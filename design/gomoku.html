@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>五子棋 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=1">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="十五路棋盘"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">每一步落子都会记录在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/gomoku.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const E = window.GomokuEngine;
+  const N = E.SIZE;
+  const board = document.getElementById('boardInner');
+  const M = 58;
+  const STEP = (900 - M * 2) / (N - 1);
+
+  let svg = null;
+  let stoneLayer = null;
+  let ghost = null;
+  let hover = null;
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function px(i) { return M + i * STEP; }
+
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 900 900', role: 'img', 'aria-label': '十五路五子棋棋盘' });
+    board.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    const wood = el('linearGradient', { id: 'wood', x1: '0', y1: '0', x2: '1', y2: '1' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#ffe9bf' }, wood);
+    el('stop', { offset: '1', 'stop-color': '#f2cf9a' }, wood);
+
+    el('rect', { x: 16, y: 16, width: 868, height: 868, rx: 40, fill: '#ffffff' }, svg);
+    el('rect', { x: 26, y: 26, width: 848, height: 848, rx: 34, fill: 'url(#wood)' }, svg);
+    el('rect', { x: 26, y: 26, width: 848, height: 848, rx: 34, fill: 'none', stroke: '#e3bb82', 'stroke-width': 5 }, svg);
+
+    for (let i = 0; i < N; i++) {
+      el('line', { x1: px(0), y1: px(i), x2: px(N - 1), y2: px(i), stroke: '#c9a06a', 'stroke-width': 2, opacity: '.85' }, svg);
+      el('line', { x1: px(i), y1: px(0), x2: px(i), y2: px(N - 1), stroke: '#c9a06a', 'stroke-width': 2, opacity: '.85' }, svg);
+    }
+
+    [[3, 3], [3, 11], [11, 3], [11, 11], [7, 7]].forEach((p) => {
+      el('circle', { cx: px(p[0]), cy: px(p[1]), r: 6, fill: '#a9803f' }, svg);
+    });
+
+    ghost = el('circle', { cx: -100, cy: -100, r: STEP * 0.44, fill: '#3a4a63', opacity: 0, 'pointer-events': 'none' }, svg);
+    stoneLayer = el('g', {}, svg);
+
+    svg.addEventListener('pointerdown', onTap);
+    svg.addEventListener('pointermove', onMove);
+    svg.addEventListener('pointerleave', () => { ghost.setAttribute('opacity', '0'); hover = null; });
+  }
+
+  function pointFromEvent(ev) {
+    const rect = svg.getBoundingClientRect();
+    const vx = (ev.clientX - rect.left) / rect.width * 900;
+    const vy = (ev.clientY - rect.top) / rect.height * 900;
+    const i = Math.round((vx - M) / STEP);
+    const j = Math.round((vy - M) / STEP);
+    if (i < 0 || i >= N || j < 0 || j >= N) return null;
+    const dx = vx - px(i), dy = vy - px(j);
+    if (Math.sqrt(dx * dx + dy * dy) > STEP * 0.62) return null;
+    return { x: i, y: j };
+  }
+
+  let cur = null;
+
+  function onMove(ev) {
+    if (!cur || cur.phase !== 'playing') { ghost.setAttribute('opacity', '0'); return; }
+    const pt = pointFromEvent(ev);
+    if (!pt || cur.cells[E.idx(pt.x, pt.y)]) { ghost.setAttribute('opacity', '0'); hover = null; return; }
+    hover = pt;
+    ghost.setAttribute('cx', px(pt.x));
+    ghost.setAttribute('cy', px(pt.y));
+    ghost.setAttribute('fill', cur.turn === 0 ? '#2f3646' : '#ffffff');
+    ghost.setAttribute('stroke', cur.turn === 0 ? '#ffffff' : '#c9a06a');
+    ghost.setAttribute('stroke-width', 2);
+    ghost.setAttribute('opacity', '0.4');
+  }
+
+  function onTap(ev) {
+    if (!cur) return;
+    const pt = pointFromEvent(ev);
+    if (!pt) return;
+    if (!window.GameShell.getState) return;
+    const st = window.GameShell.getState();
+    if (st.phase !== 'playing') return;
+    const myTurn = window.GameShell.isLocal() || st.players[st.turn].id === window.Net.identity.id;
+    if (!myTurn) { window.GameShell.toast('还没轮到你落子', true); return; }
+    if (st.cells[E.idx(pt.x, pt.y)]) { window.GameShell.toast('这里已经有子了', true); return; }
+    window.GameShell.send({ type: 'place', x: pt.x, y: pt.y });
+  }
+
+  /* ---------------- 棋子 ---------------- */
+  function renderStones(state) {
+    stoneLayer.innerHTML = '';
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        const mark = state.cells[E.idx(x, y)];
+        if (!mark) continue;
+        const cx = px(x), cy = px(y);
+        el('circle', {
+          cx: cx + 2, cy: cy + 4, r: STEP * 0.44,
+          fill: 'rgba(58,74,99,.18)'
+        }, stoneLayer);
+        if (mark === 1) {
+          el('circle', { cx: cx, cy: cy, r: STEP * 0.44, fill: '#2f3646' }, stoneLayer);
+          el('circle', { cx: cx - STEP * 0.14, cy: cy - STEP * 0.14, r: STEP * 0.13, fill: '#ffffff', opacity: '.22' }, stoneLayer);
+        } else {
+          el('circle', { cx: cx, cy: cy, r: STEP * 0.44, fill: '#fffdf5', stroke: '#d9c39c', 'stroke-width': 2 }, stoneLayer);
+          el('circle', { cx: cx - STEP * 0.14, cy: cy - STEP * 0.14, r: STEP * 0.12, fill: '#ffffff' }, stoneLayer);
+        }
+      }
+    }
+
+    if (state.last) {
+      const cx = px(state.last.x), cy = px(state.last.y);
+      el('circle', {
+        cx: cx, cy: cy, r: STEP * 0.16,
+        fill: state.last.mark === 1 ? '#ffd98a' : '#e2564a', opacity: '.95'
+      }, stoneLayer);
+    }
+  }
+
+  /* ---------------- 底部栏 ---------------- */
+  function renderDock(state, ctx) {
+    const info = document.getElementById('dockInfo');
+    const actions = document.getElementById('dockActions');
+    if (!info || !actions) return;
+
+    const curP = state.players[state.turn];
+    const isBlack = state.turn === 0;
+    const count = state.moves ? state.moves.length : 0;
+    let ttl = '';
+    let sub = '';
+
+    if (state.phase === 'ended') {
+      ttl = state.winner ? (state.players.find((p) => p.id === state.winner) || {}).name + ' 获胜' : '和棋';
+      sub = '点「再来一局」重新开局';
+    } else {
+      ttl = (curP ? curP.name : '') + ' 落子 · ' + (isBlack ? '黑棋' : '白棋');
+      sub = ctx.isTurn
+        ? (ctx.local ? '本机热座：轮到这位玩家，点棋盘落子' : '轮到你了，点棋盘交叉点落子')
+        : '等对方落子…';
+    }
+
+    info.innerHTML =
+      '<div class="diceChip" style="background:' + (state.turn === 0 ? '#2f3646' : '#fffdf5') + ';color:' +
+      (state.turn === 0 ? '#fff' : '#8a6a3a') + ';border-color:#fff">' + (state.turn === 0 ? '●' : '○') + '</div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub + ' · 已下 ' + count + ' 手</div></div>';
+
+    actions.innerHTML = '';
+    if (state.phase === 'playing') {
+      const hint = document.createElement('div');
+      hint.className = 'btn ghost';
+      hint.style.display = 'grid';
+      hint.style.placeItems = 'center';
+      hint.style.fontSize = '13px';
+      hint.textContent = ctx.isTurn ? '请落子' : '等待对手';
+      actions.appendChild(hint);
+    }
+  }
+
+  /* ---------------- 启动 ---------------- */
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'gomoku',
+    title: '五子棋',
+    blurb: '十五路棋盘，两人对弈，横、竖、斜任意方向先连成五子者获胜。点击棋盘交叉点落子，黑棋先行。',
+    min: 2,
+    max: 2,
+    engine: E,
+    turnPill: (s) => (s.phase === 'playing' ? (s.turn === 0 ? '黑棋' : '白棋') : '—'),
+    seatColor: (p, i) => (i === 0 ? '#2f3646' : '#fffdf5'),
+    seatTag: (p, i) => (i === 0 ? '黑' : '白'),
+    winnerTitle: (s) => {
+      if (!s.winner) return '和棋';
+      const w = s.players.find((p) => p.id === s.winner);
+      return (w ? w.name : '玩家') + ' 连成五子';
+    },
+    winnerSub: (s) => '共 ' + ((s.moves && s.moves.length) || 0) + ' 手',
+    onState: function (state, ctx) {
+      cur = state;
+      renderStones(state);
+      if (state.phase !== 'lobby') renderDock(state, ctx);
+    }
+  });
+})();
+</script>
+</body>
+</html>

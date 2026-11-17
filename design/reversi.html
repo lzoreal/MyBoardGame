@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>黑白棋 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=3">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="八乘八黑白棋棋盘"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">每一手落子与翻子都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/reversi.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const R = window.ReversiEngine;
+  const N = R.SIZE;
+  const board = document.getElementById('boardInner');
+  const PAD = 74;
+  const CELL = (900 - PAD * 2) / N;
+
+  let svg = null, discLayer = null, hintLayer = null, ringLayer = null;
+  let cur = null;
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  const cx = (x) => PAD + CELL * x + CELL / 2;
+  const cy = (y) => PAD + CELL * y + CELL / 2;
+
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 900 900', role: 'img', 'aria-label': '八乘八黑白棋棋盘' });
+    board.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    const g1 = el('linearGradient', { id: 'rvBoard', x1: '0', y1: '0', x2: '0', y2: '1' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#8ede9a' }, g1);
+    el('stop', { offset: '1', 'stop-color': '#63c47c' }, g1);
+
+    el('rect', { x: 18, y: 18, width: 864, height: 864, rx: 44, fill: '#ffffff' }, svg);
+    el('rect', { x: 30, y: 30, width: 840, height: 840, rx: 36, fill: 'url(#rvBoard)' }, svg);
+    el('rect', { x: 30, y: 30, width: 840, height: 840, rx: 36, fill: 'none', stroke: '#3fae63', 'stroke-width': 5 }, svg);
+
+    for (let i = 0; i <= N; i++) {
+      const p = PAD + CELL * i;
+      el('line', { x1: PAD, y1: p, x2: PAD + CELL * N, y2: p, stroke: '#ffffff', 'stroke-width': 2, opacity: '.28' }, svg);
+      el('line', { x1: p, y1: PAD, x2: p, y2: PAD + CELL * N, stroke: '#ffffff', 'stroke-width': 2, opacity: '.28' }, svg);
+    }
+    [[2, 2], [6, 2], [2, 6], [6, 6]].forEach((d) => {
+      el('circle', { cx: cx(d[0]), cy: cy(d[1]), r: 9, fill: '#3b9a58', opacity: '.55' }, svg);
+    });
+
+    hintLayer = el('g', {}, svg);
+    ringLayer = el('g', {}, svg);
+    discLayer = el('g', {}, svg);
+
+    svg.addEventListener('pointerdown', onTap);
+  }
+
+  function cellFromEvent(ev) {
+    const rect = svg.getBoundingClientRect();
+    const vx = (ev.clientX - rect.left) / rect.width * 900;
+    const vy = (ev.clientY - rect.top) / rect.height * 900;
+    const x = Math.floor((vx - PAD) / CELL);
+    const y = Math.floor((vy - PAD) / CELL);
+    if (x < 0 || x >= N || y < 0 || y >= N) return null;
+    return { x: x, y: y };
+  }
+
+  function myTurn() {
+    if (!cur || cur.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return cur.players[cur.turn].id === window.Net.identity.id;
+  }
+
+  function onTap(ev) {
+    if (!myTurn()) {
+      if (cur && cur.phase === 'playing') window.GameShell.toast('还没轮到你下', true);
+      return;
+    }
+    const pt = cellFromEvent(ev);
+    if (!pt) return;
+    window.GameShell.send({ type: 'place', x: pt.x, y: pt.y });
+  }
+
+  function drawDisc(parent, x, y, mark, opts) {
+    const o = opts || {};
+    const r = CELL * 0.4;
+    el('circle', { cx: cx(x) + 3, cy: cy(y) + 5, r: r, fill: 'rgba(40,70,50,.22)' }, parent);
+    if (mark === 1) {
+      el('circle', { cx: cx(x), cy: cy(y), r: r, fill: '#303a4c' }, parent);
+      el('circle', { cx: cx(x) - r * 0.3, cy: cy(y) - r * 0.34, r: r * 0.42, fill: '#6b7794', opacity: '.75' }, parent);
+      el('circle', { cx: cx(x) - r * 0.3, cy: cy(y) - r * 0.34, r: r * 0.2, fill: '#ffffff', opacity: '.5' }, parent);
+    } else {
+      el('circle', { cx: cx(x), cy: cy(y), r: r, fill: '#fffdf5', stroke: '#e6dcc6', 'stroke-width': 3 }, parent);
+      el('circle', { cx: cx(x) - r * 0.3, cy: cy(y) - r * 0.34, r: r * 0.42, fill: '#ffffff' }, parent);
+      el('circle', { cx: cx(x) - r * 0.3, cy: cy(y) - r * 0.34, r: r * 0.18, fill: '#f1e6cd', opacity: '.8' }, parent);
+    }
+    if (o.badge) {
+      el('circle', { cx: cx(x), cy: cy(y), r: r * 0.3, fill: '#ffd166', stroke: '#fff', 'stroke-width': 3 }, parent);
+    }
+  }
+
+  function render(state) {
+    if (!svg) return;
+    discLayer.innerHTML = '';
+    hintLayer.innerHTML = '';
+    ringLayer.innerHTML = '';
+
+    const counts = R.counts(state.cells);
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        const v = state.cells[R.idx(x, y)];
+        if (v) drawDisc(discLayer, x, y, v, { badge: state.last && state.last.x === x && state.last.y === y });
+      }
+    }
+
+    if (state.phase === 'playing' && myTurn()) {
+      const mark = state.turn + 1;
+      R.legalMoves(state.cells, mark).forEach((m) => {
+        el('circle', {
+          cx: cx(m.x), cy: cy(m.y), r: CELL * 0.14,
+          fill: mark === 1 ? 'rgba(48,58,76,.85)' : 'rgba(255,255,255,.95)',
+          stroke: mark === 1 ? '#fff' : '#b9a882', 'stroke-width': 2
+        }, hintLayer);
+      });
+    }
+
+    // 上一步翻子位置闪一圈
+    if (state.last) {
+      el('circle', {
+        cx: cx(state.last.x), cy: cy(state.last.y), r: CELL * 0.48,
+        fill: 'none', stroke: '#ffd166', 'stroke-width': 5, opacity: '.9'
+      }, ringLayer);
+    }
+
+    // 比分牌
+    const label = document.createElement('div');
+    label.className = 'scoreBar';
+    label.innerHTML =
+      '<span class="chip black">● 黑 ' + counts.black + '</span>' +
+      '<span class="chip white">○ 白 ' + counts.white + '</span>' +
+      '<span class="chip empty">空 ' + counts.empty + '</span>';
+    const old = board.querySelector('.scoreBar');
+    if (old) old.remove();
+    board.appendChild(label);
+  }
+
+  function renderDock(state, ctx) {
+    const info = document.getElementById('dockInfo');
+    const actions = document.getElementById('dockActions');
+    const counts = R.counts(state.cells);
+    const curP = state.players[state.turn];
+    let ttl = '', sub = '';
+
+    if (state.phase === 'ended') {
+      const name = state.winner
+        ? (state.players.find((p) => p.id === state.winner) || {}).name
+        : null;
+      ttl = name ? name + ' 获胜' : '和棋';
+      sub = '黑 ' + counts.black + ' : 白 ' + counts.white + '，点「再来一局」重开';
+    } else {
+      ttl = (curP ? curP.name : '') + ' · ' + (state.turn === 0 ? '黑棋' : '白棋');
+      sub = ctx.isTurn
+        ? (ctx.local ? '本机热座：轮到这位玩家，点空位落子' : '轮到你了，点亮的空位落子')
+        : '等对方落子…';
+    }
+
+    info.innerHTML =
+      '<div class="diceChip" style="background:' + (state.turn === 0 ? '#303a4c' : '#fffdf5') +
+      ';color:' + (state.turn === 0 ? '#fff' : '#8a6a3a') + '">' + (state.turn === 0 ? '●' : '○') + '</div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub +
+      ' · 黑 ' + counts.black + ' 白 ' + counts.white + '</div></div>';
+
+    actions.innerHTML = '';
+    if (state.phase === 'playing') {
+      const hint = document.createElement('div');
+      hint.className = 'btn ghost';
+      hint.style.display = 'grid';
+      hint.style.placeItems = 'center';
+      hint.style.fontSize = '13px';
+      hint.textContent = ctx.isTurn ? '请落子' : '等待对手';
+      actions.appendChild(hint);
+    }
+  }
+
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'reversi',
+    title: '黑白棋',
+    blurb: '8×8 棋盘，黑棋先行。落子要夹住对方棋子，被夹住的全部翻成自己颜色；两边都没位置可下就比子数，多者获胜。',
+    min: 2,
+    max: 2,
+    engine: R,
+    turnPill: (s) => (s.phase === 'playing' ? (s.turn === 0 ? '黑棋' : '白棋') : '—'),
+    seatColor: (p, i) => (i === 0 ? '#303a4c' : '#fffdf5'),
+    seatTag: (p, i) => (i === 0 ? '黑' : '白'),
+    winnerTitle: (s) => {
+      if (!s.winner) return '和棋';
+      const w = s.players.find((p) => p.id === s.winner);
+      const c = R.counts(s.cells);
+      return (w ? w.name : '玩家') + ' 以 ' + (s.winner === s.players[0].id ? c.black : c.white) + ' : ' +
+        (s.winner === s.players[0].id ? c.white : c.black) + ' 获胜';
+    },
+    winnerSub: (s) => {
+      const c = R.counts(s.cells);
+      return '黑 ' + c.black + ' 子 / 白 ' + c.white + ' 子';
+    },
+    onState: function (state, ctx) {
+      cur = state;
+      if (!state || !state.cells) return;
+      render(state);
+      if (state.phase !== 'lobby') renderDock(state, ctx);
+    }
+  });
+})();
+</script>
+</body>
+</html>

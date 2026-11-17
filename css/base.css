@@ -138,8 +138,12 @@ html, body {
 }
 
 .gc-art.ludo { background: linear-gradient(135deg, #e08a3c, #c4553f); }
-.gc-art.uno  { background: linear-gradient(135deg, #4a5568, #2d3748); }
-.gc-art.go   { background: linear-gradient(135deg, #7b8b99, #5b6875); }
+.gc-art.snakes { background: linear-gradient(135deg, #6fbf6a, #8b6ad9); }
+.gc-art.uno  { background: linear-gradient(135deg, #ff7b6c 0%, #f0b429 34%, #2f9e63 66%, #3f7fe0 100%); }
+.gc-art.go   { background: linear-gradient(135deg, #7b9b7d, #5b6875); }
+.gc-art.rev  { background: linear-gradient(135deg, #74c98b, #2f7d55); }
+.gc-art.c4   { background: linear-gradient(135deg, #ff8b7c, #f7c13c); }
+.gc-art.jump { background: linear-gradient(135deg, #ffd166, #e07b39); }
 
 .gc-title {
   display: flex;

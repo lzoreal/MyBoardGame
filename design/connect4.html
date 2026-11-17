@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>四子连珠 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=3">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="七列六行四子连珠棋盘"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">每一手落子都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/connect4.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const C = window.Connect4Engine;
+  const COLS = C.COLS, ROWS = C.ROWS;
+  const board = document.getElementById('boardInner');
+
+  const PADX = 66, PADY = 58;
+  const CELL = (900 - PADX * 2) / COLS;   // 110
+  const TOP = PADY;
+  const discLayerH = 0;
+
+  let svg = null, holeLayer = null, discLayer = null, hintLayer = null, hitLayer = null, labelLayer = null;
+  let cur = null;
+  let lastDropKey = '';
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  const cx = (c) => PADX + CELL * c + CELL / 2;
+  const cy = (r) => TOP + CELL * r + CELL / 2;
+
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 900 ' + (TOP * 2 + CELL * ROWS), role: 'img', 'aria-label': '七列六行四子连珠棋盘' });
+    board.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    const bg = el('linearGradient', { id: 'c4frame', x1: '0', y1: '0', x2: '0', y2: '1' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#6fc6f2' }, bg);
+    el('stop', { offset: '1', 'stop-color': '#3f8fd6' }, bg);
+    const hole = el('radialGradient', { id: 'c4hole', cx: '.5', cy: '.35', r: '.75' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#1f4f86' }, hole);
+    el('stop', { offset: '1', 'stop-color': '#3b83c4' }, hole);
+
+    el('rect', { x: 12, y: 12, width: 876, height: TOP * 2 + CELL * ROWS - 24, rx: 46, fill: '#ffffff' }, svg);
+    el('rect', { x: 24, y: 24, width: 852, height: TOP * 2 + CELL * ROWS - 48, rx: 38, fill: 'url(#c4frame)' }, svg);
+
+    holeLayer = el('g', {}, svg);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        el('circle', { cx: cx(c), cy: cy(r), r: CELL * 0.4, fill: 'url(#c4hole)' }, holeLayer);
+        el('circle', { cx: cx(c), cy: cy(r), r: CELL * 0.4, fill: 'none', stroke: '#2f7ab8', 'stroke-width': 3, opacity: '.5' }, holeLayer);
+      }
+    }
+
+    hintLayer = el('g', {}, svg);
+    discLayer = el('g', {}, svg);
+    labelLayer = el('g', {}, svg);
+    hitLayer = el('g', {}, svg);
+
+    for (let c = 0; c < COLS; c++) {
+      const rect = el('rect', {
+        x: PADX + CELL * c, y: 24, width: CELL, height: TOP * 2 + CELL * ROWS - 48,
+        fill: 'transparent', style: 'cursor:pointer'
+      }, hitLayer);
+      rect.addEventListener('pointerenter', () => showHint(c));
+      rect.addEventListener('pointerleave', () => { hintLayer.innerHTML = ''; });
+      rect.addEventListener('pointerdown', () => onColumn(c));
+    }
+  }
+
+  function showHint(col) {
+    if (!cur || cur.phase !== 'playing') return;
+    hintLayer.innerHTML = '';
+    el('rect', {
+      x: PADX + CELL * col + 4, y: 26, width: CELL - 8, height: TOP * 2 + CELL * ROWS - 52,
+      rx: 20, fill: '#ffffff', opacity: '.22'
+    }, hintLayer);
+    const row = C.dropRow(cur.cells, col);
+    if (row >= 0) {
+      el('circle', {
+        cx: cx(col), cy: cy(row), r: CELL * 0.34,
+        fill: cur.turn === 0 ? '#e2564a' : '#f0b429', opacity: '.55'
+      }, hintLayer);
+    }
+  }
+
+  function myTurn() {
+    if (!cur || cur.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return cur.players[cur.turn].id === window.Net.identity.id;
+  }
+
+  function onColumn(col) {
+    if (!cur) return;
+    if (cur.phase !== 'playing') return;
+    if (!myTurn()) { window.GameShell.toast('还没轮到你落子', true); return; }
+    window.GameShell.send({ type: 'place', col: col });
+  }
+
+  function render(state) {
+    discLayer.innerHTML = '';
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const v = state.cells[C.idx(c, r)];
+        if (!v) continue;
+        const key = c + ':' + r;
+        const g = el('g', {}, discLayer);
+        const isNew = state.last && state.last.col === c && state.last.row === r && lastDropKey !== key;
+        if (isNew) {
+          g.setAttribute('class', 'c4drop');
+          g.setAttribute('style', '--drop:' + (-(r + 1) * CELL + 6) + 'px');
+        }
+        el('circle', { cx: cx(c) + 2, cy: cy(r) + 4, r: CELL * 0.36, fill: 'rgba(24,60,92,.28)' }, g);
+        el('circle', {
+          cx: cx(c), cy: cy(r), r: CELL * 0.36,
+          fill: v === 1 ? '#e2564a' : '#f7c13c',
+          stroke: '#ffffff', 'stroke-width': 4
+        }, g);
+        el('circle', {
+          cx: cx(c) - CELL * 0.1, cy: cy(r) - CELL * 0.12, r: CELL * 0.12,
+          fill: '#ffffff', opacity: '.55'
+        }, g);
+      }
+    }
+    if (state.last) lastDropKey = state.last.col + ':' + state.last.row;
+
+    // 列提示交给底部按钮，棋盘上不再重复写数字
+    hintLayer.innerHTML = '';
+  }
+
+  function renderDock(state, ctx) {
+    const info = document.getElementById('dockInfo');
+    const actions = document.getElementById('dockActions');
+    const curP = state.players[state.turn];
+    let ttl = '', sub = '';
+
+    if (state.phase === 'ended') {
+      const name = state.winner ? (state.players.find((p) => p.id === state.winner) || {}).name : null;
+      ttl = name ? name + ' 连成四子' : '和棋';
+      sub = '共 ' + state.moves.length + ' 手，点「再来一局」重开';
+    } else {
+      ttl = (curP ? curP.name : '') + ' · ' + (state.turn === 0 ? '红子' : '黄子');
+      sub = ctx.isTurn
+        ? (ctx.local ? '本机热座：点某一列把子落下去' : '轮到你了，点某一列')
+        : '等对方落子…';
+    }
+
+    info.innerHTML =
+      '<div class="diceChip" style="background:' + (state.turn === 0 ? '#e2564a' : '#f7c13c') +
+      ';color:#fff;border-color:#fff">' + (state.turn === 0 ? '●' : '●') + '</div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div></div>';
+
+    actions.innerHTML = '';
+    hints(state, actions);
+  }
+
+  function hints(state, actions) {
+    if (state.phase !== 'playing') return;
+    const wrap = document.createElement('div');
+    wrap.className = 'colHints';
+    for (let c = 0; c < COLS; c++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'colBtn' + (C.dropRow(state.cells, c) < 0 ? ' full' : '');
+      b.textContent = String(c + 1);
+      b.disabled = C.dropRow(state.cells, c) < 0;
+      b.addEventListener('click', () => onColumn(c));
+      wrap.appendChild(b);
+    }
+    actions.appendChild(wrap);
+  }
+
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'connect4',
+    title: '四子连珠',
+    blurb: '7 列 6 行，棋子落在该列最下面。横、竖、斜任意方向先连成四子者胜；列满了就换一列。',
+    min: 2,
+    max: 2,
+    engine: C,
+    turnPill: (s) => (s.phase === 'playing' ? (s.turn === 0 ? '红子' : '黄子') : '—'),
+    seatColor: (p, i) => (i === 0 ? '#e2564a' : '#f7c13c'),
+    seatTag: () => '',
+    winnerTitle: (s) => {
+      if (!s.winner) return '和棋';
+      const w = s.players.find((p) => p.id === s.winner);
+      return (w ? w.name : '玩家') + ' 连成四子';
+    },
+    winnerSub: (s) => '共 ' + s.moves.length + ' 手',
+    onState: function (state, ctx) {
+      cur = state;
+      if (!state || !state.cells) return;
+      render(state);
+      if (state.phase !== 'lobby') renderDock(state, ctx);
+    }
+  });
+})();
+</script>
+</body>
+</html>

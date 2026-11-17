@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>飞行棋 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=1">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="飞行棋棋盘"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">最近发生的操作都记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/ludo.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const E = window.LudoEngine;
+  const board = document.getElementById('boardInner');
+  const CX = 450, CY = 450, R = 306;
+
+  let svg = null;
+  let tokenLayer = null;
+  let haloLayer = null;
+  let tokens = {};
+  let lastMoveKey = '';
+  let rolling = false;
+
+  /* ---------------- 几何 ---------------- */
+  function tilePoint(step) {
+    /* 沿正方形周长等距分布：每条边正好 13 格，读数从左下角 1 开始顺时针 */
+    const SIDE = R * 2;
+    let s = (step - 1) * (4 * SIDE / E.PATH_LEN);
+    if (s < SIDE) return { x: CX - R + s, y: CY + R };
+    s -= SIDE;
+    if (s < SIDE) return { x: CX + R, y: CY + R - s };
+    s -= SIDE;
+    if (s < SIDE) return { x: CX + R - s, y: CY - R };
+    s -= SIDE;
+    return { x: CX - R, y: CY - R + s };
+  }
+
+  const BASE = [
+    { x: 231, y: 669 },
+    { x: 669, y: 669 },
+    { x: 669, y: 231 },
+    { x: 231, y: 231 }
+  ];
+
+  const TOKEN_OFF = [
+    { x: -9, y: -9 }, { x: 9, y: -9 }, { x: 9, y: 9 }, { x: -9, y: 9 }
+  ];
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function shade(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (amt >= 0) {
+      r = Math.round(r + (255 - r) * amt);
+      g = Math.round(g + (255 - g) * amt);
+      b = Math.round(b + (255 - b) * amt);
+    } else {
+      const k = 1 + amt;
+      r = Math.round(r * k); g = Math.round(g * k); b = Math.round(b * k);
+    }
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  /* ---------------- 棋盘（只画一次） ---------------- */
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 900 900', role: 'img', 'aria-label': '飞行棋棋盘' });
+    board.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    const lawn = el('linearGradient', { id: 'lawnGrad', x1: '0', y1: '0', x2: '0', y2: '1' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#b7ec9a' }, lawn);
+    el('stop', { offset: '1', 'stop-color': '#8ed363' }, lawn);
+
+    el('rect', { x: 20, y: 20, width: 860, height: 860, rx: 48, fill: '#2e94ab' }, svg);
+    el('rect', { x: 20, y: 20, width: 860, height: 860, rx: 48, fill: 'none', stroke: '#5ad0e0', 'stroke-width': 8 }, svg);
+    el('rect', { x: 44, y: 44, width: 812, height: 812, rx: 36, fill: 'url(#lawnGrad)' }, svg);
+    el('rect', { x: 44, y: 44, width: 812, height: 812, rx: 36, fill: 'none', stroke: '#ffffff', 'stroke-width': 4, opacity: '.7' }, svg);
+
+    /* 四角停机坪 */
+    BASE.forEach((b, i) => {
+      const color = E.COLORS[i];
+      el('rect', {
+        x: b.x - 59, y: b.y - 59, width: 118, height: 118, rx: 22,
+        fill: shade(color, 0.72), stroke: '#ffffff', 'stroke-width': 6
+      }, svg);
+      el('rect', {
+        x: b.x - 43, y: b.y - 43, width: 86, height: 86, rx: 16,
+        fill: shade(color, 0.5), opacity: '.65'
+      }, svg);
+      const label = el('text', {
+        x: b.x, y: b.y + 44, 'text-anchor': 'middle', 'font-size': 12,
+        'font-weight': 800, fill: '#ffffff', opacity: '.9'
+      }, svg);
+      label.textContent = '停机坪';
+    });
+
+    /* 52 格跑道 */
+    for (let step = 1; step <= E.PATH_LEN; step++) {
+      const p = tilePoint(step);
+      const color = E.COLORS[E.tileColorIndex(step)];
+      el('rect', {
+        x: p.x - 22, y: p.y - 22, width: 44, height: 44, rx: 12,
+        fill: color, stroke: '#ffffff', 'stroke-width': 3.5
+      }, svg);
+      const t = el('text', {
+        x: p.x, y: p.y + 6, 'text-anchor': 'middle',
+        'font-size': 16, 'font-weight': 800, fill: '#ffffff', opacity: '.92'
+      }, svg);
+      t.textContent = step;
+    }
+
+    /* 中央终点 */
+    el('circle', { cx: CX, cy: CY, r: 128, fill: '#fff6df', stroke: '#ffffff', 'stroke-width': 8 }, svg);
+    el('circle', { cx: CX, cy: CY, r: 112, fill: 'none', stroke: '#ffd98a', 'stroke-width': 4, 'stroke-dasharray': '16 10' }, svg);
+    const title = el('text', { x: CX, y: CY - 6, 'text-anchor': 'middle', 'font-size': 46, 'font-weight': 900, fill: '#33415c' }, svg);
+    title.textContent = '终点';
+    const sub = el('text', { x: CX, y: CY + 34, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 700, fill: '#5b6b87' }, svg);
+    sub.textContent = '第一个到达就获胜';
+
+    haloLayer = el('g', { id: 'halo' }, svg);
+    tokenLayer = el('g', { id: 'tokens' }, svg);
+  }
+
+  /* ---------------- 棋子 ---------------- */
+  function ensureToken(index, player) {
+    if (!tokens[index]) {
+      const g = el('g', { class: 'ludoToken' }, tokenLayer);
+      g.style.transition = 'transform .38s cubic-bezier(.2,.8,.3,1)';
+      el('circle', { cx: 0, cy: 0, r: 19, fill: '#ffffff', opacity: '.55' }, g);
+      const body = el('circle', {
+        cx: 0, cy: 0, r: 16, fill: E.COLORS[index] || '#3f7fe0',
+        stroke: '#ffffff', 'stroke-width': 3.5
+      }, g);
+      el('path', { d: 'M0,-9 L7,8 L0,4 L-7,8 Z', fill: '#ffffff', opacity: '.96' }, g);
+      tokens[index] = { g: g, body: body };
+    }
+    const t = tokens[index];
+    t.body.setAttribute('fill', player.color || E.COLORS[index] || '#3f7fe0');
+    return t.g;
+  }
+
+  function placeOf(state, index) {
+    const p = state.players[index];
+    if (!p) return BASE[0];
+    if (p.pos === 0) return BASE[index] || BASE[0];
+    if (p.pos >= E.PATH_LEN) {
+      const a = (index / 4) * Math.PI * 2 - Math.PI / 2;
+      return { x: CX + Math.cos(a) * 62, y: CY + Math.sin(a) * 62 };
+    }
+    const t = tilePoint(p.pos);
+    const o = TOKEN_OFF[index] || { x: 0, y: 0 };
+    return { x: t.x + o.x, y: t.y + o.y };
+  }
+
+  function renderTokens(state) {
+    if (!state || !state.players) return;
+    state.players.forEach((p, i) => {
+      const g = ensureToken(i, p);
+      const at = placeOf(state, i);
+      g.style.transform = 'translate(' + at.x + 'px,' + at.y + 'px)';
+    });
+    for (let i = state.players.length; i < 4; i++) {
+      if (tokens[i]) tokens[i].g.style.display = 'none';
+    }
+    renderHalo(state);
+  }
+
+  function renderHalo(state) {
+    if (!haloLayer) return;
+    haloLayer.innerHTML = '';
+    if (state.phase !== 'playing') return;
+    const cur = state.players[state.turn];
+    if (!cur) return;
+    const at = placeOf(state, state.turn);
+    const ring = el('circle', {
+      cx: at.x, cy: at.y, r: 27, fill: 'none',
+      stroke: cur.color, 'stroke-width': 4, opacity: '.85'
+    }, haloLayer);
+    ring.setAttribute('class', 'ludoHalo');
+  }
+
+  /* ---------------- 骰子 ---------------- */
+  const PIP = {
+    1: [[1, 1]],
+    2: [[0, 0], [2, 2]],
+    3: [[0, 0], [1, 1], [2, 2]],
+    4: [[0, 0], [2, 0], [0, 2], [2, 2]],
+    5: [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]],
+    6: [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2]]
+  };
+
+  function diceSvg(n) {
+    const pips = PIP[n] || [];
+    let out = '<svg viewBox="0 0 60 60" width="40" height="40" aria-hidden="true">';
+    pips.forEach((p) => {
+      const x = 15 + p[0] * 15, y = 15 + p[1] * 15;
+      out += '<circle cx="' + x + '" cy="' + y + '" r="5.4" fill="#3a4a63"/>';
+    });
+    out += '</svg>';
+    return out;
+  }
+
+  function setDiceFace(n) {
+    const face = document.getElementById('diceFace');
+    const box = document.getElementById('diceBox');
+    if (!face) return;
+    face.innerHTML = n ? diceSvg(n) : '<span style="color:#b6c2d3;font-weight:800">–</span>';
+    if (box) {
+      box.classList.remove('landed');
+      void box.offsetWidth;
+      box.classList.add('landed');
+    }
+  }
+
+  /* ---------------- 底部栏 ---------------- */
+  function renderDock(state, ctx) {
+    const info = document.getElementById('dockInfo');
+    const actions = document.getElementById('dockActions');
+    if (!info || !actions) return;
+
+    if (state.phase === 'lobby') {
+      info.innerHTML = '<div><div class="ttl">等人齐再开局</div><div class="sub">至少 ' +
+        '2 人，最多 4 人</div></div>';
+      actions.innerHTML = '';
+      return;
+    }
+
+    const cur = state.players[state.turn];
+    const mine = ctx.isTurn;
+    const finished = state.winner && state.players.find((p) => p.id === state.winner);
+    let ttl = finished && state.phase === 'ended' ? (finished.name + ' 到达终点') : ((cur ? cur.name : '') + ' 的回合');
+    let sub = '';
+    if (state.phase === 'ended') sub = '点「再来一局」重新开始';
+    else if (cur && cur.pos === 0) sub = mine ? '掷出 6 点才能起飞' : '还在停机坪，需要 6 点起飞';
+    else if (cur) sub = '在 ' + cur.pos + ' 格，掷骰前进 · 踩到同色格再 +4';
+    if (ctx.local) sub = '本机热座：' + (sub || '') + '（换人操作）';
+
+    info.innerHTML =
+      '<div class="diceBox" id="diceBox"><span class="diceFace" id="diceFace"></span></div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div></div>';
+
+    setDiceFace(state.dice || null);
+
+    actions.innerHTML = '';
+    const canRoll = state.phase === 'playing' && ctx.isTurn;
+    const btn = document.createElement('button');
+    btn.className = 'btn primary';
+    btn.type = 'button';
+    btn.id = 'rollBtn';
+    btn.textContent = '掷骰子';
+    btn.disabled = !canRoll;
+    btn.addEventListener('click', () => roll(state, ctx));
+    actions.appendChild(btn);
+
+    if (!ctx.isTurn && state.phase === 'playing') {
+      btn.title = ctx.local ? '本机热座：轮到下一位玩家' : '还没轮到你';
+    }
+  }
+
+  function roll(state, ctx) {
+    if (!ctx.isTurn) { ctx.toast(ctx.local ? '本机热座：轮到下一位玩家操作' : '还没轮到你走', true); return; }
+    if (rolling) return;
+    rolling = true;
+    const box = document.getElementById('diceBox');
+    let t = 0;
+    const iv = setInterval(() => {
+      setDiceFace(1 + Math.floor(Math.random() * 6));
+      if (box) box.classList.add('spin');
+      t += 1;
+      if (t > 5) {
+        clearInterval(iv);
+        if (box) box.classList.remove('spin');
+        const v = 1 + Math.floor(Math.random() * 6);
+        setDiceFace(v);
+        rolling = false;
+        ctx.send({ type: 'roll', dice: v });
+      }
+    }, 80);
+  }
+
+  /* ---------------- 落点动画 ---------------- */
+  function pulseLanding(state) {
+    if (!state.lastMove || !haloLayer) return;
+    const key = state.players.map((p) => p.pos).join(',') + '|' + (state.dice || '');
+    if (key === lastMoveKey) return;
+    lastMoveKey = key;
+    const at = tilePoint(state.lastMove.to);
+    const ring = el('circle', {
+      cx: at.x, cy: at.y, r: 20, fill: 'none', stroke: '#ffffff', 'stroke-width': 5, opacity: '.9'
+    }, haloLayer);
+    ring.setAttribute('class', 'landPulse');
+    setTimeout(() => { if (ring.parentNode) ring.parentNode.removeChild(ring); }, 700);
+  }
+
+  /* ---------------- 注入样式 ---------------- */
+  function injectStyle() {
+    if (document.getElementById('ludoStyle')) return;
+    const css = document.createElement('style');
+    css.id = 'ludoStyle';
+    css.textContent =
+      '@keyframes haloPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:.35}}' +
+      '.ludoHalo{animation:haloPulse 1.6s ease-in-out infinite}' +
+      '@keyframes landPop{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.1);opacity:0}}' +
+      '.landPulse{animation:landPop .65s ease-out forwards}';
+    document.head.appendChild(css);
+  }
+
+  /* ---------------- 启动 ---------------- */
+  injectStyle();
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'ludo',
+    title: '飞行棋',
+    blurb: '2-4 人竞速：掷出 6 点起飞，踩到同色格顺风 +4，撞机把对手送回停机坪，先到第 52 格获胜。',
+    min: 2,
+    max: 4,
+    engine: E,
+    turnPill: (s) => '第 ' + (s.round || 1) + ' 回合',
+    seatTag: (p) => (p.finished ? '到达' : (typeof p.pos === 'number' ? (p.pos === 0 ? '待飞' : p.pos + ' 格') : '')),
+    winnerTitle: (s) => {
+      const w = s.players.find((p) => p.id === s.winner);
+      return w ? (w.name + ' 到达终点') : '对局结束';
+    },
+    winnerSub: (s) => '共 ' + (s.round || 1) + ' 回合 · 其他玩家可以再来一局',
+    onState: function (state, ctx) {
+      renderTokens(state);
+      /* 等待开局阶段底部栏由外壳负责（那里有「开始游戏」按钮），这里只画棋盘 */
+      if (state.phase === 'lobby') return;
+      renderDock(state, ctx);
+      pulseLanding(state);
+    }
+  });
+})();
+</script>
+</body>
+</html>

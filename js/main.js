@@ -20,11 +20,22 @@
   const SKIP_GRACE_MS = 30000;      // 轮到某人后 30 秒没动静且对方不在线，就跳过
 
   /* ---------------- 视图 ---------------- */
-  // 房间建立/加入成功后统一交给新版界面（design/board-q.html），
-  // 这里只负责大厅与建房、拉人，牌桌由 board-q 自己接管。
-  function gotoTablePage(code) {
-    if (!code) return;
-    location.href = 'design/board-q.html?room=' + encodeURIComponent(code);
+  // 大富翁交给 board-q.html；其余桌游各自有独立页面，房间生命周期由页面自己接管。
+  const TABLE_PAGES = {
+    monopoly: 'design/board-q.html',
+    ludo: 'design/ludo.html',
+    snakes: 'design/snakes.html',
+    gomoku: 'design/gomoku.html',
+    reversi: 'design/reversi.html',
+    connect4: 'design/connect4.html',
+    jump: 'design/jump.html',
+    uno: 'design/uno.html'
+  };
+
+  function gotoTablePage(code, game) {
+    const g = game || gameId || 'monopoly';
+    const page = TABLE_PAGES[g] || TABLE_PAGES.monopoly;
+    location.href = page + (code ? ('?room=' + encodeURIComponent(code)) : '');
   }
 
   function show(name) {
@@ -59,6 +70,13 @@
       return;
     }
     gameId = g.id;
+
+    // 飞行棋 / 蛇梯棋 / 五子棋：页面自带建房与加入面板，直接跳过去
+    if (g.id !== 'monopoly') {
+      location.href = TABLE_PAGES[g.id] || 'design/board-q.html';
+      return;
+    }
+
     const savedName = window.Net.identity.name || '';
 
     openModal(

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>跳棋 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=3">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="星形跳棋棋盘"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">每一步走子与连跳都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/jump.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const J = window.JumpEngine;
+  const H = J.HOLES;
+  const board = document.getElementById('boardInner');
+
+  const COLORS = ['#e2564a', '#3f7fe0', '#2f9e63', '#d9a13b', '#8f5bd9', '#e57bb4'];
+  const S = 60;
+  const W = 12, HGT = 16 * Math.sqrt(3) / 2;
+  const OX = (900 - W * S) / 2;
+  const OY = (900 - HGT * S) / 2;
+  const HOLE_R = 20, MARBLE_R = 16.5;
+
+  let svg = null, holeLayer = null, marbleLayer = null, markLayer = null;
+  let cur = null, sel = null;
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  const px = (h) => OX + h.x * S;
+  const py = (h) => OY + h.y * S;
+
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 900 900', role: 'img', 'aria-label': '六角星跳棋棋盘' });
+    board.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    const bg = el('linearGradient', { id: 'jumpBg', x1: '0', y1: '0', x2: '1', y2: '1' }, defs);
+    el('stop', { offset: '0', 'stop-color': '#fff8e8' }, bg);
+    el('stop', { offset: '1', 'stop-color': '#ffe9c6' }, bg);
+
+    el('rect', { x: 14, y: 14, width: 872, height: 872, rx: 48, fill: '#ffffff' }, svg);
+    el('rect', { x: 26, y: 26, width: 848, height: 848, rx: 40, fill: 'url(#jumpBg)' }, svg);
+    el('rect', { x: 26, y: 26, width: 848, height: 848, rx: 40, fill: 'none', stroke: '#e8cf9f', 'stroke-width': 5 }, svg);
+
+    holeLayer = el('g', {}, svg);
+    markLayer = el('g', {}, svg);
+    marbleLayer = el('g', {}, svg);
+
+    H.forEach((h) => {
+      el('circle', { cx: px(h), cy: py(h), r: HOLE_R, fill: '#fffdf3', stroke: '#e7cfa4', 'stroke-width': 2.5 }, holeLayer);
+      el('circle', { cx: px(h), cy: py(h), r: HOLE_R - 5, fill: 'none', stroke: '#f4e6c8', 'stroke-width': 2 }, holeLayer);
+    });
+
+    svg.addEventListener('pointerdown', onTap);
+  }
+
+  function myTurn() {
+    if (!cur || cur.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return cur.players[cur.turn].id === window.Net.identity.id;
+  }
+
+  function holeAt(ev) {
+    const rect = svg.getBoundingClientRect();
+    const vx = (ev.clientX - rect.left) / rect.width * 900;
+    const vy = (ev.clientY - rect.top) / rect.height * 900;
+    const ux = (vx - OX) / S;
+    const uy = (vy - OY) / S;
+    let best = -1, bestD = 1e9;
+    H.forEach((h) => {
+      const d = Math.hypot(h.x - ux, h.y - uy);
+      if (d < bestD) { bestD = d; best = h.i; }
+    });
+    return bestD <= 0.62 ? best : -1;
+  }
+
+  function onTap(ev) {
+    if (!cur || cur.phase !== 'playing') return;
+    if (!myTurn()) { window.GameShell.toast('还没轮到你走', true); return; }
+
+    const hole = holeAt(ev);
+    if (hole < 0) return;
+
+    const chain = cur.chain;
+    const from = chain !== null ? chain : sel;
+    const st = window.GameShell.getState();
+
+    if (from !== null && from !== undefined) {
+      const t = J.targets(cur, from).find((x) => x.to === hole);
+      if (t) {
+        sel = null;
+        window.GameShell.send({ type: 'move', from: from, to: hole });
+        return;
+      }
+    }
+
+    if (cur.holes[hole] === cur.turn && chain === null) {
+      sel = (sel === hole ? null : hole);
+      render(cur, st);
+      return;
+    }
+
+    sel = null;
+    render(cur, st);
+  }
+
+  function render(state) {
+    if (!svg) return;
+    marbleLayer.innerHTML = '';
+    markLayer.innerHTML = '';
+
+    state.holes.forEach((v, i) => {
+      if (v < 0) return;
+      const h = H[i];
+      const c = COLORS[v % COLORS.length];
+      el('circle', { cx: px(h) + 2, cy: py(h) + 4, r: MARBLE_R, fill: 'rgba(80,60,30,.2)' }, marbleLayer);
+      el('circle', { cx: px(h), cy: py(h), r: MARBLE_R, fill: c, stroke: '#ffffff', 'stroke-width': 3 }, marbleLayer);
+      el('circle', { cx: px(h) - 5, cy: py(h) - 6, r: 6, fill: '#ffffff', opacity: '.6' }, marbleLayer);
+    });
+
+    const from = state.chain !== null ? state.chain : sel;
+    if (from !== null && from !== undefined) {
+      const hs = H[from];
+      el('circle', {
+        cx: px(hs), cy: py(hs), r: MARBLE_R + 7,
+        fill: 'none', stroke: '#ffd166', 'stroke-width': 5
+      }, markLayer);
+      J.targets(state, from).forEach((t) => {
+        const ht = H[t.to];
+        el('circle', {
+          cx: px(ht), cy: py(ht), r: MARBLE_R - 2,
+          fill: t.jump ? '#ffe9b0' : '#d7f4e1',
+          stroke: t.jump ? '#f0b429' : '#2f9e63',
+          'stroke-width': 3, 'stroke-dasharray': t.jump ? '7 6' : 'none', opacity: '.95'
+        }, markLayer);
+      });
+    }
+  }
+
+  function goalCount(state, seat) {
+    return J.ARMS[state.goals[seat]].filter((h) => state.holes[h] === seat).length;
+  }
+
+  function renderDock(state, ctx) {
+    const info = document.getElementById('dockInfo');
+    const actions = document.getElementById('dockActions');
+    const curP = state.players[state.turn];
+    let ttl = '', sub = '';
+
+    if (state.phase === 'ended') {
+      const name = state.winner ? (state.players.find((p) => p.id === state.winner) || {}).name : null;
+      ttl = name ? name + ' 全部到位' : '对局结束';
+      sub = '点「再来一局」重开';
+    } else {
+      ttl = (curP ? curP.name : '') + ' · ' + (['红', '蓝', '绿', '黄', '紫', '粉'][state.turn % 6] + '方');
+      sub = state.chain !== null
+        ? '连跳中：可以继续跳，也可以结束这一步'
+        : (ctx.isTurn
+          ? (ctx.local ? '本机热座：点自己的子，再点亮的孔位' : '点自己的子，再点亮起的孔位')
+          : '等对方走棋…');
+    }
+
+    info.innerHTML =
+      '<div class="diceChip" style="background:' + COLORS[state.turn % COLORS.length] +
+      ';border-color:#fff"></div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub +
+      ' · 到位 ' + goalCount(state, state.turn) + '/10</div></div>';
+
+    actions.innerHTML = '';
+    if (state.phase !== 'playing') return;
+
+    if (state.chain !== null && ctx.isTurn) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn primary';
+      b.textContent = '结束这一步';
+      b.addEventListener('click', () => window.GameShell.send({ type: 'endChain' }));
+      actions.appendChild(b);
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'goalWrap';
+    state.players.forEach((p, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'goalChip' + (i === state.turn ? ' active' : '');
+      chip.innerHTML = '<span class="dot" style="background:' + COLORS[i % COLORS.length] + '"></span>' +
+        '<span>' + goalCount(state, i) + '/10</span>';
+      wrap.appendChild(chip);
+    });
+    actions.appendChild(wrap);
+  }
+
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'jump',
+    title: '跳棋',
+    blurb: '星形棋盘 121 个孔位，2-6 人。走一步到相邻空孔，或隔一颗子跳到对面空孔并可连跳；先把 10 颗子全部送进对面三角区的人获胜。',
+    min: 2,
+    max: 6,
+    engine: J,
+    turnPill: (s) => (s.phase === 'playing' ? (['红', '蓝', '绿', '黄', '紫', '粉'][s.turn % 6] + '方回合') : '—'),
+    seatColor: (p, i) => COLORS[i % COLORS.length],
+    seatTag: (p, i) => {
+      const st = window.GameShell.getState();
+      if (!st || !st.holes || !st.goals) return '';
+      return '(' + goalCount(st, i) + '/10)';
+    },
+    winnerTitle: (s) => {
+      const w = s.players.find((p) => p.id === s.winner);
+      return (w ? w.name : '玩家') + ' 全部到位';
+    },
+    winnerSub: () => '10 颗子全部走进对面三角区',
+    onState: function (state, ctx) {
+      cur = state;
+      sel = null;
+      if (!state || !state.holes) return;
+      render(state);
+      if (state.phase !== 'lobby') renderDock(state, ctx);
+    }
+  });
+})();
+</script>
+</body>
+</html>

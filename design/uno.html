@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>UNO · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=3">
+<style>
+  .unoWrap { display: flex; flex-direction: column; gap: 8px; padding: 2px 10px 0; }
+  .unoTable {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 10px;
+  }
+  .unoTable::before {
+    content: "";
+    position: absolute;
+    inset: 6% 8%;
+    border-radius: 40px;
+    background: radial-gradient(closest-side, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%, transparent);
+  }
+  .pileCol { position: relative; display: flex; align-items: center; gap: 22px; z-index: 1; }
+  .drawPile {
+    width: 104px; height: 150px;
+    border-radius: 20px;
+    border: 4px solid #fff;
+    background: repeating-linear-gradient(135deg, #33415c 0 12px, #3d4c6b 12px 24px);
+    box-shadow: 0 8px 0 rgba(51,65,92,.35), 0 16px 26px rgba(31,78,92,.25);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    font-weight: 900;
+    cursor: pointer;
+    flex: none;
+  }
+  .drawPile:active { transform: translateY(3px); box-shadow: 0 4px 0 rgba(51,65,92,.35); }
+  .drawPile .cnt { font-size: 13px; font-weight: 700; opacity: .85; }
+  .drawPile .unoTxt { font-size: 26px; letter-spacing: 3px; color: #ffd166; }
+  .discardSlot { position: relative; width: 112px; height: 158px; flex: none; }
+  .discardSlot .unoCard { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .colorRing {
+    position: absolute;
+    left: 50%; bottom: -16px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 3px solid #fff;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .colorDot { width: 14px; height: 14px; border-radius: 50%; }
+  .dirPill {
+    position: absolute;
+    top: 6%; left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 3px solid #fff;
+    background: #fff3d6;
+    color: #7a5b1f;
+    font-size: 13px;
+    font-weight: 800;
+    z-index: 2;
+  }
+
+  /* 手牌 */
+  .handWrap {
+    flex: none;
+    display: flex;
+    gap: 10px;
+    padding: 10px 6px 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    min-height: 156px;
+    align-items: flex-end;
+  }
+  .handWrap::-webkit-scrollbar { display: none; }
+  .unoCard {
+    position: relative;
+    width: 96px; height: 138px;
+    flex: none;
+    border-radius: 18px;
+    border: 4px solid #fff;
+    box-shadow: 0 6px 0 rgba(31,78,92,.28), 0 10px 18px rgba(31,78,92,.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.18);
+    cursor: pointer;
+    transition: transform .16s cubic-bezier(.2,.8,.3,1), box-shadow .16s;
+    user-select: none;
+    overflow: hidden;
+  }
+  .unoCard .corner { position: absolute; font-size: 15px; font-weight: 900; opacity: .92; }
+  .unoCard .tl { left: 8px; top: 6px; }
+  .unoCard .br { right: 8px; bottom: 6px; transform: rotate(180deg); }
+  .unoCard .oval {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 66%; height: 70%;
+    transform: translate(-50%,-50%) rotate(-18deg);
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+    box-shadow: inset 0 0 0 3px rgba(0,0,0,.06);
+  }
+  .unoCard .glyph { position: relative; z-index: 2; color: #33415c; }
+  .unoCard.c-r { background: linear-gradient(180deg, #ff7b6c 0%, #d63c31 100%); }
+  .unoCard.c-y { background: linear-gradient(180deg, #ffd35e 0%, #e8a415 100%); }
+  .unoCard.c-g { background: linear-gradient(180deg, #6fd58e 0%, #228d52 100%); }
+  .unoCard.c-b { background: linear-gradient(180deg, #74b5ff 0%, #2a62c8 100%); }
+  .unoCard.c-w {
+    background:
+      conic-gradient(#e2564a 0 25%, #f0b429 0 50%, #2f9e63 0 75%, #3f7fe0 0 100%);
+  }
+  .unoCard.c-w .oval { background: rgba(255,255,255,.9); }
+  .unoCard.playable { transform: translateY(-8px); box-shadow: 0 6px 0 rgba(31,78,92,.28), 0 12px 24px rgba(31,78,92,.3), 0 0 0 3px #ffd166; }
+  .unoCard.dim { filter: saturate(.55) brightness(.92); opacity: .72; }
+  .unoCard:active { transform: translateY(-2px) scale(.98); }
+
+  .unoHandEmpty { color: var(--ink-2); font-size: 13px; font-weight: 700; padding: 50px 8px; }
+
+  .colorSheet {
+    position: fixed; inset: 0; z-index: 22;
+    display: grid; place-items: center;
+    background: rgba(23,62,78,.44);
+    backdrop-filter: blur(3px);
+  }
+  .colorSheet.hidden { display: none; }
+  .colorCard {
+    padding: 22px;
+    border-radius: 26px;
+    border: 4px solid #fff;
+    background: #fffdf7;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .colorCard h2 { margin: 0 0 4px; font-size: 20px; }
+  .colorCard p { margin: 0 0 16px; color: var(--ink-2); font-size: 13px; }
+  .colorGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .colorBtn {
+    width: 108px; height: 76px;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 5px 0 rgba(31,78,92,.22);
+  }
+  .colorBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(31,78,92,.22); }
+  .colorBtn.r { background: linear-gradient(180deg,#ff7b6c,#d63c31); }
+  .colorBtn.y { background: linear-gradient(180deg,#ffd35e,#e8a415); }
+  .colorBtn.g { background: linear-gradient(180deg,#6fd58e,#228d52); }
+  .colorBtn.b { background: linear-gradient(180deg,#74b5ff,#2a62c8); }
+
+  @media (min-width: 900px) {
+    .unoWrap { padding: 4px 24px 0; }
+    .unoTable { gap: 40px; }
+    .handWrap { justify-content: center; min-height: 176px; }
+    .unoCard { width: 108px; height: 154px; font-size: 46px; }
+  }
+  @media (max-width: 899px) and (orientation: landscape) {
+    .unoTable { gap: 16px; }
+    .handWrap { min-height: 130px; }
+    .unoCard { width: 82px; height: 118px; font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap unoWrap" aria-label="牌桌">
+    <div class="unoTable" id="unoTable">
+      <div class="dirPill" id="dirPill">顺时针 →</div>
+      <div class="pileCol">
+        <button class="drawPile" id="drawPile" type="button" aria-label="从牌堆摸一张">
+          <span class="unoTxt">UNO</span>
+          <span class="cnt" id="deckCount">× 0</span>
+        </button>
+        <div class="discardSlot" id="discardSlot"></div>
+      </div>
+      <div class="colorRing" id="colorRing"></div>
+    </div>
+    <div class="handWrap" id="handWrap"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">出牌、摸牌、惩罚都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="colorSheet hidden" id="colorPick">
+    <div class="colorCard">
+      <h2>选一个颜色</h2>
+      <p>变色牌把桌面颜色换成你选的这个</p>
+      <div class="colorGrid">
+        <button class="colorBtn r" type="button" data-color="r">红</button>
+        <button class="colorBtn y" type="button" data-color="y">黄</button>
+        <button class="colorBtn g" type="button" data-color="g">绿</button>
+        <button class="colorBtn b" type="button" data-color="b">蓝</button>
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn ghost" type="button" id="colorCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/uno.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const U = window.UnoEngine;
+  const COLOR_HEX = { r: '#d63c31', y: '#e8a415', g: '#228d52', b: '#2a62c8' };
+  let cur = null;
+  let pendingWild = -1;
+
+  const $ = (id) => document.getElementById(id);
+
+  function mySeat(state) {
+    if (window.GameShell.isLocal()) return state.turn;
+    const i = state.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+
+  function myTurn(state) {
+    if (state.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return state.players[state.turn].id === window.Net.identity.id;
+  }
+
+  function cardNode(card, opts) {
+    const o = opts || {};
+    const d = document.createElement('div');
+    d.className = 'unoCard c-' + card.c + (o.cls ? ' ' + o.cls : '');
+    const text = U.label(card);
+    const isAction = card.c === 'w' || !/^\d$/.test(card.v);
+    const glyph = card.v === 'skip' ? '⊘' : card.v === 'rev' ? '⇄' : card.v === 'd2' ? '+2'
+      : card.v === 'wd4' ? '+4' : card.v === 'wild' ? '★' : card.v;
+    d.innerHTML =
+      '<span class="corner tl">' + text + '</span>' +
+      '<span class="corner br">' + text + '</span>' +
+      (isAction
+        ? '<span class="glyph" style="font-size:34px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)">' + glyph + '</span>'
+        : '<span class="oval"></span><span class="glyph">' + glyph + '</span>');
+    return d;
+  }
+
+  function render(state, ctx) {
+    const top = U.topCard(state);
+    const slot = $('discardSlot');
+    slot.innerHTML = '';
+    if (top) slot.appendChild(cardNode(top, { cls: '' }));
+
+    $('deckCount').textContent = '× ' + state.deck.length;
+    $('dirPill').textContent = state.players.length === 2
+      ? '两人局 · 反转等于禁手'
+      : (state.dir === 1 ? '顺时针 →' : '逆时针 ←');
+
+    const ring = $('colorRing');
+    ring.innerHTML = '<span>当前颜色</span><span class="colorDot" style="background:' +
+      (COLOR_HEX[state.color] || '#999') + '"></span><span>' +
+      (U.colorName(state.color) || '—') + '</span>';
+
+    const wrap = $('handWrap');
+    wrap.innerHTML = '';
+    const seat = mySeat(state);
+    const hand = (state.hands && state.hands[seat]) || [];
+    const mine = myTurn(state);
+
+    if (!hand.length) {
+      const p = document.createElement('div');
+      p.className = 'unoHandEmpty';
+      p.textContent = state.phase === 'ended' ? '这一局结束了' : '手里没牌了';
+      wrap.appendChild(p);
+    } else {
+      hand.forEach((card, i) => {
+        const canPlay = mine && U.playable(card, top, state.color);
+        const node = cardNode(card, { cls: canPlay ? 'playable' : (mine ? 'dim' : '') });
+        node.addEventListener('click', () => {
+          if (!myTurn(state)) { window.GameShell.toast('还没轮到你出牌', true); return; }
+          if (!U.playable(card, top, state.color)) { window.GameShell.toast('这张牌出不了', true); return; }
+          if (card.c === 'w') {
+            pendingWild = i;
+            $('colorPick').classList.remove('hidden');
+            return;
+          }
+          window.GameShell.send({ type: 'play', i: i });
+        });
+        wrap.appendChild(node);
+      });
+    }
+
+    $('drawPile').disabled = !mine || state.drawnPlayable || state.phase !== 'playing';
+    renderDock(state, ctx);
+  }
+
+  function renderDock(state, ctx) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    const curP = state.players[state.turn];
+    const seat = mySeat(state);
+    const hand = (state.hands && state.hands[seat]) || [];
+
+    let ttl = '', sub = '';
+    if (state.phase === 'ended') {
+      const name = state.winner ? (state.players.find((p) => p.id === state.winner) || {}).name : null;
+      ttl = name ? name + ' 出完了所有牌' : '对局结束';
+      sub = '点「再来一局」重开';
+    } else {
+      ttl = (curP ? curP.name : '') + ' 出牌 · 手里 ' + (state.hands[state.turn] || []).length + ' 张';
+      sub = state.drawnPlayable
+        ? '刚摸的牌能出，出牌或结束回合'
+        : (ctx.isTurn
+          ? (ctx.local ? '本机热座：亮起的牌能出，点牌出牌' : '轮到你了：亮起的牌能出')
+          : '等对方出牌…');
+    }
+
+    info.innerHTML =
+      '<div class="diceChip" style="background:' + (COLOR_HEX[state.color] || '#999') +
+      ';border-color:#fff"></div>' +
+      '<div><div class="ttl">' + ttl + '</div><div class="sub">' + sub +
+      ' · 你有 ' + hand.length + ' 张</div></div>';
+
+    actions.innerHTML = '';
+    if (state.phase !== 'playing') return;
+
+    if (myTurn(state) && state.drawnPlayable) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn primary';
+      b.textContent = '结束回合';
+      b.addEventListener('click', () => window.GameShell.send({ type: 'endTurn' }));
+      actions.appendChild(b);
+      return;
+    }
+
+    const hint = document.createElement('div');
+    hint.className = 'btn ghost';
+    hint.style.display = 'grid';
+    hint.style.placeItems = 'center';
+    hint.style.fontSize = '13px';
+    hint.textContent = myTurn(state) ? '点牌出牌，或摸一张' : '等待对手';
+    actions.appendChild(hint);
+  }
+
+  $('drawPile').addEventListener('click', () => {
+    if (!cur || cur.phase !== 'playing') return;
+    if (!myTurn(cur)) { window.GameShell.toast('还没轮到你摸牌', true); return; }
+    window.GameShell.send({ type: 'draw' });
+  });
+
+  document.querySelectorAll('.colorBtn').forEach((b) => {
+    b.addEventListener('click', () => {
+      const c = b.getAttribute('data-color');
+      $('colorPick').classList.add('hidden');
+      if (pendingWild < 0) return;
+      const i = pendingWild;
+      pendingWild = -1;
+      window.GameShell.send({ type: 'play', i: i, color: c });
+    });
+  });
+  $('colorCancel').addEventListener('click', () => {
+    pendingWild = -1;
+    $('colorPick').classList.add('hidden');
+  });
+  $('colorPick').addEventListener('click', (e) => {
+    if (e.target === $('colorPick')) { pendingWild = -1; $('colorPick').classList.add('hidden'); }
+  });
+
+  window.GameShell.boot({
+    game: 'uno',
+    title: 'UNO',
+    blurb: '108 张牌，颜色或点数对上才能出。变色牌自己选颜色，+2 与 +4 让下家摸牌并跳过，出完手上最后一张就赢。抽一张后如果这张能出，可以接着出，也可以结束回合。',
+    min: 2,
+    max: 6,
+    engine: U,
+    turnPill: (s) => (s.phase === 'playing' ? ('剩 ' + (s.hands[s.turn] || []).length + ' 张') : '—'),
+    seatColor: (p, i) => '#' + ['d63c31', 'e8a415', '228d52', '2a62c8', '8f5bd9', 'e57bb4'][i % 6],
+    seatTag: (p, i) => {
+      const st = window.GameShell.getState();
+      if (!st || !st.hands) return '';
+      return (st.hands[i] || []).length + ' 张';
+    },
+    winnerTitle: (s) => {
+      const w = s.players.find((p) => p.id === s.winner);
+      return (w ? w.name : '玩家') + ' 出完了所有牌';
+    },
+    winnerSub: () => 'UNO！剩最后一张时没被抓到',
+    onState: function (state, ctx) {
+      cur = state;
+      if (!state || !state.discard || !state.hands) return;
+      render(state, ctx);
+    }
+  });
+})();
+</script>
+</body>
+</html>
