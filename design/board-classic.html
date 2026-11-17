@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>大富翁 · 萌趣街区（Q 版 2.5D）</title>
+<link rel="stylesheet" href="board-classic.css?v=1">
+</head>
+<body>
+<div class="app mobile" id="app">
+  <div class="bgCity" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="tbL">
+      <button class="homeBtn" id="btnHome" aria-label="返回大厅">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3.4 11.6 12 4l8.6 7.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M6.4 10.8h11.2v8.2H6.4z" fill="#fff" opacity=".9"/></svg>
+      </button>
+      <div class="roomPill"><b>房间：A12345</b></div>
+    </div>
+    <div class="tbR">
+      <div class="roundPill">回合 <b id="roundNo">1</b>/20</div>
+      <button class="logBtn" id="btnLog">日志</button>
+    </div>
+  </header>
+
+  <aside class="players" id="players"></aside>
+
+  <main class="boardWrap" id="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <svg id="boardSvg" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tokens" id="tokens"></div>
+    </div>
+  </main>
+
+  <footer class="dock" id="dock">
+    <div class="dockRow1">
+      <div class="turnPanel">
+        <div class="tpAv" id="turnAv"></div>
+        <div class="tpTx">
+          <b id="turnName">玩家A 的回合</b>
+          <span id="turnHint">掷骰子，前进吧！</span>
+          <div class="timer"><i id="timerFill"></i></div>
+        </div>
+        <div class="tsec" id="timerTxt">30s</div>
+      </div>
+      <div class="diceDisc"><div class="diceWrap"><canvas id="diceCv"></canvas></div></div>
+      <div class="actions" id="actions"></div>
+    </div>
+    <div class="locBar">
+      <div class="locIc" id="locIc"></div>
+      <div class="locTx"><b id="locName">当前位置：GO</b><span id="locTip">经过起点，获得 $200</span></div>
+      <button class="miniBtn" id="btnProps">地产</button>
+      <button class="miniBtn" id="btnTrade">交易</button>
+    </div>
+  </footer>
+
+  <div class="buyCard" id="popCard"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- 地块详情 -->
+  <div class="modal" id="tileModal">
+    <div class="mBox">
+      <div class="mHead"><b id="tmName">地块</b><button class="xBtn" id="tmClose">✕</button></div>
+      <div class="mBody" id="tmBody"></div>
+    </div>
+  </div>
+
+  <!-- 交易 -->
+  <div class="modal" id="tradeModal">
+    <div class="mBox wide">
+      <div class="mHead"><b>发起交易</b><button class="xBtn" id="trClose">✕</button></div>
+      <div class="mBody" id="trBody"></div>
+    </div>
+  </div>
+
+  <!-- 交易请求 -->
+  <div class="modal" id="trInModal">
+    <div class="mBox">
+      <div class="mHead"><b>交易请求</b></div>
+      <div class="mBody" id="trInBody"></div>
+    </div>
+  </div>
+
+  <!-- 日志 -->
+  <div class="sheet" id="logSheet">
+    <div class="sheetHead"><b>行动日志</b><button class="xBtn" id="logClose">✕</button></div>
+    <div class="logList" id="logList"></div>
+  </div>
+
+  <!-- 我的地产 -->
+  <div class="sheet" id="propSheet">
+    <div class="sheetHead"><b>我的地产</b><button class="xBtn" id="propClose">✕</button></div>
+    <div class="logList" id="propList"></div>
+  </div>
+
+  <!-- 结算 -->
+  <div class="modal" id="winModal">
+    <div class="mBox win">
+      <div class="mBody" id="winBody"></div>
+    </div>
+  </div>
+</div>
+<pre id="dbg"></pre>
+
+<script src="assets/lib/three.min.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  const D = window.MonoData, ENG = window.MonoEngine;
+  const TILES = D.TILES, GROUPS = D.GROUPS;
+  const dbgEl = document.getElementById('dbg');
+  const dbg = function (s) { dbgEl.textContent += s + '\n'; };
+  window.addEventListener('error', function (e) { dbg('ERR ' + e.message + ' @' + e.lineno); });
+
+  /* ================= 几何 ================= */
+  const CELL = 90, N = 11, BOARD = CELL * N, PW = 64;
+  const AX = 0.74, AY = 0.86;
+  const iso = function (x, y) { return { x: AX * (x - y), y: AY * (x + y) }; };
+  function cellRect(i) {
+    if (i === 0) return { x: BOARD - CELL, y: BOARD - CELL, w: CELL, h: CELL };
+    if (i === 10) return { x: 0, y: BOARD - CELL, w: CELL, h: CELL };
+    if (i === 20) return { x: 0, y: 0, w: CELL, h: CELL };
+    if (i === 30) return { x: BOARD - CELL, y: 0, w: CELL, h: CELL };
+    if (i < 10) return { x: BOARD - CELL - i * CELL, y: BOARD - PW, w: CELL, h: PW };
+    if (i < 20) return { x: 0, y: BOARD - CELL - (i - 10) * CELL, w: PW, h: CELL };
+    if (i < 30) return { x: (i - 20) * CELL, y: 0, w: CELL, h: PW };
+    return { x: BOARD - PW, y: (i - 30) * CELL, w: PW, h: CELL };
+  }
+  function cellCenter(i) {
+    const r = cellRect(i);
+    return iso(r.x + r.w / 2, r.y + r.h / 2);
+  }
+  const cs = [iso(0, 0), iso(BOARD, 0), iso(0, BOARD), iso(BOARD, BOARD)];
+  const PAD = 56;
+  const VB = {
+    x: Math.min.apply(null, cs.map(function (c) { return c.x; })) - PAD,
+    y: Math.min.apply(null, cs.map(function (c) { return c.y; })) - PAD,
+    w: Math.max.apply(null, cs.map(function (c) { return c.x; })) - Math.min.apply(null, cs.map(function (c) { return c.x; })) + PAD * 2,
+    h: Math.max.apply(null, cs.map(function (c) { return c.y; })) - Math.min.apply(null, cs.map(function (c) { return c.y; })) + PAD * 2
+  };
+  const M = 'matrix(' + AX + ',' + AY + ',' + (-AX) + ',' + AY + ',0,0)';
+  let LARGE = false;
+  const det = 2 * AX * AY;
+  const INV = 'matrix(' + (AY / det).toFixed(5) + ',' + (-AY / det).toFixed(5) + ',' +
+    (AX / det).toFixed(5) + ',' + (AX / det).toFixed(5) + ',0,0)';
+  document.getElementById('boardInner').style.aspectRatio = (VB.w / VB.h).toFixed(3);
+
+  /* ================= 调色 ================= */
+  function shade(hex, k) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const f = function (v) { return Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k))); };
+    return '#' + ((f(r) << 16) | (f(g) << 8) | f(b)).toString(16).padStart(6, '0');
+  }
+  const TYPE_COLOR = {
+    go: '#f3e0b2', rail: '#8fc4ef', util: '#94e0d0', chance: '#ffd66e',
+    chest: '#c9aef0', tax: '#ffa9a0', jail: '#c9d8e8', free: '#a8e6a6', gotojail: '#ffb0a4'
+  };
+  const TYPE_TXT = { go: 'GO', rail: '车', util: '水电', chance: '机会', chest: '命运', tax: '税', jail: '监狱', free: '停车', gotojail: '入狱' };
+  function tileColor(t) {
+    if (t.type === 'prop') return (GROUPS[t.group] || {}).color || '#e6dfcc';
+    return TYPE_COLOR[t.type] || '#e6dfcc';
+  }
+
+  /* ================= 头像 ================= */
+  function avatarSVG(pl) {
+    const hat = pl.hat || '#f2c94c', skin = '#ffddbd';
+    return '<svg viewBox="0 0 44 44">' +
+      '<circle cx="22" cy="22" r="21" fill="#ffffff"/>' +
+      '<circle cx="22" cy="23.5" r="13.6" fill="' + skin + '"/>' +
+      '<path d="M7.6 20.4c0-8.6 6.4-13.4 14.4-13.4s14.4 4.8 14.4 13.4z" fill="' + hat + '"/>' +
+      '<path d="M7.2 19.4h29.6c1.4 0 2.4 1 2.4 2.2s-1 2.2-2.4 2.2H7.2c-1.4 0-2.4-1-2.4-2.2s1-2.2 2.4-2.2z" fill="' + shade(hat, -0.14) + '"/>' +
+      '<circle cx="16.4" cy="26" r="2.35" fill="#26304a"/>' +
+      '<circle cx="27.6" cy="26" r="2.35" fill="#26304a"/>' +
+      '<circle cx="17.2" cy="25.2" r="0.9" fill="#fff" opacity=".9"/>' +
+      '<circle cx="28.4" cy="25.2" r="0.9" fill="#fff" opacity=".9"/>' +
+      '<circle cx="12.8" cy="29.4" r="2.5" fill="#ff9d90" opacity=".5"/>' +
+      '<circle cx="31.2" cy="29.4" r="2.5" fill="#ff9d90" opacity=".5"/>' +
+      '<path d="M18.8 31.2c1.8 1.8 4.6 1.8 6.4 0" stroke="#26304a" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+      '<path d="M6 44c1.6-6.6 8-9.4 16-9.4s14.4 2.8 16 9.4z" fill="' + pl.color + '"/>' +
+      '</svg>';
+  }
+  const FACES = [
+    avatarSVG({ color: '#e8544a', hat: '#f2c94c' }),
+    avatarSVG({ color: '#3f7fe0', hat: '#2c3e57' }),
+    avatarSVG({ color: '#2f9e63', hat: '#e0a35c' }),
+    avatarSVG({ color: '#d9a13b', hat: '#6b4a2f' })
+  ];
+  const FACE_OF = function (i) { return FACES[((i % 4) + 4) % 4]; };
+
+  /* ================= 图标 ================= */
+  function houseShape(cx, cy, w, body, roof, sw) {
+    const hh = w * 0.62, rh = w * 0.42;
+    const s = sw || 2;
+    return '<g>' +
+      '<ellipse cx="' + cx.toFixed(1) + '" cy="' + (cy + 2).toFixed(1) + '" rx="' + (w * 0.52).toFixed(1) + '" ry="' + (w * 0.16).toFixed(1) + '" fill="#33502a" opacity=".26"/>' +
+      '<rect x="' + (cx - w / 2).toFixed(1) + '" y="' + (cy - hh).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + hh.toFixed(1) + '" rx="' + (w * 0.12).toFixed(1) + '" fill="' + body + '" stroke="#fff" stroke-width="' + s + '"/>' +
+      '<path d="M' + (cx - w * 0.62).toFixed(1) + ',' + (cy - hh).toFixed(1) + ' L' + cx.toFixed(1) + ',' + (cy - hh - rh).toFixed(1) + ' L' + (cx + w * 0.62).toFixed(1) + ',' + (cy - hh).toFixed(1) + ' Z" fill="' + roof + '" stroke="#fff" stroke-width="' + s + '"/>' +
+      '<rect x="' + (cx - w * 0.1).toFixed(1) + '" y="' + (cy - hh * 0.55).toFixed(1) + '" width="' + (w * 0.2).toFixed(1) + '" height="' + (hh * 0.55).toFixed(1) + '" rx="1.5" fill="#fff" opacity=".78"/>' +
+      '</g>';
+  }
+  function towerShape(cx, cy, w, hf, c1, c2) {
+    const bh = w * 0.92 * (hf || 1), rh = w * 0.3;
+    let o = '<g>' +
+      '<ellipse cx="' + cx.toFixed(1) + '" cy="' + (cy + 3).toFixed(1) + '" rx="' + (w * 0.5).toFixed(1) + '" ry="' + (w * 0.16).toFixed(1) + '" fill="#33502a" opacity=".26"/>' +
+      '<rect x="' + (cx - w / 2).toFixed(1) + '" y="' + (cy - bh).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="' + (w * 0.12).toFixed(1) + '" fill="' + c1 + '" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M' + (cx - w * 0.62).toFixed(1) + ',' + (cy - bh).toFixed(1) + ' L' + cx.toFixed(1) + ',' + (cy - bh - rh).toFixed(1) + ' L' + (cx + w * 0.62).toFixed(1) + ',' + (cy - bh).toFixed(1) + ' Z" fill="' + c2 + '" stroke="#fff" stroke-width="2"/>';
+    [-1, 1].forEach(function (q) {
+      o += '<rect x="' + (cx + q * w * 0.23 - w * 0.11).toFixed(1) + '" y="' + (cy - bh * 0.78).toFixed(1) + '" width="' + (w * 0.22).toFixed(1) + '" height="' + (bh * 0.2).toFixed(1) + '" rx="1.6" fill="#fff" opacity=".82"/>';
+      o += '<rect x="' + (cx + q * w * 0.23 - w * 0.11).toFixed(1) + '" y="' + (cy - bh * 0.44).toFixed(1) + '" width="' + (w * 0.22).toFixed(1) + '" height="' + (bh * 0.2).toFixed(1) + '" rx="1.6" fill="#fff" opacity=".82"/>';
+    });
+    return o + '</g>';
+  }
+
+  /* ================= 棋盘 ================= */
+  const DECOR = [['#ffe6b0', '#e2915a'], ['#bee0fb', '#4f8fd6'], ['#ffc9dc', '#d9648f'],
+    ['#cdf0b6', '#63a45c'], ['#ffe3ad', '#cb9a45'], ['#cfd3fb', '#7781cc'],
+    ['#ffcfb2', '#cf7648'], ['#b8ece1', '#4aa895'], ['#e7d7fb', '#a286d2']];
+
+  function buildBoard() {
+    let s = '';
+    s += '<defs>' +
+      '<pattern id="grass2" width="160" height="160" patternUnits="userSpaceOnUse">' +
+      '<image href="assets/tex/grass.png" width="160" height="160" preserveAspectRatio="none"/></pattern>' +
+      '<linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#fffdf6"/><stop offset="1" stop-color="#f0e4cd"/></linearGradient>' +
+      '<filter id="softDrop" x="-24%" y="-24%" width="150%" height="170%">' +
+      '<feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#3a2a12" flood-opacity=".3"/></filter>' +
+      '<filter id="blk" x="-30%" y="-30%" width="170%" height="180%">' +
+      '<feDropShadow dx="0" dy="5" stdDeviation="3" flood-color="#33260f" flood-opacity=".32"/></filter>' +
+      '</defs>';
+
+    /* 底板：厚实青绿边框 + 奶油面 */
+    s += '<g filter="url(#softDrop)"><g transform="' + M + '">';
+    s += '<rect x="-56" y="-56" width="' + (BOARD + 112) + '" height="' + (BOARD + 112) + '" rx="64" fill="#3fa9bd"/>';
+    s += '<rect x="-46" y="-46" width="' + (BOARD + 92) + '" height="' + (BOARD + 92) + '" rx="56" fill="#63c4d2"/>';
+    s += '<rect x="-38" y="-38" width="' + (BOARD + 76) + '" height="' + (BOARD + 76) + '" rx="50" fill="#fffdf4"/>';
+    s += '</g></g>';
+
+    /* 路面环 */
+    s += '<g transform="' + M + '">';
+    s += '<rect x="' + (PW * 0.55) + '" y="' + (PW * 0.55) + '" width="' + (BOARD - PW * 1.1) + '" height="' + (BOARD - PW * 1.1) + '" rx="26" fill="#eef1f4"/>';
+    s += '<rect x="' + (PW + 4) + '" y="' + (PW + 4) + '" width="' + (BOARD - PW * 2 - 8) + '" height="' + (BOARD - PW * 2 - 8) + '" rx="22" fill="#f9f6ea"/>';
+    s += '<rect x="' + (PW + 12) + '" y="' + (PW + 12) + '" width="' + (BOARD - PW * 2 - 24) + '" height="' + (BOARD - PW * 2 - 24) + '" rx="18" fill="url(#grass2)"/>';
+    s += '<rect x="' + (PW + 12) + '" y="' + (PW + 12) + '" width="' + (BOARD - PW * 2 - 24) + '" height="' + (BOARD - PW * 2 - 24) + '" rx="18" fill="none" stroke="#fff" stroke-width="4" opacity=".55"/>';
+    s += '</g>';
+
+    /* 中央：圆形内环大道 + 喷泉广场 */
+    const fc = iso(BOARD / 2, BOARD / 2);
+    s += '<g>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + fc.y + '" rx="' + (AX * 258) + '" ry="' + (AY * 258) + '" fill="#fbf4e2" opacity=".92"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + fc.y + '" rx="' + (AX * 258) + '" ry="' + (AY * 258) + '" fill="none" stroke="#ffffff" stroke-width="4" opacity=".7"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + fc.y + '" rx="' + (AX * 148) + '" ry="' + (AY * 148) + '" fill="#dff0c6" opacity=".9"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + fc.y + '" rx="' + (AX * 148) + '" ry="' + (AY * 148) + '" fill="none" stroke="#fff" stroke-width="3.5" opacity=".7"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + fc.y + '" rx="' + (AX * 96) + '" ry="' + (AY * 96) + '" fill="#ffffff"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + (fc.y - 4) + '" rx="' + (AX * 74) + '" ry="' + (AY * 74) + '" fill="#8bd8f2"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + (fc.y - 4) + '" rx="' + (AX * 58) + '" ry="' + (AY * 58) + '" fill="#c8f1ff"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + (fc.y - 22) + '" rx="' + (AX * 34) + '" ry="' + (AY * 34) + '" fill="#ffffff"/>';
+    s += '<ellipse cx="' + fc.x + '" cy="' + (fc.y - 32) + '" rx="' + (AX * 16) + '" ry="' + (AY * 16) + '" fill="#dff4ff"/>';
+    s += '<ellipse cx="' + (fc.x - AX * 26) + '" cy="' + (fc.y - 30) + '" rx="7" ry="4" fill="#fff" opacity=".8"/>';
+    s += '<ellipse cx="' + (fc.x + AX * 30) + '" cy="' + (fc.y - 18) + '" rx="6" ry="3.4" fill="#fff" opacity=".7"/>';
+    s += '</g>';
+
+    /* 树 */
+    s += '<g>';
+    const trees = [[1.2, 1.2], [3.0, 1.1], [5.0, 1.3], [7.2, 1.2], [8.9, 1.8],
+      [9.1, 3.6], [9.0, 5.6], [8.8, 7.6], [7.0, 9.0], [5.0, 9.1],
+      [3.0, 9.0], [1.4, 8.4], [1.1, 6.4], [1.1, 4.4], [1.3, 2.6], [7.6, 4.2]];
+    trees.forEach(function (t, k) {
+      const p = iso(t[0] * (BOARD / 11), t[1] * (BOARD / 11));
+      const r = 12 + (k % 3) * 3.5;
+      s += '<ellipse cx="' + p.x.toFixed(1) + '" cy="' + (p.y + r * 0.55).toFixed(1) + '" rx="' + (r * 0.95).toFixed(1) + '" ry="' + (r * 0.3).toFixed(1) + '" fill="#2f5e33" opacity=".22"/>';
+      s += '<rect x="' + (p.x - 2.6).toFixed(1) + '" y="' + (p.y - 1).toFixed(1) + '" width="5.2" height="' + (r * 0.75).toFixed(1) + '" rx="2.6" fill="#a9784a"/>';
+      s += '<circle cx="' + p.x.toFixed(1) + '" cy="' + (p.y - r * 0.85).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="#5cbb63"/>';
+      s += '<circle cx="' + (p.x - r * 0.42).toFixed(1) + '" cy="' + (p.y - r * 0.4).toFixed(1) + '" r="' + (r * 0.68).toFixed(1) + '" fill="#70cd78"/>';
+      s += '<circle cx="' + (p.x + r * 0.3).toFixed(1) + '" cy="' + (p.y - r * 1.15).toFixed(1) + '" r="' + (r * 0.5).toFixed(1) + '" fill="#8fdc92" opacity=".9"/>';
+    });
+    s += '</g>';
+
+    /* 内圈街区楼：四边各三排，围出中央公园 */
+    s += '<g>';
+    let bi = 0;
+    [-1, 0, 1].forEach(function (row) {
+      for (let k = 0; k < 7; k++) {
+        const t0 = 176 + k * 108;
+        const d = PW + 78 + (row + 1) * 96;
+        const sides = [[t0, d], [t0, BOARD - d], [d, t0], [BOARD - d, t0]];
+        sides.forEach(function (bp) {
+          const bx = bp[0], by = bp[1];
+          if (bx < PW + 86 || bx > BOARD - PW - 86 || by < PW + 86 || by > BOARD - PW - 86) return;
+          const dd = Math.sqrt(Math.pow(bx - BOARD / 2, 2) + Math.pow(by - BOARD / 2, 2));
+          if (dd < 206) return;
+          const c = iso(bx, by);
+          const w = 56 + ((k + bi) % 3) * 8;
+          const hf = 1 + ((k * 3 + bi) % 3) * 0.18;
+          const pal = DECOR[(bi + k) % DECOR.length];
+          s += towerShape(c.x, c.y, w, hf, pal[0], pal[1]);
+          bi++;
+        });
+      }
+    });
+    s += '</g>';
+
+    /* 40 格：贴纸式 2.5D 方块 */
+    s += '<g>';
+    TILES.forEach(function (t, i) {
+      const r = cellRect(i);
+      const col = tileColor(t);
+      const dark = shade(col, -0.42);
+      s += '<g transform="translate(-3,7)"><g transform="' + M + '">' +
+        '<rect x="' + (r.x + 3) + '" y="' + (r.y + 3) + '" width="' + (r.w - 6) + '" height="' + (r.h - 6) + '" rx="14" fill="' + dark + '"/></g></g>';
+      s += '<g transform="' + M + '">' +
+        '<rect x="' + (r.x + 3) + '" y="' + (r.y + 3) + '" width="' + (r.w - 6) + '" height="' + (r.h - 6) + '" rx="14" fill="' + col + '" stroke="#ffffff" stroke-width="4.6"/>' +
+        '<rect x="' + (r.x + 9) + '" y="' + (r.y + 9) + '" width="' + (r.w - 18) + '" height="' + (r.h - 26) + '" rx="9" fill="#ffffff" opacity="' + (t.type === 'prop' ? '.16' : '.3') + '"/>' +
+        '</g>';
+    });
+    s += '</g>';
+
+    /* 格内图标 / 角格文字 */
+    s += '<g>';
+    TILES.forEach(function (t, i) {
+      const c = cellCenter(i);
+      if (t.type === 'prop') {
+        const gc = tileColor(t);
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + (c.y + (LARGE ? 4 : 6)).toFixed(1) + ')">' +
+          houseShape(0, 0, LARGE ? 42 : 40, '#fffdf5', shade(gc, -0.3), 2.2) + '</g>';
+        if (LARGE) {
+          s += '<g transform="translate(' + c.x.toFixed(1) + ',' + (c.y - 26).toFixed(1) + ')' + INV + '">' +
+            '<text y="0" text-anchor="middle" font-size="17" font-weight="900" fill="#fff" stroke="' + shade(gc, -0.55) +
+            '" stroke-width="3.4" paint-order="stroke">' + t.name + '</text>' +
+            '<text y="19" text-anchor="middle" font-size="14" font-weight="900" fill="#ffffff" opacity=".95" stroke="' +
+            shade(gc, -0.55) + '" stroke-width="3" paint-order="stroke">$' + t.price + '</text></g>';
+        }
+        return;
+      }
+      if (t.type === 'rail') {
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + c.y.toFixed(1) + ')">' +
+          '<rect x="-15" y="-6" width="30" height="13" rx="5" fill="#fffdf5" stroke="#fff" stroke-width="2"/>' +
+          '<rect x="-11" y="-13" width="22" height="9" rx="4" fill="#fffdf5" stroke="#fff" stroke-width="2"/>' +
+          '<circle cx="-8" cy="9" r="3.4" fill="#5b7192"/><circle cx="8" cy="9" r="3.4" fill="#5b7192"/>' +
+          '<rect x="-15" y="3" width="30" height="3" rx="1.5" fill="#4a8fdd"/></g>';
+        return;
+      }
+      if (t.type === 'util') {
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + c.y.toFixed(1) + ')">' +
+          '<path d="M2 -16 L-11 3h8l-3 13 14-20h-9z" fill="#fffdf5" stroke="#fff" stroke-width="2.4"/></g>';
+        return;
+      }
+      if (t.type === 'chance' || t.type === 'chest') {
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + c.y.toFixed(1) + ')' + INV + '">' +
+          '<text y="8" text-anchor="middle" font-size="30" font-weight="900" fill="#fff" stroke="#c69a3a" stroke-width="3" paint-order="stroke">?</text></g>';
+        return;
+      }
+      if (t.type === 'tax') {
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + c.y.toFixed(1) + ')' + INV + '">' +
+          '<text y="9" text-anchor="middle" font-size="27" font-weight="900" fill="#fff" stroke="#c9685f" stroke-width="3" paint-order="stroke">$</text></g>';
+        return;
+      }
+      const lab = TYPE_TXT[t.type] || t.name;
+      const big = t.type === 'go';
+      const fs = big ? 30 : (t.type === 'free' || t.type === 'jail' ? 15 : 18);
+      s += '<g transform="translate(' + c.x.toFixed(1) + ',' + c.y.toFixed(1) + ')' + INV + '">' +
+        '<text y="' + (fs * 0.34).toFixed(0) + '" text-anchor="middle" font-size="' + fs + '" font-weight="900" fill="#fff" stroke="' +
+        (t.type === 'go' ? '#c9574a' : '#7e6f56') + '" stroke-width="' + (big ? 5 : 3.4) + '" paint-order="stroke">' + lab + '</text></g>';
+    });
+    s += '</g>';
+
+    const svg = document.getElementById('boardSvg');
+    svg.setAttribute('viewBox', VB.x.toFixed(0) + ' ' + VB.y.toFixed(0) + ' ' + VB.w.toFixed(0) + ' ' + VB.h.toFixed(0));
+    svg.innerHTML = s + '<g id="ovl"></g>' +
+      '<g id="hitLayer">' + TILES.map(function (t, i) {
+        const r = cellRect(i);
+        return '<g transform="' + M + '"><rect class="hit" data-i="' + i + '" x="' + r.x + '" y="' + r.y +
+          '" width="' + r.w + '" height="' + r.h + '" rx="12" fill="transparent"/></g>';
+      }).join('') + '</g>';
+    svg.addEventListener('click', function (e) {
+      const el = e.target.closest ? e.target.closest('[data-i]') : null;
+      if (el) openTile(Number(el.getAttribute('data-i')));
+    });
+  }
+
+  /* ================= 归属 / 房屋 ================= */
+  function renderOverlay() {
+    const g = document.getElementById('ovl');
+    const parts = [];
+    TILES.forEach(function (t, i) {
+      const pr = state.props[i];
+      if (!pr || !pr.owner) return;
+      const p = state.players.filter(function (x) { return x.id === pr.owner; })[0];
+      if (!p) return;
+      const r = cellRect(i);
+      const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+      const cc = iso(cx, cy);
+      parts.push('<g transform="' + M + '"><rect x="' + (r.x + 6) + '" y="' + (r.y + 6) + '" width="' + (r.w - 12) +
+        '" height="' + (r.h - 12) + '" rx="11" fill="' + p.color + '" opacity="' + (pr.mortgaged ? '.1' : '.24') + '"/></g>');
+      // 归属旗
+      const bx = cx - BOARD / 2, by = cy - BOARD / 2;
+      const bl = Math.sqrt(bx * bx + by * by) || 1;
+      const off = Math.min(r.w, r.h) / 2 - 6;
+      const fx = cc.x + (AX * (bx - by) / bl) * off * 1.1;
+      const fy = cc.y + (AY * (bx + by) / bl) * off * 1.1;
+      parts.push('<g transform="translate(' + fx.toFixed(1) + ',' + fy.toFixed(1) + ')">' +
+        '<circle r="9.5" fill="#fff"/><circle r="7" fill="' + p.color + '"/>' +
+        (pr.mortgaged ? '<path d="M-4 -4 L4 4 M4 -4 L-4 4" stroke="#fff" stroke-width="2.2"/>' : '') +
+        '</g>');
+      // 房子 / 旅馆
+      if (pr.houses > 0) {
+        const n = pr.houses >= 5 ? 1 : pr.houses;
+        const w = pr.houses >= 5 ? 26 : 15;
+        for (let k = 0; k < n; k++) {
+          const dx = pr.houses >= 5 ? 0 : (k - (n - 1) / 2) * 17;
+          parts.push('<g transform="translate(' + (cc.x + dx).toFixed(1) + ',' + (cc.y - 12).toFixed(1) + ')">' +
+            (pr.houses >= 5
+              ? '<rect x="-13" y="-16" width="26" height="15" rx="4" fill="#ffd45c" stroke="#fff" stroke-width="2"/>' +
+                '<rect x="-14" y="-19" width="28" height="5" rx="2.5" fill="#fff5c9" stroke="#fff" stroke-width="1.6"/>'
+              : '<rect x="-6.5" y="-11" width="13" height="11" rx="2.5" fill="#fff" stroke="#ffd45c" stroke-width="2"/>' +
+                '<path d="M-8 -11 L0 -18 L8 -11 Z" fill="#ffd45c" stroke="#fff" stroke-width="1.6"/>') +
+            '</g>');
+        }
+      }
+    });
+    g.innerHTML = parts.join('');
+  }
+
+  /* ================= 骰子 ================= */
+  function roundedBoxGeo(w, h, d, seg, r) {
+    const geo = new THREE.BoxGeometry(w, h, d, seg, seg, seg);
+    const pos = geo.attributes.position;
+    const inx = w / 2 - r, iny = h / 2 - r, inz = d / 2 - r;
+    const v = new THREE.Vector3(), n = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      n.set(Math.max(-inx, Math.min(inx, v.x)), Math.max(-iny, Math.min(iny, v.y)), Math.max(-inz, Math.min(inz, v.z)));
+      v.sub(n);
+      if (v.lengthSq() > 1e-8) v.normalize().multiplyScalar(r);
+      pos.setXYZ(i, n.x + v.x, n.y + v.y, n.z + v.z);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+  const dcv = document.getElementById('diceCv');
+  const dr = new THREE.WebGLRenderer({ canvas: dcv, antialias: true, alpha: true });
+  dr.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  const ds = new THREE.Scene();
+  const dcam = new THREE.PerspectiveCamera(32, 1.4, 0.1, 60);
+  dcam.position.set(0, 2.4, 5.0); dcam.lookAt(0, -0.1, 0);
+  ds.add(new THREE.HemisphereLight(0xffffff, 0xc6d8f0, 1.05));
+  const dlight = new THREE.DirectionalLight(0xffffff, 0.9); dlight.position.set(-2.2, 3.4, 3.2); ds.add(dlight);
+  const pipMat = new THREE.MeshBasicMaterial({ color: 0x2b3550 });
+  const pipGeo = new THREE.CircleGeometry(0.078, 16);
+  const PIP = {
+    1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]],
+    4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+    6: [[-1, -1], [0, -1], [1, -1], [-1, 1], [0, 1], [1, 1]]
+  };
+  function makeDie() {
+    const grp = new THREE.Group();
+    grp.add(new THREE.Mesh(roundedBoxGeo(1, 1, 1, 7, 0.16), new THREE.MeshLambertMaterial({ color: 0xfdfcf7 })));
+    [{ n: 1, ax: 'z', s: 1 }, { n: 6, ax: 'z', s: -1 }, { n: 2, ax: 'y', s: 1 },
+     { n: 5, ax: 'y', s: -1 }, { n: 3, ax: 'x', s: 1 }, { n: 4, ax: 'x', s: -1 }].forEach(function (f) {
+      PIP[f.n].forEach(function (p) {
+        const pip = new THREE.Mesh(pipGeo, pipMat);
+        const o = 0.504, k = 0.16;
+        if (f.ax === 'z') { pip.position.set(p[0] * k, p[1] * k, f.s * o); if (f.s < 0) pip.rotation.y = Math.PI; }
+        else if (f.ax === 'y') { pip.position.set(p[0] * k, f.s * o, p[1] * k); pip.rotation.x = f.s > 0 ? -Math.PI / 2 : Math.PI / 2; }
+        else { pip.position.set(f.s * o, p[0] * k, p[1] * k); pip.rotation.y = f.s > 0 ? Math.PI / 2 : -Math.PI / 2; }
+        grp.add(pip);
+      });
+    });
+    return grp;
+  }
+  const dieA = makeDie(), dieB = makeDie();
+  dieA.position.set(-0.79, 0, 0.16); dieB.position.set(0.79, 0, -0.2);
+  dieB.scale.setScalar(0.9);
+  ds.add(dieA); ds.add(dieB);
+  function setDieFace(die, n) {
+    const base = { 1: [0, 0, 0], 6: [0, Math.PI, 0], 2: [-Math.PI / 2, 0, 0], 5: [Math.PI / 2, 0, 0], 3: [0, 0, -Math.PI / 2], 4: [0, 0, Math.PI / 2] };
+    const r = base[n] || [0, 0, 0];
+    die.rotation.set(r[0] + 0.18, r[1] + 0.42, r[2] + 0.05);
+  }
+  function renderDice() {
+    const w = Math.max(80, dcv.clientWidth || 120), h = Math.max(60, dcv.clientHeight || 100);
+    dr.setSize(w, h, false);
+    dcam.aspect = w / h; dcam.updateProjectionMatrix(); dcam.lookAt(0, -0.1, 0);
+    dr.render(ds, dcam);
+  }
+  setDieFace(dieA, 2); setDieFace(dieB, 5);
+
+  /* ================= 状态 ================= */
+  const NAMES = [{ id: 'p1', name: '玩家A' }, { id: 'p2', name: '玩家B' }, { id: 'p3', name: '玩家C' }, { id: 'p4', name: '玩家D' }];
+  let state = ENG.createInitial(NAMES, Math.random);
+  let rolling = false, timerLeft = 30, timerId = null, lastKey = '';
+
+  const $ = function (id) { return document.getElementById(id); };
+  const cur = function () { return state.players[state.turn]; };
+  const actorId = function () { return cur().id; };
+  const pById = function (id) { return state.players.filter(function (p) { return p.id === id; })[0]; };
+  const faceOf = function (p) { return FACE_OF(state.players.indexOf(p)); };
+
+  function toast(msg) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('show'); }, 1700);
+  }
+
+  /* ================= 动作 ================= */
+  function act(action, actor) {
+    actor = actor || actorId();
+    const before = state.players.map(function (p) { return p.pos; });
+    const res = ENG.act(state, action, actor);
+    if (!res.ok) { toast(res.msg || '不能这么做'); return false; }
+    state = res.state;
+    if (action.type === 'roll' && state.lastRoll) { rolling = true; spinDice(state.lastRoll.d1, state.lastRoll.d2); }
+    syncAll(before);
+    return true;
+  }
+
+  function spinDice(d1, d2) {
+    const t0 = performance.now(), dur = 620;
+    const ax = dieA.rotation.x, az = dieA.rotation.z, bx = dieB.rotation.x, bz = dieB.rotation.z;
+    (function step() {
+      const k = Math.min(1, (performance.now() - t0) / dur);
+      dieA.rotation.x = ax + k * 9 * Math.PI; dieA.rotation.z = az + k * 7 * Math.PI;
+      dieB.rotation.x = bx + k * 8 * Math.PI; dieB.rotation.z = bz + k * 6 * Math.PI;
+      renderDice();
+      if (k < 1) requestAnimationFrame(step);
+      else { setDieFace(dieA, d1); setDieFace(dieB, d2); renderDice(); rolling = false; }
+    })();
+  }
+
+  /* ================= 玩家卡 ================= */
+  function renderPlayers() {
+    $('players').innerHTML = state.players.map(function (p, i) {
+      const active = p.id === actorId();
+      return '<div class="pcard' + (active ? ' active' : '') + (p.bankrupt ? ' out' : '') + '" style="--pc:' + D.COLORS[i] + '">' +
+        '<div class="pav">' + FACE_OF(i) + '</div>' +
+        '<div class="pnm">' + p.name + (p.inJail ? '<i>🔒</i>' : '') + '</div>' +
+        '<div class="pcash">$' + p.money.toLocaleString() + '</div></div>';
+    }).join('');
+  }
+
+  /* ================= 棋子 ================= */
+  const tokensEl = $('tokens');
+  const tokenEls = [];
+  function pct(p) { return { l: ((p.x - VB.x) / VB.w) * 100, t: ((p.y - VB.y) / VB.h) * 100 }; }
+  function buildTokens() {
+    tokensEl.innerHTML = '';
+    tokenEls.length = 0;
+    state.players.forEach(function (p, i) {
+      const d = document.createElement('div');
+      d.className = 'token';
+      d.style.setProperty('--c', D.COLORS[i]);
+      d.style.zIndex = 4 + i;
+      d.innerHTML = '<div class="tkSh"></div><div class="tkBody">' + FACE_OF(i) + '</div>';
+      tokensEl.appendChild(d);
+      tokenEls.push(d);
+    });
+  }
+  const OFF = [[-2.5, -2.2], [2.5, -2.2], [-2.5, 2.4], [2.5, 2.4]];
+  function placeToken(i, pos, hop) {
+    const d = tokenEls[i];
+    if (!d) return;
+    if (pos == null) pos = state.players[i].pos;
+    const pt = pct(cellCenter(pos));
+    d.style.left = (pt.l + OFF[i % 4][0]).toFixed(2) + '%';
+    d.style.top = (pt.t + OFF[i % 4][1]).toFixed(2) + '%';
+    d.style.opacity = state.players[i].bankrupt ? '.35' : '1';
+    if (hop) {
+      d.classList.remove('hop');
+      void d.offsetWidth;
+      d.classList.add('hop');
+    }
+  }
+  function syncTokens(before) {
+    state.players.forEach(function (p, i) {
+      const from = before && before[i] != null ? before[i] : p.pos;
+      if (from === p.pos) { placeToken(i, p.pos); return; }
+      const steps = (p.pos - from + 40) % 40;
+      if (steps > 18) { placeToken(i, p.pos); return; }
+      let k = 0;
+      const t = setInterval(function () {
+        k++;
+        placeToken(i, (from + k) % 40, true);
+        if (k >= steps) clearInterval(t);
+      }, 82);
+    });
+    tokenEls.forEach(function (el, i) {
+      el.className = 'token' + (state.players[i].id === actorId() ? ' me' : '') + (state.players[i].inJail ? ' jailed' : '');
+    });
+  }
+
+  /* ================= HUD ================= */
+  function tileInfo(i) {
+    const t = TILES[i], pr = state.props[i];
+    if (!pr || !pr.owner) return { name: t.name, tip: t.price ? '地产价 $' + t.price : (t.note || '') };
+    const o = pById(pr.owner);
+    return {
+      name: t.name + (pr.mortgaged ? '（抵押中）' : ''),
+      tip: (o ? o.name : '—') + ' 持有 · 租金 $' + ENG.rentAt(state, i, state.lastRoll ? state.lastRoll.total : 7)
+    };
+  }
+  const ICONS = {
+    prop: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3.6 11.2 12 4l8.4 7.2" fill="none" stroke="#2f7fe8" stroke-width="2.2"/><rect x="6.4" y="10.8" width="11.2" height="8.6" rx="1.8" fill="#9ed2ff"/><rect x="9.6" y="13.4" width="5" height="6" rx="1" fill="#fff"/></svg>',
+    rail: '<svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="6" width="18" height="9" rx="3" fill="#8bbdf0"/><rect x="6" y="3.4" width="12" height="4" rx="2" fill="#bcdcff"/><circle cx="7.6" cy="17" r="2.6" fill="#56769c"/><circle cx="16.4" cy="17" r="2.6" fill="#56769c"/></svg>',
+    util: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M13 2 5 14h5l-1.6 8L19 9h-6z" fill="#7fdccd" stroke="#46b3a2" stroke-width="1.6"/></svg>',
+    go: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 16c4-8 12-10 16-5" fill="none" stroke="#e0574a" stroke-width="3"/><path d="M15 8l5 3-3 5" fill="none" stroke="#e0574a" stroke-width="3"/></svg>',
+    jail: '<svg viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="5" width="16" height="14" rx="3" fill="#c9d8e8"/><path d="M8 5v14M12 5v14M16 5v14" stroke="#7f93aa" stroke-width="2"/></svg>',
+    free: '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#a8e6a6"/><path d="M12 7v10M7 12h10" stroke="#3f8e46" stroke-width="2.4"/></svg>',
+    chance: '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="9" fill="#ffd66e"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="900" fill="#a97b17">?</text></svg>',
+    chest: '<svg viewBox="0 0 24 24" width="24" height="24"><rect x="3.4" y="9" width="17" height="10" rx="2.6" fill="#e3d3fa" stroke="#a483d6" stroke-width="1.8"/><rect x="3.4" y="5.6" width="17" height="4" rx="2" fill="#c9aef0" stroke="#a483d6" stroke-width="1.8"/></svg>',
+    tax: '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="9" fill="#ffc0b8"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="900" fill="#c9564a">$</text></svg>',
+    gotojail: '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="9" fill="#ffc0b8"/><path d="M8 9l8 6M16 9l-8 6" stroke="#a83c33" stroke-width="2.2"/></svg>'
+  };
+
+  function renderHUD() {
+    const p = cur();
+    if (p) {
+      $('turnAv').innerHTML = faceOf(p);
+      $('turnName').textContent = p.name + ' 的回合';
+    }
+    $('roundNo').textContent = String(Math.floor(state.turn / 4) + 1);
+    const hints = {
+      awaitRoll: (p && p.inJail) ? '在监狱：掷双骰或交保释金' : '掷骰子，前进吧！',
+      awaitBuy: '要不要买下这块地？',
+      awaitAuction: '拍卖进行中，请出价',
+      awaitEnd: '结束回合，交给下一位'
+    };
+    $('turnHint').textContent = hints[state.turnPhase] || '';
+    const info = tileInfo(p ? p.pos : 0);
+    const t = TILES[p ? p.pos : 0];
+    $('locIc').innerHTML = ICONS[t.type] || ICONS.prop;
+    $('locName').textContent = '当前位置：' + info.name;
+    $('locTip').textContent = info.tip;
+    renderActions();
+    renderBuy();
+    renderTradeInbox();
+    renderWin();
+  }
+
+  function btn(label, kind, fn, disabled) {
+    const b = document.createElement('button');
+    b.className = 'actBtn ' + (kind || '');
+    b.textContent = label;
+    if (disabled) b.disabled = true;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function renderActions() {
+    const wrap = $('actions');
+    wrap.innerHTML = '';
+    if (state.phase === 'ended') return;
+    const tp = state.turnPhase;
+    if (tp === 'awaitRoll') {
+      const p = cur();
+      if (p && p.inJail) {
+        wrap.appendChild(btn('保释 $50', 'alt', function () { act({ type: 'jailPay' }); }));
+        if (p.cards > 0) wrap.appendChild(btn('用卡出狱', 'alt', function () { act({ type: 'jailCard' }); }));
+      }
+      wrap.appendChild(btn('掷骰子', 'primary big', function () { if (!rolling) act({ type: 'roll' }); }));
+      return;
+    }
+    if (tp === 'awaitBuy') return;
+    if (tp === 'awaitAuction') {
+      const a = state.auction;
+      const bidder = pById(a.queue[a.i]);
+      const min = a.bid + 10;
+      wrap.appendChild(btn('$' + min, 'alt', function () { act({ type: 'bid', amount: min }, bidder.id); }));
+      wrap.appendChild(btn('$' + (min + 50), 'alt', function () { act({ type: 'bid', amount: min + 50 }, bidder.id); }));
+      wrap.appendChild(btn('放弃', 'primary', function () { act({ type: 'auctionPass' }, bidder.id); }));
+      return;
+    }
+    wrap.appendChild(btn('结束回合', 'primary big', function () { act({ type: 'endTurn' }); }));
+  }
+
+  function renderBuy() {
+    const el = $('popCard');
+    const p = cur();
+    if (!p || state.turnPhase !== 'awaitBuy') {
+      el.classList.remove('show');
+      el.innerHTML = '';
+      return;
+    }
+    const i = p.pos, t = TILES[i];
+    const grp = t.group ? GROUPS[t.group] : null;
+    const mates = grp ? TILES.filter(function (x) { return x.group === t.group; }) : [];
+    const mine = grp ? mates.filter(function (x) { return state.props[x.i].owner === p.id; }).length : 0;
+    let rent = '';
+    if (t.rent) rent = '租金 $' + ENG.rentAt(state, i, 7) + ' · 未建房';
+    else if (t.type === 'rail') rent = '车站：持有越多租金越高';
+    else if (t.type === 'util') rent = '公用事业：按骰子点数×倍数';
+    el.innerHTML =
+      '<div class="buyBar" style="background:' + tileColor(t) + '"></div>' +
+      '<div class="buyTop"><div class="buyIc">' + (ICONS[t.type] || ICONS.prop) + '</div>' +
+      '<div class="buyTx"><b>' + t.name + '</b><span>价格 $' + (t.price || 0) + ' · ' + rent + '</span>' +
+      (grp ? '<span class="setTag">' + grp.name + '组 ' + mine + '/' + mates.length + '</span>' : '') + '</div>' +
+      '<div class="buyTimer" id="pcT">' + Math.max(0, timerLeft) + 's</div></div>' +
+      '<div class="buyBtns"><button class="actBtn alt" id="pcNo">不买 · 拍卖</button>' +
+      '<button class="actBtn primary" id="pcYes">购买 $' + (t.price || 0) + '</button></div>';
+    el.classList.add('show');
+    $('pcNo').onclick = function () { act({ type: 'decline' }); };
+    $('pcYes').onclick = function () { act({ type: 'buy' }); };
+  }
+
+  function renderLog() {
+    $('logList').innerHTML = state.logs.slice().reverse().map(function (l) {
+      return '<div class="logrow">' + l + '</div>';
+    }).join('');
+  }
+
+  function renderProps() {
+    const list = ENG.propsOf(state, actorId ? actorId() : cur().id).sort(function (a, b) { return a - b; });
+    if (!list.length) { $('propList').innerHTML = '<div class="logrow">还没有地产，先掷骰子买地吧</div>'; return; }
+    $('propList').innerHTML = list.map(function (i) {
+      const t = TILES[i], pr = state.props[i];
+      const can = ENG.canBuild(state, i);
+      const tag = pr.houses >= 5 ? '旅馆' : (pr.houses > 0 ? pr.houses + ' 栋房' : '空地');
+      let chips = '';
+      if (t.type === 'prop') {
+        chips += '<button class="chip" data-a="build" data-i="' + i + '"' + (can.ok ? '' : ' disabled') + '>建房 $' + t.house + '</button>';
+        if (pr.houses > 0) chips += '<button class="chip" data-a="sellHouse" data-i="' + i + '">拆房 +$' + Math.floor(t.house / 2) + '</button>';
+      }
+      chips += pr.mortgaged
+        ? '<button class="chip" data-a="unmortgage" data-i="' + i + '">赎回 -$' + Math.ceil(t.price / 2 * 1.1) + '</button>'
+        : '<button class="chip" data-a="mortgage" data-i="' + i + '">抵押 +$' + Math.floor(t.price / 2) + '</button>';
+      return '<div class="prow" style="--gc:' + tileColor(t) + '">' +
+        '<div class="pv"><b>' + t.name + '</b><span>' + tag + (pr.mortgaged ? ' · 抵押中' : '') + '</span></div>' +
+        '<div class="pb">' + chips + '</div></div>';
+    }).join('');
+    $('propList').querySelectorAll('button[data-a]').forEach(function (b) {
+      b.onclick = function () {
+        act({ type: b.getAttribute('data-a'), tile: Number(b.getAttribute('data-i')) });
+        renderProps();
+      };
+    });
+  }
+
+  /* ================= 地块详情 ================= */
+  function openTile(i) {
+    const t = TILES[i], pr = state.props[i];
+    const grp = t.group ? GROUPS[t.group] : null;
+    let body = '<div class="tmTag" style="background:' + tileColor(t) + '">' + (grp ? grp.name + '组' : (TYPE_TXT[t.type] || '格')) + '</div>' +
+      '<div class="tmName">' + t.name + '</div>';
+    if (t.price) body += '<div class="tmLine">价格 <b>$' + t.price + '</b>' + (t.house ? ' · 建房 <b>$' + t.house + '</b>' : '') + '</div>';
+    if (t.rent) {
+      body += '<div class="tmRent"><span>空地 $' + t.rent[0] + '</span><span>1房 $' + t.rent[1] + '</span><span>2房 $' + t.rent[2] +
+        '</span><span>3房 $' + t.rent[3] + '</span><span>旅馆 $' + t.rent[4] + '</span></div>';
+    }
+    if (pr && pr.owner) {
+      const o = pById(pr.owner);
+      body += '<div class="tmOwner" style="--oc:' + o.color + '"><i></i>' + o.name + ' 持有' +
+        (pr.houses ? ' · ' + (pr.houses >= 5 ? '旅馆' : pr.houses + ' 栋房') : '') + (pr.mortgaged ? ' · 已抵押' : '') + '</div>';
+    } else if (t.price) {
+      body += '<div class="tmOwner none">暂无房主</div>';
+    }
+    if (t.note) body += '<div class="tmNote">' + t.note + '</div>';
+    $('tmName').textContent = '地块 ' + (i + 1) + ' / 40';
+    $('tmBody').innerHTML = body;
+    $('tileModal').classList.add('open');
+  }
+
+  /* ================= 交易 ================= */
+  const tradeDraft = { toId: null, offerTiles: [], requestTiles: [], offerCash: 0, requestCash: 0 };
+  function openTrade() {
+    const me = cur();
+    const others = state.players.filter(function (p) { return p.id !== me.id && !p.bankrupt; });
+    tradeDraft.toId = others.length ? others[0].id : null;
+    tradeDraft.offerTiles = []; tradeDraft.requestTiles = [];
+    tradeDraft.offerCash = 0; tradeDraft.requestCash = 0;
+    renderTrade();
+    $('tradeModal').classList.add('open');
+  }
+  function renderTrade() {
+    const me = cur();
+    if (!tradeDraft.toId) {
+      $('trBody').innerHTML = '<div class="logrow">没有可交易的玩家</div>';
+      return;
+    }
+    const other = pById(tradeDraft.toId);
+    const mineTiles = ENG.propsOf(state, me.id).filter(function (i) { return state.props[i].houses === 0; });
+    const otherTiles = ENG.propsOf(state, other.id).filter(function (i) { return state.props[i].houses === 0; });
+    const chip = function (i, side) {
+      const on = (side === 'offer' ? tradeDraft.offerTiles : tradeDraft.requestTiles).indexOf(i) >= 0;
+      return '<button class="tchip' + (on ? ' on' : '') + '" data-side="' + side + '" data-i="' + i + '" style="--gc:' + tileColor(TILES[i]) + '">' + TILES[i].name + '</button>';
+    };
+    $('trBody').innerHTML =
+      '<div class="trWho">和谁换 <div class="trWhoBtns">' + state.players.filter(function (p) { return p.id !== me.id && !p.bankrupt; })
+        .map(function (p) { return '<button class="wBtn' + (p.id === tradeDraft.toId ? ' on' : '') + '" data-to="' + p.id + '">' + p.name + '</button>'; }).join('') + '</div></div>' +
+      '<div class="trSec"><b>你给出（现金 $' + me.money + '）</b><div class="trChips">' +
+        (mineTiles.length ? mineTiles.map(function (i) { return chip(i, 'offer'); }).join('') : '<span class="dim">没有可交易的地产</span>') + '</div>' +
+        '<input class="trInput" id="trOfferCash" type="number" min="0" max="' + me.money + '" placeholder="附加现金" value="' + (tradeDraft.offerCash || '') + '"></div>' +
+      '<div class="trSec"><b>你要换到（现金 $' + other.money + '）</b><div class="trChips">' +
+        (otherTiles.length ? otherTiles.map(function (i) { return chip(i, 'request'); }).join('') : '<span class="dim">对方没有可交易的地产</span>') + '</div>' +
+        '<input class="trInput" id="trRequestCash" type="number" min="0" max="' + other.money + '" placeholder="要对方补现金" value="' + (tradeDraft.requestCash || '') + '"></div>' +
+      '<div class="trBtns"><button class="actBtn alt" id="trCancel">取消</button><button class="actBtn primary" id="trSend">发起交易</button></div>';
+
+    $('trBody').querySelectorAll('.wBtn').forEach(function (b) {
+      b.onclick = function () { tradeDraft.toId = b.getAttribute('data-to'); tradeDraft.offerTiles = []; tradeDraft.requestTiles = []; renderTrade(); };
+    });
+    $('trBody').querySelectorAll('.tchip').forEach(function (b) {
+      b.onclick = function () {
+        const side = b.getAttribute('data-side'), i = Number(b.getAttribute('data-i'));
+        const arr = side === 'offer' ? tradeDraft.offerTiles : tradeDraft.requestTiles;
+        const k = arr.indexOf(i);
+        if (k >= 0) arr.splice(k, 1); else arr.push(i);
+        renderTrade();
+      };
+    });
+    const oc = $('trOfferCash'), rc = $('trRequestCash');
+    if (oc) oc.oninput = function () { tradeDraft.offerCash = Math.max(0, Math.min(me.money, Number(oc.value) || 0)); };
+    if (rc) rc.oninput = function () { tradeDraft.requestCash = Math.max(0, Math.min(other.money, Number(rc.value) || 0)); };
+    $('trCancel').onclick = function () { $('tradeModal').classList.remove('open'); };
+    $('trSend').onclick = function () {
+      const ok = act({
+        type: 'tradePropose', toId: tradeDraft.toId,
+        offerTiles: tradeDraft.offerTiles, requestTiles: tradeDraft.requestTiles,
+        offerCash: tradeDraft.offerCash, requestCash: tradeDraft.requestCash
+      });
+      if (ok) $('tradeModal').classList.remove('open');
+    };
+  }
+
+  function renderTradeInbox() {
+    const tr = state.trade;
+    const el = $('trInModal');
+    if (!tr) { el.classList.remove('open'); return; }
+    const from = pById(tr.fromId), to = pById(tr.toId);
+    const names = function (arr) { return arr.length ? arr.map(function (i) { return TILES[i].name; }).join('、') : '无'; };
+    $('trInBody').innerHTML =
+      '<div class="trLine"><b>' + from.name + '</b> 向 <b>' + to.name + '</b> 发起交易</div>' +
+      '<div class="trGive"><span>给出</span>' + names(tr.offerTiles) + (tr.offerCash ? ' + $' + tr.offerCash : '') + '</div>' +
+      '<div class="trTake"><span>换得</span>' + names(tr.requestTiles) + (tr.requestCash ? ' + $' + tr.requestCash : '') + '</div>' +
+      '<div class="trBtns"><button class="actBtn alt" id="trNo">拒绝</button><button class="actBtn primary" id="trYes">接受</button></div>' +
+      '<div class="trHint">由 ' + to.name + ' 决定</div>';
+    el.classList.add('open');
+    $('trNo').onclick = function () { act({ type: 'tradeRespond', accept: false }, tr.toId); };
+    $('trYes').onclick = function () { act({ type: 'tradeRespond', accept: true }, tr.toId); };
+  }
+
+  function renderWin() {
+    const el = $('winModal');
+    if (state.phase !== 'ended') { el.classList.remove('open'); return; }
+    const w = pById(state.winner);
+    $('winBody').innerHTML = '<div class="winCup">🏆</div><div class="winName">' + (w ? w.name : '赢家') + '</div>' +
+      '<div class="winSub">成为最后的赢家</div><button class="actBtn primary big" id="winAgain">再来一局</button>';
+    el.classList.add('open');
+    $('winAgain').onclick = function () { location.reload(); };
+  }
+
+  /* ================= 计时 ================= */
+  function updateTimer() {
+    const p = Math.max(0, timerLeft / 30);
+    $('timerFill').style.width = (p * 100) + '%';
+    $('timerFill').style.background = p > 0.5 ? '#7ed957' : (p > 0.25 ? '#ffc244' : '#ff6b5b');
+    $('timerTxt').textContent = Math.max(0, timerLeft) + 's';
+    const pcT = $('pcT');
+    if (pcT) pcT.textContent = Math.max(0, timerLeft) + 's';
+  }
+  function resetTimer() { timerLeft = 30; updateTimer(); }
+  function autoAct() {
+    if (state.phase === 'ended') return;
+    const tp = state.turnPhase;
+    if (tp === 'awaitRoll') act({ type: 'roll' });
+    else if (tp === 'awaitBuy') act({ type: 'decline' });
+    else if (tp === 'awaitAuction') {
+      const a = state.auction;
+      const bidder = a ? a.queue[a.i] : null;
+      if (bidder) act({ type: 'auctionPass' }, bidder);
+    } else if (tp === 'awaitEnd') act({ type: 'endTurn' });
+    else act({ type: 'endTurn' });
+    resetTimer();
+  }
+
+  /* ================= 总渲染 ================= */
+  function syncAll(before) {
+    renderPlayers();
+    renderOverlay();
+    syncTokens(before);
+    renderHUD();
+    renderLog();
+    if ($('propSheet').classList.contains('open')) renderProps();
+    const key = state.turn + '#' + state.turnPhase + '#' + state.phase + '#' + (state.trade ? 'T' : '');
+    if (key !== lastKey) {
+      lastKey = key;
+      if (state.phase !== 'ended') startTimer();
+    }
+  }
+  function startTimer() {
+    if (timerId) clearInterval(timerId);
+    resetTimer();
+    timerId = setInterval(function () {
+      timerLeft--;
+      updateTimer();
+      if (timerLeft <= 0) autoAct();
+    }, 1000);
+  }
+
+  /* ================= 弹层按钮 ================= */
+  $('btnLog').onclick = function () { $('propSheet').classList.remove('open'); $('logSheet').classList.add('open'); };
+  $('logClose').onclick = function () { $('logSheet').classList.remove('open'); };
+  $('btnProps').onclick = function () { $('logSheet').classList.remove('open'); $('propSheet').classList.add('open'); renderProps(); };
+  $('propClose').onclick = function () { $('propSheet').classList.remove('open'); };
+  $('btnTrade').onclick = openTrade;
+  $('trClose').onclick = function () { $('tradeModal').classList.remove('open'); };
+  $('tmClose').onclick = function () { $('tileModal').classList.remove('open'); };
+  $('btnHome').onclick = function () { location.href = '../index.html'; };
+
+  function applyMode() {
+    const q = new URLSearchParams(location.search).get('mode');
+    const desktop = q ? q === 'desktop' : window.innerWidth >= 900;
+    $('app').className = 'app ' + (desktop ? 'desktop' : 'mobile');
+    const was = LARGE;
+    LARGE = desktop;
+    if (was !== desktop) buildBoard();
+    setTimeout(function () { sizeBoard(); renderDice(); }, 60);
+  }
+
+  /* 棋盘按容器尺寸等比缩放（宽度优先，超高则按高度回缩） */
+  function sizeBoard() {
+    const wrap = $('boardWrap'), inner = $('boardInner');
+    const aw = wrap.clientWidth, ah = wrap.clientHeight;
+    if (!aw || !ah) return;
+    const ratio = VB.w / VB.h;
+    let w = aw, h = aw / ratio;
+    if (h > ah) { h = ah; w = ah * ratio; }
+    inner.style.width = Math.floor(w) + 'px';
+    inner.style.height = Math.floor(h) + 'px';
+  }
+
+  function syncAnimFlag() { document.body.classList.toggle('noanim', document.hidden); }
+  syncAnimFlag();
+  document.addEventListener('visibilitychange', syncAnimFlag);
+  setInterval(syncAnimFlag, 500);
+
+  applyMode();
+  buildBoard();
+  buildTokens();
+  state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+  syncAll(null);
+  renderDice();
+  window.addEventListener('resize', function () { applyMode(); });
+  window.addEventListener('orientationchange', function () { setTimeout(applyMode, 200); });
+  sizeBoard();
+  if (new URLSearchParams(location.search).get('dbg') === '1') dbgEl.style.display = 'block';
+  dbg('ready ' + VB.w.toFixed(0) + 'x' + VB.h.toFixed(0));
+})();
+</script>
+</body>
+</html>

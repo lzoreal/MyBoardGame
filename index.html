@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>桌游大厅</title>
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/board.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo"></span>
+    <span>桌游大厅</span>
+  </div>
+  <div class="who" id="who-line"></div>
+</header>
+
+<main class="app">
+
+  <!-- ===================== 大厅 ===================== -->
+  <section id="view-lobby" class="view">
+    <div class="lobby-head">
+      <h1>今天玩点什么？</h1>
+      <p>选一个游戏，建个房间，把邀请码丢给朋友就行。</p>
+    </div>
+    <div class="game-grid" id="game-grid"></div>
+    <p class="cfg-warn hidden" id="cfg-warn">
+      还没配置 Supabase：打开 <code>js/config.js</code> 填 url 和 anonKey。
+    </p>
+  </section>
+
+  <!-- ===================== 房间等待 ===================== -->
+  <section id="view-room" class="view hidden">
+    <div class="room-card">
+      <div class="room-head">
+        <div>
+          <div class="room-kicker">房间已创建</div>
+          <h2 id="room-game-name">大富翁</h2>
+        </div>
+        <div class="code-box">
+          <span class="k">邀请码</span>
+          <strong id="room-code">—</strong>
+          <button class="mini" id="btn-copy">复制</button>
+        </div>
+      </div>
+
+      <ul class="seat-list" id="seat-list"></ul>
+
+      <div class="room-actions">
+        <button class="btn primary" id="btn-start">开始游戏</button>
+        <button class="btn" id="btn-leave">离开房间</button>
+      </div>
+      <p class="room-hint" id="room-hint"></p>
+    </div>
+  </section>
+
+  <!-- ===================== 牌桌 ===================== -->
+  <section id="view-table" class="view hidden">
+    <div class="table-layout">
+      <div class="board-scroll">
+        <div class="board" id="board">
+          <canvas id="fx"></canvas>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="turnbar" id="turnbar"></div>
+        <div class="players" id="players"></div>
+        <div class="actions" id="actions"></div>
+        <div class="log-wrap">
+          <div class="log-title">动态</div>
+          <ul class="log" id="log"></ul>
+        </div>
+        <div class="table-foot">
+          <button class="mini" id="btn-quit">离开房间</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./js/config.js"></script>
+<script src="./js/data.js"></script>
+<script src="./js/engine.js"></script>
+<script src="./js/scene.js"></script>
+<script src="./js/net.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/lobby.js"></script>
+<script src="./js/main.js"></script>
+</body>
+</html>

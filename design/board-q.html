@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>大富翁 · 萌趣街区（Q 版透视棋盘）</title>
+<link rel="stylesheet" href="board-q.css?v=12">
+</head>
+<body>
+<div class="app mobile" id="app">
+  <div class="bgCity" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <button class="homeBtn" id="btnHome" aria-label="返回大厅">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3.4 11.6 12 4l8.6 7.6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M6.4 10.8h11.2v8.2H6.4z" fill="#fff" opacity=".9"/></svg>
+    </button>
+    <button class="roomPill" id="roomPill" type="button"><b>房间：A12345</b></button>
+    <div class="tbSp"></div>
+    <div class="roundPill">回合 <b id="roundNo">1</b>/20</div>
+    <button class="logBtn" id="btnLog">日志</button>
+  </header>
+
+  <main class="boardWrap" id="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <svg id="boardSvg" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tokens" id="tokens"></div>
+      <div class="fxLayer" id="fxLayer" aria-hidden="true"></div>
+      <div class="center" id="center">
+        <div class="rankList" id="rankList"></div>
+        <div class="diceWrap"><canvas id="diceCv" role="img" aria-label="骰子"></canvas><div class="diceSum" id="diceSum"></div></div>
+        <button class="rollBtn" id="rollBtn">掷骰子</button>
+        <div class="ctHint" id="ctHint">点击中间区域掷骰子</div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="rail railL" id="railL" aria-label="玩家资产"></aside>
+  <aside class="rail railR" id="railR" aria-label="本局动态"></aside>
+  <footer class="dock" id="dock">
+    <div class="turnPanel">
+      <div class="tpAv" id="turnAv"></div>
+      <div class="tpTx">
+        <b id="turnName">玩家A 的回合</b>
+        <span id="turnHint" aria-live="polite">掷骰子，前进吧！</span>
+      </div>
+      <div class="tsecWrap"><div class="timer"><i id="timerFill"></i></div><div class="tsec" id="timerTxt">30s</div></div>
+    </div>
+    <div class="actions" id="actions"></div>
+    <div class="locBar">
+      <div class="locIc" id="locIc"></div>
+      <div class="locTx"><b id="locName">当前位置：起点</b><span id="locTip">经过起点，获得 $200</span></div>
+      <button class="miniBtn" id="btnProps" type="button" aria-label="打开我的地产">地产</button>
+      <button class="miniBtn" id="btnTrade" type="button" aria-label="发起交易">交易</button>
+    </div>
+  </footer>
+
+  <div class="buyCard" id="popCard"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="turnBanner" id="turnBanner" aria-live="polite"></div>
+  <div class="cardPop" id="cardPop"><div class="cpDeck" id="cpDeck">机会</div><div class="cpTx" id="cpTx"></div></div>
+
+  <div class="modal" id="tileModal">
+    <div class="mBox">
+      <div class="mHead"><b id="tmName">地块</b><button class="xBtn" id="tmClose" type="button" aria-label="关闭"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#c9554a" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button></div>
+      <div class="mBody" id="tmBody"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="tradeModal">
+    <div class="mBox wide">
+      <div class="mHead"><b>发起交易</b><button class="xBtn" id="trClose" type="button" aria-label="关闭"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#c9554a" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button></div>
+      <div class="mBody" id="trBody"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="trInModal">
+    <div class="mBox">
+      <div class="mHead"><b>交易请求</b></div>
+      <div class="mBody" id="trInBody"></div>
+    </div>
+  </div>
+
+  <div class="sheet" id="logSheet">
+    <div class="sheetHead"><b>行动日志</b><button class="xBtn" id="logClose" type="button" aria-label="关闭"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#c9554a" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button></div>
+    <div class="logList" id="logList"></div>
+  </div>
+
+  <div class="sheet" id="propSheet">
+    <div class="sheetHead"><b>我的地产</b><button class="xBtn" id="propClose" type="button" aria-label="关闭"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#c9554a" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button></div>
+    <div class="logList" id="propList"></div>
+  </div>
+
+  <div class="modal" id="winModal">
+    <div class="mBox win"><div class="mBody" id="winBody"></div></div>
+  </div>
+
+  <div class="sheet" id="roomSheet">
+    <div class="sheetHead"><b>房间</b><button class="xBtn" id="roomClose" type="button" aria-label="关闭"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#c9554a" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button></div>
+    <div class="roomBody" id="roomBody"></div>
+  </div>
+
+  <div class="roomLayer" id="roomLayer"><div class="rlCard" id="rlCard"></div></div>
+</div>
+<pre id="dbg"></pre>
+
+<script src="assets/lib/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/net.js"></script>
+<script>
+(function () {
+  'use strict';
+  const D = window.MonoData, ENG = window.MonoEngine;
+  const TILES = D.TILES, GROUPS = D.GROUPS;
+  const dbgEl = document.getElementById('dbg');
+  const dbg = function (s) { dbgEl.textContent += s + '\n'; };
+  window.addEventListener('error', function (e) { dbg('ERR ' + e.message + ' @' + e.lineno); });
+  const $ = function (id) { return document.getElementById(id); };
+
+  /* ================= 透视几何 ================= */
+  const B0 = 0.024;                   // 外框（白边）
+  const RING = 0.082;                // 地块环厚
+  const PAD = 26;                    // viewBox 留白
+  let WB = 1120, HB = 880, QP = 0.34; // 透视强度：顶部宽度 = WB/(1+QP)
+  let VB = { x: 0, y: 0, w: 1, h: 1 };
+  let LARGE = false;
+  let built = false;
+  const SPAN = 1 - (B0 + RING) * 2;
+  const CW = SPAN / 9;
+
+  function gY(t) { return 1 - Math.log(1 + QP * (1 - t)) / Math.log(1 + QP); }
+  function proj(u, v) {
+    const s = 1 / (1 + QP * (1 - v));
+    return { x: (u - 0.5) * WB * s, y: gY(v) * HB };
+  }
+  function setGeom(desktop) {
+    if (desktop) { WB = 1100; HB = 790; QP = 0.34; }
+    else { WB = 900; HB = 858; QP = 0.44; }
+    VB = { x: -WB / 2 - PAD, y: -PAD, w: WB + PAD * 2, h: HB + PAD * 2 };
+  }
+
+  /* 40 格：u 左右、v 远近（0 远端，1 近端） */
+  function cellUV(i) {
+    const a = B0, r = RING, b = 1 - B0, e = 1 - B0 - RING;
+    if (i === 0) return { u0: e, u1: b, v0: e, v1: b };
+    if (i === 10) return { u0: a, u1: a + r, v0: e, v1: b };
+    if (i === 20) return { u0: a, u1: a + r, v0: a, v1: a + r };
+    if (i === 30) return { u0: e, u1: b, v0: a, v1: a + r };
+    if (i < 10) { const k = i; return { u0: e - k * CW, u1: e - (k - 1) * CW, v0: e, v1: b }; }
+    if (i < 20) { const k = i - 10; return { u0: a, u1: a + r, v0: e - k * CW, v1: e - (k - 1) * CW }; }
+    if (i < 30) { const k = i - 20; return { u0: a + r + (k - 1) * CW, u1: a + r + k * CW, v0: a, v1: a + r }; }
+    const k = i - 30;
+    return { u0: e, u1: b, v0: a + r + (k - 1) * CW, v1: a + r + k * CW };
+  }
+  function quad(i) {
+    const c = cellUV(i);
+    return [proj(c.u0, c.v0), proj(c.u1, c.v0), proj(c.u1, c.v1), proj(c.u0, c.v1)];
+  }
+  function pathOf(pts) {
+    return 'M' + pts.map(function (p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' L') + ' Z';
+  }
+  function isPropCell(tt) { return tt && tt.type === 'prop'; }
+  function edgeStrip(i) {
+    const c = cellUV(i), w = RING * 0.34;
+    if (i >= 1 && i <= 9) return { u0: c.u0, u1: c.u1, v0: c.v1 - w, v1: c.v1 };
+    if (i >= 11 && i <= 19) return { u0: c.u0, u1: c.u0 + w, v0: c.v0, v1: c.v1 };
+    if (i >= 21 && i <= 29) return { u0: c.u0, u1: c.u1, v0: c.v0, v1: c.v0 + w };
+    if (i >= 31 && i <= 39) return { u0: c.u1 - w, u1: c.u1, v0: c.v0, v1: c.v1 };
+    return null;
+  }
+  function cellCenter(i) {
+    const c = cellUV(i);
+    return proj((c.u0 + c.u1) / 2, (c.v0 + c.v1) / 2);
+  }
+  function cellSize(i) {
+    const q = quad(i);
+    const w = Math.hypot(q[1].x - q[0].x, q[1].y - q[0].y);
+    const h = Math.hypot(q[3].x - q[0].x, q[3].y - q[0].y);
+    return { w: w, h: h };
+  }
+  function cellAngle(i) {
+    if (i >= 11 && i <= 19) return -90;
+    if (i >= 31 && i <= 39) return 90;
+    return 0;
+  }
+
+  /* ================= 调色 ================= */
+  function shade(hex, k) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const f = function (v) { return Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k))); };
+    return '#' + ((f(r) << 16) | (f(g) << 8) | f(b)).toString(16).padStart(6, '0');
+  }
+  const TYPE_COLOR = {
+    go: '#f7e8bd', rail: '#9ecdf2', util: '#9fe6d6', chance: '#ffd97a',
+    chest: '#cfb4f2', tax: '#ffb3a9', jail: '#cddbea', free: '#b1e9ac', gotojail: '#ffb7ab'
+  };
+  const TYPE_TXT = { go: 'START', rail: '车站', util: '公用', chance: '机会', chest: '命运', tax: '税', jail: '监狱', free: '停车场', gotojail: '入狱' };
+  function tileColor(t) {
+    if (t.type === 'prop') return (GROUPS[t.group] || {}).color || '#e6dfcc';
+    return TYPE_COLOR[t.type] || '#e6dfcc';
+  }
+
+  /* ================= 头像 ================= */
+  function avatarSVG(pl) {
+    const hat = pl.hat || '#f2c94c', skin = '#ffddbd';
+    return '<svg viewBox="0 0 44 44">' +
+      '<circle cx="22" cy="22" r="21" fill="#ffffff"/>' +
+      '<circle cx="22" cy="23.5" r="13.6" fill="' + skin + '"/>' +
+      '<path d="M7.6 20.4c0-8.6 6.4-13.4 14.4-13.4s14.4 4.8 14.4 13.4z" fill="' + hat + '"/>' +
+      '<path d="M7.2 19.4h29.6c1.4 0 2.4 1 2.4 2.2s-1 2.2-2.4 2.2H7.2c-1.4 0-2.4-1-2.4-2.2s1-2.2 2.4-2.2z" fill="' + shade(hat, -0.14) + '"/>' +
+      '<circle cx="16.4" cy="26" r="2.35" fill="#26304a"/>' +
+      '<circle cx="27.6" cy="26" r="2.35" fill="#26304a"/>' +
+      '<circle cx="17.2" cy="25.2" r="0.9" fill="#fff" opacity=".9"/>' +
+      '<circle cx="28.4" cy="25.2" r="0.9" fill="#fff" opacity=".9"/>' +
+      '<circle cx="12.8" cy="29.4" r="2.5" fill="#ff9d90" opacity=".5"/>' +
+      '<circle cx="31.2" cy="29.4" r="2.5" fill="#ff9d90" opacity=".5"/>' +
+      '<path d="M18.8 31.2c1.8 1.8 4.6 1.8 6.4 0" stroke="#26304a" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+      '<path d="M6 44c1.6-6.6 8-9.4 16-9.4s14.4 2.8 16 9.4z" fill="' + pl.color + '"/>' +
+      '</svg>';
+  }
+  const FACES = [
+    avatarSVG({ color: '#e8544a', hat: '#f2c94c' }),
+    avatarSVG({ color: '#3f7fe0', hat: '#2c3e57' }),
+    avatarSVG({ color: '#2f9e63', hat: '#e0a35c' }),
+    avatarSVG({ color: '#d9a13b', hat: '#6b4a2f' })
+  ];
+  const FACE_OF = function (i) { return FACES[((i % 4) + 4) % 4]; };
+
+  /* ================= Q 版小房子 ================= */
+  function house(cx, cy, w, body, roof, sw, hf) {
+    const hh = w * 0.56 * (hf || 1), rh = w * 0.52;
+    const x0 = cx - w / 2, y0 = cy - hh;
+    const f = function (n) { return n.toFixed(1); };
+    return '<g>' +
+      '<ellipse cx="' + f(cx) + '" cy="' + f(cy + w * 0.05) + '" rx="' + f(w * 0.54) + '" ry="' + f(w * 0.16) + '" fill="#20361c" opacity=".22"/>' +
+      /* 房体 */
+      '<rect x="' + f(x0) + '" y="' + f(y0) + '" width="' + f(w) + '" height="' + f(hh) + '" rx="' + f(w * 0.1) + '" fill="' + body + '" stroke="#ffffff" stroke-width="' + sw + '"/>' +
+      /* 右侧受光弱一点 */
+      '<rect x="' + f(x0 + w * 0.74) + '" y="' + f(y0 + hh * 0.14) + '" width="' + f(w * 0.22) + '" height="' + f(hh * 0.8) + '" rx="' + f(w * 0.06) + '" fill="#2b3a2b" opacity=".1"/>' +
+      /* 屋顶 */
+      '<path d="M' + f(cx - w * 0.66) + ',' + f(y0 + 1) + ' L' + f(cx) + ',' + f(y0 - rh) + ' L' + f(cx + w * 0.66) + ',' + f(y0 + 1) + ' Z" fill="' + roof + '" stroke="#ffffff" stroke-width="' + sw + '"/>' +
+      '<path d="M' + f(cx - w * 0.5) + ',' + f(y0 - rh * 0.28) + ' L' + f(cx - w * 0.14) + ',' + f(y0 - rh * 0.86) + ' L' + f(cx - w * 0.02) + ',' + f(y0 - rh * 0.72) + ' L' + f(cx - w * 0.36) + ',' + f(y0 - rh * 0.18) + ' Z" fill="#ffffff" opacity=".3"/>' +
+      /* 两扇窗 */
+      '<rect x="' + f(cx - w * 0.33) + '" y="' + f(y0 + hh * 0.18) + '" width="' + f(w * 0.2) + '" height="' + f(hh * 0.26) + '" rx="' + f(w * 0.04) + '" fill="#fffdf6"/>' +
+      '<rect x="' + f(cx + w * 0.13) + '" y="' + f(y0 + hh * 0.18) + '" width="' + f(w * 0.2) + '" height="' + f(hh * 0.26) + '" rx="' + f(w * 0.04) + '" fill="#fffdf6"/>' +
+      '<path d="M' + f(cx - w * 0.23) + ',' + f(y0 + hh * 0.18) + ' v' + f(hh * 0.26) + ' M' + f(cx + w * 0.23) + ',' + f(y0 + hh * 0.18) + ' v' + f(hh * 0.26) + '" stroke="' + roof + '" stroke-width="' + f(Math.max(1, w * 0.02)) + '" opacity=".5"/>' +
+      /* 门 */
+      '<rect x="' + f(cx - w * 0.12) + '" y="' + f(cy - hh * 0.42) + '" width="' + f(w * 0.24) + '" height="' + f(hh * 0.42) + '" rx="' + f(w * 0.05) + '" fill="#fffdf6"/>' +
+      '<circle cx="' + f(cx + w * 0.07) + '" cy="' + f(cy - hh * 0.18) + '" r="' + f(Math.max(1, w * 0.025)) + '" fill="' + roof + '" opacity=".7"/>' +
+      '</g>';
+  }
+  function tower(cx, cy, w, hf, c1, c2) {
+    const bh = w * 1.05 * (hf || 1), rh = w * 0.3, sd = w * 0.2;
+    const f = function (n) { return n.toFixed(1); };
+    let o = '<g>' +
+      '<ellipse cx="' + f(cx + sd * 0.4) + '" cy="' + f(cy + 2) + '" rx="' + f(w * 0.56) + '" ry="' + f(w * 0.15) + '" fill="#20361c" opacity=".22"/>' +
+      /* 右侧面（暗） */
+      '<path d="M' + f(cx + w / 2) + ',' + f(cy - bh + rh * 0.1) + ' L' + f(cx + w / 2 + sd) + ',' + f(cy - bh - rh * 0.2) +
+        ' L' + f(cx + w / 2 + sd) + ',' + f(cy - rh * 0.2) + ' L' + f(cx + w / 2) + ',' + f(cy) + ' Z" fill="' + shade(c1, -0.2) + '" stroke="#ffffff" stroke-width="1.8"/>' +
+      /* 正面 */
+      '<rect x="' + f(cx - w / 2) + '" y="' + f(cy - bh) + '" width="' + f(w) + '" height="' + f(bh) + '" rx="' + f(w * 0.08) + '" fill="' + c1 + '" stroke="#ffffff" stroke-width="2"/>' +
+      /* 屋顶 */
+      '<path d="M' + f(cx - w * 0.56) + ',' + f(cy - bh) + ' L' + f(cx) + ',' + f(cy - bh - rh) + ' L' + f(cx + w * 0.56) + ',' + f(cy - bh) + ' Z" fill="' + c2 + '" stroke="#ffffff" stroke-width="2"/>' +
+      '<path d="M' + f(cx - w * 0.4) + ',' + f(cy - bh - rh * 0.22) + ' L' + f(cx - w * 0.06) + ',' + f(cy - bh - rh * 0.82) + ' L' + f(cx + w * 0.1) + ',' + f(cy - bh - rh * 0.66) + ' L' + f(cx - w * 0.22) + ',' + f(cy - bh - rh * 0.12) + ' Z" fill="#ffffff" opacity=".26"/>';
+    for (let row = 0; row < 2; row++) {
+      for (let k = -1; k <= 1; k++) {
+        o += '<rect x="' + f(cx + k * w * 0.27 - w * 0.075) + '" y="' + f(cy - bh * (0.72 - row * 0.3)) +
+          '" width="' + f(w * 0.15) + '" height="' + f(bh * 0.17) + '" rx="1.4" fill="#fffdf6" opacity=".9"/>';
+      }
+    }
+    return o + '</g>';
+  }
+
+  /* ================= 棋盘 ================= */
+  const DECOR = [['#ffe3ad', '#e08d55'], ['#bcdffa', '#4b8bd0'], ['#ffc7db', '#d8648c'],
+    ['#cdeeb2', '#5da457'], ['#ffe1a4', '#c9963f'], ['#cdd2fb', '#737ecb'],
+    ['#ffcdae', '#cb7442'], ['#b4ebdd', '#46a794'], ['#e5d4fb', '#9e82d1']];
+
+  function buildBoard() {
+    let s = '<defs>' +
+      '<pattern id="grass" width="120" height="120" patternUnits="userSpaceOnUse">' +
+      '<image href="assets/tex/grass.png" width="120" height="120" preserveAspectRatio="none"/></pattern>' +
+      '<filter id="softDrop" x="-20%" y="-20%" width="150%" height="160%">' +
+      '<feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#20303a" flood-opacity=".32"/></filter>' +
+      '</defs>';
+
+    /* 1. 棋盘板：青绿厚框 + 白色内沿 + 草地内场 */
+    const outer = [proj(-0.028, -0.028), proj(1.028, -0.028), proj(1.028, 1.028), proj(-0.028, 1.028)];
+    const plate = [proj(0, 0), proj(1, 0), proj(1, 1), proj(0, 1)];
+    const court = [proj(B0 + RING, B0 + RING), proj(1 - B0 - RING, B0 + RING),
+      proj(1 - B0 - RING, 1 - B0 - RING), proj(B0 + RING, 1 - B0 - RING)];
+
+    s += '<g filter="url(#softDrop)">';
+    s += '<path d="' + pathOf(outer) + '" fill="#2e94ab"/>';
+    s += '<path d="' + pathOf(plate) + '" fill="#5ad0e0"/>';
+    s += '<path d="' + pathOf(court) + '" fill="#ffffff"/>';
+    s += '<path d="' + pathOf(plate) + '" fill="none" stroke="#ffffff" stroke-width="2.2" opacity=".65"/>';
+    s += '<path d="' + pathOf([proj(0, 0), proj(1, 0), proj(1, 0.22), proj(0, 0.22)]) + '" fill="#ffffff" opacity=".16"/>';
+    s += '<path d="' + pathOf(court) + '" fill="url(#grass)"/>';
+    s += '<path d="' + pathOf(court) + '" fill="#8ed363" opacity=".3"/>';
+    s += '<path d="' + pathOf(court) + '" fill="none" stroke="#ffffff" stroke-width="3" opacity=".9"/>';
+    s += '</g>';
+
+    /* 2. 内场装饰：草地上的浅纹路（横竖两条石板路） */
+    s += '<g opacity=".5">';
+    const roadV = [proj(0.5 - 0.035, RING), proj(0.5 + 0.035, RING), proj(0.5 + 0.045, 1 - RING), proj(0.5 - 0.045, 1 - RING)];
+    s += '<path d="' + pathOf(roadV) + '" fill="#eaf3d8"/>';
+    const roadH = [proj(RING, 0.5 - 0.032), proj(1 - RING, 0.5 - 0.036), proj(1 - RING, 0.5 + 0.036), proj(RING, 0.5 + 0.032)];
+    s += '<path d="' + pathOf(roadH) + '" fill="#eaf3d8"/>';
+    s += '</g>';
+
+    /* 2.5 中央广场：给 logo / 排行 / 骰子垫一块浅色场地 */
+    const ctr = proj(0.5, 0.5);
+    const rxp = Math.abs(proj(0.72, 0.5).x - proj(0.28, 0.5).x) / 2;
+    const ryp = Math.abs(proj(0.5, 0.74).y - proj(0.5, 0.26).y) / 2;
+    s += '<ellipse cx="' + ctr.x.toFixed(1) + '" cy="' + ctr.y.toFixed(1) + '" rx="' + rxp.toFixed(1) +
+      '" ry="' + ryp.toFixed(1) + '" fill="#f4ffdf" opacity=".34"/>';
+    s += '<ellipse cx="' + ctr.x.toFixed(1) + '" cy="' + (ctr.y - ryp * 0.22).toFixed(1) + '" rx="' + (rxp * 0.72).toFixed(1) +
+      '" ry="' + (ryp * 0.62).toFixed(1) + '" fill="#ffffff" opacity=".22"/>';
+
+    /* 3. 街区楼：内场四排，按远近排序后绘制 */
+    const buildings = [];
+    const innerMin = B0 + RING + 0.02;
+    const rows = 1;
+    for (let row = 0; row < rows; row++) {
+      for (let k = 0; k < 9; k++) {
+        const t = 0.2 + k * 0.075;
+        const d = innerMin + 0.04 + row * 0.07;
+        buildings.push([t, d], [t, 1 - d], [d, t], [1 - d, t]);
+      }
+    }
+    /* 四角的小院落，让内场不至于太空 */
+    const corner = innerMin + 0.03;
+    [[corner, corner], [1 - corner, corner], [corner, 1 - corner], [1 - corner, 1 - corner]].forEach(function (pt, n) {
+      buildings.push([pt[0] + 0.045, pt[1]], [pt[0], pt[1] + 0.045], [pt[0] + 0.05, pt[1] + 0.05]);
+    });
+    buildings.sort(function (a, b) { return proj(a[0], a[1]).y - proj(b[0], b[1]).y; });
+    buildings.forEach(function (b, n) {
+      const c = proj(b[0], b[1]);
+      const sc = 1 / (1 + QP * (1 - b[1]));
+      const w = (34 + (n % 3) * 7) * sc;
+      const pal = DECOR[n % DECOR.length];
+      s += house(c.x, c.y + w * 0.1, w, pal[0], pal[1], 2, 0.8 + (n % 4) * 0.16);
+    });
+
+    /* 3.5 内场树与灌木 */
+    const treePts = [[0.3, 0.3], [0.7, 0.3], [0.3, 0.7], [0.7, 0.7],
+      [0.5, 0.24], [0.5, 0.76], [0.24, 0.5], [0.76, 0.5],
+      [0.38, 0.22], [0.62, 0.78]];
+    treePts.forEach(function (tp, n) {
+      const c = proj(tp[0], tp[1]);
+      const sc = 1 / (1 + QP * (1 - tp[1]));
+      const r = (11 + (n % 3) * 3) * sc;
+      if (Math.abs(tp[0] - 0.5) < 0.06 && Math.abs(tp[1] - 0.5) < 0.06) return;
+      s += '<g>' +
+        '<ellipse cx="' + c.x.toFixed(1) + '" cy="' + (c.y + r * 0.6).toFixed(1) + '" rx="' + (r * 1.05).toFixed(1) +
+        '" ry="' + (r * 0.34).toFixed(1) + '" fill="#2c5a34" opacity=".2"/>' +
+        '<rect x="' + (c.x - r * 0.1).toFixed(1) + '" y="' + (c.y - r * 0.1).toFixed(1) + '" width="' + (r * 0.2).toFixed(1) +
+        '" height="' + (r * 0.7).toFixed(1) + '" fill="#a9784a"/>' +
+        '<circle cx="' + c.x.toFixed(1) + '" cy="' + (c.y - r * 0.75).toFixed(1) + '" r="' + r.toFixed(1) + '" fill="#5cbb63"/>' +
+        '<circle cx="' + (c.x - r * 0.38).toFixed(1) + '" cy="' + (c.y - r * 0.4).toFixed(1) + '" r="' + (r * 0.66).toFixed(1) + '" fill="#79d17f"/>' +
+        '<circle cx="' + (c.x + r * 0.26).toFixed(1) + '" cy="' + (c.y - r * 1.02).toFixed(1) + '" r="' + (r * 0.46).toFixed(1) + '" fill="#93dd97" opacity=".9"/>' +
+        '</g>';
+    });
+
+    /* 4. 地块：奶油白卡 + 靠外框的组色条（像手游截图里的地产卡） */
+    const cells = [];
+    for (let i = 0; i < 40; i++) cells.push(i);
+    cells.sort(function (a, b) { return cellCenter(a).y - cellCenter(b).y; });
+    cells.forEach(function (i) {
+      const t = TILES[i], q = quad(i), col = tileColor(t);
+      const th = Math.max(6, cellSize(i).h * 0.14);
+      const isCorner = (i === 0 || i === 10 || i === 20 || i === 30);
+      s += '<path d="' + pathOf(q.map(function (p) { return { x: p.x, y: p.y + th }; })) +
+        '" fill="#bfd6b8"/>';
+      s += '<path d="' + pathOf(q) + '" fill="' + (isCorner ? '#fff6df' : shade(col, 0.4)) +
+        '" stroke="#ffffff" stroke-width="4.2" stroke-linejoin="round"/>';
+      const st = edgeStrip(i);
+      if (st) {
+        s += '<path d="' + pathOf([proj(st.u0, st.v0), proj(st.u1, st.v0), proj(st.u1, st.v1), proj(st.u0, st.v1)]) +
+          '" fill="' + shade(col, -0.12) + '"/>';
+      }
+    });
+
+    /* 5. 地块文字 / 摆件 / 编号 */
+    cells.forEach(function (i) {
+      const t = TILES[i], c = cellCenter(i), sz = cellSize(i);
+      const cuu = cellUV(i);
+
+      /* 方向：0=远端上，1=近端下 */
+      const axis = (i >= 1 && i <= 9) ? [0, 1] : (i >= 11 && i <= 19) ? [-1, 0] :
+        (i >= 21 && i <= 29) ? [0, -1] : (i >= 31 && i <= 39) ? [1, 0] : [0, 0];
+      const cu = { u: (cuu.u0 + cuu.u1) / 2, v: (cuu.v0 + cuu.v1) / 2 };
+      const dp = (isPropCell(t) ? RING * 0.2 : RING * 0.36);
+      const outP = proj(cu.u + axis[0] * dp, cu.v + axis[1] * dp);
+      const inP = proj(cu.u - axis[0] * dp * 1.2, cu.v - axis[1] * dp * 1.2);
+      const mx = Math.min(sz.w, sz.h);
+      const ang = cellAngle(i), col = tileColor(t), isProp = t.type === 'prop';
+
+      /* 编号小牌：靠近外框一侧（仅电脑版显示，手机版保持干净） */
+      if (LARGE && !(t.type === 'go' || t.type === 'jail' || t.type === 'free' || t.type === 'gotojail')) {
+        const q0 = proj(cuu.u0, cu.v), q1 = proj(cuu.u1, cu.v);
+        const tan = { x: q1.x - q0.x, y: q1.y - q0.y };
+        const len = Math.hypot(tan.x, tan.y) || 1;
+        const nw = mx * 0.34, nh = mx * 0.2;
+        const px = outP.x + tan.x / len * mx * 0.42;
+        const py = outP.y + tan.y / len * mx * 0.42;
+        s += '<g transform="translate(' + px.toFixed(1) + ',' + py.toFixed(1) + ')">' +
+          '<rect x="' + (-nw / 2) + '" y="' + (-nh / 2) + '" width="' + nw + '" height="' + nh +
+          '" rx="' + (nh / 2) + '" fill="#2f3a52" opacity=".82"/>' +
+          '<text y="' + (nh * 0.16) + '" text-anchor="middle" font-size="' + (nh * 0.86) +
+          '" font-weight="800" fill="#fff">' + (i === 0 ? 'GO' : i) + '</text></g>';
+      }
+
+      /* 格上摆件：放在靠外框一侧 */
+      if (isProp) {
+        const hw = Math.min(mx * (LARGE ? 0.72 : 0.62), sz.h * 0.78);
+        s += house(outP.x, outP.y + sz.h * 0.16, hw, '#fffdf6', col, Math.max(1.8, hw * 0.055));
+      } else if (t.type === 'rail') {
+        const w = mx * 0.62;
+        s += '<g transform="translate(' + outP.x + ',' + (outP.y + sz.h * 0.06) + ')">' +
+          '<rect x="' + (-w / 2) + '" y="' + (-w * 0.2) + '" width="' + w + '" height="' + (w * 0.3) + '" rx="' + (w * 0.1) + '" fill="#fffdf5" stroke="#fff" stroke-width="2"/>' +
+          '<rect x="' + (-w * 0.36) + '" y="' + (-w * 0.44) + '" width="' + (w * 0.72) + '" height="' + (w * 0.24) + '" rx="' + (w * 0.08) + '" fill="#cfe6ff" stroke="#fff" stroke-width="2"/>' +
+          '<circle cx="' + (-w * 0.24) + '" cy="' + (w * 0.12) + '" r="' + (w * 0.1) + '" fill="#5b7192"/>' +
+          '<circle cx="' + (w * 0.24) + '" cy="' + (w * 0.12) + '" r="' + (w * 0.1) + '" fill="#5b7192"/></g>';
+      } else if (t.type === 'util') {
+        s += '<g transform="translate(' + outP.x + ',' + (outP.y + sz.h * 0.04) + ')">' +
+          '<path d="M' + (mx * 0.03) + ' ' + (-mx * 0.34) + ' L' + (-mx * 0.22) + ' ' + (mx * 0.02) + ' h' + (mx * 0.17) +
+          ' l' + (-mx * 0.06) + ' ' + (mx * 0.28) + ' L' + (mx * 0.28) + ' ' + (-mx * 0.1) + ' h' + (-mx * 0.13) + ' Z" fill="#ffffff" stroke="#6fd9c7" stroke-width="2"/></g>';
+      } else if (t.type === 'chance' || t.type === 'chest') {
+        s += '<g transform="translate(' + outP.x + ',' + (outP.y + sz.h * 0.02) + ')">' +
+          '<text y="' + (mx * 0.1) + '" text-anchor="middle" font-size="' + (mx * 0.6) + '" font-weight="900" fill="' + shade(col, -0.28) + '">?</text></g>';
+      } else if (t.type === 'tax') {
+        s += '<g transform="translate(' + outP.x + ',' + (outP.y + sz.h * 0.02) + ')">' +
+          '<text y="' + (mx * 0.1) + '" text-anchor="middle" font-size="' + (mx * 0.58) + '" font-weight="900" fill="#c2554a">$</text></g>';
+      } else {
+        const lab = TYPE_TXT[t.type] || t.name;
+        const ic = CORNER_ICON[t.type];
+        if (ic) {
+          const k = mx * 0.64;
+          s += '<g transform="translate(' + outP.x.toFixed(1) + ',' + (outP.y - sz.h * 0.12) + ') scale(' + (k / 24).toFixed(2) + ')" opacity=".92">' + ic + '</g>';
+        }
+        s += '<g transform="translate(' + c.x.toFixed(1) + ',' + (c.y + sz.h * 0.26) + ') rotate(' + ang + ')">' +
+          '<text y="0" text-anchor="middle" font-size="' + (mx * 0.38) + '" font-weight="900" fill="#3d4a63">' + lab + '</text></g>';
+      }
+
+      /* 名称 / 价格：放在靠内场一侧 */
+      const showName = isProp;
+      const showPrice = (isProp || t.type === 'rail' || t.type === 'util') && LARGE;
+      if (showName || showPrice) {
+        const fs = Math.max(8, mx * (LARGE ? 0.26 : (ang !== 0 ? 0.5 : 0.34)));
+        const nameTxt = LARGE ? t.name
+          : (ang !== 0 ? t.name.slice(0, 1)
+            : (t.name.length >= 3 ? t.name.slice(0, 2) : t.name));
+        const txtP = LARGE ? inP : proj(cu.u - axis[0] * RING * 0.06, cu.v - axis[1] * RING * 0.06);
+        s += '<g transform="translate(' + txtP.x.toFixed(1) + ',' + txtP.y.toFixed(1) + ') rotate(' + (LARGE ? ang : 0) + ')">';
+        if (showName) {
+          s += '<text y="0" text-anchor="middle" font-size="' + fs + '" font-weight="900" fill="#33415c">' + nameTxt + '</text>';
+        }
+        if (showPrice) {
+          s += '<text y="' + (showName ? fs * 1.05 : fs * 0.32) + '" text-anchor="middle" font-size="' + (fs * 0.9) +
+            '" font-weight="800" fill="#5b6b87">$' + (t.price || 0) + '</text>';
+        }
+        s += '</g>';
+      }
+    });
+
+    const svg = $('boardSvg');
+    svg.setAttribute('viewBox', VB.x.toFixed(0) + ' ' + VB.y.toFixed(0) + ' ' + VB.w.toFixed(0) + ' ' + VB.h.toFixed(0));
+
+    svg.innerHTML = s + '<g id="ovl"></g>' +
+      '<g id="hitLayer">' + cells.map(function (i) {
+        return '<path class="hit" data-i="' + i + '" d="' + pathOf(quad(i)) + '" fill="transparent"/>';
+      }).join('') + '</g>';
+    svg.addEventListener('click', function (e) {
+      const el = e.target.closest ? e.target.closest('[data-i]') : null;
+      if (el) openTile(Number(el.getAttribute('data-i')));
+    });
+  }
+
+  /* ================= 归属 / 房屋标记 ================= */
+  let prevOwners = {}, lastPurchases = [];
+  function renderOverlay() {
+    const g = $('ovl');
+    const parts = [];
+    for (let i = 0; i < 40; i++) {
+      const pr = state.props[i];
+      const ownChanged = pr && pr.owner && pr.owner !== prevOwners[i];
+      prevOwners[i] = pr && pr.owner ? pr.owner : null;
+      if (!pr || !pr.owner) continue;
+      const p = state.players.filter(function (x) { return x.id === pr.owner; })[0];
+      if (!p) continue;
+      const q = quad(i);
+      parts.push('<path d="' + pathOf(q) + '" fill="' + p.color + '" opacity="' + (pr.mortgaged ? '.08' : '.2') + '"/>');
+      if (ownChanged) {
+        parts.push('<path class="ownFlash" d="' + pathOf(q) + '" fill="#fff" stroke="#fff" stroke-width="6"/>');
+        lastPurchases.push(i);
+      }
+      const c = cellCenter(i), sz = cellSize(i);
+      const r = Math.max(6, Math.min(sz.w, sz.h) * 0.16);
+      parts.push('<g transform="translate(' + (c.x - sz.w * 0.3) + ',' + (c.y - sz.h * 0.24) + ')">' +
+        '<circle r="' + (r * 1.35) + '" fill="#fff"/><circle r="' + r + '" fill="' + p.color + '"/>' +
+        (pr.mortgaged ? '<path d="M' + (-r * 0.5) + ' ' + (-r * 0.5) + ' L' + (r * 0.5) + ' ' + (r * 0.5) + ' M' + (r * 0.5) + ' ' + (-r * 0.5) +
+          ' L' + (-r * 0.5) + ' ' + (r * 0.5) + '" stroke="#fff" stroke-width="2"/>' : '') + '</g>');
+      const popBuild = pr.houses > (prevHouses[i] || 0);
+      prevHouses[i] = pr.houses;
+      if (pr.houses > 0) {
+        const n = pr.houses >= 5 ? 1 : pr.houses;
+        const hw = Math.min(sz.w, sz.h) * (pr.houses >= 5 ? 0.7 : 0.36);
+        for (let k = 0; k < n; k++) {
+          const dx = pr.houses >= 5 ? 0 : (k - (n - 1) / 2) * hw * 1.05;
+          const hy = c.y - sz.h * 0.34;
+          parts.push('<g class="' + (popBuild ? 'hPop' : '') + '">' + (pr.houses >= 5
+            ? '<g transform="translate(' + (c.x + dx) + ',' + hy + ')">' +
+              '<rect x="' + (-hw * 0.62) + '" y="' + (-hw * 0.5) + '" width="' + (hw * 1.24) + '" height="' + (hw * 0.5) + '" rx="' + (hw * 0.12) + '" fill="#ffd45c" stroke="#fff" stroke-width="2"/>' +
+              '<rect x="' + (-hw * 0.68) + '" y="' + (-hw * 0.62) + '" width="' + (hw * 1.36) + '" height="' + (hw * 0.16) + '" rx="' + (hw * 0.06) + '" fill="#fff6cf" stroke="#fff" stroke-width="1.6"/>' +
+              '<rect x="' + (-hw * 0.2) + '" y="' + (-hw * 0.34) + '" width="' + (hw * 0.4) + '" height="' + (hw * 0.34) + '" fill="#fff" opacity=".5"/></g>'
+            : house(c.x + dx, hy, hw, '#ffffff', '#ffd45c', 2)) + '</g>');
+        }
+      }
+    }
+    const curP = state.players[state.turn];
+    if (curP && state.phase !== 'ended') {
+      const cq = pathOf(quad(curP.pos));
+      parts.push('<path class="curHalo" d="' + cq + '" fill="none" stroke="#ffffff" stroke-width="16" stroke-linejoin="round"/>');
+      parts.push('<path class="curRing" d="' + cq +
+        '" fill="none" stroke="' + D.COLORS[state.turn] + '" stroke-width="9" stroke-linejoin="round"/>');
+    }
+    g.innerHTML = parts.join('');
+  }
+
+  /* ================= 骰子 ================= */
+  function roundedBoxGeo(w, h, d, seg, r) {
+    const geo = new THREE.BoxGeometry(w, h, d, seg, seg, seg);
+    const pos = geo.attributes.position;
+    const inx = w / 2 - r, iny = h / 2 - r, inz = d / 2 - r;
+    const v = new THREE.Vector3(), n = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      n.set(Math.max(-inx, Math.min(inx, v.x)), Math.max(-iny, Math.min(iny, v.y)), Math.max(-inz, Math.min(inz, v.z)));
+      v.sub(n);
+      if (v.lengthSq() > 1e-8) v.normalize().multiplyScalar(r);
+      pos.setXYZ(i, n.x + v.x, n.y + v.y, n.z + v.z);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+  const dcv = $('diceCv');
+  const dr = new THREE.WebGLRenderer({ canvas: dcv, antialias: true, alpha: true });
+  dr.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  const ds = new THREE.Scene();
+  const dcam = new THREE.PerspectiveCamera(32, 1.4, 0.1, 60);
+  dcam.position.set(0, 2.3, 5.2); dcam.lookAt(0, -0.15, 0);
+  ds.add(new THREE.HemisphereLight(0xffffff, 0xc6d8f0, 1.1));
+  const dlight = new THREE.DirectionalLight(0xffffff, 0.9); dlight.position.set(-2.2, 3.4, 3.2); ds.add(dlight);
+  const pipMat = new THREE.MeshBasicMaterial({ color: 0x2b3550 });
+  const pipGeo = new THREE.CircleGeometry(0.078, 16);
+  const PIP = {
+    1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]],
+    4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+    6: [[-1, -1], [0, -1], [1, -1], [-1, 1], [0, 1], [1, 1]]
+  };
+  function makeDie() {
+    const grp = new THREE.Group();
+    grp.add(new THREE.Mesh(roundedBoxGeo(1, 1, 1, 7, 0.16), new THREE.MeshLambertMaterial({ color: 0xfdfcf7 })));
+    [{ n: 1, ax: 'z', s: 1 }, { n: 6, ax: 'z', s: -1 }, { n: 2, ax: 'y', s: 1 },
+     { n: 5, ax: 'y', s: -1 }, { n: 3, ax: 'x', s: 1 }, { n: 4, ax: 'x', s: -1 }].forEach(function (f) {
+      PIP[f.n].forEach(function (p) {
+        const pip = new THREE.Mesh(pipGeo, pipMat);
+        const o = 0.504, k = 0.16;
+        if (f.ax === 'z') { pip.position.set(p[0] * k, p[1] * k, f.s * o); if (f.s < 0) pip.rotation.y = Math.PI; }
+        else if (f.ax === 'y') { pip.position.set(p[0] * k, f.s * o, p[1] * k); pip.rotation.x = f.s > 0 ? -Math.PI / 2 : Math.PI / 2; }
+        else { pip.position.set(f.s * o, p[0] * k, p[1] * k); pip.rotation.y = f.s > 0 ? Math.PI / 2 : -Math.PI / 2; }
+        grp.add(pip);
+      });
+    });
+    return grp;
+  }
+  const dieA = makeDie(), dieB = makeDie();
+  dieA.position.set(-0.72, 0, 0.14); dieB.position.set(0.72, 0, -0.18);
+  dieB.scale.setScalar(0.92);
+  ds.add(dieA); ds.add(dieB);
+  function setDieFace(die, n) {
+    const base = { 1: [0, 0, 0], 6: [0, Math.PI, 0], 2: [-Math.PI / 2, 0, 0], 5: [Math.PI / 2, 0, 0], 3: [0, 0, -Math.PI / 2], 4: [0, 0, Math.PI / 2] };
+    const r = base[n] || [0, 0, 0];
+    die.rotation.set(r[0] + 0.16, r[1] + 0.4, r[2] + 0.04);
+  }
+  function renderDice() {
+    const w = Math.max(60, dcv.clientWidth || 120), h = Math.max(50, dcv.clientHeight || 90);
+    dr.setSize(w, h, false);
+    dcam.aspect = w / h; dcam.updateProjectionMatrix(); dcam.lookAt(0, -0.15, 0);
+    dr.render(ds, dcam);
+  }
+  setDieFace(dieA, 2); setDieFace(dieB, 5);
+
+  /* ================= 状态 ================= */
+  const NAMES = [{ id: 'p1', name: '玩家A' }, { id: 'p2', name: '玩家B' }, { id: 'p3', name: '玩家C' }, { id: 'p4', name: '玩家D' }];
+  let state = ENG.createInitial(NAMES, Math.random);
+  let rolling = false, timerLeft = 30, timerId = null, lastKey = '';
+  let lastCardAt = 0, autoLock = false, endLock = false, outSeen = 0, hadAuction = false;
+
+  /* ---------- 联机 ---------- */
+  const NET = { on: false, myId: null, code: null, host: false, started: false };
+  let idleSince = Date.now();
+  let roomPhase = 'entry';          // entry | waiting | table
+  let rlTimer = null;
+  const hasNet = function () {
+    return !!(window.Net && window.Net.CONFIG_OK && window.Net.hasClient && window.Net.identity);
+  };
+  const myTurn = function () { return !NET.on || (state.players[state.turn] && state.players[state.turn].id === NET.myId); };
+  const meP = function () { return NET.on ? pById(NET.myId) : cur(); };
+
+  const cur = function () { return state.players[state.turn]; };
+  const actorId = function () { return NET.on ? NET.myId : cur().id; };
+  const pById = function (id) { return state.players.filter(function (p) { return p.id === id; })[0]; };
+  const faceOf = function (p) { return FACE_OF(state.players.indexOf(p)); };
+
+  /* ---- 动画细节：金额飘字 / 回合横幅 ---- */
+  function spawnFloat(txt, xPct, yPct, cls) {
+    const layer = $('fxLayer');
+    if (!layer) return;
+    const s = document.createElement('span');
+    s.className = 'fxNum ' + (cls || '');
+    s.textContent = txt;
+    s.style.left = xPct + '%';
+    s.style.top = yPct + '%';
+    layer.appendChild(s);
+    s.addEventListener('animationend', function () { s.remove(); });
+    setTimeout(function () { if (s.parentNode) s.remove(); }, 1600);
+  }
+  function spawnCoins(xPct, yPct, n) {
+    const layer = $('fxLayer');
+    if (!layer) return;
+    n = n || 7;
+    for (let k = 0; k < n; k++) {
+      const s = document.createElement('span');
+      s.className = 'coin';
+      s.textContent = '$';
+      const x0 = Number(xPct), y0 = Number(yPct);
+      s.style.left = (x0 + (Math.random() * 14 - 7)).toFixed(2) + '%';
+      s.style.top = (y0 + (Math.random() * 6 - 3)).toFixed(2) + '%';
+      s.style.setProperty('--cx', (Math.random() * 66 - 33).toFixed(1) + 'px');
+      s.style.setProperty('--cy', (-(52 + Math.random() * 46)).toFixed(1) + 'px');
+      s.style.animationDelay = (k * 45) + 'ms';
+      layer.appendChild(s);
+      setTimeout(function () { if (s.parentNode) s.remove(); }, 1250);
+    }
+  }
+  function showTurnBanner(p, idx) {
+    const el = $('turnBanner');
+    if (!el || !p) return;
+    el.innerHTML = '<i style="background:' + D.COLORS[idx] + '"></i>轮到 ' + p.name + ' 了';
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('show'); }, 1700);
+  }
+
+  function toast(msg) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('show'); }, 1700);
+  }
+
+  /* ================= 动作 ================= */
+  function act(action, actor) {
+    if (NET.on) return netAct(action, actor);
+    actor = actor || actorId();
+    const before = state.players.map(function (p) { return p.pos; });
+    const res = ENG.act(state, action, actor);
+    if (!res.ok) { toast(res.msg || '不能这么做'); return false; }
+    state = res.state;
+    if (action.type === 'roll' && state.lastRoll) { rolling = true; spinDice(state.lastRoll.d1, state.lastRoll.d2); }
+    syncAll(before);
+    return true;
+  }
+
+  /* 联机：把动作交给房间（乐观锁写回），结果由 onRoomState 回来 */
+  function netAct(action, actor) {
+    window.Net.mutate(function (st) {
+      const r = ENG.act(st, action, actor || NET.myId, Math.random);
+      if (!r.ok) { toast(r.msg || '不能这么做'); return null; }
+      return r.state;
+    }).catch(function (e) { toast(e.message || '同步失败'); });
+    return true;
+  }
+  function spinDice(d1, d2) {
+    if (document.hidden) { setDieFace(dieA, d1); setDieFace(dieB, d2); renderDice(); rolling = false; return; }
+    const dw = document.querySelector('.diceWrap');
+    if (dw) dw.classList.add('spinning');
+    const t0 = performance.now(), dur = 620;
+    const ax = dieA.rotation.x, az = dieA.rotation.z, bx = dieB.rotation.x, bz = dieB.rotation.z;
+    (function step() {
+      const k = Math.min(1, (performance.now() - t0) / dur);
+      dieA.rotation.x = ax + k * 9 * Math.PI; dieA.rotation.z = az + k * 7 * Math.PI;
+      dieB.rotation.x = bx + k * 8 * Math.PI; dieB.rotation.z = bz + k * 6 * Math.PI;
+      renderDice();
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        setDieFace(dieA, d1); setDieFace(dieB, d2); renderDice(); rolling = false;
+        if (dw) { dw.classList.remove('spinning'); dw.classList.add('landed'); setTimeout(function () { dw.classList.remove('landed'); }, 320); }
+        const ds = $('diceSum');
+        if (ds) { ds.textContent = (d1 + d2); ds.classList.remove('show'); void ds.offsetWidth; ds.classList.add('show'); }
+      }
+    })();
+  }
+
+  /* ================= 中央：资金排行 ================= */
+
+  function showCard(card) {
+    const el = $('cardPop');
+    $('cpDeck').textContent = card.deck === 'chance' ? '机会' : '命运';
+    $('cpDeck').className = 'cpDeck ' + card.deck;
+    $('cpTx').textContent = card.text;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('show'); }, 3200);
+  }
+
+  function renderRank() {
+    const list = state.players.slice().sort(function (a, b) {
+      if (a.bankrupt !== b.bankrupt) return a.bankrupt ? 1 : -1;
+      return ENG.netWorth(state, a.id) - ENG.netWorth(state, b.id);
+    }).reverse();
+    const ORD = ['1st', '2nd', '3rd', '4th'];
+    $('rankList').innerHTML = list.map(function (p, k) {
+      const idx = state.players.indexOf(p);
+      const active = p.id === actorId();
+      const off = NET.on && window.Net.presenceActive() && !window.Net.isOnline(p.id);
+      return '<div class="rkPill' + (active ? ' me' : '') + (p.bankrupt ? ' out' : '') + (off ? ' off' : '') + '" style="--pc:' + D.COLORS[idx] + '">' +
+        '<span class="rkDot"></span><span class="rkNo">' + ORD[k] + '</span>' +
+        '<span class="rkCash' + (curDelta[p.id] ? ' pop' : '') + '">$' + p.money + '</span></div>';
+    }).join('');
+  }
+
+  /* ================= 棋子 ================= */
+  const tokensEl = $('tokens');
+  const tokenEls = [];
+  const OFF = [[-10, -8], [10, -8], [-10, 9], [10, 9]];
+  function tokenScale(pos) {
+    const c = cellCenter(pos);
+    const t = (c.y - VB.y) / VB.h;
+    return 0.78 + 0.34 * t;
+  }
+  function buildTokens() {
+    tokensEl.innerHTML = '';
+    tokenEls.length = 0;
+    state.players.forEach(function (p, i) {
+      const d = document.createElement('div');
+      d.className = 'token';
+      d.style.setProperty('--c', D.COLORS[i]);
+      d.innerHTML = '<div class="tkSh"></div><div class="tkBody">' + FACE_OF(i) + '</div>';
+      tokensEl.appendChild(d);
+      tokenEls.push(d);
+    });
+  }
+  function pct(p) { return { l: ((p.x - VB.x) / VB.w) * 100, t: ((p.y - VB.y) / VB.h) * 100 }; }
+  function placeToken(i, pos, hop) {
+    const d = tokenEls[i];
+    if (!d) return;
+    if (pos == null) pos = state.players[i].pos;
+    const c = cellCenter(pos), pt = pct(c);
+    const sc = tokenScale(pos);
+    d.style.left = pt.l.toFixed(2) + '%';
+    d.style.top = pt.t.toFixed(2) + '%';
+    d.style.zIndex = String(20 + Math.round(c.y / 4));
+    d.style.setProperty('--tk', sc.toFixed(3));
+    d.style.setProperty('--dx', OFF[i % 4][0] + 'px');
+    d.style.setProperty('--dy', OFF[i % 4][1] + 'px');
+    d.style.opacity = state.players[i].bankrupt ? '.3' : '1';
+    if (hop) { d.classList.remove('hop'); void d.offsetWidth; d.classList.add('hop'); }
+  }
+  function syncTokens(before) {
+    state.players.forEach(function (p, i) {
+      const from = before && before[i] != null ? before[i] : p.pos;
+      if (from === p.pos) { placeToken(i, p.pos); return; }
+      const steps = (p.pos - from + 40) % 40;
+      if (steps > 18) { placeToken(i, p.pos); return; }
+      let k = 0;
+      const t = setInterval(function () {
+        k++;
+        placeToken(i, (from + k) % 40, true);
+        if (k >= steps) clearInterval(t);
+      }, 82);
+    });
+    tokenEls.forEach(function (el, i) {
+      el.className = 'token' + (state.players[i].id === actorId() ? ' me' : '') + (state.players[i].inJail ? ' jailed' : '');
+    });
+  }
+
+  /* ================= HUD ================= */
+  function tileInfo(i) {
+    const t = TILES[i], pr = state.props[i];
+    if (!pr || !pr.owner) return { name: t.name, tip: t.price ? '地产价 $' + t.price : (t.note || '') };
+    const o = pById(pr.owner);
+    return {
+      name: t.name + (pr.mortgaged ? '（抵押中）' : ''),
+      tip: (o ? o.name : '—') + ' 持有 · 租金 $' + ENG.rentAt(state, i, state.lastRoll ? state.lastRoll.total : 7)
+    };
+  }
+  const ICONS = {
+    prop: '<svg viewBox="0 0 24 24" width="22" height="22"><path d="M3.6 11.2 12 4l8.4 7.2" fill="none" stroke="#2f7fe8" stroke-width="2.2"/><rect x="6.4" y="10.8" width="11.2" height="8.6" rx="1.8" fill="#9ed2ff"/><rect x="9.6" y="13.4" width="5" height="6" rx="1" fill="#fff"/></svg>',
+    rail: '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="6" width="18" height="9" rx="3" fill="#8bbdf0"/><rect x="6" y="3.4" width="12" height="4" rx="2" fill="#bcdcff"/><circle cx="7.6" cy="17" r="2.6" fill="#56769c"/><circle cx="16.4" cy="17" r="2.6" fill="#56769c"/></svg>',
+    util: '<svg viewBox="0 0 24 24" width="22" height="22"><path d="M13 2 5 14h5l-1.6 8L19 9h-6z" fill="#7fdccd" stroke="#46b3a2" stroke-width="1.6"/></svg>',
+    go: '<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 16c4-8 12-10 16-5" fill="none" stroke="#e0574a" stroke-width="3"/><path d="M15 8l5 3-3 5" fill="none" stroke="#e0574a" stroke-width="3"/></svg>',
+    jail: '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="4" y="5" width="16" height="14" rx="3" fill="#c9d8e8"/><path d="M8 5v14M12 5v14M16 5v14" stroke="#7f93aa" stroke-width="2"/></svg>',
+    free: '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="8" fill="#a8e6a6"/><path d="M12 7v10M7 12h10" stroke="#3f8e46" stroke-width="2.4"/></svg>',
+    chance: '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="#ffd66e"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="900" fill="#a97b17">?</text></svg>',
+    chest: '<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3.4" y="9" width="17" height="10" rx="2.6" fill="#e3d3fa" stroke="#a483d6" stroke-width="1.8"/><rect x="3.4" y="5.6" width="17" height="4" rx="2" fill="#c9aef0" stroke="#a483d6" stroke-width="1.8"/></svg>',
+    tax: '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="#ffc0b8"/><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="900" fill="#c9564a">$</text></svg>',
+    gotojail: '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="#ffc0b8"/><path d="M8 9l8 6M16 9l-8 6" stroke="#a83c33" stroke-width="2.2"/></svg>'
+  };
+
+  const CORNER_ICON = {
+    go: '<path d="M4 16c5-9 13-11 17-5" fill="none" stroke="#ffffff" stroke-width="3.4"/><path d="M15 8l5 3-3 5" fill="none" stroke="#ffffff" stroke-width="3.4"/>',
+    jail: '<rect x="4" y="5" width="16" height="15" rx="3" fill="#ffffff" opacity=".9"/><path d="M8 5v15M12 5v15M16 5v15" stroke="#7f93aa" stroke-width="2"/>',
+    free: '<rect x="3" y="10" width="18" height="7" rx="3.4" fill="#ffffff" opacity=".92"/><rect x="6.5" y="6.4" width="11" height="5" rx="2.4" fill="#ffffff" opacity=".92"/><circle cx="7.6" cy="18" r="2.2" fill="#56769c"/><circle cx="16.4" cy="18" r="2.2" fill="#56769c"/>',
+    gotojail: '<circle cx="12" cy="12" r="9" fill="#ffffff" opacity=".92"/><path d="M8 9l8 6M16 9l-8 6" stroke="#c9564a" stroke-width="2.4"/>'
+  };
+
+  function renderRails() {
+    if (!document.getElementById('railL')) return;
+    const ORD = ['1st', '2nd', '3rd', '4th'];
+    const list = state.players.slice().sort(function (a, b) {
+      if (a.bankrupt !== b.bankrupt) return a.bankrupt ? 1 : -1;
+      return ENG.netWorth(state, b.id) - ENG.netWorth(state, a.id);
+    });
+    const nwMap = {}, maxNw = Math.max(1, list.reduce(function (m, p) {
+      const nw = ENG.netWorth(state, p.id);
+      nwMap[p.id] = nw;
+      return Math.max(m, nw);
+    }, 0));
+    $('railL').innerHTML = '<div class="railTi">玩家资产</div>' + list.map(function (p, k) {
+      const idx = state.players.indexOf(p);
+      const mine = p.id === actorId();
+      const own = ENG.propsOf(state, p.id);
+      const houses = own.reduce(function (n, i) { return n + (state.props[i].houses || 0); }, 0);
+      const now = idx === state.turn && state.phase !== 'ended';
+      const chips = own.slice(0, 7).map(function (i) {
+        const tl = D.TILES[i] || {};
+        const co = tl.group ? D.GROUPS[tl.group].color : (tl.type === 'rail' ? '#6b7d99' : '#3f9e8f');
+        return '<i style="background:' + co + '"></i>';
+      }).join('') + (own.length > 7 ? '<b>+' + (own.length - 7) + '</b>' : '');
+      const barW = Math.max(6, Math.round((nwMap[p.id] / maxNw) * 100));
+      const pop = curDelta[p.id] ? ' pop' : '';
+      return '<div class="pRow' + (now ? ' now' : '') + (p.bankrupt ? ' out' : '') + (mine ? ' me' : '') + '" style="--pc:' + D.COLORS[idx] + '">' +
+        '<div class="pAv">' + faceOf(p) + '</div>' +
+        '<div class="pMain"><div class="pName">' + p.name + '<i class="pOrd">' + ORD[k] + '</i></div>' +
+        '<div class="pMeta">' + (p.bankrupt ? '已出局'
+          : '<span>地 <b>' + own.length + '</b></span><span>房 <b>' + houses + '</b></span><span>净值 <b>$' + nwMap[p.id] + '</b></span>') + '</div>' +
+        '<div class="pBar"><i style="width:' + barW + '%"></i></div>' +
+        '<div class="pChips">' + (chips || '<span class="pNone">暂无地产</span>') + '</div></div>' +
+        '<div class="pCash' + pop + '">$' + p.money + '</div></div>';
+    }).join('');
+
+    const last = state.logs.slice(-4).reverse();
+    const stageTxt = ({ awaitRoll: '等待掷骰', awaitBuy: '等待买地', awaitAuction: '拍卖中', awaitEnd: '等待结束回合' })[state.turnPhase] || '进行中';
+    const sellable = D.TILES.filter(function (x) { return x.type === 'prop' || x.type === 'rail' || x.type === 'util'; });
+    const sold = sellable.filter(function (x) { return state.props[x.i] && state.props[x.i].owner; }).length;
+    const gTot = {}, gOwn = {};
+    sellable.forEach(function (x) {
+      if (!x.group) return;
+      gTot[x.group] = (gTot[x.group] || 0) + 1;
+      if (state.props[x.i] && state.props[x.i].owner) gOwn[x.group] = (gOwn[x.group] || 0) + 1;
+    });
+    const gChips = Object.keys(gTot).map(function (g) {
+      const o = gOwn[g] || 0;
+      return '<span class="gChip' + (o >= gTot[g] ? ' full' : '') + '" style="--gc:' + D.GROUPS[g].color + '">' +
+        D.GROUPS[g].name + '<b>' + o + '/' + gTot[g] + '</b></span>';
+    }).join('');
+    $('railR').innerHTML = '<div class="railTi">本局动态</div>' +
+      '<div class="railSale"><div class="rsHead"><span>地产进度</span><b>' + sold + '/' + sellable.length + '</b></div>' +
+      '<div class="rsBar"><i style="width:' + Math.round(sold / sellable.length * 100) + '%"></i></div></div>' +
+      '<div class="rsChips">' + gChips + '</div>' +
+      '<div class="railStage">第 ' + (Math.floor(state.turn / 4) + 1) + ' 回合 · ' + stageTxt + '</div>' +
+      (last.length ? last.map(function (l) { return '<div class="railLog">' + l + '</div>'; }).join('')
+        : '<div class="railLog">开局了，先掷骰子吧</div>') +
+      '<div class="railBtns">' +
+      '<button class="miniBtn" id="railProps" type="button">我的地产</button>' +
+      '<button class="miniBtn" id="railTrade" type="button">发起交易</button>' +
+      '<button class="miniBtn" id="railLogs" type="button">全部日志</button></div>';
+    const bind = function (id, fn) {
+      const el = $(id);
+      if (el) el.addEventListener('click', fn);
+    };
+    bind('railProps', function () { $('btnProps').click(); });
+    bind('railTrade', function () { $('btnTrade').click(); });
+    bind('railLogs', function () { $('btnLog').click(); });
+  }
+
+  function renderHUD() {
+    const p = cur();
+    if (p) {
+      $('turnAv').innerHTML = faceOf(p);
+      $('turnName').textContent = p.name + ' 的回合';
+    }
+    $('roundNo').textContent = String(Math.floor(state.turn / 4) + 1);
+    const hints = {
+      awaitRoll: (p && p.inJail) ? '在监狱：掷双骰或交保释金' : '掷骰子，前进吧！',
+      awaitBuy: '要不要买下这块地？',
+      awaitAuction: '拍卖进行中，请出价',
+      awaitEnd: '结束回合，交给下一位'
+    };
+    $('turnHint').textContent = hints[state.turnPhase] || '';
+    if (NET.on) {
+      $('roomPill').querySelector('b').textContent = '房间 ' + (NET.code || '—');
+      const p0 = state.players[state.turn];
+      if (!p0) { $('timerTxt').textContent = ''; }
+      else if (p0.id === NET.myId) $('timerTxt').textContent = '你的回合';
+      else if (window.Net.presenceActive() && !window.Net.isOnline(p0.id)) $('timerTxt').textContent = '离线 · 稍后跳过';
+      else $('timerTxt').textContent = '在线';
+      $('timerFill').style.width = '100%';
+      $('timerFill').style.background = '#7ed957';
+    }
+    const posi = p ? p.pos : 0;
+    const info = tileInfo(posi), t = TILES[posi];
+    $('locIc').innerHTML = ICONS[t.type] || ICONS.prop;
+    $('locName').textContent = '当前位置：' + info.name;
+    $('locTip').textContent = info.tip;
+    $('ctHint').hidden = true;
+    const lockSide = (state.turnPhase === 'awaitBuy' || state.turnPhase === 'awaitAuction' || !!state.trade) || !myTurn();
+    $('btnProps').disabled = lockSide;
+    $('btnTrade').disabled = lockSide;
+    const canRoll = state.turnPhase === 'awaitRoll' && state.phase !== 'ended' && myTurn();
+    $('rollBtn').hidden = !canRoll;
+    $('ctHint').hidden = true;
+    renderRank();
+    renderRails();
+    renderActions();
+    renderBuy();
+    renderTradeInbox();
+    renderWin();
+  }
+
+  function btn(label, kind, fn, disabled) {
+    const b = document.createElement('button');
+    b.className = 'actBtn ' + (kind || '');
+    b.textContent = label;
+    if (disabled) b.disabled = true;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function renderActions() {
+    const wrap = $('actions');
+    wrap.innerHTML = '';
+    if (state.phase === 'ended') return;
+    const tp = state.turnPhase;
+    if (tp === 'awaitRoll') {
+      const p = cur();
+      if (!myTurn()) return;
+      if (p && p.inJail) {
+        wrap.appendChild(btn('保释 $50', 'alt', function () { act({ type: 'jailPay' }); }));
+        if (p.cards > 0) wrap.appendChild(btn('用卡出狱', 'alt', function () { act({ type: 'jailCard' }); }));
+      }
+      return;
+    }
+    if (tp === 'awaitBuy') return;
+    if (tp === 'awaitAuction') {
+      const a = state.auction;
+      const bidder = pById(a.queue[a.i]);
+      if (NET.on && bidder.id !== NET.myId) return;
+      const min = a.bid + 10;
+      wrap.appendChild(btn('$' + min, 'alt', function () { act({ type: 'bid', amount: min }, bidder.id); }));
+      wrap.appendChild(btn('+50', 'alt', function () { act({ type: 'bid', amount: min + 50 }, bidder.id); }));
+      wrap.appendChild(btn('放弃', 'primary', function () { act({ type: 'auctionPass' }, bidder.id); }));
+      return;
+    }
+    if (!myTurn()) return;
+    wrap.appendChild(btn('结束回合', 'primary', function () {
+      if (endLock) return;
+      endLock = true;
+      setTimeout(function () { endLock = false; }, 500);
+      if (state.trade) act({ type: 'tradeCancel' }, state.trade.fromId);
+      act({ type: 'endTurn' });
+    }));
+  }
+
+  function renderBuy() {
+    const el = $('popCard');
+    const p = cur();
+    if (!p || state.turnPhase !== 'awaitBuy') {
+      el.classList.remove('show');
+      el.innerHTML = '';
+      return;
+    }
+    const i = p.pos, t = TILES[i];
+    const grp = t.group ? GROUPS[t.group] : null;
+    const mates = grp ? TILES.filter(function (x) { return x.group === t.group; }) : [];
+    const mine = grp ? mates.filter(function (x) { return state.props[x.i].owner === p.id; }).length : 0;
+    let rent = '';
+    if (t.rent) rent = '租金 $' + ENG.rentAt(state, i, 7) + ' · 未建房';
+    else if (t.type === 'rail') rent = '车站：持有越多租金越高';
+    else if (t.type === 'util') rent = '公用事业：按骰子点数×倍数';
+    el.innerHTML =
+      '<div class="buyBar" style="background:' + tileColor(t) + '"></div>' +
+      '<div class="buyTop"><div class="buyIc">' + (ICONS[t.type] || ICONS.prop) + '</div>' +
+      '<div class="buyTx"><b>' + t.name + '</b><span>价格 $' + (t.price || 0) + ' · ' + rent + '</span>' +
+      (grp ? '<span class="setTag">' + grp.name + '组 ' + mine + '/' + mates.length + '</span>' : '') + '</div>' +
+      '<div class="buyTimer" id="pcT">' + Math.max(0, timerLeft) + 's</div></div>' +
+      (myTurn()
+        ? '<div class="buyBtns"><button class="actBtn alt" id="pcNo">不买 · 拍卖</button>' +
+          '<button class="actBtn primary" id="pcYes">购买 $' + (t.price || 0) + '</button></div>'
+        : '<div class="buyBtns"><span class="waitTipline">等 ' + p.name + ' 决定要不要买…</span></div>');
+    el.classList.add('show');
+    if ($('pcNo')) $('pcNo').onclick = function () { act({ type: 'decline' }); };
+    if ($('pcYes')) $('pcYes').onclick = function () { act({ type: 'buy' }); };
+  }
+
+  function renderLog() {
+    $('logList').innerHTML = state.logs.slice().reverse().map(function (l) {
+      return '<div class="logrow">' + l + '</div>';
+    }).join('');
+  }
+
+  function renderProps() {
+    const me = pById(actorId());
+    const head = '<div class="logrow">现金 $' + (me ? me.money : 0) + ' · 出狱卡 ' + (me ? me.cards : 0) + ' 张</div>';
+    const list = ENG.propsOf(state, actorId()).sort(function (a, b) { return a - b; });
+    if (!list.length) { $('propList').innerHTML = head + '<div class="logrow">还没有地产，先掷骰子买地吧</div>'; return; }
+    $('propList').innerHTML = head + list.map(function (i) {
+      const t = TILES[i], pr = state.props[i];
+      const can = ENG.canBuild(state, i);
+      const tag = pr.houses >= 5 ? '旅馆' : (pr.houses > 0 ? pr.houses + ' 栋房' : '空地');
+      let chips = '';
+      if (t.type === 'prop') {
+        chips += '<button class="chip" data-a="build" data-i="' + i + '"' + (can.ok ? '' : ' disabled') + '>建房 $' + t.house + '</button>';
+        if (pr.houses > 0) chips += '<button class="chip" data-a="sellHouse" data-i="' + i + '">拆房 +$' + Math.floor(t.house / 2) + '</button>';
+      }
+      chips += pr.mortgaged
+        ? '<button class="chip" data-a="unmortgage" data-i="' + i + '">赎回 -$' + Math.ceil(t.price / 2 * 1.1) + '</button>'
+        : '<button class="chip" data-a="mortgage" data-i="' + i + '">抵押 +$' + Math.floor(t.price / 2) + '</button>';
+      return '<div class="prow" style="--gc:' + tileColor(t) + '">' +
+        '<div class="pv"><b>' + t.name + '</b><span>' + tag + (pr.mortgaged ? ' · 抵押中' : '') + '</span></div>' +
+        '<div class="pb">' + chips + '</div></div>';
+    }).join('');
+    $('propList').querySelectorAll('button[data-a]').forEach(function (b) {
+      b.onclick = function () {
+        act({ type: b.getAttribute('data-a'), tile: Number(b.getAttribute('data-i')) });
+        renderProps();
+      };
+    });
+  }
+
+  /* ================= 地块详情 ================= */
+  function openTile(i) {
+    const t = TILES[i], pr = state.props[i];
+    const grp = t.group ? GROUPS[t.group] : null;
+    let body = '<div class="tmTag" style="background:' + tileColor(t) + '">' + (grp ? grp.name + '组' : (TYPE_TXT[t.type] || '格')) + '</div>' +
+      '<div class="tmName">' + t.name + '</div>';
+    if (t.price) body += '<div class="tmLine">价格 <b>$' + t.price + '</b>' + (t.house ? ' · 建房 <b>$' + t.house + '</b>' : '') + '</div>';
+    if (t.rent) {
+      body += '<div class="tmRent"><span>空地 $' + t.rent[0] + '</span><span>1房 $' + t.rent[1] + '</span><span>2房 $' + t.rent[2] +
+        '</span><span>3房 $' + t.rent[3] + '</span><span>旅馆 $' + t.rent[4] + '</span></div>';
+    }
+    if (pr && pr.owner) {
+      const o = pById(pr.owner);
+      body += '<div class="tmOwner" style="--oc:' + o.color + '"><i></i>' + o.name + ' 持有' +
+        (pr.houses ? ' · ' + (pr.houses >= 5 ? '旅馆' : pr.houses + ' 栋房') : '') + (pr.mortgaged ? ' · 已抵押' : '') + '</div>';
+    } else if (t.price) {
+      body += '<div class="tmOwner none">暂无房主</div>';
+    }
+    if (t.note) body += '<div class="tmNote">' + t.note + '</div>';
+    $('tmName').textContent = '地块 ' + (i + 1) + ' / 40';
+    $('tmBody').innerHTML = body;
+    $('tileModal').classList.add('open');
+  }
+
+  /* ================= 交易 ================= */
+  const tradeDraft = { toId: null, offerTiles: [], requestTiles: [], offerCash: 0, requestCash: 0 };
+  function openTrade() {
+    const me = cur();
+    const others = state.players.filter(function (p) { return p.id !== me.id && !p.bankrupt; });
+    tradeDraft.toId = others.length ? others[0].id : null;
+    tradeDraft.offerTiles = []; tradeDraft.requestTiles = [];
+    tradeDraft.offerCash = 0; tradeDraft.requestCash = 0;
+    renderTrade();
+    $('tradeModal').classList.add('open');
+  }
+  function renderTrade() {
+    const me = cur();
+    if (!tradeDraft.toId) {
+      $('trBody').innerHTML = '<div class="logrow">没有可交易的玩家</div>';
+      return;
+    }
+    const other = pById(tradeDraft.toId);
+    const mineTiles = ENG.propsOf(state, me.id).filter(function (i) { return state.props[i].houses === 0; });
+    const otherTiles = ENG.propsOf(state, other.id).filter(function (i) { return state.props[i].houses === 0; });
+    const chip = function (i, side) {
+      const on = (side === 'offer' ? tradeDraft.offerTiles : tradeDraft.requestTiles).indexOf(i) >= 0;
+      return '<button class="tchip' + (on ? ' on' : '') + '" data-side="' + side + '" data-i="' + i + '" style="--gc:' + tileColor(TILES[i]) + '">' + TILES[i].name + '</button>';
+    };
+    $('trBody').innerHTML =
+      '<div class="trWho">和谁换 <div class="trWhoBtns">' + state.players.filter(function (p) { return p.id !== me.id && !p.bankrupt; })
+        .map(function (p) { return '<button class="wBtn' + (p.id === tradeDraft.toId ? ' on' : '') + '" data-to="' + p.id + '">' + p.name + '</button>'; }).join('') + '</div></div>' +
+      '<div class="trSec"><b>你给出（现金 $' + me.money + '）</b><div class="trChips">' +
+        (mineTiles.length ? mineTiles.map(function (i) { return chip(i, 'offer'); }).join('') : '<span class="dim">没有可交易的地产</span>') + '</div>' +
+        '<input class="trInput" id="trOfferCash" type="number" min="0" max="' + me.money + '" placeholder="附加现金" value="' + (tradeDraft.offerCash || '') + '"></div>' +
+      '<div class="trSec"><b>你要换到（现金 $' + other.money + '）</b><div class="trChips">' +
+        (otherTiles.length ? otherTiles.map(function (i) { return chip(i, 'request'); }).join('') : '<span class="dim">对方没有可交易的地产</span>') + '</div>' +
+        '<input class="trInput" id="trRequestCash" type="number" min="0" max="' + other.money + '" placeholder="要对方补现金" value="' + (tradeDraft.requestCash || '') + '"></div>' +
+      '<div class="trBtns"><button class="actBtn alt" id="trCancel">取消</button><button class="actBtn primary" id="trSend">发起交易</button></div>';
+
+    $('trBody').querySelectorAll('.wBtn').forEach(function (b) {
+      b.onclick = function () { tradeDraft.toId = b.getAttribute('data-to'); tradeDraft.offerTiles = []; tradeDraft.requestTiles = []; renderTrade(); };
+    });
+    $('trBody').querySelectorAll('.tchip').forEach(function (b) {
+      b.onclick = function () {
+        const side = b.getAttribute('data-side'), i = Number(b.getAttribute('data-i'));
+        const arr = side === 'offer' ? tradeDraft.offerTiles : tradeDraft.requestTiles;
+        const k = arr.indexOf(i);
+        if (k >= 0) arr.splice(k, 1); else arr.push(i);
+        renderTrade();
+      };
+    });
+    const oc = $('trOfferCash'), rc = $('trRequestCash');
+    if (oc) oc.oninput = function () { tradeDraft.offerCash = Math.max(0, Math.min(me.money, Number(oc.value) || 0)); };
+    if (rc) rc.oninput = function () { tradeDraft.requestCash = Math.max(0, Math.min(other.money, Number(rc.value) || 0)); };
+    $('trCancel').onclick = function () { $('tradeModal').classList.remove('open'); };
+    $('trSend').onclick = function () {
+      const ok = act({
+        type: 'tradePropose', toId: tradeDraft.toId,
+        offerTiles: tradeDraft.offerTiles, requestTiles: tradeDraft.requestTiles,
+        offerCash: tradeDraft.offerCash, requestCash: tradeDraft.requestCash
+      });
+      if (ok) $('tradeModal').classList.remove('open');
+    };
+  }
+
+  function renderTradeInbox() {
+    const tr = state.trade;
+    const el = $('trInModal');
+    if (!tr) { el.classList.remove('open'); return; }
+    const from = pById(tr.fromId), to = pById(tr.toId);
+    const names = function (arr) { return arr.length ? arr.map(function (i) { return TILES[i].name; }).join('、') : '无'; };
+    const iAmTo = !NET.on || tr.toId === NET.myId;
+    const iAmFrom = !NET.on || tr.fromId === NET.myId;
+    $('trInBody').innerHTML =
+      '<div class="trLine"><b>' + from.name + '</b> 向 <b>' + to.name + '</b> 发起交易</div>' +
+      '<div class="trGive"><span>给出</span>' + names(tr.offerTiles) + (tr.offerCash ? ' + $' + tr.offerCash : '') + '</div>' +
+      '<div class="trTake"><span>换得</span>' + names(tr.requestTiles) + (tr.requestCash ? ' + $' + tr.requestCash : '') + '</div>' +
+      '<div class="trBtns">' +
+      (iAmFrom ? '<button class="actBtn alt" id="trRevoke">撤销</button>' : '') +
+      (iAmTo ? '<button class="actBtn alt" id="trNo">拒绝</button><button class="actBtn primary" id="trYes">接受</button>' : '') +
+      '</div>' +
+      '<div class="trHint">' + (iAmTo ? '由 ' + to.name + ' 决定（把设备交给 TA）' : '等 ' + to.name + ' 决定…') + '</div>';
+    el.classList.add('open');
+    if ($('trNo')) $('trNo').onclick = function () { act({ type: 'tradeRespond', accept: false }, tr.toId); };
+    if ($('trYes')) $('trYes').onclick = function () { act({ type: 'tradeRespond', accept: true }, tr.toId); };
+    if ($('trRevoke')) $('trRevoke').onclick = function () { act({ type: 'tradeCancel' }, tr.fromId); };
+  }
+
+  function renderWin() {
+    const el = $('winModal');
+    if (state.phase !== 'ended') { el.classList.remove('open'); return; }
+    const w = pById(state.winner);
+    const host = !NET.on || NET.host;
+    $('winBody').innerHTML = '<div class="winCup">🏆</div><div class="winName">' + (w ? w.name : '赢家') + '</div>' +
+      '<div class="winSub">成为最后的赢家</div>' +
+      (host ? '<button class="actBtn primary big" id="winAgain">再来一局</button>'
+            : '<button class="actBtn alt big" id="winWait">等房主开下一局</button>');
+    el.classList.add('open');
+    if ($('winAgain')) $('winAgain').onclick = function () {
+      if (!NET.on) { location.reload(); return; }
+      window.Net.mutate(function (st) {
+        if (st.phase !== 'ended') return null;
+        if (st.hostId !== NET.myId) { toast('只有房主能开下一局'); return null; }
+        return {
+          game: 'monopoly', phase: 'lobby', hostId: st.hostId,
+          players: st.players.filter(function (p) { return !p.kicked; }).map(function (p) { return { id: p.id, name: p.name }; }),
+          logs: ['房主开了下一局，等大家进来'], createdAt: Date.now()
+        };
+      }).catch(function (e) { toast(e.message || '开下一局失败'); });
+    };
+    if ($('winWait')) $('winWait').onclick = function () { toast('等房主开下一局…'); };
+  }
+
+  /* ================= 计时 ================= */
+  function updateTimer() {
+    if (NET.on) {
+      const p0 = state.players[state.turn];
+      $('timerFill').style.width = '100%';
+      $('timerFill').style.background = '#7ed957';
+      if (!p0) $('timerTxt').textContent = '';
+      else if (p0.id === NET.myId) $('timerTxt').textContent = '你的回合';
+      else if (window.Net.presenceActive() && !window.Net.isOnline(p0.id)) $('timerTxt').textContent = '离线 · 稍后自动跳过';
+      else $('timerTxt').textContent = '在线';
+      return;
+    }
+    const p = Math.max(0, timerLeft / 30);
+    $('timerFill').style.width = (p * 100) + '%';
+    $('timerFill').style.background = p > 0.5 ? '#7ed957' : (p > 0.25 ? '#ffc244' : '#ff6b5b');
+    $('timerTxt').textContent = Math.max(0, timerLeft) + 's';
+    const pcT = $('pcT');
+    if (pcT) pcT.textContent = Math.max(0, timerLeft) + 's';
+  }
+  function resetTimer() { timerLeft = 30; updateTimer(); }
+  function autoAct() {
+    if (state.phase === 'ended' || autoLock || NET.on) return;
+    autoLock = true;
+    setTimeout(function () { autoLock = false; }, 700);
+    const tp = state.turnPhase;
+    if (tp === 'awaitRoll') act({ type: 'roll' });
+    else if (tp === 'awaitBuy') act({ type: 'decline' });
+    else if (tp === 'awaitAuction') {
+      const a = state.auction;
+      const bidder = a ? a.queue[a.i] : null;
+      if (bidder) act({ type: 'auctionPass' }, bidder);
+    } else act({ type: 'endTurn' });
+    resetTimer();
+  }
+
+  /* ================= 总渲染 ================= */
+  let lastMoneyMap = null, lastTurnKey = null, prevHouses = {}, curDelta = {};
+  function syncAll(before) {
+    /* 金钱变化 → 棋子旁边飘 +$ / -$ */
+    curDelta = {};
+    if (lastMoneyMap) {
+      state.players.forEach(function (p, i) {
+        const prev = lastMoneyMap[p.id];
+        if (prev == null || prev === p.money) return;
+        const d = p.money - prev;
+        curDelta[p.id] = d;
+        const c = cellCenter(p.pos), pt = pct(c);
+        spawnFloat((d > 0 ? '+$' : '-$') + Math.abs(d), pt.l.toFixed(2), (pt.t - 9).toFixed(2), d > 0 ? 'plus' : 'minus');
+        if (d > 0) spawnCoins(pt.l.toFixed(2), (pt.t - 7).toFixed(2), Math.min(10, 3 + Math.round(Math.abs(d) / 60)));
+      });
+    }
+    /* 回合切换 → 顶部横幅 */
+    const tk = state.players[state.turn] ? state.players[state.turn].id : null;
+    if (lastTurnKey !== null && tk !== lastTurnKey && state.phase !== 'ended') {
+      showTurnBanner(state.players[state.turn], state.turn);
+    }
+    lastTurnKey = tk;
+    renderOverlay();
+    if (lastPurchases.length) {
+      lastPurchases.forEach(function (idx) {
+        const pt = pct(cellCenter(idx));
+        spawnCoins(pt.l.toFixed(2), (pt.t - 4).toFixed(2), 6);
+      });
+      lastPurchases = [];
+      const bw = document.querySelector('.boardWrap');
+      if (bw) { bw.classList.remove('punch'); void bw.offsetWidth; bw.classList.add('punch'); setTimeout(function () { bw.classList.remove('punch'); }, 520); }
+    }
+    syncTokens(before);
+    renderHUD();
+    renderLog();
+    if ($('roomSheet').classList.contains('open')) refreshRoomSheet();
+    if ($('propSheet').classList.contains('open')) renderProps();
+    if (state.card && state.card.at !== lastCardAt) { lastCardAt = state.card.at; showCard(state.card); }
+    const auc = !!state.auction;
+    if (hadAuction && !auc) {
+      const last = state.logs[state.logs.length - 1] || '拍卖结束';
+      toast(last);
+    }
+    hadAuction = auc;
+    lastMoneyMap = {};
+    state.players.forEach(function (p) { lastMoneyMap[p.id] = p.money; });
+    const outCount = state.players.filter(function (x) { return x.bankrupt; }).length;
+    if (outCount > outSeen) { outSeen = outCount; toast('有玩家破产出局'); }
+    const key = state.turn + '#' + state.turnPhase + '#' + state.phase + '#' + (state.trade ? 'T' : '') +
+      '#' + (state.auction ? 'A' + state.auction.i : '');
+    if (key !== lastKey) {
+      lastKey = key;
+      if (state.phase !== 'ended') startTimer();
+    }
+  }
+  function startTimer() {
+    if (timerId) clearInterval(timerId);
+    resetTimer();
+    if (NET.on) { updateTimer(); return; }
+    timerId = setInterval(function () {
+      timerLeft--;
+      updateTimer();
+      if (timerLeft <= 0) autoAct();
+    }, 1000);
+  }
+
+  /* ================= 联机：房间层 ================= */
+  const rl = $('roomLayer');
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function seatRow(p, i, st) {
+    const on = NET.on && window.Net.presenceActive() ? window.Net.isOnline(p.id) : true;
+    const isHost = p.id === (st.hostId || NET.myId);
+    return '<div class="seatRow">' +
+      '<span class="sDot" style="background:' + D.COLORS[i % 4] + '"></span>' +
+      '<span class="sName">' + esc(p.name) + '</span>' +
+      (isHost ? '<span class="sTag host">房主</span>' : '') +
+      (p.id === NET.myId ? '<span class="sTag me">你</span>' : '') +
+      (p.kicked ? '<span class="sTag out">已移出</span>' : '') +
+      (NET.on ? '<span class="sTag ' + (on ? 'on' : 'off') + '">' + (on ? '在线' : '离线') + '</span>' : '') +
+      (NET.on && NET.host && p.id !== NET.myId && !p.kicked
+        ? '<button class="kickBtn" data-kick="' + p.id + '">移出</button>' : '') +
+      '</div>';
+  }
+  function renderEntry() {
+    roomPhase = 'entry';
+    const nick = (window.Net && window.Net.identity.name) || localStorage.getItem('mbg:nick') || '';
+    $('rlCard').innerHTML =
+      '<div class="rlTitle">萌趣街区 · 联机</div>' +
+      '<div class="rlSub">建个房间把邀请码发给朋友，或者输入朋友的邀请码</div>' +
+      '<label class="rlField"><span>昵称</span><input id="rlNick" maxlength="12" placeholder="例如 阿蒙" value="' + esc(nick) + '"></label>' +
+      '<label class="rlField"><span>邀请码</span><input id="rlCode" maxlength="5" placeholder="5 位，如 K7M2Q"></label>' +
+      '<div class="rlBtns">' +
+      '<button class="actBtn primary" id="rlCreate">创建房间</button>' +
+      '<button class="actBtn alt" id="rlJoin">加入房间</button>' +
+      '</div>' +
+      '<button class="rlLocal" id="rlLocalBtn">先本地试玩（4 人热座）</button>' +
+      (hasNet() ? '' : '<div class="rlWarn">没读到 Supabase 配置，联机不可用；检查 js/config.js</div>');
+    rl.classList.add('show');
+    $('rlCode').addEventListener('input', function (e) {
+      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+    $('rlCreate').onclick = function () { doCreate(); };
+    $('rlJoin').onclick = function () { doJoin(); };
+    $('rlLocalBtn').onclick = function () { rl.classList.remove('show'); roomPhase = 'table'; };
+    if (hasNet()) setTimeout(function () { if ($('rlNick')) $('rlNick').focus(); }, 120);
+  }
+  function readNick() {
+    const v = (($('rlNick') && $('rlNick').value) || '').trim().slice(0, 12);
+    if (!v) { toast('先填个昵称'); return ''; }
+    window.Net.setName(v);
+    return v;
+  }
+  async function doCreate() {
+    if (!hasNet()) return toast('联机不可用：检查 js/config.js');
+    const nick = readNick(); if (!nick) return;
+    NET.myId = window.Net.identity.id;
+    NET.host = true;
+    const seed = {
+      game: 'monopoly', phase: 'lobby', hostId: NET.myId,
+      players: [{ id: NET.myId, name: nick }],
+      logs: ['房间已建立，等朋友加入'], createdAt: Date.now()
+    };
+    try {
+      const code = await window.Net.createRoom(seed);
+      NET.code = code; NET.on = true;
+      if (timerId) { clearInterval(timerId); timerId = null; }
+      localStorage.setItem('mbg:room', code);
+      window.Net.subscribe(code, onRoomState, onStatus);
+      state = JSON.parse(JSON.stringify(seed));
+      renderWaiting(seed);
+    } catch (e) { toast(e.message || '创建失败'); }
+  }
+  async function doJoin() {
+    if (!hasNet()) return toast('联机不可用：检查 js/config.js');
+    const nick = readNick(); if (!nick) return;
+    const code = (($('rlCode') && $('rlCode').value) || '').trim().toUpperCase();
+    if (code.length !== 5) return toast('邀请码是 5 位');
+    NET.myId = window.Net.identity.id;
+    try {
+      const row = await window.Net.joinRoom(code);
+      const st = row.state;
+      if (!st || !st.game) throw new Error('房间数据异常');
+      if (!st.players.some(function (p) { return p.id === NET.myId; })) {
+        if (st.phase === 'playing' || st.phase === 'ended') throw new Error('这局已经开始了，等下一局吧');
+        if (st.players.length >= 4) throw new Error('房间满了（最多 4 人）');
+        await window.Net.mutate(function (s) {
+          s.players.push({ id: NET.myId, name: nick });
+          s.logs = (s.logs || []).concat(nick + ' 加入了房间').slice(-20);
+          return s;
+        });
+      }
+      NET.code = code; NET.on = true;
+      NET.host = st.hostId === NET.myId;
+      if (timerId) { clearInterval(timerId); timerId = null; }
+      localStorage.setItem('mbg:room', code);
+      window.Net.subscribe(code, onRoomState, onStatus);
+      const fresh = await window.Net.fetchRoom(code);
+      onRoomState(fresh.state, fresh.version);
+    } catch (e) {
+      localStorage.removeItem('mbg:room');
+      toast(e.message || '加入失败');
+    }
+  }
+  function renderWaiting(st) {
+    roomPhase = 'waiting';
+    $('app').classList.add('waiting');
+    $('roomPill').querySelector('b').textContent = '房间 ' + (NET.code || '—');
+    NET.host = st.hostId === NET.myId;
+    const me = st.players.some(function (p) { return p.id === NET.myId; });
+    const seats = st.players.map(function (p, i) { return seatRow(p, i, st); }).join('') +
+      (function () {
+        let s = '';
+        for (let k = st.players.length; k < 4; k++) s += '<div class="seatRow empty"><span class="sDot ghost"></span><span class="sName">等待加入…</span></div>';
+        return s;
+      })();
+    $('rlCard').innerHTML =
+      '<div class="rlTitle">房间 <b class="rlCode">' + (NET.code || '—') + '</b></div>' +
+      '<div class="rlSub">把邀请码发给朋友，至少 2 人才能开局</div>' +
+      '<div class="seatList">' + seats + '</div>' +
+      '<div class="rlBtns">' +
+      (NET.host ? '<button class="actBtn primary" id="rlStart"' + (st.players.length < 2 ? ' disabled' : '') + '>开始游戏</button>' : '') +
+      '<button class="actBtn alt" id="rlCopy">复制邀请码</button>' +
+      '<button class="actBtn alt" id="rlLeave">离开</button>' +
+      '</div>' +
+      '<div class="rlHint">' + (NET.host ? (st.players.length < 2 ? '等朋友进来…' : '人齐了就点开始')
+        : '等房主开始…') + (me ? '' : '（你已被移出这个房间）') + '</div>';
+    rl.classList.add('show');
+    if ($('rlStart')) $('rlStart').onclick = startGame;
+    $('rlCopy').onclick = copyCode;
+    $('rlLeave').onclick = leaveNet;
+    bindKickButtons();
+    if (!rlTimer) rlTimer = setInterval(function () {
+      if (roomPhase === 'waiting' && state && state.players) renderWaiting(state);
+      else if (roomPhase === 'table' && roomPhaseState()) refreshRoomSheet();
+    }, 4000);
+  }
+  function roomPhaseState() { return $('roomSheet').classList.contains('open'); }
+  function bindKickButtons() {
+    document.querySelectorAll('[data-kick]').forEach(function (b) {
+      b.onclick = function () {
+        if (b.dataset.arm === '1') {
+          b.dataset.arm = '';
+          act({ type: 'kick', target: b.getAttribute('data-kick') }, NET.myId);
+          return;
+        }
+        b.dataset.arm = '1';
+        b.textContent = '确认？';
+        setTimeout(function () { if (b.isConnected) { b.dataset.arm = ''; b.textContent = '移出'; } }, 6000);
+      };
+    });
+  }
+  function startGame() {
+    if (!NET.on) return;
+    window.Net.mutate(function (st) {
+      if (st.phase !== 'lobby') return null;
+      if (st.hostId !== NET.myId) { toast('只有房主能开始'); return null; }
+      if (st.players.length < 2) { toast('至少 2 人才能开始'); return null; }
+      const init = ENG.createInitial(st.players.map(function (p) { return { id: p.id, name: p.name }; }), Math.random);
+      init.hostId = st.hostId;
+      return init;
+    }).catch(function (e) { toast(e.message || '开局失败'); });
+  }
+  function copyCode() {
+    const code = NET.code || window.Net.getCode();
+    if (!code) return;
+    const done = function () { toast('邀请码已复制：' + code); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(function () { fallbackCopy(code, done); });
+    } else fallbackCopy(code, done);
+  }
+  function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动记下：' + text); }
+    document.body.removeChild(ta);
+  }
+  function leaveNet() {
+    if (NET.on && window.Net) window.Net.leave();
+    localStorage.removeItem('mbg:room');
+    NET.on = false; NET.code = null; NET.host = false; NET.myId = null;
+    roomPhase = 'entry';
+    state = ENG.createInitial(NAMES, Math.random);
+    buildTokens();
+    state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+    syncAll(null);
+    rl.classList.remove('show');
+    renderEntry();
+    showLayer();
+  }
+  function showLayer() { rl.classList.add('show'); }
+
+  /* 房间面板（局内，房主踢人 / 看在线） */
+  function refreshRoomSheet() {
+    const st = state;
+    const seats = st.players.map(function (p, i) { return seatRow(p, i, st); }).join('');
+    $('roomBody').innerHTML =
+      '<div class="rsCode">邀请码 <b>' + (NET.code || '—') + '</b>' +
+      '<button class="miniBtn" id="rsCopy">复制</button></div>' +
+      '<div class="rsList">' + seats + '</div>' +
+      '<div class="rsHint">' + (NET.host ? '你是房主：可以把掉线的人移出对局' : '房主可以把掉线的人移出对局') + '</div>' +
+      '<div class="rsBtns"><button class="actBtn alt" id="rsLeave">退出房间</button></div>';
+    if ($('rsCopy')) $('rsCopy').onclick = copyCode;
+    if ($('rsLeave')) $('rsLeave').onclick = function () {
+      $('roomSheet').classList.remove('open');
+      leaveNet();
+    };
+    bindKickButtons();
+  }
+
+  /* 房间状态回来 */
+  function onRoomState(ns, ver) {
+    if (!ns || !ns.game) return;
+    const prev = state;
+    const before = prev && prev.players ? prev.players.map(function (p) { return p.pos; }) : null;
+    const prevRoll = prev ? JSON.stringify(prev.lastRoll) : '';
+    state = ns;
+    if (ns.phase === 'lobby') {
+      if (roomPhase !== 'waiting') renderWaiting(ns); else renderWaiting(ns);
+      return;
+    }
+    roomPhase = 'table';
+    $('app').classList.remove('waiting');
+    rl.classList.remove('show');
+    if (tokenEls.length !== state.players.length) {
+      buildTokens();
+      state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+    }
+    if (JSON.stringify(state.lastRoll) !== prevRoll && ns.lastRoll) {
+      rolling = true;
+      spinDice(ns.lastRoll.d1, ns.lastRoll.d2);
+    }
+    syncAll(before);
+    const me = state.players.filter(function (p) { return p.id === NET.myId; })[0];
+    if (me && me.kicked) {
+      toast('你已被房主移出对局');
+      setTimeout(leaveNet, 900);
+    }
+  }
+  function onStatus(s) {
+    if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') toast('实时连接断开，正在重连…');
+  }
+
+  /* 掉线跳过：对方既不在线、这个状态又静止 30 秒，就替他跳过 */
+  function skipTick() {
+    if (!NET.on || roomPhase !== 'table' || !state || state.phase !== 'playing') { idleSince = Date.now(); return; }
+    const p = state.players[state.turn];
+    if (!p || p.bankrupt || p.id === NET.myId) { idleSince = Date.now(); return; }
+    if (!window.Net.presenceActive() || window.Net.isOnline(p.id)) { idleSince = Date.now(); return; }
+    if (Date.now() - idleSince < 30000) return;
+    idleSince = Date.now();
+    toast(p.name + ' 掉线，替他跳过这一回合');
+    netAct({ type: 'skipTurn' }, NET.myId);
+  }
+
+  function bootNet() {
+    const q = new URLSearchParams(location.search);
+    if (q.get('local') === '1' || !hasNet()) {
+      NET.on = false;
+      roomPhase = 'table';
+      rl.classList.remove('show');
+      return;
+    }
+    rl.classList.add('show');
+    const code = (q.get('room') || localStorage.getItem('mbg:room') || '').trim().toUpperCase();
+    if (code && code.length === 5) {
+      window.Net.joinRoom(code).then(function (row) {
+        const st = row.state;
+        if (!st || !st.players.some(function (p) { return p.id === window.Net.identity.id; })) {
+          localStorage.removeItem('mbg:room');
+          renderEntry();
+          return;
+        }
+        NET.myId = window.Net.identity.id;
+        NET.code = code; NET.on = true; NET.host = st.hostId === NET.myId;
+        if (!window.Net.identity.name) {
+          const me = st.players.filter(function (p) { return p.id === NET.myId; })[0];
+          if (me) window.Net.setName(me.name);
+        }
+        window.Net.subscribe(code, onRoomState, onStatus);
+        onRoomState(st, row.version);
+      }).catch(function () {
+        localStorage.removeItem('mbg:room');
+        renderEntry();
+      });
+    } else {
+      renderEntry();
+    }
+  }
+
+  function applyMode() {
+    const q = new URLSearchParams(location.search).get('mode');
+    const desktop = q ? q === 'desktop' : window.innerWidth >= 900;
+    const was = LARGE;
+    LARGE = desktop;
+    $('app').className = 'app ' + (desktop ? 'desktop' : 'mobile');
+    setGeom(desktop);
+    if (built && was !== desktop) {
+      buildBoard();
+      if (tokenEls.length) state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+    }
+    setTimeout(function () { sizeBoard(); renderDice(); }, 60);
+  }
+  function sizeBoard() {
+    const wrap = $('boardWrap'), inner = $('boardInner');
+    const aw = wrap.clientWidth, ah = wrap.clientHeight;
+    if (!aw || !ah) return;
+    const ratio = VB.w / VB.h;
+    let w = aw, h = aw / ratio;
+    if (h > ah) { h = ah; w = ah * ratio; }
+    inner.style.width = Math.floor(w) + 'px';
+    inner.style.height = Math.floor(h) + 'px';
+    inner.style.setProperty('--bs', Math.floor(w) + 'px');
+    const cy0 = gY(B0 + RING), cy1 = gY(1 - B0 - RING);
+    inner.style.setProperty('--cty', ((((cy0 + cy1) / 2) * HB - VB.y) / VB.h * 100).toFixed(2) + '%');
+    inner.style.setProperty('--cs', Math.round((cy1 - cy0) * h) + 'px');
+    if (tokenEls.length) state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+  }
+
+  /* ================= 弹层按钮 ================= */
+  $('btnLog').onclick = function () { $('propSheet').classList.remove('open'); $('logSheet').classList.add('open'); };
+  $('logClose').onclick = function () { $('logSheet').classList.remove('open'); };
+  $('btnProps').onclick = function () { $('logSheet').classList.remove('open'); $('propSheet').classList.add('open'); renderProps(); };
+  $('propClose').onclick = function () { $('propSheet').classList.remove('open'); };
+  $('btnTrade').onclick = openTrade;
+  $('trClose').onclick = function () { $('tradeModal').classList.remove('open'); };
+  $('tmClose').onclick = function () { $('tileModal').classList.remove('open'); };
+  $('btnHome').onclick = function () { location.href = '../index.html'; };
+  $('roomPill').onclick = function () {
+    if (!NET.on) { toast('本地热座：没有房间'); return; }
+    refreshRoomSheet();
+    $('roomSheet').classList.add('open');
+  };
+  $('roomClose').onclick = function () { $('roomSheet').classList.remove('open'); };
+  $('rollBtn').onclick = function () { if (state.turnPhase === 'awaitRoll' && !rolling && myTurn()) act({ type: 'roll' }); };
+  $('center').addEventListener('click', function (e) {
+    if (e.target.closest('#rollBtn') || e.target.closest('.rankList')) return;
+    if (state.turnPhase === 'awaitRoll' && !rolling && myTurn()) act({ type: 'roll' });
+  });
+
+  function syncAnimFlag() { document.body.classList.toggle('noanim', document.hidden); }
+  syncAnimFlag();
+  document.addEventListener('visibilitychange', syncAnimFlag);
+  setInterval(syncAnimFlag, 500);
+
+  applyMode();
+  buildBoard();
+  built = true;
+  buildTokens();
+  state.players.forEach(function (p, i) { placeToken(i, p.pos); });
+  syncAll(null);
+  renderDice();
+  window.addEventListener('resize', function () { applyMode(); });
+  window.addEventListener('orientationchange', function () { setTimeout(applyMode, 200); });
+  sizeBoard();
+  bootNet();
+  setInterval(skipTick, 5000);
+  setInterval(function () {
+    if (NET.on && roomPhase === 'table' && window.Net.presenceActive()) renderRank();
+  }, 6000);
+  if (new URLSearchParams(location.search).get('dbg') === '1') dbgEl.style.display = 'block';
+  if (new URLSearchParams(location.search).get('dbg') === '1') {
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;display:flex;gap:6px;flex-wrap:wrap;max-width:60vw';
+    const mk = function (label, fn) {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.style.cssText = 'font:12px/1.2 sans-serif;padding:6px 8px;border-radius:8px;border:1px solid #333;background:#fff';
+      b.onclick = function () { fn(); syncAll(null); };
+      panel.appendChild(b);
+    };
+    mk('入狱A', function () {
+      const p0 = state.players[0];
+      p0.pos = 10; p0.inJail = true; p0.jailTurns = 0;
+      state.turn = 0; state.turnPhase = 'awaitRoll';
+    });
+    mk('给A棕地', function () {
+      [1, 3].forEach(function (i) { state.props[i].owner = state.players[0].id; });
+      state.players[0].pos = 1; state.turn = 0; state.turnPhase = 'awaitEnd';
+    });
+    mk('A钱1000', function () { state.players[0].money = 1000; });
+    mk('B破产', function () { state.players[1].bankrupt = true; });
+    mk('C破产', function () { state.players[2].bankrupt = true; });
+    mk('抽卡', function () {
+      state.card = { deck: 'chance', text: '银行分红，领取 $50（调试卡）', at: Date.now() };
+    });
+    mk('终局', function () { [1, 2, 3].forEach(function (k) { state.players[k].bankrupt = true; }); state.phase = 'ended'; state.winner = state.players[0].id; });
+    document.body.appendChild(panel);
+  }
+  dbg('ready ' + VB.w.toFixed(0) + 'x' + VB.h.toFixed(0));
+})();
+</script>
+</body>
+</html>

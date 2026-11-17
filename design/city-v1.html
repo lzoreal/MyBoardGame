@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大富翁 · 像素城市原型</title>
+<style>
+  :root{
+    --ink:#1b2430;
+    --panel:#222a36;
+    --panel2:#1a222c;
+    --line:#0e1218;
+    --cream:#efe6d2;
+    --dim:#9aa5b4;
+    --accent:#5ac47a;
+    --accent2:#f2c14e;
+    --red:#d4544a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:#12161c;
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, #1d2632 0%, rgba(29,38,50,0) 65%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, rgba(0,0,0,0) 2px 4px);
+    color:var(--cream);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    display:flex;flex-direction:column;
+  }
+
+  /* 顶栏 */
+  .top{
+    height:52px;flex:0 0 auto;display:flex;align-items:center;gap:12px;
+    padding:0 16px;
+    border-bottom:2px solid #0c1016;
+    background:linear-gradient(180deg,#232c38,#1a222c);
+  }
+  .logo{width:18px;height:18px;background:var(--accent);box-shadow:3px 3px 0 #0e1218;border-radius:2px}
+  .top .title{font-size:13px;font-weight:700;letter-spacing:1px}
+  .top .grow{flex:1}
+  .chip{
+    font-size:11px;color:var(--cream);
+    border:2px solid #0e1218;background:#2b3543;
+    padding:4px 8px;box-shadow:2px 2px 0 #0c1016;
+  }
+  .chip b{color:var(--accent2);letter-spacing:2px}
+
+  /* 主体 */
+  main{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+  .stage{
+    position:relative;
+    width:min(calc(100vh - 190px), calc(100vw - 40px), 820px);
+    aspect-ratio:1/1;
+  }
+  canvas#board{
+    position:absolute;inset:0;width:100%;height:100%;
+    image-rendering:pixelated;
+    box-shadow:0 0 0 3px #0b0f14, 0 0 0 6px #2a3441, 0 18px 40px -18px rgba(0,0,0,.9);
+  }
+
+  /* 中间操作台 */
+  .console{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(76%, 420px);
+    max-height:78%;
+    overflow:auto;
+    background:var(--panel);
+    border:3px solid var(--line);
+    box-shadow:inset 0 0 0 2px #39465a, inset 0 0 0 4px #1b232e, 4px 4px 0 rgba(0,0,0,.55);
+    padding:14px;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .chead{display:flex;align-items:center;gap:8px;font-size:12px}
+  .cdot{width:8px;height:8px;background:var(--red);box-shadow:2px 2px 0 #0c1016}
+  .cname{font-weight:700;letter-spacing:.5px}
+  .cname em{font-style:normal;font-size:10px;color:#111;background:var(--accent2);padding:2px 5px;margin-left:6px}
+  .cround{margin-left:auto;font-size:10px;color:var(--dim)}
+
+  .money{display:flex;align-items:baseline;gap:8px;justify-content:center;padding:2px 0}
+  .money b{font-size:30px;letter-spacing:-.5px;color:#fff;text-shadow:2px 2px 0 #0c1016}
+  .money span{font-size:10px;color:var(--dim)}
+
+  .dicebox{display:flex;justify-content:center;align-items:center;gap:8px}
+  .die{
+    width:34px;height:34px;background:#f4f1e8;border:3px solid #0e1218;
+    box-shadow:3px 3px 0 rgba(0,0,0,.5);
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  }
+  .die i{display:block;width:56%;height:56%;margin:auto;background:transparent}
+  .die i.on{background:#222a36}
+  .die.spin{animation:tumble .16s steps(2) infinite}
+  @keyframes tumble{
+    0%{transform:rotate(-8deg) translateY(0)}
+    50%{transform:rotate(6deg) translateY(-3px)}
+    100%{transform:rotate(-8deg) translateY(0)}
+  }
+  .total{font-size:11px;color:var(--cream);background:#182029;border:2px solid var(--line);padding:4px 8px}
+
+  .btn{
+    font:inherit;font-size:12px;font-weight:700;
+    color:var(--cream);background:#2f3a49;
+    border:3px solid var(--line);
+    box-shadow:0 3px 0 #0c1016;
+    padding:8px 12px;cursor:pointer;letter-spacing:.5px;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:none}
+  .btn.primary{background:var(--accent);color:#0d1a12;box-shadow:0 3px 0 #1d6b3a}
+  .btn.primary:active{box-shadow:none}
+  .btn.ghost{background:#202934;color:var(--dim)}
+  .btn.wide{width:100%}
+  .row{display:flex;gap:8px}
+  .row .btn{flex:1}
+
+  .log{border-top:2px dashed #37424f;padding-top:8px;display:flex;flex-direction:column;gap:4px}
+  .log div{font-size:10.5px;color:var(--dim)}
+  .log div:first-child{color:var(--cream)}
+
+  /* 底部玩家条 */
+  .rail{
+    width:min(calc(100vh - 190px), calc(100vw - 40px), 820px);
+    display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;flex:0 0 auto;
+  }
+  .pc{
+    display:flex;align-items:center;gap:8px;
+    background:#1d2530;border:3px solid #0b0f14;
+    box-shadow:inset 0 0 0 2px #2b3543;
+    padding:7px 10px;
+  }
+  .pc .sw{width:12px;height:12px;box-shadow:2px 2px 0 #0c1016}
+  .pc .nm{font-size:11.5px;font-weight:700}
+  .pc .sub{font-size:10px;color:var(--dim)}
+  .pc .cash{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--accent2)}
+  .pc.on{border-color:var(--accent);box-shadow:inset 0 0 0 2px #2c5a3c,0 0 12px rgba(90,196,122,.25)}
+
+  .tag{position:fixed;right:12px;bottom:10px;font-size:10px;color:#6e7c8c}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="logo"></div>
+  <div class="title">像素城市 · 大富翁</div>
+  <div class="grow"></div>
+  <div class="chip">房间 <b>K7M2Q</b></div>
+  <div class="chip">离开</div>
+</div>
+
+<main>
+  <div class="stage">
+    <canvas id="board"></canvas>
+    <div class="console" id="console"></div>
+  </div>
+  <div class="rail" id="rail"></div>
+</main>
+
+<div class="tag">原型 · 像素城市（素材为代码绘制的占位像素图）</div>
+
+<script src="../js/data.js"></script>
+<script>
+(function () {
+  const D = window.MonoData;
+  const T = D.TILES;
+  const COLORS = D.COLORS;
+
+  /* ---------------- 状态（假数据） ---------------- */
+  const state = {
+    round: 3,
+    turn: 0,
+    lastRoll: { a: 4, b: 3, sum: 7 },
+    players: [
+      { id: 'me', name: '阿蒙', color: COLORS[0], pos: 1, money: 1500 },
+      { id: 'b', name: '老王', color: COLORS[1], pos: 25, money: 900 },
+      { id: 'c', name: '小李', color: COLORS[2], pos: 7, money: 1240 }
+    ],
+    props: {
+      1: { owner: 'me', houses: 2 },
+      3: { owner: 'me', houses: 1 },
+      6: { owner: 'b', houses: 3 },
+      8: { owner: 'b', houses: 1 },
+      9: { owner: 'b', houses: 5 },
+      11: { owner: 'c', houses: 0 },
+      37: { owner: 'c', houses: 5 },
+      39: { owner: 'c', houses: 1 }
+    }
+  };
+
+  const me = state.players[0];
+
+  /* ---------------- 调色板 ---------------- */
+  const P = {
+    road: '#49505b',
+    roadLine: '#e7e0c9',
+    plot: '#dcd6c6',
+    plotEdge: '#b8b1a0',
+    walk: '#cfc8b6',
+    walk2: '#a89f8c',
+    grass: '#77b36c',
+    grass2: '#5f9a58',
+    water: '#4f89a8',
+    ink: '#141b24',
+    cream: '#efe6d2',
+    brick: '#b06a4e',
+    brick2: '#8b5240',
+    glass: '#7ba7c2',
+    glass2: '#567f9b',
+    roofR: '#cf5a4a',
+    roofB: '#4a6b9c',
+    roofG: '#d3a127',
+    wall1: '#f3ead6',
+    wall2: '#ddd3ba',
+    shadow: 'rgba(8,12,18,.32)'
+  };
+
+  /* ---------------- 画布 ---------------- */
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  let S = 0, CELL = 0, PAD = 0;
+
+  function cellOf(i) {
+    if (i <= 10) return { r: 11, c: 11 - i };
+    if (i <= 20) return { r: 11 - (i - 10), c: 1 };
+    if (i <= 30) return { r: 1, c: i - 19 };
+    return { r: 1 + (i - 30), c: 11 };
+  }
+
+  function tileRect(i) {
+    const rc = cellOf(i);
+    return {
+      x: PAD + (rc.c - 1) * CELL,
+      y: PAD + (rc.r - 1) * CELL,
+      w: CELL,
+      h: CELL
+    };
+  }
+
+  function resize() {
+    const box = canvas.parentElement.getBoundingClientRect();
+    S = Math.round(Math.min(box.width, box.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = S * dpr;
+    canvas.height = S * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    PAD = Math.round(S * 0.012);
+    CELL = Math.floor((S - PAD * 2) / 11);
+    draw();
+  }
+
+  /* 统一用 2px 网格画，保证"像素块"的硬边感觉 */
+  function px(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x / 2) * 2, Math.round(y / 2) * 2, Math.max(2, Math.round(w / 2) * 2), Math.max(2, Math.round(h / 2) * 2));
+  }
+
+  /* 像素多边形填充（按 2px 方块栅格化，保证斜边也是硬像素） */
+  function pixPoly(pts, color) {
+    const ys = pts.map(p => p[1]);
+    const y0 = Math.floor(Math.min.apply(null, ys) / 2) * 2;
+    const y1 = Math.ceil(Math.max.apply(null, ys) / 2) * 2;
+    ctx.fillStyle = color;
+    for (let yy = y0; yy < y1; yy += 2) {
+      const sy = yy + 1;
+      const xs = [];
+      for (let k = 0; k < pts.length; k++) {
+        const a = pts[k], b = pts[(k + 1) % pts.length];
+        if ((a[1] <= sy && b[1] > sy) || (b[1] <= sy && a[1] > sy)) {
+          xs.push(a[0] + (sy - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+        }
+      }
+      if (xs.length < 2) continue;
+      xs.sort((p, q) => p - q);
+      for (let j = 0; j + 1 < xs.length; j += 2) {
+        const sx = Math.floor(xs[j] / 2) * 2;
+        const ex = Math.ceil(xs[j + 1] / 2) * 2;
+        if (ex > sx) ctx.fillRect(sx, yy, ex - sx, 2);
+      }
+    }
+  }
+
+  /* 颜色加深 / 提亮 */
+  function shade(hex, k) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (k < 0) { r = r * (1 + k); g = g * (1 + k); b = b * (1 + k); }
+    else { r = r + (255 - r) * k; g = g + (255 - g) * k; b = b + (255 - b) * k; }
+    const h = v => ('0' + Math.round(Math.max(0, Math.min(255, v))).toString(16)).slice(-2);
+    return '#' + h(r) + h(g) + h(b);
+  }
+
+  const OUT = '#2b2724';
+
+  /* ---------------- 建筑素材（3/4 视角像素图） ---------------- */
+  const B = {
+    // 空地：草地 + 围栏 + 出售牌
+    lot(x, y, w, h) {
+      px(x, y, w, h, P.grass2);
+      px(x + 2, y + 2, w - 4, h - 4, P.grass);
+      // 围栏
+      const fx = x + 4, fy = y + 4, fw = w - 8, fh = h - 8;
+      px(fx, fy, fw, 2, '#9c8158');
+      px(fx, fy + fh - 2, fw, 2, '#9c8158');
+      px(fx, fy, 2, fh, '#9c8158');
+      px(fx + fw - 2, fy, 2, fh, '#9c8158');
+      // 出售牌
+      const sx = x + w * 0.3, sy = y + h * 0.34;
+      px(sx + 2, sy + h * 0.2, 3, h * 0.28, '#7c5f3e');
+      px(sx - 2, sy - 2, w * 0.44 + 4, h * 0.24 + 4, OUT);
+      px(sx, sy, w * 0.44, h * 0.24, '#f3ead6');
+      px(sx + 2, sy + 2, w * 0.44 - 4, 3, '#b9a98c');
+      // 小树
+      tree(x + w * 0.76, y + h * 0.72, w * 0.2);
+    },
+
+    // 小房子（1~2 房）
+    house(x, y, w, h, roof, count) {
+      const n = count || 1;
+      for (let k = 0; k < n; k++) {
+        const bw = Math.round(w * (n === 1 ? 0.62 : 0.46));
+        const bh = Math.round(h * (n === 1 ? 0.34 : 0.28));
+        const bx = Math.round(x + (n === 1 ? (w - bw) / 2 : w * 0.06 + k * w * 0.44));
+        const byy = Math.round(y + h * (n === 1 ? 0.56 : 0.6));
+        const rh = Math.round(h * (n === 1 ? 0.26 : 0.22));
+        // 投影
+        px(bx + 4, byy + bh - 1, bw, 4, 'rgba(20,27,36,.22)');
+        // 屋顶描边
+        pixPoly([[bx - 5, byy + 3], [bx + bw + 5, byy + 3], [bx + bw / 2, byy - rh - 3]], OUT);
+        // 屋顶
+        pixPoly([[bx - 3, byy + 2], [bx + bw + 3, byy + 2], [bx + bw / 2, byy - rh]], roof);
+        pixPoly([[bx + 1, byy + 2], [bx + bw / 2, byy - rh], [bx + bw / 2, byy + 2]], shade(roof, -0.22));
+        // 墙
+        px(bx - 2, byy - 2, bw + 4, bh + 4, OUT);
+        px(bx, byy, bw, bh, '#f4ead4');
+        px(bx + bw - 4, byy, 4, bh, '#ded0b4');
+        px(bx, byy + bh - 4, bw, 4, '#cbbda3');
+        // 门
+        px(bx + bw * 0.42, byy + bh * 0.42, Math.max(6, Math.round(bw * 0.2)), Math.round(bh * 0.58), '#8a5a3c');
+        // 窗
+        px(bx + Math.round(bw * 0.1), byy + Math.round(bh * 0.22), Math.max(6, Math.round(bw * 0.22)), Math.max(5, Math.round(bh * 0.34)), OUT);
+        px(bx + Math.round(bw * 0.1) + 1, byy + Math.round(bh * 0.22) + 1, Math.max(4, Math.round(bw * 0.22)) - 2, Math.max(3, Math.round(bh * 0.34)) - 2, '#8fc0dc');
+      }
+    },
+
+    // 多层楼（3~4 房）
+    tower(x, y, w, h, roof, accent) {
+      const bw = Math.round(w * 0.56), bh = Math.round(h * 0.66);
+      const bx = Math.round(x + (w - bw) / 2), byy = Math.round(y + h * 0.6) - bh;
+      px(bx + 5, byy + bh, bw, 5, 'rgba(20,27,36,.24)');
+      // 楼体
+      px(bx - 2, byy - 2, bw + 4, bh + 4, OUT);
+      px(bx, byy, bw, bh, '#e9dfc8');
+      px(bx + bw - 5, byy, 5, bh, '#d2c5a9');
+      // 窗（2 列）
+      const cols = 2, rows = Math.max(2, Math.round(bh / 14));
+      const ww = Math.round(bw * 0.26), wh = Math.round(bh / rows * 0.5);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const wx = bx + Math.round(bw * (c === 0 ? 0.16 : 0.56));
+          const wy = byy + 6 + r * Math.round((bh - 12) / rows);
+          px(wx, wy, ww, wh, OUT);
+          px(wx + 1, wy + 1, ww - 2, wh - 2, '#8fc0dc');
+        }
+      }
+      // 顶沿 + 屋顶
+      px(bx - 4, byy - 7, bw + 8, 6, OUT);
+      px(bx - 3, byy - 6, bw + 6, 4, roof);
+      if (accent) px(bx + Math.round(bw * 0.18), byy - 12, Math.round(bw * 0.5), 6, accent);
+    },
+
+    // 旅馆 / 高级酒店（5 房）
+    hotel(x, y, w, h) {
+      const bw = Math.round(w * 0.78), bh = Math.round(h * 0.6);
+      const bx = Math.round(x + (w - bw) / 2), byy = Math.round(y + h * 0.62) - bh;
+      px(bx + 6, byy + bh, bw, 5, 'rgba(20,27,36,.24)');
+      px(bx - 2, byy - 2, bw + 4, bh + 4, OUT);
+      px(bx, byy, bw, bh, '#f2e3bb');
+      px(bx + bw - 6, byy, 6, bh, '#dcc896');
+      // 窗两排
+      const rows = 3;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < 3; c++) {
+          const wx = bx + Math.round(bw * (0.12 + c * 0.29));
+          const wy = byy + 5 + r * Math.round((bh - 16) / rows);
+          px(wx, wy, Math.round(bw * 0.18), Math.round(bh / rows * 0.42), '#7d6234');
+          px(wx, wy, Math.round(bw * 0.18), 2, '#d3a127');
+        }
+      }
+      // 门廊
+      px(bx + Math.round(bw * 0.3), byy + bh - Math.round(bh * 0.3), Math.round(bw * 0.4), Math.round(bh * 0.3), '#8a5a3c');
+      px(bx + Math.round(bw * 0.22), byy + bh - Math.round(bh * 0.34), Math.round(bw * 0.56), 4, '#d3a127');
+      // 屋顶 + 招牌
+      px(bx - 5, byy - 8, bw + 10, 7, OUT);
+      px(bx - 4, byy - 7, bw + 8, 5, '#d3a127');
+      px(bx + Math.round(bw * 0.3), byy - 14, Math.round(bw * 0.4), 7, OUT);
+      px(bx + Math.round(bw * 0.3) + 1, byy - 13, Math.round(bw * 0.4) - 2, 5, '#d4544a');
+      // 旗杆
+      px(bx + 4, byy - 16, 2, 8, '#6b6252');
+      px(bx + 6, byy - 16, 7, 4, '#d4544a');
+    },
+
+    // 车站
+    station(x, y, w, h) {
+      const bw = Math.round(w * 0.82), bh = Math.round(h * 0.4);
+      const bx = Math.round(x + (w - bw) / 2), byy = Math.round(y + h * 0.72) - bh;
+      // 铁轨
+      px(x + 3, y + h - 12, w - 6, 3, '#6a6257');
+      for (let k = x + 4; k < x + w - 6; k += 8) px(k, y + h - 15, 3, 8, '#8b8175');
+      // 站房
+      px(bx - 2, byy - 2, bw + 4, bh + 4, OUT);
+      px(bx, byy, bw, bh, '#dcd3bf');
+      px(bx, byy + bh - 5, bw, 5, '#b2a992');
+      px(bx + 4, byy + 5, bw - 8, bh - 12, '#5f7f96');
+      for (let k = bx + 6; k < bx + bw - 8; k += 9) px(k, byy + 7, 4, bh - 16, '#a7cadf');
+      // 雨棚
+      px(bx - 4, byy - 7, bw + 8, 6, OUT);
+      px(bx - 3, byy - 6, bw + 6, 4, '#3f6b8c');
+      // 站牌
+      px(bx + Math.round(bw * 0.32), byy - 13, Math.round(bw * 0.36), 7, OUT);
+      px(bx + Math.round(bw * 0.32) + 1, byy - 12, Math.round(bw * 0.36) - 2, 5, '#f3ead6');
+    },
+
+    // 公园
+    park(x, y, w, h) {
+      px(x, y, w, h, P.grass2);
+      px(x + 2, y + 2, w - 4, h - 4, P.grass);
+      px(x + w * 0.52, y + h * 0.44, w * 0.34, w * 0.26, '#3f728e');
+      px(x + w * 0.54, y + h * 0.46, w * 0.3, w * 0.22, P.water);
+      tree(x + w * 0.2, y + h * 0.36, w * 0.18);
+      tree(x + w * 0.2, y + h * 0.74, w * 0.16);
+      tree(x + w * 0.74, y + h * 0.22, w * 0.15);
+    },
+
+    // 机会 / 命运：广告牌
+    sign(x, y, w, h, color, glyph) {
+      px(x, y, w, h, P.walk2);
+      px(x + 2, y + 2, w - 4, h - 4, '#3b4652');
+      const bw = Math.round(w * 0.66), bx = Math.round(x + (w - bw) / 2);
+      const byy = Math.round(y + h * 0.34);
+      px(bx + bw / 2 - 2, byy + h * 0.24, 4, h * 0.26, '#6c7684');
+      px(bx - 2, byy - 2, bw + 4, h * 0.26 + 4, OUT);
+      px(bx, byy, bw, h * 0.26, color);
+      px(bx + 2, byy + 2, bw - 4, h * 0.26 - 4, '#f7efdc');
+      ctx.fillStyle = shade(color, -0.35);
+      ctx.font = '700 ' + Math.round(h * 0.2) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(glyph, bx + bw / 2, byy + h * 0.13);
+    },
+
+    // 税 / 政府楼
+    gov(x, y, w, h) {
+      const bw = Math.round(w * 0.76), bh = Math.round(h * 0.42);
+      const bx = Math.round(x + (w - bw) / 2), byy = Math.round(y + h * 0.74) - bh;
+      px(bx + 4, byy + bh, bw, 4, 'rgba(20,27,36,.22)');
+      px(bx - 2, byy - 2, bw + 4, bh + 4, OUT);
+      px(bx, byy, bw, bh, '#ddd5c2');
+      for (let k = 0; k < 4; k++) {
+        px(bx + Math.round(bw * (0.08 + k * 0.24)), byy + 5, Math.round(bw * 0.09), bh - 10, '#c6bda8');
+      }
+      px(bx - 5, byy - 8, bw + 10, 7, OUT);
+      px(bx - 4, byy - 7, bw + 8, 5, '#b7ab90');
+      // 三角山花
+      pixPoly([[bx + bw * 0.5 - 10, byy - 8], [bx + bw * 0.5 + 10, byy - 8], [bx + bw * 0.5, byy - 18]], '#a89a7c');
+    }
+  };
+
+  function tree(x, y, s) {
+    px(x + s * 0.4, y - 2, 3, 8, '#5a4630');
+    px(x - 2, y - 4, s + 6, 5, OUT);
+    px(x, y - 11, s, 9, '#4e8a4c');
+    px(x + 2, y - 14, s - 4, 5, '#5f9e58');
+    px(x + 3, y - 13, s * 0.45, 3, '#7bbd6e');
+    px(x + 1, y - 3, s + 2, 4, '#3f723e');
+  }
+
+  /* 汽车（棋子） */
+  function car(x, y, w, color, i) {
+    const bw = w, bh = Math.max(9, Math.round(w * 0.6));
+    px(x + 2, y + bh - 1, bw, 3, 'rgba(10,14,20,.45)');
+    px(x - 1, y - 1, bw + 2, bh + 2, OUT);
+    px(x, y, bw, bh - 2, color);
+    px(x, y + bh - 5, bw, 3, shade(color, -0.3));
+    px(x + Math.round(bw * 0.18), y - Math.round(bh * 0.34), Math.round(bw * 0.64), Math.round(bh * 0.36), OUT);
+    px(x + Math.round(bw * 0.2), y - Math.round(bh * 0.3), Math.round(bw * 0.6), Math.round(bh * 0.3), shade(color, 0.35));
+    px(x + 2, y + 1, 2, 2, '#151c26');
+    px(x + bw - 4, y + 1, 2, 2, '#151c26');
+    if (i !== 0) px(x + 1, y + 2, 2, 2, '#ffe9b0');
+  }
+
+  /* ---------------- 画棋盘 ---------------- */
+  function draw() {
+    if (!S) return;
+    ctx.clearRect(0, 0, S, S);
+
+    // 整个棋盘先铺沥青（地块之间露出来的就是街道）
+    px(0, 0, S, S, '#2a303a');
+    px(4, 4, S - 8, S - 8, P.road);
+
+    // 中间城区：外圈环路 + 公园
+    const cx0 = PAD + CELL, cy0 = PAD + CELL;
+    const csz = CELL * 9;
+    drawCityCenter(cx0, cy0, csz);
+
+    // 环形地块
+    T.forEach((t, i) => drawTile(i, t));
+  }
+
+  function drawCityCenter(x, y, s) {
+    // 环路（地块与园区之间的街道）
+    px(x, y, s, s, P.road2 || '#4f5763');
+    // 虚线
+    ctx.fillStyle = 'rgba(231,224,201,.35)';
+    const ring = Math.max(6, s * 0.014);
+    for (let k = 0; k < s; k += 14) {
+      ctx.fillRect(x + k, y + ring / 2 - 1, 8, 2);
+      ctx.fillRect(x + k, y + s - ring / 2 - 1, 8, 2);
+      ctx.fillRect(x + ring / 2 - 1, y + k, 2, 8);
+      ctx.fillRect(x + s - ring / 2 - 1, y + k, 2, 8);
+    }
+
+    // 园区地面
+    const px0 = x + 10, py0 = y + 10, psz = s - 20;
+    px(px0, py0, psz, psz, P.grass2);
+    px(px0 + 4, py0 + 4, psz - 8, psz - 8, P.grass);
+
+    // 步道十字
+    px(px0 + psz * 0.06, py0 + psz * 0.46, psz * 0.88, 8, '#d9d3c3');
+    px(px0 + psz * 0.46, py0 + psz * 0.06, 8, psz * 0.88, '#d9d3c3');
+
+    // 左上：池塘（拼出不规则边）
+    const wx = px0 + psz * 0.06, wy = py0 + psz * 0.06;
+    const ww = psz * 0.2, wh = psz * 0.14;
+    px(wx, wy + 4, ww, wh - 4, P.water);
+    px(wx + 4, wy, ww - 10, wh, P.water);
+    px(wx + 6, wy + 4, ww - 16, 4, '#6fa3bd');
+    px(wx + ww * 0.5, wy + wh, 4, 8, '#8a7f66');
+
+    // 右上：社区花园（3×3 菜畦）
+    const gx = px0 + psz * 0.66, gy = py0 + psz * 0.07;
+    px(gx - 4, gy - 4, psz * 0.22, psz * 0.16, '#b8b1a0');
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        px(gx + c * (psz * 0.07), gy + r * (psz * 0.045), psz * 0.055, psz * 0.03, r % 2 ? '#8fbf6d' : '#6fae63');
+      }
+    }
+
+    // 左下：运动场（跑道）
+    const fx = px0 + psz * 0.08, fy = py0 + psz * 0.7;
+    px(fx, fy, psz * 0.2, psz * 0.14, '#b8b1a0');
+    px(fx + 4, fy + 4, psz * 0.2 - 8, psz * 0.14 - 8, '#c98f5c');
+    px(fx + psz * 0.1 - 1, fy + 4, 2, psz * 0.14 - 8, '#efe6d2');
+
+    // 右下：市集摊（三个带遮阳棚的小摊）
+    const mx = px0 + psz * 0.68, my = py0 + psz * 0.72;
+    for (let k = 0; k < 3; k++) {
+      const sx = mx + k * psz * 0.075;
+      px(sx, my + 6, psz * 0.06, psz * 0.07, '#efe6d2');
+      px(sx - 2, my, psz * 0.065, 6, ['#cf5a4a', '#4a6b9c', '#d3a127'][k]);
+    }
+
+    // 树
+    tree(px0 + psz * 0.32, py0 + psz * 0.1, psz * 0.045);
+    tree(px0 + psz * 0.34, py0 + psz * 0.86, psz * 0.045);
+    tree(px0 + psz * 0.86, py0 + psz * 0.4, psz * 0.045);
+    tree(px0 + psz * 0.1, py0 + psz * 0.38, psz * 0.045);
+    tree(px0 + psz * 0.6, py0 + psz * 0.3, psz * 0.04);
+
+    // 小车
+    car(px0 + psz * 0.22, py0 + psz * 0.44, psz * 0.045, COLORS[3], 1);
+    car(px0 + psz * 0.44, py0 + psz * 0.66, psz * 0.045, COLORS[1], 0);
+  }
+
+  const SHORT = {
+    go: '起点', jail: '监狱', free: '免费停车', gotojail: '入狱'
+  };
+
+  function drawTile(i, t) {
+    const r = tileRect(i);
+    const x = r.x, y = r.y, w = r.w, h = r.h;
+    const g2 = 4;
+
+    // 地块：浅色铺装，四周留出街道
+    px(x + g2, y + g2, w - g2 * 2, h - g2 * 2, P.plotEdge);
+    px(x + g2 + 2, y + g2 + 2, w - g2 * 2 - 4, h - g2 * 2 - 4, P.plot);
+
+    const prop = state.props[i];
+    const group = t.group ? D.GROUPS[t.group] : null;
+    const accent = group ? group.color : P.roofR;
+
+    // 分组色条
+    if (group) {
+      px(x + 6, y + 6, w - 12, 6, accent);
+      px(x + 6, y + 12, w - 12, 2, 'rgba(20,27,36,.35)');
+    }
+
+    const bx = x + 6, by = y + (group ? 16 : 6), bw = w - 12, bh = h - (group ? 16 : 6) - 20;
+
+    if (t.type === 'prop') {
+      const lvl = prop ? prop.houses : 0;
+      if (lvl === 0) B.lot(bx, by, bw, bh);
+      else if (lvl <= 2) B.house(bx, by, bw, bh, accent, lvl === 2 ? 2 : 1);
+      else if (lvl <= 4) B.tower(bx, by, bw, bh, accent, '#efe6d2');
+      else B.hotel(bx, by, bw, bh);
+    } else if (t.type === 'rail') {
+      B.station(bx, by, bw, bh);
+    } else if (t.type === 'util') {
+      B.tower(bx, by, bw, bh, '#6f7d8c', '#8fa2b3');
+    } else if (t.type === 'chance') {
+      B.sign(bx, by, bw, bh, '#7d6bd6', '?');
+    } else if (t.type === 'chest') {
+      B.sign(bx, by, bw, bh, '#4a9c6e', '★');
+    } else if (t.type === 'tax') {
+      B.gov(bx, by, bw, bh);
+    } else if (t.type === 'free') {
+      px(bx, by, bw, bh, '#2b3543');
+      px(bx + 3, by + 3, bw - 6, bh - 6, '#3b4652');
+      ctx.strokeStyle = '#e8e2cf'; ctx.lineWidth = 2;
+      ctx.strokeRect(bx + bw * 0.18, by + bh * 0.38, bw * 0.64, bh * 0.44);
+      ctx.fillStyle = '#e8e2cf';
+      ctx.font = '700 ' + Math.round(bh * 0.3) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('P', bx + bw / 2, by + bh * 0.62);
+    } else if (t.type === 'jail') {
+      px(bx, by, bw, bh, '#3b4652');
+      px(bx + 4, by + bh * 0.18, bw - 8, bh * 0.64, '#5a636e');
+      for (let k = 0; k < 4; k++) px(bx + 8 + k * ((bw - 16) / 4), by + bh * 0.2, 4, bh * 0.6, '#20293a');
+      px(bx + 3, by + bh * 0.1, bw - 6, 5, '#8b8577');
+    } else if (t.type === 'go') {
+      B.house(bx, by, bw, bh, '#c9a227');
+    } else if (t.type === 'gotojail') {
+      B.gov(bx, by, bw, bh);
+      px(bx + bw * 0.66, by + bh * 0.5, bw * 0.24, bh * 0.32, '#20293a');
+      px(bx + bw * 0.7, by + bh * 0.56, bw * 0.16, 4, '#d4544a');
+    }
+
+    // 车（棋子）
+    const here = state.players.filter(p => p.pos === i);
+    if (here.length) {
+      const cw = Math.max(10, Math.round(CELL * 0.2));
+      here.forEach((p, k) => {
+        car(x + 6 + k * (cw + 3), y + h - 22 - Math.round(cw * 0.5), cw, p.color, 0);
+      });
+    }
+
+    // 当前玩家所在格：绿色描边
+    if (state.players[state.turn].pos === i) {
+      ctx.strokeStyle = '#5ac47a';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
+    }
+
+    // 名字条
+    px(x + 4, y + h - 19, w - 8, 15, 'rgba(22,28,36,.92)');
+    ctx.fillStyle = '#f3ead6';
+    ctx.font = '700 ' + Math.max(9, Math.round(CELL * 0.145)) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(t.name, x + w / 2, y + h - 11.5);
+
+    // 价格角标
+    if (t.price) {
+      ctx.font = Math.max(7, Math.round(CELL * 0.105)) + 'px sans-serif';
+      ctx.fillStyle = 'rgba(12,16,22,.72)';
+      const tw = ctx.measureText('$' + t.price).width + 8;
+      ctx.fillRect(x + w - tw - 5, y + 6, tw, Math.max(9, CELL * 0.13));
+      ctx.fillStyle = '#d9d2bf';
+      ctx.textAlign = 'center';
+      ctx.fillText('$' + t.price, x + w - tw / 2 - 5, y + 6 + Math.max(9, CELL * 0.13) / 2);
+    }
+
+    // 抵押斜纹
+    if (prop && prop.mortgaged) {
+      ctx.fillStyle = 'rgba(212,84,74,.16)';
+      for (let k = -h; k < w; k += 10) ctx.fillRect(x + k, y, 5, h);
+    }
+  }
+
+  /* ---------------- 中央面板 ---------------- */
+  const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  function dieHTML(v) {
+    let s = '';
+    for (let k = 0; k < 9; k++) s += '<i' + (PIPS[v].indexOf(k) >= 0 ? ' class="on"' : '') + '></i>';
+    return '<div class="die">' + s + '</div>';
+  }
+
+  function renderConsole() {
+    const p = state.players[state.turn];
+    const owned = Object.keys(state.props).filter(k => state.props[k].owner === p.id).length;
+    document.getElementById('console').innerHTML =
+      '<div class="chead"><span class="cdot" style="background:' + p.color + '"></span>' +
+        '<span class="cname">' + p.name + '<em>你的回合</em></span>' +
+        '<span class="cround">第 ' + state.round + ' 轮</span></div>' +
+      '<div class="money"><b>$' + p.money + '</b><span>' + owned + ' 块地产</span></div>' +
+      '<div class="dicebox">' + dieHTML(state.lastRoll.a) + dieHTML(state.lastRoll.b) +
+        '<span class="total">' + state.lastRoll.sum + ' 点</span></div>' +
+      '<button class="btn primary wide" id="roll">掷骰子</button>' +
+      '<div class="row"><button class="btn ghost">交易</button><button class="btn ghost">地产</button></div>' +
+      '<div class="log"><div>阿蒙 掷出 ' + state.lastRoll.a + ' + ' + state.lastRoll.b + ' = ' + state.lastRoll.sum + '</div>' +
+      '<div>老王 买下 珠江路 $100</div><div>轮到 阿蒙</div></div>';
+
+    document.getElementById('roll').addEventListener('click', () => {
+      const dice = document.querySelectorAll('.die');
+      dice.forEach(d => d.classList.add('spin'));
+      const btn = document.getElementById('roll');
+      btn.disabled = true;
+      setTimeout(() => {
+        state.lastRoll = {
+          a: 1 + Math.floor(Math.random() * 6),
+          b: 1 + Math.floor(Math.random() * 6)
+        };
+        state.lastRoll.sum = state.lastRoll.a + state.lastRoll.b;
+        renderConsole();
+      }, 460);
+    });
+  }
+
+  function renderRail() {
+    document.getElementById('rail').innerHTML = state.players.map((p, i) => {
+      const owned = Object.keys(state.props).filter(k => state.props[k].owner === p.id).length;
+      return '<div class="pc' + (i === state.turn ? ' on' : '') + '">' +
+        '<span class="sw" style="background:' + p.color + '"></span>' +
+        '<div><div class="nm">' + p.name + (p.id === me.id ? '（你）' : '') + '</div>' +
+        '<div class="sub">' + owned + ' 块地产</div></div>' +
+        '<div class="cash">$' + p.money + '</div></div>';
+    }).join('');
+  }
+
+  function all() {
+    draw();
+    renderConsole();
+    renderRail();
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  resize();
+  renderConsole();
+  renderRail();
+})();
+</script>
+</body>
+</html>

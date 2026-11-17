@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>大富翁 · 素材对照（Q 版卡通方向）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:18px 20px 40px;background:#f2f5fa;color:#25314a;
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{font-size:13px;color:#78849c;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .card{background:#fff;border-radius:16px;padding:12px;box-shadow:0 4px 14px rgba(40,70,120,.10)}
+  .card h2{font-size:15px;margin:0 0 2px}
+  .card .meta{font-size:11.5px;color:#8896ad;margin-bottom:8px;line-height:1.5}
+  .view{width:100%;height:230px;border-radius:12px;background:linear-gradient(180deg,#eaf3ff,#dfeafc);overflow:hidden}
+  .view canvas{display:block;width:100%;height:100%}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:999px;background:#eef3fb;color:#4a5e85;font-weight:700}
+  .tag.ok{background:#e3f7e6;color:#2f7a3b}
+  .tag.warn{background:#fff1dc;color:#8a5b12}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+  th,td{padding:7px 8px;border-bottom:1px solid #e8eef7;text-align:left}
+  th{color:#78849c;font-weight:700;background:#f7fafd}
+  td b{color:#25314a}
+</style>
+</head>
+<body>
+<h1>素材对照 · Q 版卡通大富翁</h1>
+<div class="sub">全部 CC0（公有领域，可商用、无需署名）。下方每个方块是按各素材包原样实时渲染的，直接看风格差异。</div>
+
+<div class="grid" id="grid"></div>
+
+<h2 style="font-size:16px;margin:26px 0 6px">素材包清单</h2>
+<table>
+  <thead><tr><th>素材包</th><th>内容</th><th>格式</th><th>授权</th><th>用在</th></tr></thead>
+  <tbody>
+    <tr><td><b>KayKit City Builder Bits</b></td><td>8 栋彩色楼 + 道路 + 5 辆车 + 路灯/消防栓等 32 件</td><td>glTF / FBX / OBJ</td><td class="ok">CC0</td><td>棋盘建筑、小车</td></tr>
+    <tr><td><b>Kenney City Kit (Commercial)</b></td><td>14 栋商业楼 + 14 栋低细节 + 5 座摩天楼 + 雨棚等 41 件</td><td>glb / fbx / obj</td><td class="ok">CC0</td><td>地产格建筑</td></tr>
+    <tr><td><b>Kenney City Kit (Suburban)</b></td><td>21 种住宅 + 大小树 + 栅栏 + 门牌 40 件</td><td>glb / fbx / obj</td><td class="ok">CC0</td><td>空地/低等级房屋</td></tr>
+    <tr><td><b>Kenney City Kit (Roads)</b></td><td>道路直/弯/十字/回环 + 路灯 + 路牌 + 施工件 95 件</td><td>glb / fbx / obj</td><td class="ok">CC0</td><td>环路与街景</td></tr>
+    <tr><td><b>Kenney Mini Characters</b></td><td>20 个 Q 版人物 + 23 件辅助道具（拐杖/眼镜等）</td><td>glb / fbx / obj</td><td class="ok">CC0</td><td>棋子、玩家头像</td></tr>
+    <tr><td><b>Kenney Boardgame Pack</b></td><td>桌游用棋盘、卡牌、骰子、标记件</td><td>png / 矢量</td><td class="ok">CC0</td><td>卡牌、骰子贴图</td></tr>
+    <tr><td><b>Kenney UI Pack</b></td><td>按钮、面板、滑动条、图标</td><td>png / svg</td><td class="ok">CC0</td><td>HUD 皮肤</td></tr>
+  </tbody>
+</table>
+
+<script src="assets/lib/three.min.js"></script>
+<script src="assets/lib/GLTFLoader.js"></script>
+<script>
+(function () {
+  const BASE = {
+    kay: 'assets/models/kaykit-city/KayKit_City_Builder_Bits_1.0_FREE/Assets/gltf/',
+    kc: 'assets/models/kit-commercial/',
+    ks: 'assets/models/kit-suburban/',
+    kr: 'assets/models/kit-roads/',
+    ch: 'assets/models/kit-characters/Models/GLB format/'
+  };
+  const EXT = { kay: '.gltf', kc: '.glb', ks: '.glb', kr: '.glb', ch: '.glb' };
+
+  const loader = new THREE.GLTFLoader();
+  const cache = {};
+
+  function load(kit, name) {
+    const url = encodeURI(BASE[kit] + name + EXT[kit]);
+    if (cache[url]) return Promise.resolve(cache[url]);
+    return new Promise(function (res) {
+      loader.load(url, function (g) { cache[url] = g.scene; res(g.scene); },
+        undefined, function () { res(null); });
+    });
+  }
+
+  const CARDS = [
+    {
+      title: 'KayKit · City Builder Bits',
+      meta: '8 栋建筑 + 道路 + 车辆。颜色饱和、卡通比例，最接近参考图那种玩具城市。',
+      items: [['kay', 'building_A'], ['kay', 'building_C'], ['kay', 'building_E'], ['kay', 'building_G'],
+              ['kay', 'car_taxi'], ['kay', 'road_straight']],
+      tags: ['CC0 可商用', 'glTF', '32 件'],
+      spread: 0.95, h: 5.4
+    },
+    {
+      title: 'KayKit · 全部 8 栋楼',
+      meta: '俯视小楼、带招牌配色，成排摆放就是街区。',
+      items: [['kay', 'building_A'], ['kay', 'building_B'], ['kay', 'building_C'], ['kay', 'building_D'],
+              ['kay', 'building_E'], ['kay', 'building_F'], ['kay', 'building_G'], ['kay', 'building_H']],
+      tags: ['CC0 可商用', 'glTF'],
+      spread: 0.86, h: 6.2
+    },
+    {
+      title: 'Kenney · 商业楼 / 住宅 / 树',
+      meta: '低模偏写实，楼体是灰白贴图，靠染色才有颜色。广场、环路用它很稳。',
+      items: [['kc', 'building-a'], ['kc', 'building-e'], ['kc', 'building-i'],
+              ['ks', 'building-type-a'], ['ks', 'building-type-k'], ['ks', 'tree-large']],
+      tags: ['CC0 可商用', 'glb', '1 项警告：需要染色'],
+      spread: 0.95, h: 5.4
+    },
+    {
+      title: 'Kenney · Mini Characters（棋子候选）',
+      meta: '20 个 Q 版人物，可直接当棋子；风格比参考图更「方块」，但一致性好。',
+      items: [['ch', 'character-male-b'], ['ch', 'character-female-b'], ['ch', 'character-male-d'],
+              ['ch', 'character-female-d'], ['ch', 'character-worker'], ['ch', 'character-robot']],
+      tags: ['CC0 可商用', 'glb', '20 人物'],
+      spread: 0.95, h: 2.6, yBase: 0
+    },
+    {
+      title: 'Kenney · 道路与街景件',
+      meta: '直道、十字、弯道、路灯、锥桶，用来拼环路和施工区。',
+      items: [['kr', 'road-straight'], ['kr', 'road-crossroad'], ['kr', 'road-bend'],
+              ['kr', 'light-square'], ['kr', 'traffic-light'], ['kr', 'construction-cone']],
+      tags: ['CC0 可商用', 'glb', '95 件'],
+      spread: 1.6, h: 4.6
+    }
+  ];
+
+  const grid = document.getElementById('grid');
+
+  CARDS.forEach(function (cfg) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<h2>' + cfg.title + '</h2><div class="meta">' + cfg.meta + '</div>' +
+      '<div class="view"></div><div class="tags">' +
+      cfg.tags.map(function (t) {
+        return '<span class="tag ' + (/警告/.test(t) ? 'warn' : 'ok') + '">' + t + '</span>';
+      }).join('') + '</div>';
+    grid.appendChild(card);
+    buildView(card.querySelector('.view'), cfg);
+  });
+
+  function fitCamera(cam, group, renderer, w, h) {
+    // 等距投影下的屏幕坐标（与相机方向 (1,1.25,1) 对应）
+    const K = 0.70710678, CE = 0.751, SE = 0.468;
+    const box = new THREE.Box3().setFromObject(group);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    [box.min.x, box.max.x].forEach(function (x) {
+      [box.min.y, box.max.y].forEach(function (y) {
+        [box.min.z, box.max.z].forEach(function (z) {
+          const sx = (x - z) * K;
+          const sy = y * CE - (x + z) * K * SE;
+          minX = Math.min(minX, sx); maxX = Math.max(maxX, sx);
+          minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
+        });
+      });
+    });
+    const padX = (maxX - minX) * 0.07 + 0.03, padY = (maxY - minY) * 0.07 + 0.03;
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    let halfW = (maxX - minX) / 2 + padX, halfH = (maxY - minY) / 2 + padY;
+    const aspect = w / h;
+    if (halfW / halfH > aspect) halfH = halfW / aspect; else halfW = halfH * aspect;
+    cam.left = cx - halfW; cam.right = cx + halfW;
+    cam.top = cy + halfH; cam.bottom = cy - halfH;
+    cam.updateProjectionMatrix();
+  }
+
+  function buildView(el, cfg) {
+    const w = el.clientWidth || 320, h = el.clientHeight || 190;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setSize(w, h, false);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    el.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xa8d8a0, 0.75));
+    const sun = new THREE.DirectionalLight(0xfff8ec, 0.72);
+    sun.position.set(4, 7, 3); sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.camera.left = -6; sun.shadow.camera.right = 6;
+    sun.shadow.camera.top = 6; sun.shadow.camera.bottom = -6;
+    scene.add(sun);
+
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(6, 40),
+      new THREE.MeshLambertMaterial({ color: 0xeef5ff }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.01;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 60);
+    const dir = new THREE.Vector3(1, 1.25, 1).normalize();
+    const viewH = cfg.h;
+    const aspect = w / h;
+    let vh, vw;
+    if (aspect >= 1) { vh = viewH; vw = viewH * aspect; } else { vw = viewH; vh = viewH / aspect; }
+    cam.left = -vw / 2; cam.right = vw / 2; cam.top = vh / 2; cam.bottom = -vh / 2;
+    cam.position.copy(dir.multiplyScalar(20));
+    cam.lookAt(0, 0.6, 0);
+    cam.updateProjectionMatrix();
+
+    const group = new THREE.Group();
+    scene.add(group);
+    const items = cfg.items;
+    Promise.all(items.map(function (it) { return load(it[0], it[1]); })).then(function (scenes) {
+      const n = items.length;
+      scenes.forEach(function (src, i) {
+        if (!src) return;
+        let skinned = false;
+        src.traverse(function (o) { if (o.isSkinnedMesh) skinned = true; });
+        const obj = skinned ? src : src.clone(true);
+        obj.traverse(function (o) {
+          if (o.isMesh) {
+            o.castShadow = true; o.receiveShadow = true;
+            if (o.material && o.material.map) o.material.map.encoding = THREE.sRGBEncoding;
+          }
+        });
+        const box = new THREE.Box3().setFromObject(obj);
+        const size = new THREE.Vector3(); box.getSize(size);
+        const targetSize = cfg.spread < 1 ? 0.75 : 1.0;
+        const s = targetSize / Math.max(size.x, size.z, 0.001);
+        obj.scale.setScalar(s);
+        // 沿屏幕水平方向 (1,0,-1) 排开
+        const t = (i - (n - 1) / 2) * cfg.spread;
+        obj.position.set(t * 0.707, -box.min.y * s + 0.02, -t * 0.707);
+        obj.rotation.y = -Math.PI / 4;
+        group.add(obj);
+      });
+      group.updateMatrixWorld(true);
+      fitCamera(cam, group, renderer, w, h);
+      const lb = new THREE.Box3().setFromObject(group);
+      const tag = document.createElement('div');
+      tag.textContent = 'bbox ' + (lb.max.x - lb.min.x).toFixed(2) + ' x ' + (lb.max.y - lb.min.y).toFixed(2) +
+        ' | cam ' + (cam.right - cam.left).toFixed(2) + ' x ' + (cam.top - cam.bottom).toFixed(2);
+      tag.style.cssText = 'position:absolute;left:6px;bottom:4px;font:10px monospace;color:#6b7a93;opacity:.75';
+      el.style.position = 'relative';
+      el.appendChild(tag);
+      renderer.render(scene, cam);
+    });
+  }
+})();
+</script>
+</body>
+</html>

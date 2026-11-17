@@ -1,0 +1,308 @@
+/* =========================================================
+   大富翁 · 萌趣街区（Q 版 2.5D）  board-classic.css
+   手机竖屏为主版式；电脑版为独立横屏版式（非缩放）
+   ========================================================= */
+:root{
+  --blue:#2f6bd0; --blueD:#1b4f9e; --blueL:#6cb9ff;
+  --cream:#fdf4e2; --creamD:#f0dfbf; --ink:#2b3a52; --dim:#8b7d62;
+  --gold:#ffcf4d; --line:rgba(168,136,92,.32);
+  --shadowCard:0 6px 0 rgba(176,142,92,.28),0 12px 22px rgba(20,40,80,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background:#bfe6f7;user-select:none;
+}
+.noanim *{transition:none!important;animation:none!important}
+
+.app{position:fixed;inset:0;overflow:hidden;
+  display:flex;flex-direction:column}
+
+/* ---------- 背景：天空 + 城市剪影 ---------- */
+.bgCity{position:absolute;inset:0;z-index:0;
+  background:
+    linear-gradient(180deg,#a9dcf7 0%,#d7f0fb 46%,#eaf7e6 72%,#cfeab5 100%);
+}
+.bgCity::before{content:"";position:absolute;inset:0;
+  background:url("assets/tex/bg-city.png") center/cover no-repeat;
+  opacity:.34;filter:saturate(1.15) brightness(1.12) blur(2px);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 60%,rgba(0,0,0,.35) 100%);
+          mask-image:linear-gradient(180deg,#000 0%,#000 60%,rgba(0,0,0,.35) 100%);
+}
+.bgCity::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-60px;height:220px;
+  background:radial-gradient(ellipse at 50% 100%,#8ed06c 0%,#a9dd82 52%,#c4e89c 100%);
+  border-radius:50% 50% 0 0;opacity:.9}
+
+/* ================= 顶栏 ================= */
+.topbar{position:absolute;z-index:5;display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding:8px 10px 6px}
+.tbL{display:flex;align-items:center;gap:8px;min-width:0}
+.tbR{display:flex;align-items:center;gap:8px}
+
+.homeBtn{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:14px;cursor:pointer;
+  background:linear-gradient(180deg,#7dbcf3,#3f7fd0);box-shadow:0 3px 0 #24548f,0 6px 12px rgba(20,50,100,.3),inset 0 2px 0 rgba(255,255,255,.5);
+  display:grid;place-items:center}
+.homeBtn:active{transform:translateY(2px)}
+
+.roomPill{display:flex;align-items:center;height:40px;padding:0 16px;border-radius:20px;
+  background:linear-gradient(180deg,#4a8de0,#2a5fb0);border:2px solid rgba(255,255,255,.85);
+  box-shadow:0 3px 0 #1d4685,0 8px 16px rgba(20,50,100,.26),inset 0 2px 0 rgba(255,255,255,.34);
+  color:#fff;font-weight:800;font-size:13px;letter-spacing:.4px;white-space:nowrap;
+  text-shadow:0 1px 2px rgba(10,40,90,.45)}
+.roundPill{display:flex;align-items:center;height:36px;padding:0 14px;border-radius:18px;
+  background:rgba(255,255,255,.24);border:2px solid rgba(255,255,255,.7);
+  color:#fff;font-weight:800;font-size:12px;white-space:nowrap;
+  text-shadow:0 1px 2px rgba(10,40,90,.4)}
+.roundPill b{font-size:14px;margin:0 2px}
+.logBtn{height:36px;padding:0 14px;border:0;border-radius:16px;cursor:pointer;
+  background:linear-gradient(180deg,#fffaf0,#efdcbb);color:#7a6a4c;font-weight:900;font-size:12px;
+  box-shadow:0 3px 0 #c9b48a,inset 0 2px 0 rgba(255,255,255,.85)}
+.logBtn:active{transform:translateY(2px)}
+
+/* ================= 玩家胶囊 ================= */
+.players{position:absolute;z-index:4;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.pcard{position:relative;display:flex;align-items:center;gap:8px;padding:5px 8px 5px 5px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(0,0,0,.1)),var(--pc);
+  border:2.5px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.16),0 8px 14px rgba(20,40,80,.2);
+  transition:transform .18s,box-shadow .18s}
+.pcard.active{transform:scale(1.02);
+  box-shadow:0 0 0 3px var(--gold),0 0 18px rgba(255,207,77,.7),0 6px 14px rgba(20,40,80,.24)}
+.pcard.out{opacity:.55;filter:grayscale(.5)}
+.pav{width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:#fff;overflow:hidden;
+  box-shadow:0 0 0 2.5px rgba(255,255,255,.9),inset 0 0 0 1px rgba(0,0,0,.06)}
+.pav svg{width:100%;height:100%;display:block}
+.pnm{font-weight:900;font-size:12.5px;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.28);min-width:0}
+.pnm i{font-style:normal;font-size:11px;margin-left:2px;opacity:.9}
+.pcash{margin-left:auto;background:linear-gradient(180deg,#fffdf5,#f3e4c4);border-radius:11px;padding:3px 8px;
+  font-weight:900;font-size:12px;color:#3b4b63;white-space:nowrap;
+  box-shadow:inset 0 0 0 1.5px rgba(190,160,110,.5),0 1px 0 rgba(255,255,255,.7)}
+
+/* ================= 棋盘 ================= */
+.boardWrap{position:absolute;z-index:1;display:grid;place-items:center;overflow:hidden}
+.boardInner{position:relative;width:100%;max-width:100%;max-height:100%;
+  filter:drop-shadow(0 18px 30px rgba(24,44,80,.22))}
+#boardSvg{display:block;width:100%;height:100%}
+.tokens{position:absolute;inset:0;pointer-events:none}
+
+.token{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;transform:translateZ(0);
+  transition:left .08s linear,top .08s linear}
+.tkSh{position:absolute;left:50%;bottom:-2px;width:34px;height:10px;margin-left:-17px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(30,50,20,.34),rgba(30,50,20,0) 70%)}
+.tkBody{position:absolute;inset:0;border-radius:50%;background:#fff;overflow:hidden;
+  box-shadow:0 0 0 3px var(--c),0 4px 8px rgba(20,40,80,.3)}
+.tkBody svg{width:100%;height:100%;display:block}
+.token.me .tkBody{box-shadow:0 0 0 3px var(--c),0 0 0 6px rgba(255,214,90,.55),0 6px 12px rgba(20,40,80,.3)}
+.token.jailed{filter:saturate(.7)}
+.token.hop{animation:hop .3s ease-out}
+@keyframes hop{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-9px) scale(1.05)}100%{transform:translateY(0) scale(1)}}
+
+/* ================= 底部操作区 ================= */
+.dock{position:absolute;z-index:4;display:flex;flex-direction:column;gap:8px}
+.dockRow1{display:flex;align-items:flex-end;gap:8px}
+
+.turnPanel{position:relative;flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:9px;
+  padding:8px 12px 8px 8px;border-radius:24px;
+  background:linear-gradient(180deg,#fffdf5,#f9ecd4);border:3px solid #fff;
+  box-shadow:var(--shadowCard)}
+.tpAv{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:#fff;overflow:hidden;
+  box-shadow:0 0 0 3px rgba(255,255,255,.95),0 4px 10px rgba(30,60,110,.2)}
+.tpAv svg{width:100%;height:100%;display:block}
+.tpTx{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.tpTx b{font-size:15px;color:#2c5cc0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tpTx span{font-size:11.5px;color:#8b7d62;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{height:6px;border-radius:4px;background:#e8dcc2;overflow:hidden;margin-top:3px}
+.timer i{display:block;height:100%;width:100%;border-radius:4px;background:#7ed957;transition:width .35s linear,background .35s}
+.tsec{font-size:12px;font-weight:900;color:#8b7d62;flex:0 0 auto}
+
+.diceDisc{position:relative;flex:0 0 78px;width:78px;height:78px;border-radius:50%;
+  background:radial-gradient(circle at 50% 30%,#ffffff 0%,#f2f7ff 55%,#cfe2fb 100%);
+  box-shadow:0 0 0 4px #ffffff,0 0 0 7px rgba(126,176,238,.55),0 8px 18px rgba(30,90,170,.3),
+    inset 0 -6px 12px rgba(140,180,230,.35);
+  display:grid;place-items:center}
+.diceWrap{width:66px;height:62px}
+#diceCv{width:66px;height:62px;display:block}
+
+.actions{flex:0 0 112px;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.actBtn{flex:1 1 46px;min-height:36px;border:0;border-radius:14px;cursor:pointer;padding:0 10px;
+  font:900 12.5px/1.15 inherit;letter-spacing:.3px;color:#fff;
+  background:linear-gradient(180deg,#6cb9ff 0%,#3a80e6 52%,#2459c4 100%);
+  box-shadow:0 4px 0 #1a489f,0 8px 16px rgba(30,90,180,.3),inset 0 2px 0 rgba(255,255,255,.55)}
+.actBtn:active{transform:translateY(3px)}
+.actBtn.alt{background:linear-gradient(180deg,#fffdf5,#e9dbbd);color:#7a6a4c;
+  box-shadow:0 4px 0 #c9b48a,0 6px 12px rgba(120,100,60,.18),inset 0 2px 0 rgba(255,255,255,.85)}
+.actBtn.big{flex:1 1 100%;min-height:56px;font-size:16.5px;letter-spacing:1.5px;border-radius:18px;
+  text-shadow:0 2px 3px rgba(8,44,100,.35);
+  box-shadow:0 6px 0 #1a489f,0 12px 22px rgba(30,90,180,.36),inset 0 2px 0 rgba(255,255,255,.6)}
+.actBtn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* 当前位置条 */
+.locBar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:18px;
+  background:linear-gradient(180deg,#fffdf5,#f7ead1);border:2.5px solid #fff;
+  box-shadow:0 4px 0 rgba(176,142,92,.26),0 8px 16px rgba(20,40,80,.14)}
+.locIc{width:30px;height:30px;flex:0 0 30px;border-radius:10px;display:grid;place-items:center;
+  background:#eaf4ff;box-shadow:inset 0 0 0 2px #cfe3ff}
+.locTx{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+.locTx b{font-size:12px;color:#2b3a52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.locTx span{font-size:10.5px;color:#8b7d62;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.miniBtn{height:30px;padding:0 10px;border:0;border-radius:11px;cursor:pointer;
+  font:900 11px/1 inherit;color:#2c5cc0;background:#eaf4ff;
+  box-shadow:inset 0 0 0 2px #cfe3ff,0 2px 0 rgba(160,190,230,.5)}
+.miniBtn:active{transform:translateY(1px)}
+
+/* ================= 买地卡 ================= */
+.buyCard{position:absolute;z-index:6;left:12px;right:12px;bottom:212px;
+  border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#fffdf6,#f9ead0);
+  border:3px solid #fff;box-shadow:0 10px 26px rgba(20,50,100,.24),0 7px 0 rgba(176,142,92,.3);
+  transform:translateY(16px);opacity:0;pointer-events:none;transition:.2s}
+.buyCard.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.buyBar{height:8px}
+.buyTop{display:flex;align-items:center;gap:9px;padding:9px 12px 7px}
+.buyIc{width:34px;height:34px;flex:0 0 34px;border-radius:11px;display:grid;place-items:center;background:#fff;
+  box-shadow:inset 0 0 0 2px #ecdff0}
+.buyTx{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+.buyTx b{font-size:15.5px;color:#2b3a52;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.buyTx span{font-size:11px;color:#8b7d62;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setTag{color:#2c5cc0!important}
+.buyTimer{font:900 12px/1 inherit;color:#c0562f;background:#fff2e2;border-radius:9px;padding:5px 8px}
+.buyBtns{display:flex;gap:8px;padding:0 12px 11px}
+.buyBtns .actBtn{min-height:46px;font-size:14px}
+
+/* ================= 通用弹窗 ================= */
+.modal{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:18px;
+  background:rgba(18,32,54,.42);opacity:0;pointer-events:none;transition:.2s}
+.modal.open{opacity:1;pointer-events:auto}
+.mBox{width:100%;max-width:340px;max-height:86%;display:flex;flex-direction:column;
+  border-radius:24px;background:linear-gradient(180deg,#fffdf6,#faeed7);
+  border:3px solid #fff;box-shadow:0 16px 40px rgba(10,28,60,.4),0 8px 0 rgba(176,142,92,.3);
+  transform:scale(.94);transition:.2s;overflow:hidden}
+.modal.open .mBox{transform:scale(1)}
+.mBox.wide{max-width:420px}
+.mHead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px}
+.mHead b{font-size:14px;color:#2b3a52}
+.xBtn{width:30px;height:30px;border:0;border-radius:10px;cursor:pointer;background:#fff;
+  color:#8b7d62;font-size:14px;box-shadow:inset 0 0 0 2px #eadfc8}
+.mBody{overflow:auto;padding:2px 14px 16px;font-size:13px;color:#3b4b63}
+
+.toast{position:absolute;z-index:9;left:50%;top:22%;transform:translate(-50%,-8px);
+  max-width:78%;padding:9px 16px;border-radius:14px;background:rgba(22,36,58,.92);color:#fff;
+  font:800 12.5px/1.45 inherit;text-align:center;opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* 地块详情 */
+.tmTag{display:inline-block;padding:3px 10px;border-radius:9px;color:#fff;font-weight:900;font-size:11px;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
+.tmName{font-size:19px;font-weight:900;color:#2b3a52;margin:6px 0 4px}
+.tmLine{font-size:12.5px;color:#6b6150;margin-bottom:6px}
+.tmLine b{color:#c0562f}
+.tmRent{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.tmRent span{background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;color:#4b5a72;
+  box-shadow:inset 0 0 0 1.5px #eee1c9;font-weight:700}
+.tmOwner{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#2b3a52}
+.tmOwner i{width:12px;height:12px;border-radius:50%;background:var(--oc);display:block;
+  box-shadow:0 0 0 2px #fff}
+.tmOwner.none{color:#9a8f7a;font-weight:700}
+.tmNote{margin-top:8px;font-size:11.5px;color:#7c7160;line-height:1.6}
+
+/* 交易 */
+.trWho{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-weight:800;font-size:12px;color:#7a6a4c}
+.trWhoBtns{display:flex;gap:6px}
+.wBtn{border:0;border-radius:10px;padding:6px 10px;cursor:pointer;font:900 11.5px/1 inherit;
+  color:#2c5cc0;background:#fff;box-shadow:inset 0 0 0 2px #cfe3ff}
+.wBtn.on{background:#2f6bd0;color:#fff;box-shadow:inset 0 0 0 2px #2f6bd0,0 3px 0 #1a489f}
+.trSec{margin-bottom:10px;padding:10px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 2px #f0e3cb}
+.trSec b{display:block;font-size:12px;color:#7a6a4c;margin-bottom:7px}
+.trChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tchip{border:0;border-radius:9px;padding:5px 9px;cursor:pointer;font:900 11px/1.2 inherit;
+  color:#4b5a72;background:#fbf3e4;box-shadow:inset 0 0 0 2px rgba(190,160,110,.4)}
+.tchip.on{background:var(--gc);color:#fff;box-shadow:inset 0 0 0 2px #fff,0 3px 0 rgba(0,0,0,.18)}
+.trInput{width:100%;height:34px;border:0;border-radius:10px;padding:0 10px;font:800 13px inherit;
+  background:#fbf6ea;box-shadow:inset 0 0 0 2px #eee1c9;color:#3b4b63;outline:none}
+.dim{font-size:11.5px;color:#a89a80}
+.trBtns{display:flex;gap:8px;margin-top:6px}
+.trBtns .actBtn{min-height:44px;font-size:13px}
+.trLine{font-size:13px;margin-bottom:10px;color:#3b4b63}
+.trGive,.trTake{background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:8px;font-size:12.5px;
+  box-shadow:inset 0 0 0 2px #f0e3cb}
+.trGive span,.trTake span{display:inline-block;background:#eaf4ff;color:#2c5cc0;border-radius:7px;
+  padding:2px 7px;font-weight:900;font-size:11px;margin-right:8px}
+.trHint{margin-top:8px;font-size:11px;color:#9a8f7a;text-align:right}
+
+/* 结算 */
+.mBox.win{max-width:300px;text-align:center}
+.winCup{font-size:52px;line-height:1;margin:14px 0 4px}
+.winName{font-size:22px;font-weight:900;color:#2b3a52}
+.winSub{font-size:12px;color:#8b7d62;margin:4px 0 14px}
+.win .actBtn{margin-bottom:14px}
+
+/* ================= 抽屉 ================= */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:66%;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#fffdf6,#f8ead0);border-radius:24px 24px 0 0;border-top:3px solid #fff;
+  box-shadow:0 -12px 30px rgba(20,50,100,.28);
+  transform:translateY(104%);transition:transform .26s cubic-bezier(.3,1.1,.5,1)}
+.sheet.open{transform:translateY(0)}
+.sheetHead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px}
+.sheetHead b{font-size:14px;color:#2b3a52}
+.logList{overflow:auto;padding:2px 14px 20px;display:flex;flex-direction:column;gap:6px}
+.logrow{font-size:11.5px;font-weight:700;color:#5b5340;background:#fff;border-radius:10px;padding:7px 10px;
+  box-shadow:inset 0 0 0 1.5px #f0e6d2}
+.prow{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:8px 10px;
+  box-shadow:inset 0 0 0 1.5px #f0e6d2,inset 6px 0 0 var(--gc)}
+.prow .pv{min-width:88px}
+.prow .pv b{display:block;font-size:12.5px;color:#2b3a52}
+.prow .pv span{font-size:10.5px;color:#8b7d62;font-weight:700}
+.prow .pb{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.chip{border:0;border-radius:9px;padding:6px 9px;cursor:pointer;font:900 10.5px/1 inherit;
+  color:#2c5cc0;background:#eaf4ff;box-shadow:inset 0 0 0 1.5px #cfe3ff}
+.chip[disabled]{opacity:.42;cursor:not-allowed}
+
+/* ================= 手机版定位 ================= */
+.app.mobile .topbar{top:8px;left:8px;right:8px}
+.app.mobile .players{left:8px;top:64px;width:132px}
+.app.mobile .pav{width:32px;height:32px;flex:0 0 32px}
+.app.mobile .pnm{font-size:11.5px}
+.app.mobile .pcash{font-size:11px;padding:2px 6px}
+.app.mobile .boardWrap{top:54px;left:-4px;right:-4px;bottom:198px;padding:0 4px}
+.app.mobile .boardInner{transform:scale(1.07)}
+.app.mobile .dock{left:8px;right:8px;bottom:8px}
+.app.mobile .actions{flex:0 0 96px}
+.app.mobile .tpTx b{font-size:13.5px}
+.app.mobile .tpAv{width:50px;height:50px;flex:0 0 50px}
+.app.mobile .buyCard{left:8px;right:8px;bottom:198px}
+
+/* ================= 电脑版：独立横屏版式 ================= */
+.app.desktop .topbar{top:0;left:0;right:0;height:60px;padding:10px 18px;
+  background:linear-gradient(180deg,#3d7fd6,#26589f);
+  box-shadow:0 3px 0 #1c4685,0 10px 24px rgba(10,40,90,.28);
+  border-radius:0 0 16px 16px}
+.app.desktop .roomPill{height:38px;font-size:15px;background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.5);box-shadow:none;padding-left:18px}
+.app.desktop .roundPill{height:38px;font-size:13px;background:rgba(255,255,255,.22)}
+.app.desktop .players{left:18px;top:84px;width:214px;gap:9px}
+.app.desktop .pcard{padding:6px 10px 6px 6px;border-radius:18px}
+.app.desktop .pav{width:44px;height:44px;flex:0 0 44px}
+.app.desktop .pnm{font-size:14px}
+.app.desktop .pcash{font-size:14px;padding:4px 10px}
+.app.desktop .boardWrap{top:74px;left:250px;right:24px;bottom:196px;padding:0 6px}
+.app.desktop .dock{left:18px;right:18px;bottom:14px}
+.app.desktop .dockRow1{align-items:stretch;gap:14px}
+.app.desktop .turnPanel{flex:0 1 420px;max-width:420px;padding:10px 16px 10px 10px;border-radius:26px}
+.app.desktop .tpAv{width:70px;height:70px;flex:0 0 70px}
+.app.desktop .tpTx b{font-size:19px}
+.app.desktop .tpTx span{font-size:12.5px}
+.app.desktop .diceDisc{flex:0 0 104px;width:104px;height:104px}
+.app.desktop .diceWrap{width:92px;height:86px}
+.app.desktop #diceCv{width:92px;height:86px}
+.app.desktop .actions{flex:1 1 auto;flex-wrap:nowrap;align-items:stretch;max-width:none}
+.app.desktop .actBtn{min-height:64px;font-size:15px;border-radius:18px}
+.app.desktop .actBtn.big{flex:1 1 auto;min-height:88px;font-size:21px;letter-spacing:3px}
+.app.desktop .locBar{flex:0 0 100%;padding:8px 14px}
+.app.desktop .locTx b{font-size:13.5px}
+.app.desktop .locTx span{font-size:11.5px}
+.app.desktop .miniBtn{height:34px;font-size:12px}
+.app.desktop .buyCard{left:auto;right:24px;width:360px;bottom:196px}
+.app.desktop .players .pcard{padding:7px 12px 7px 7px}
+
+/* 调试 */
+#dbg{position:fixed;left:6px;bottom:6px;max-width:60vw;max-height:34vh;overflow:auto;display:none;
+  background:rgba(0,0,0,.72);color:#9ff;font:11px/1.4 Consolas,monospace;padding:6px;border-radius:6px;z-index:99}

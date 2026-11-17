@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>像素城市 · 大富翁 v2</title>
+<style>
+  :root{
+    --bg:#0d141c; --panel:#1b2531; --panel2:#222e3c; --line:#38485b;
+    --ink:#e9e3d3; --dim:#93a2b4; --green:#57b76e; --gold:#e0b23c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;overflow:hidden;}
+  .app{
+    height:100vh;display:grid;
+    grid-template-rows:44px 1fr 132px;
+    gap:8px;padding:8px;
+  }
+  .topbar{grid-row:1;display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--line);padding:0 12px;}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.5px;font-size:14px;}
+  .badge{width:13px;height:13px;background:var(--green);box-shadow:0 0 0 2px #0d141c inset;}
+  .topbar .spacer{flex:1;}
+  .chip{font-size:12px;color:var(--dim);border:2px solid var(--line);padding:3px 8px;}
+  .chip b{color:var(--ink);font-weight:600;}
+
+  .boardWrap{position:relative;background:#0b1119;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  canvas#board{display:block;image-rendering:pixelated;}
+
+  .console{grid-row:3;background:var(--panel);border:2px solid var(--line);padding:8px 10px;
+    display:grid;grid-template-columns:196px 1fr 1fr 300px;gap:10px;overflow:hidden;}
+  .cLeft{display:flex;flex-direction:column;gap:6px;justify-content:center;}
+  .turnRow{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .dot{width:10px;height:10px;background:#e2564a;}
+  .tag{background:var(--gold);color:#1a1608;font-weight:700;font-size:11px;padding:1px 6px;}
+  .money{font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1;}
+  .money span{font-size:12px;color:var(--dim);font-weight:400;margin-left:6px;}
+  .diceRow{display:flex;align-items:center;gap:6px;}
+  .die{width:28px;height:28px;background:#efe8d6;border:3px solid #0d141c;display:grid;
+    grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:2px;gap:1px;cursor:pointer;}
+  .die i{display:block;width:100%;height:100%;}
+  .die i.on{background:#20293a;}
+  .total{font-size:12px;color:var(--dim);}
+  .btn{display:block;width:100%;padding:10px 0;font:700 13px/1 "PingFang SC","Microsoft YaHei",sans-serif;
+    color:#0f1a12;background:var(--green);border:0;border-bottom:4px solid #2f7a45;cursor:pointer;}
+  .btn:active{transform:translateY(2px);border-bottom-width:2px;}
+  .btn.ghost{background:var(--panel2);color:var(--ink);border-bottom:4px solid #16202b;}
+  .col{display:flex;flex-direction:column;gap:6px;justify-content:center;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .log{overflow:auto;border-left:2px solid var(--line);padding-left:10px;font-size:12px;color:var(--dim);line-height:1.7;}
+  .foot{grid-column:1/5;font-size:10px;color:#5d6b7a;}
+
+  .rail{display:grid;grid-template-columns:1fr;gap:5px;align-content:center;}
+  .pcard{background:var(--panel2);border:2px solid var(--line);padding:4px 8px;display:flex;align-items:center;gap:8px;}
+  .pcard.active{border-color:var(--green);}
+  .pcard .sq{width:9px;height:9px;}
+  .pcard .nm{font-size:12px;font-weight:600;}
+  .pcard .sub{font-size:10px;color:var(--dim);}
+  .pcard .cash{margin-left:auto;font-weight:800;color:var(--gold);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo"><span class="badge"></span>像素城市 · 大富翁</div>
+    <div class="spacer"></div>
+    <div class="chip">房间 <b>K7M2Q</b></div>
+    <div class="chip">素材 <b>PtDesigns · Shopping Street (CC0)</b></div>
+  </div>
+
+  <div class="boardWrap"><canvas id="board"></canvas></div>
+
+  <div class="console">
+    <div class="cLeft">
+      <div class="turnRow"><span class="dot" id="pdot"></span><span id="pname">阿婆</span><span class="tag">你的回合</span></div>
+      <div class="money" id="pcash">$1500<span id="pdeed">2 块地产</span></div>
+      <div class="diceRow"><div class="die" id="d1"></div><div class="die" id="d2"></div><div class="total" id="ptotal">7 点</div></div>
+    </div>
+    <div class="col">
+      <button class="btn" id="roll">掷骰子</button>
+      <div class="row2"><button class="btn ghost" style="padding:8px 0">交易</button><button class="btn ghost" style="padding:8px 0">地产</button></div>
+    </div>
+    <div class="rail" id="rail"></div>
+    <div class="log" id="log"></div>
+    <div class="foot">建筑为程序绘制的像素图（占位）；地面纹理与中央街区来自 PtDesigns「Shopping Street」CC0 素材包。</div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script>
+(function () {
+  const D = window.MonoData;
+
+  const TILE_BASE = './assets/town-shopping/environments_shopping_street_tiles_v1.0/tiles/';
+  const MAT_BASE  = './assets/town-shopping/environments_shopping_street_tiles_v1.0/materials/';
+
+  const T = {
+    wallPlasterU:'wall_plaster_u.png', wallPlasterV:'wall_plaster_v.png',
+    wallBrickU:'wall_brick_u.png', wallBrickV:'wall_brick_v.png',
+    wallWoodU:'wall_wood_u.png', wallWoodV:'wall_wood_v.png',
+    sfWinU:'storefront_window_u.png', sfWinV:'storefront_window_v.png',
+    sfGlassU:'storefront_glass_door_u.png', sfGlassV:'storefront_glass_door_v.png',
+    sfSolidU:'storefront_solid_door_u.png', sfSolidV:'storefront_solid_door_v.png',
+    roofFlat:'slate_roof_flat.png',
+    roofRiseU:'slate_roof_rise_u.png', roofFallU:'slate_roof_fall_u.png',
+    roofRiseV:'slate_roof_rise_v.png', roofFallV:'slate_roof_fall_v.png',
+    awningU:'striped_awning_u.png', awningV:'striped_awning_v.png',
+    signU:'blank_shop_sign_u.png', signV:'blank_shop_sign_v.png',
+    post:'corner_post_brick.png', chimney:'brick_chimney.png', vent:'roof_vent.png'
+  };
+  const M = { asphalt:'asphalt.png', brick:'brick.png', concrete:'concrete.png', grass:'grass.png', paving:'paving.png', plaster:'plaster.png', slate:'slate.png', wood:'wood.png', teal:'teal.png' };
+
+  const IMG = {};
+  let pending = 0, ready = false;
+
+  function loadAll() {
+    const list = [];
+    for (const k in T) list.push(['t:' + k, TILE_BASE + T[k]]);
+    for (const k in M) list.push(['m:' + k, MAT_BASE + M[k]]);
+    pending = list.length;
+    list.forEach(function (it) {
+      const im = new Image();
+      im.onload = im.onerror = function () {
+        if (--pending === 0) { ready = true; bakePatterns(); draw(); }
+      };
+      im.src = it[1];
+      IMG[it[0]] = im;
+    });
+  }
+
+  const PAT = {};
+  function bakePatterns() {
+    for (const k in M) {
+      const im = IMG['m:' + k];
+      if (im && im.width) PAT[k] = ctx.createPattern(im, 'repeat');
+    }
+  }
+
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  let S = 0, CELL = 0, PAD = 0;
+
+  function cellOf(i) {
+    if (i <= 10) return { r: 11, c: 11 - i };
+    if (i <= 20) return { r: 11 - (i - 10), c: 1 };
+    if (i <= 30) return { r: 1, c: i - 19 };
+    return { r: 1 + (i - 30), c: 11 };
+  }
+  function tileRect(i) {
+    const rc = cellOf(i);
+    return { x: PAD + (rc.c - 1) * CELL, y: PAD + (rc.r - 1) * CELL, w: CELL, h: CELL };
+  }
+
+  function px(x, y, w, h, c) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
+  }
+
+  /* 纹理填充：材质是 256×256，缩到 64px 贴 */
+  const PAT_SCALE = 0.25;
+  function tex(x, y, w, h, name) {
+    const p = PAT[name];
+    if (!p) { px(x, y, w, h, '#4a5563'); return; }
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    ctx.fillStyle = p;
+    ctx.fillRect(0, 0, Math.round(w), Math.round(h));
+    ctx.restore();
+  }
+
+  /* ---------------- 程序化像素建筑 ---------------- */
+  const OUT = '#2a2422';
+  function shade(hex, k) {
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (k < 0) { r *= 1 + k; g *= 1 + k; b *= 1 + k; }
+    else { r += (255 - r) * k; g += (255 - g) * k; b += (255 - b) * k; }
+    const h = v => ('0' + Math.round(Math.max(0, Math.min(255, v))).toString(16)).slice(-2);
+    return '#' + h(r) + h(g) + h(b);
+  }
+
+  function pixPoly(pts, color) {
+    const ys = pts.map(p => p[1]);
+    const y0 = Math.floor(Math.min.apply(null, ys) / 2) * 2;
+    const y1 = Math.ceil(Math.max.apply(null, ys) / 2) * 2;
+    ctx.fillStyle = color;
+    for (let yy = y0; yy < y1; yy += 2) {
+      const sy = yy + 1; const xs = [];
+      for (let k = 0; k < pts.length; k++) {
+        const a = pts[k], b = pts[(k + 1) % pts.length];
+        if ((a[1] <= sy && b[1] > sy) || (b[1] <= sy && a[1] > sy)) {
+          xs.push(a[0] + (sy - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+        }
+      }
+      if (xs.length < 2) continue;
+      xs.sort((p, q) => p - q);
+      for (let j = 0; j + 1 < xs.length; j += 2) {
+        const sx = Math.floor(xs[j] / 2) * 2, ex = Math.ceil(xs[j + 1] / 2) * 2;
+        if (ex > sx) ctx.fillRect(sx, yy, ex - sx, 2);
+      }
+    }
+  }
+
+  // 一栋小房子：墙体 + 两坡顶 + 门窗
+  function houseSprite(x, y, w, h, roof, count) {
+    const n = count || 1;
+    for (let k = 0; k < n; k++) {
+      const bw = Math.round(w * (n === 1 ? 0.6 : 0.44));
+      const bh = Math.round(h * (n === 1 ? 0.4 : 0.34));
+      const bx = Math.round(x + (n === 1 ? (w - bw) / 2 : w * 0.07 + k * w * 0.46));
+      const by = Math.round(y + h * (n === 1 ? 0.52 : 0.58));
+      const rh = Math.round(h * (n === 1 ? 0.26 : 0.22));
+      // 影
+      px(bx + 3, by + bh - 1, bw, 3, 'rgba(12,16,22,.22)');
+      // 屋顶
+      pixPoly([[bx - 5, by + 3], [bx + bw + 5, by + 3], [bx + bw / 2, by - rh - 3]], OUT);
+      pixPoly([[bx - 3, by + 2], [bx + bw + 3, by + 2], [bx + bw / 2, by - rh]], roof);
+      pixPoly([[bx + 1, by + 2], [bx + bw / 2, by - rh], [bx + bw / 2, by + 2]], shade(roof, -0.24));
+      // 墙
+      px(bx - 2, by - 2, bw + 4, bh + 4, OUT);
+      px(bx, by, bw, bh, '#f2e6cd');
+      px(bx + bw - 4, by, 4, bh, '#dccfb2');
+      px(bx, by + bh - 3, bw, 3, '#c8bb9d');
+      // 门
+      px(bx + Math.round(bw * 0.44), by + Math.round(bh * 0.42), Math.max(5, Math.round(bw * 0.18)), Math.round(bh * 0.58), '#7d5438');
+      // 窗
+      px(bx + Math.round(bw * 0.1), by + Math.round(bh * 0.2), Math.max(5, Math.round(bw * 0.22)), Math.max(4, Math.round(bh * 0.32)), OUT);
+      px(bx + Math.round(bw * 0.1) + 1, by + Math.round(bh * 0.2) + 1, Math.max(3, Math.round(bw * 0.22)) - 2, Math.max(2, Math.round(bh * 0.32)) - 2, '#83b6d4');
+    }
+  }
+
+  // 多层楼：逐层往上叠，层高约 CELL*0.2
+  function towerSprite(x, y, w, h, roof, floors) {
+    const bw = Math.round(w * 0.56);
+    const fl = Math.max(1, floors);
+    const fh = Math.round(h * 0.2);
+    const totalH = fh * fl;
+    const bx = Math.round(x + (w - bw) / 2);
+    const byBottom = Math.round(y + h * 0.82);
+    px(bx + 4, byBottom - 1, bw, 3, 'rgba(12,16,22,.25)');
+    // 楼体
+    px(bx - 2, byBottom - totalH - 2, bw + 4, totalH + 4, OUT);
+    px(bx, byBottom - totalH, bw, totalH, '#e7dcc2');
+    px(bx + bw - 5, byBottom - totalH, 5, totalH, '#cfc1a4');
+    // 窗（每层两列）
+    for (let f = 0; f < fl; f++) {
+      const fy = byBottom - totalH + f * fh + 4;
+      for (let c = 0; c < 2; c++) {
+        const wx = bx + Math.round(bw * (c === 0 ? 0.16 : 0.56));
+        px(wx, fy, Math.round(bw * 0.24), fh - 8, OUT);
+        px(wx + 1, fy + 1, Math.round(bw * 0.24) - 2, fh - 10, '#8dbdd8');
+      }
+    }
+    // 顶檐
+    px(bx - 4, byBottom - totalH - 8, bw + 8, 8, OUT);
+    px(bx - 3, byBottom - totalH - 7, bw + 6, 4, roof);
+    // 屋顶配件
+    if (fl >= 3) {
+      px(bx + Math.round(bw * 0.62), byBottom - totalH - 16, 3, 9, '#6b6252');
+      px(bx + Math.round(bw * 0.62) + 3, byBottom - totalH - 16, 7, 4, '#cf5a4a');
+    }
+  }
+
+  // 酒店：宽体 + 招牌
+  function hotelSprite(x, y, w, h) {
+    const bw = Math.round(w * 0.74);
+    const fh = Math.round(h * 0.19), fl = 2;
+    const totalH = fh * fl;
+    const bx = Math.round(x + (w - bw) / 2);
+    const byBottom = Math.round(y + h * 0.84);
+    px(bx + 5, byBottom - 1, bw, 3, 'rgba(12,16,22,.25)');
+    px(bx - 2, byBottom - totalH - 2, bw + 4, totalH + 4, OUT);
+    px(bx, byBottom - totalH, bw, totalH, '#f1dfb4');
+    px(bx + bw - 6, byBottom - totalH, 6, totalH, '#d8c48f');
+    for (let f = 0; f < fl; f++) {
+      const fy = byBottom - totalH + f * fh + 4;
+      for (let c = 0; c < 3; c++) {
+        const wx = bx + Math.round(bw * (0.12 + c * 0.3));
+        px(wx, fy, Math.round(bw * 0.18), fh - 8, '#7d6234');
+        px(wx, fy, Math.round(bw * 0.18), 2, '#d3a127');
+      }
+    }
+    // 门廊
+    px(bx + Math.round(bw * 0.32), byBottom - Math.round(fh * 1.1), Math.round(bw * 0.36), Math.round(fh * 1.1), '#8a5a3c');
+    px(bx + Math.round(bw * 0.26), byBottom - Math.round(fh * 1.25), Math.round(bw * 0.48), 4, '#d3a127');
+    // 屋顶 + 招牌
+    px(bx - 5, byBottom - totalH - 9, bw + 10, 8, OUT);
+    px(bx - 4, byBottom - totalH - 8, bw + 8, 5, '#d3a127');
+    px(bx + Math.round(bw * 0.26), byBottom - totalH - 16, Math.round(bw * 0.48), 7, OUT);
+    px(bx + Math.round(bw * 0.26) + 1, byBottom - totalH - 15, Math.round(bw * 0.48) - 2, 5, '#cf5a4a');
+    // 旗
+    px(bx + 3, byBottom - totalH - 20, 2, 10, '#6b6252');
+    px(bx + 5, byBottom - totalH - 20, 8, 5, '#e0b23c');
+  }
+
+  function emptyLot(x, y, w, h) {
+    const bx = x + 8, by = y + 8, bw = w - 16, bh = h - 26;
+    tex(bx, by, bw, bh, 'grass');
+    px(bx, by, bw, 1, 'rgba(255,255,255,.18)');
+    px(bx, by + bh - 1, bw, 1, 'rgba(0,0,0,.25)');
+    // 木栅栏
+    px(bx, by + 2, 2, bh - 4, '#8a6a44');
+    px(bx + bw - 2, by + 2, 2, bh - 4, '#8a6a44');
+    // 出售牌
+    const sw = Math.round(w * 0.42), sh = Math.round(CELL * 0.19);
+    const sx = x + (w - sw) / 2, sy = y + h * 0.4;
+    px(sx - 2, sy - 2, sw + 4, sh + 4, OUT);
+    px(sx, sy, sw, sh, '#f2e9d6');
+    px(sx + 2, sy + 2, sw - 4, 2, '#b9a98c');
+    ctx.fillStyle = '#3a4a38';
+    ctx.font = '700 ' + Math.round(CELL * 0.13) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('空地', sx + sw / 2, sy + sh / 2 + 1);
+    px(sx + sw / 2 - 1, sy + sh, 3, Math.round(CELL * 0.14), '#7c5f3e');
+  }
+
+  /* ---------------- 棋盘 ---------------- */
+  let state = null;
+
+  function drawTile(i, t) {
+    const r = tileRect(i);
+    const x = r.x, y = r.y, w = r.w, h = r.h;
+
+    // 街道
+    tex(x, y, w, h, 'asphalt');
+    // 地块
+    tex(x + 3, y + 3, w - 6, h - 6, 'concrete');
+    px(x + 3, y + 3, w - 6, 1, 'rgba(255,255,255,.16)');
+    px(x + 3, y + h - 4, w - 6, 1, 'rgba(0,0,0,.3)');
+
+    const prop = state.props[i];
+    const group = t.group && D ? D.GROUPS[t.group] : null;
+    const accent = group ? group.color : '#cf5a4a';
+
+    if (group) {
+      px(x + 5, y + 5, w - 10, 5, accent);
+      px(x + 5, y + 10, w - 10, 1, 'rgba(10,14,20,.55)');
+    }
+
+    const bx = x + 4, by = y + (group ? 13 : 5), bw = w - 8, bh = h - (group ? 13 : 5) - 20;
+
+    if (t.type === 'prop') {
+      const lvl = prop ? prop.houses : 0;
+      const item = levelSprite(lvl);
+      if (item) drawSprite(item.spr, x + w / 2, y + h - 18, item.sc);
+      else emptyLot(bx, by, bw, bh);
+    } else if (t.type === 'rail') {
+      houseSprite(bx, by, bw, bh, '#4a6b9c', 1);
+      px(bx + 4, by + bh - 4, bw - 8, 2, '#6b6257');
+      for (let k = bx + 6; k < bx + bw - 8; k += 7) px(k, by + bh - 7, 2, 6, '#8b8175');
+    } else if (t.type === 'util') {
+      towerSprite(bx, by, bw, bh, '#6f7d8c', 2);
+    } else if (t.type === 'chance') {
+      signPost(bx, by, bw, bh, '#7d6bd6', '?');
+    } else if (t.type === 'chest') {
+      signPost(bx, by, bw, bh, '#3f9c6b', '★');
+    } else if (t.type === 'tax') {
+      govSprite(bx, by, bw, bh);
+    } else if (t.type === 'free') {
+      tex(bx, by, bw, bh, 'grass');
+      px(x + w / 2 - 10, y + h * 0.44 - 10, 20, 20, '#1b2531');
+      px(x + w / 2 - 8, y + h * 0.44 - 8, 16, 16, '#2f6fa8');
+      ctx.fillStyle = '#f2ecda';
+      ctx.font = '800 ' + Math.round(CELL * 0.19) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('P', x + w / 2, y + h * 0.44 + 1);
+    } else if (t.type === 'jail') {
+      px(bx, by, bw, bh, '#3c4550');
+      px(bx + 3, by + 3, bw - 6, bh - 6, '#59636f');
+      for (let k = 0; k < 4; k++) px(bx + 6 + k * ((bw - 12) / 4), by + 4, 3, bh - 8, '#131a22');
+    } else if (t.type === 'go') {
+      houseSprite(bx, by, bw, bh, '#d3a127', 1);
+      ctx.fillStyle = '#e0b23c';
+      ctx.font = '800 ' + Math.round(CELL * 0.14) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('GO', x + w / 2, y + h - 27);
+    } else if (t.type === 'gotojail') {
+      govSprite(bx, by, bw, bh);
+      px(x + w / 2 + 4, y + h * 0.3, 12, 12, '#1b2531');
+      ctx.fillStyle = '#cf5a4a';
+      ctx.font = '800 ' + Math.round(CELL * 0.13) + 'px sans-serif';
+      ctx.fillText('→', x + w / 2 + 10, y + h * 0.3 + 7);
+    }
+
+    // 车
+    const here = state.players.filter(p => p.pos === i);
+    if (here.length) {
+      const cw = Math.max(12, Math.round(CELL * 0.21));
+      here.forEach((p, k) => {
+        carSprite(x + 6 + k * (cw + 4), y + h - 20 - Math.round(cw * 0.6), cw, p.color, k);
+      });
+    }
+
+    // 当前格高亮
+    if (state.players[state.turn].pos === i) {
+      ctx.strokeStyle = '#66cc84';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
+    }
+
+    // 名字条：名字左对齐、价格右对齐同一行
+    px(x + 3, y + h - 17, w - 6, 15, 'rgba(13,19,26,.94)');
+    px(x + 3, y + h - 17, w - 6, 1, 'rgba(255,255,255,.14)');
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#f5efdf';
+    ctx.font = '700 ' + Math.max(9, Math.round(CELL * 0.15)) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(t.name, x + 6, y + h - 9);
+
+    if (t.price) {
+      ctx.font = '600 ' + Math.max(8, Math.round(CELL * 0.115)) + 'px sans-serif';
+      ctx.fillStyle = '#cfc8b6';
+      ctx.textAlign = 'right';
+      ctx.fillText('$' + t.price, x + w - 6, y + h - 9);
+    }
+
+    if (prop && prop.mortgaged) {
+      ctx.fillStyle = 'rgba(200,70,60,.14)';
+      for (let k = -h; k < w; k += 9) ctx.fillRect(x + k, y, 4, h);
+    }
+  }
+
+  function signPost(x, y, w, h, color, glyph) {
+    const bw = Math.round(w * 0.52), bh = Math.round(CELL * 0.2);
+    const bx = Math.round(x + (w - bw) / 2), by = Math.round(y + h * 0.4);
+    px(bx + Math.round(bw / 2) - 1, by + bh, 3, Math.round(CELL * 0.16), '#6b5540');
+    px(bx - 2, by - 2, bw + 4, bh + 4, OUT);
+    px(bx, by, bw, bh, color);
+    px(bx + 2, by + 2, bw - 4, bh - 4, '#f3ecda');
+    ctx.fillStyle = color;
+    ctx.font = '800 ' + Math.round(CELL * 0.17) + 'px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(glyph, bx + bw / 2, by + bh / 2 + 1);
+  }
+
+  function govSprite(x, y, w, h) {
+    const bw = Math.round(w * 0.7), bh = Math.round(h * 0.34);
+    const bx = Math.round(x + (w - bw) / 2), by = Math.round(y + h * 0.74) - bh;
+    px(bx + 4, by + bh, bw, 3, 'rgba(12,16,22,.22)');
+    px(bx - 2, by - 2, bw + 4, bh + 4, OUT);
+    px(bx, by, bw, bh, '#ddd5c2');
+    for (let k = 0; k < 4; k++) px(bx + Math.round(bw * (0.08 + k * 0.24)), by + 4, Math.round(bw * 0.09), bh - 8, '#c6bda8');
+    px(bx - 5, by - 7, bw + 10, 6, OUT);
+    px(bx - 4, by - 6, bw + 8, 4, '#b7ab90');
+    pixPoly([[bx + bw * 0.5 - 9, by - 7], [bx + bw * 0.5 + 9, by - 7], [bx + bw * 0.5, by - 16]], '#a89a7c');
+  }
+
+  function carSprite(x, y, w, color, k) {
+    const h = Math.round(w * 0.62);
+    px(x + 2, y + h, w, 3, 'rgba(8,12,18,.5)');
+    px(x - 1, y - 1, w + 2, h + 2, OUT);
+    px(x, y, w, h, color);
+    px(x, y + h - 3, w, 2, shade(color, -0.35));
+    px(x + Math.round(w * 0.18), y - Math.round(h * 0.3), Math.round(w * 0.64), Math.round(h * 0.4), OUT);
+    px(x + Math.round(w * 0.2), y - Math.round(h * 0.26), Math.round(w * 0.6), Math.round(h * 0.3), 'rgba(240,246,255,.8)');
+    px(x + 1, y + 1, 2, 2, '#151d27');
+    px(x + w - 3, y + 1, 2, 2, '#151d27');
+    if (k !== 0) px(x + 1, y + 2, 2, 2, '#ffe9b0');
+  }
+
+  /* ---------------- 中央等距城区 ---------------- */
+  const ANCHOR_X = 192, ANCHOR_Y = 352;
+  const spriteCache = {};
+
+  function bakeBuilding(spec) {
+    const key = JSON.stringify(spec);
+    if (spriteCache[key]) return spriteCache[key];
+    const floors = spec.floors || 1;
+    // 素材自带高度：叠层靠"整体上移"，第 f 层上移 f*268
+    const H = 420 + (floors - 1) * 268;
+    const W = 384;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    const baseY = H - 40;
+
+    function put(name, u, v, lift) {
+      const im = IMG['t:' + name];
+      if (!im || !im.width) return;
+      const sx = 128 * (u - v);
+      const sy = baseY + 64 * (u + v) - (lift || 0) - ANCHOR_Y;
+      g.drawImage(im, Math.round(sx), Math.round(sy));
+    }
+
+    for (let f = 0; f < floors; f++) {
+      const lift = f * 268;
+      put(spec.wallU, 0, 0, lift);
+      put(spec.wallV, 0, 0, lift);
+      if (f === 0) {
+        if (spec.doorU) put(spec.doorU, 0, 0, lift);
+        if (spec.doorV) put(spec.doorV, 0, 0, lift);
+      }
+    }
+    const roofLift = (floors - 1) * 268;
+    if (spec.roof === 'gable') {
+      put('roofRiseU', 0, 0, roofLift);
+      put('roofFallU', 1, 0, roofLift);
+      put('roofRiseV', 0, 0, roofLift);
+      put('roofFallV', 0, 1, roofLift);
+    } else {
+      put('roofFlat', 0, 0, roofLift);
+    }
+    if (spec.awningU) put(spec.awningU, 0, 0, 0);
+    if (spec.awningV) put(spec.awningV, 0, 0, 0);
+    if (spec.signU) put(spec.signU, 0, 0, roofLift);
+    if (spec.signV) put(spec.signV, 0, 0, roofLift);
+    if (spec.post) put(spec.post, 0, 0, 0);
+    if (spec.chimney) put('chimney', 0, 0, roofLift);
+    if (spec.vent) put('vent', 1, 0, roofLift);
+
+    const spr = { canvas: c, ax: 192, ay: baseY, w: W, h: H };
+    spriteCache[key] = spr;
+    return spr;
+  }
+
+  function drawSprite(spr, cx, baseY, scale) {
+    ctx.drawImage(spr.canvas,
+      Math.round(cx - spr.ax * scale), Math.round(baseY - spr.ay * scale),
+      Math.round(spr.w * scale), Math.round(spr.h * scale));
+  }
+
+  /* 中央街区：按等距 (u,v) 网格排成两排，像一条商业街 */
+  const CITY_SHOPS = [
+    { u: 0, v: 0, sc: 0.16, spec: { wallU:'wallBrickU', wallV:'wallBrickV', doorU:'sfWinU', doorV:'sfSolidV', awningV:'awningV', roof:'gable', floors:1, post:true } },
+    { u: 1, v: -1, sc: 0.16, spec: { wallU:'wallPlasterU', wallV:'wallPlasterV', doorU:'sfGlassU', doorV:'sfGlassV', awningU:'awningU', signU:'signU', roof:'flat', floors:1, post:true } },
+    { u: 2, v: -2, sc: 0.16, spec: { wallU:'wallWoodU', wallV:'wallWoodV', doorU:'sfSolidU', doorV:'sfWinV', signV:'signV', roof:'flat', floors:1, post:true } },
+    { u: 1, v: 0, sc: 0.155, spec: { wallU:'wallBrickU', wallV:'wallBrickV', doorU:'sfGlassU', doorV:'sfGlassV', awningV:'awningV', signV:'signV', roof:'flat', floors:1, chimney:true } },
+    { u: 2, v: -1, sc: 0.155, spec: { wallU:'wallPlasterU', wallV:'wallPlasterV', doorU:'sfWinU', doorV:'sfGlassV', awningU:'awningU', roof:'flat', floors:2, vent:true } },
+    { u: 3, v: -2, sc: 0.155, spec: { wallU:'wallWoodU', wallV:'wallWoodV', doorU:'sfGlassU', doorV:'sfWinV', signU:'signU', roof:'flat', floors:1, vent:true } }
+  ];
+
+  /* 地产建筑：等级 → 规格 + 缩放 */
+  const LEVELS = [
+    null,
+    { sc: 0.115, spec: { wallU:'wallPlasterU', wallV:'wallPlasterV', doorU:'sfGlassU', doorV:'sfGlassV', awningU:'awningU', roof:'flat', floors:1, post:true } },
+    { sc: 0.115, spec: { wallU:'wallBrickU', wallV:'wallBrickV', doorU:'sfWinU', doorV:'sfSolidV', awningV:'awningV', signV:'signV', roof:'gable', floors:1, post:true } },
+    { sc: 0.11, spec: { wallU:'wallWoodU', wallV:'wallWoodV', doorU:'sfSolidU', doorV:'sfWinV', signU:'signU', awningU:'awningU', roof:'flat', floors:1, post:true } },
+    { sc: 0.092, spec: { wallU:'wallPlasterU', wallV:'wallPlasterV', doorU:'sfGlassU', doorV:'sfGlassV', signU:'signU', roof:'flat', floors:2, vent:true } },
+    { sc: 0.078, spec: { wallU:'wallBrickU', wallV:'wallBrickV', doorU:'sfGlassU', doorV:'sfGlassV', awningU:'awningU', signU:'signU', roof:'flat', floors:3, chimney:true, vent:true } }
+  ];
+  const levelSprites = {};
+  function levelSprite(lvl) {
+    const L = LEVELS[Math.min(lvl, 5)];
+    if (!L) return null;
+    if (!levelSprites[lvl]) levelSprites[lvl] = { spr: bakeBuilding(L.spec), sc: L.sc };
+    return levelSprites[lvl];
+  }
+
+  function drawCityCenter(x, y, s) {
+    // 环路（沥青）
+    tex(x, y, s, s, 'asphalt');
+    ctx.fillStyle = 'rgba(232,224,201,.3)';
+    for (let k = 0; k < s; k += 16) {
+      ctx.fillRect(x + k, y + 5, 8, 2);
+      ctx.fillRect(x + k, y + s - 7, 8, 2);
+      ctx.fillRect(x + 5, y + k, 2, 8);
+      ctx.fillRect(x + s - 7, y + k, 2, 8);
+    }
+
+    // 园区地面
+    const ix = x + 16, iy = y + 16, isz = s - 32;
+    tex(ix, iy, isz, isz, 'grass');
+    px(ix, iy, isz, 2, 'rgba(0,0,0,.2)');
+    px(ix, iy + isz - 2, isz, 2, 'rgba(0,0,0,.2)');
+
+    // 中央广场（浅色铺装）
+    const pw = Math.round(isz * 0.46);
+    const pxA = ix + Math.round((isz - pw) / 2), pyA = iy + Math.round((isz - pw) / 2);
+    tex(pxA, pyA, pw, pw, 'paving');
+    px(pxA, pyA, pw, 2, '#8f8a7c');
+    px(pxA, pyA + pw - 2, pw, 2, '#8f8a7c');
+    px(pxA, pyA, 2, pw, '#8f8a7c');
+    px(pxA + pw - 2, pyA, 2, pw, '#8f8a7c');
+
+    // 街区：按等距 (u,v) 网格摆放店铺，形成一整条商业街
+    const isoK = pw / 5.4;
+    const bcx = pxA + pw / 2, bcy = pyA + pw * 0.3;
+    let meanDU = 0;
+    CITY_SHOPS.forEach(function (sh) { meanDU += sh.u - sh.v; });
+    meanDU /= CITY_SHOPS.length;
+    CITY_SHOPS.forEach(function (sh) {
+      const spr = bakeBuilding(sh.spec);
+      drawSprite(spr, bcx + isoK * (sh.u - sh.v - meanDU), bcy + isoK * 0.5 * (sh.u + sh.v), sh.sc);
+    });
+
+    // 喷泉（广场前侧）
+    const fw = Math.round(pw * 0.2);
+    const fx = pxA + Math.round((pw - fw) / 2), fy = pyA + pw - fw - Math.round(pw * 0.06);
+    px(fx - 2, fy - 2, fw + 4, fw + 4, '#8a8578');
+    px(fx, fy, fw, fw, '#b9b2a0');
+    px(fx + 3, fy + 3, fw - 6, fw - 6, '#4f89a8');
+    px(fx + Math.round(fw * 0.34), fy + Math.round(fw * 0.3), Math.round(fw * 0.32), Math.round(fw * 0.3), '#cfc8b6');
+    px(fx + Math.round(fw * 0.45), fy + Math.round(fw * 0.05), Math.round(fw * 0.1), Math.round(fw * 0.3), '#9ed4ea');
+
+    // 草地边缘的树
+    tree(ix + Math.round(isz * 0.08), iy + Math.round(isz * 0.2), 18);
+    tree(ix + isz - Math.round(isz * 0.14), iy + Math.round(isz * 0.22), 18);
+    tree(ix + Math.round(isz * 0.2), iy + isz - 8, 18);
+    tree(ix + isz - Math.round(isz * 0.26), iy + isz - 8, 18);
+  }
+
+  function tree(x, y, s) {
+    const w = Math.round(s * 1.6);
+    const h = Math.round(s * 1.9);
+    px(x + Math.round(w * 0.42), y - Math.round(h * 0.35), Math.max(2, Math.round(w * 0.16)), Math.round(h * 0.35), '#4a3a28');
+    pixPoly([
+      [x + w / 2, y - h],
+      [x + w, y - Math.round(h * 0.5)],
+      [x + w / 2, y - Math.round(h * 0.12)],
+      [x, y - Math.round(h * 0.5)]
+    ], '#2e5230', '#20401f');
+    pixPoly([
+      [x + w / 2, y - h],
+      [x + Math.round(w * 0.78), y - Math.round(h * 0.56)],
+      [x + w / 2, y - Math.round(h * 0.3)],
+      [x + Math.round(w * 0.3), y - Math.round(h * 0.56)]
+    ], '#477f42', '#2e5230');
+    px(x + Math.round(w * 0.44), y - Math.round(h * 0.82), Math.round(w * 0.22), Math.round(h * 0.16), '#6aa85c');
+  }
+
+  /* ---------------- 主绘制 ---------------- */
+  function draw() {
+    if (!ready || !S) return;
+    ctx.clearRect(0, 0, S, S);
+    tex(0, 0, S, S, 'asphalt');
+    px(0, 0, S, 2, '#0b1119');
+    px(0, S - 2, S, 2, '#0b1119');
+
+    drawCityCenter(PAD + CELL, PAD + CELL, CELL * 9);
+
+    if (D && D.TILES) D.TILES.forEach((t, i) => drawTile(i, t));
+  }
+
+  function resize() {
+    const box = canvas.parentElement.getBoundingClientRect();
+    S = Math.floor(Math.min(box.width, box.height) - 4);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(S * dpr);
+    canvas.height = Math.round(S * dpr);
+    canvas.style.width = S + 'px';
+    canvas.style.height = S + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    // 纹理缩放
+    ctx.save();
+    PAD = Math.round(S * 0.01);
+    CELL = Math.floor((S - PAD * 2) / 11);
+    draw();
+    ctx.restore();
+  }
+
+  /* ---------------- 面板 ---------------- */
+  const FACES = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  function dieHTML(el, v) {
+    let out = '';
+    for (let i = 0; i < 9; i++) out += '<i class="' + (FACES[v].indexOf(i) >= 0 ? 'on' : '') + '"></i>';
+    el.innerHTML = out;
+  }
+
+  let d1 = 4, d2 = 3;
+  function renderConsole() {
+    const p = state.players[state.turn];
+    document.getElementById('pdot').style.background = p.color;
+    document.getElementById('pname').textContent = p.name;
+    document.getElementById('pcash').innerHTML = '$' + p.cash + '<span>' + p.props + ' 块地产</span>';
+    document.getElementById('ptotal').textContent = (d1 + d2) + ' 点';
+    dieHTML(document.getElementById('d1'), d1);
+    dieHTML(document.getElementById('d2'), d2);
+  }
+
+  function renderRail() {
+    document.getElementById('rail').innerHTML = state.players.map(function (p, i) {
+      return '<div class="pcard' + (i === state.turn ? ' active' : '') + '">' +
+        '<span class="sq" style="background:' + p.color + '"></span>' +
+        '<div><div class="nm">' + p.name + (i === 0 ? '（你）' : '') + '</div>' +
+        '<div class="sub">' + p.props + ' 块地产</div></div>' +
+        '<div class="cash">$' + p.cash + '</div></div>';
+    }).join('');
+  }
+
+  const logs = ['· 老王 买下 珠江路 $100', '· 轮到 阿婆'];
+  function renderLog() {
+    document.getElementById('log').innerHTML = logs.slice(-4).join('<br>');
+  }
+  function pushLog(s) {
+    logs.push('· ' + s);
+    if (logs.length > 6) logs.shift();
+    renderLog();
+  }
+
+  function rollDice() {
+    d1 = 1 + Math.floor(Math.random() * 6);
+    d2 = 1 + Math.floor(Math.random() * 6);
+    const p = state.players[state.turn];
+    p.pos = (p.pos + d1 + d2) % 40;
+    pushLog(p.name + ' 掷出 ' + d1 + ' + ' + d2 + ' = ' + (d1 + d2));
+    draw(); renderConsole();
+  }
+
+  function mockState() {
+    const players = [
+      { name: '阿婆', color: '#e2564a', cash: 1500, pos: 0, props: 2 },
+      { name: '老王', color: '#3f7fe0', cash: 900, pos: 16, props: 3 },
+      { name: '小李', color: '#2f9e63', cash: 1240, pos: 27, props: 3 }
+    ];
+    const props = {};
+    const houses = { 1: 2, 3: 1, 6: 3, 8: 2, 9: 5, 12: 1, 14: 2, 16: 1, 21: 2, 24: 3, 27: 1, 29: 2, 32: 4, 34: 1, 37: 3, 39: 2 };
+    Object.keys(houses).forEach(function (k) { props[k] = { houses: houses[k], mortgaged: false }; });
+    return { players: players, props: props, turn: 0, round: 3 };
+  }
+
+  /* 让 ctx 支持纹理缩放：绘制前把 pattern 设成 0.25 倍 */
+  const _createPattern = ctx.createPattern.bind(ctx);
+  ctx.createPattern = function (img, rep) {
+    const p = _createPattern(img, rep);
+    if (p && p.setTransform) {
+      try { p.setTransform(new DOMMatrix([PAT_SCALE, 0, 0, PAT_SCALE, 0, 0])); } catch (e) {}
+    }
+    return p;
+  };
+
+  state = mockState();
+  loadAll();
+  window.addEventListener('resize', resize);
+  document.getElementById('roll').addEventListener('click', rollDice);
+  document.getElementById('d1').addEventListener('click', rollDice);
+  document.getElementById('d2').addEventListener('click', rollDice);
+
+  resize();
+  renderConsole();
+  renderRail();
+  renderLog();
+})();
+</script>
+</body>
+</html>
