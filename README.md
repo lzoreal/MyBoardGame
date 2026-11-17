@@ -4,10 +4,11 @@
 
 结构分两层：
 
-- **大厅（Lobby）**：进游戏先看到 8 张游戏卡，点哪张进哪个游戏，全部可玩、全部可联机：
-  大富翁、飞行棋、蛇梯棋、五子棋、黑白棋、四子连珠、跳棋、UNO。
+- **大厅（Lobby）**：进游戏先看到 9 张游戏卡，点哪张进哪个游戏，全部可玩、全部可联机：
+  大富翁、飞行棋、蛇梯棋、五子棋、黑白棋、四子连珠、跳棋、UNO、林中小屋。
 - **大富翁（Monopoly）**：40 格经典棋盘，2～4 人，规则按经典完整版实现，房子和棋子是真 3D。
 - **小游戏合集**：每个游戏一个页面 + 一个纯规则引擎，共用 `design/games/shell.js`（建房/加入/订阅/回合权限/座位条/结算）。
+- **林中小屋（Cabin）**：山中小屋经典规则——翻房间拼三层地图、事件/物品/预兆三类卡、预兆攒够触发闹鬼，抽预兆者当叛徒，其余人按剧本目标对抗。
 
 ## 目录
 
@@ -24,17 +25,18 @@ MyBoardGame/
 │   ├── scene.js          3D 层（three.js）：房子、旅馆、棋子
 │   ├── net.js            房间的建/查/写/订阅，乐观锁重试
 │   ├── ui.js             棋盘渲染、玩家卡、操作区、格子详情、交易与拍卖弹窗
-│   ├── lobby.js          大厅游戏注册表（8 款游戏）
-│   ├── games/            小游戏纯规则引擎：ludo / snakes / gomoku / reversi / connect4 / jump / uno
+│   ├── lobby.js          大厅游戏注册表（9 款游戏）
+│   ├── games/            小游戏纯规则引擎：ludo / snakes / gomoku / reversi / connect4 / jump / uno / cabin
 │   └── main.js           入口：视图切换、房间生命周期、动作派发
 ├── design/
 │   ├── board-q.html      大富翁主页面（Q 版透视棋盘）+ board-q.css
 │   ├── games/            小游戏通用外壳 shell.js 与 games.css
-│   ├── ludo / snakes / gomoku / reversi / connect4 / jump / uno.html
+│   ├── ludo / snakes / gomoku / reversi / connect4 / jump / uno / cabin.html
 │   └── preview/          三个预览壳（手机 / 桌面 / 宽屏）
 ├── sql/rooms.sql         ← 在 Supabase 里执行一次
 ├── tests/engine.test.js  大富翁规则单测 + 600 步随机对局压力测试
 ├── tests/games.test.js   七款小游戏的规则单测
+├── tests/cabin.test.js   林中小屋规则单测
 └── README.md
 ```
 

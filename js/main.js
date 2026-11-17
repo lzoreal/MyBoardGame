@@ -29,7 +29,8 @@
     reversi: 'design/reversi.html',
     connect4: 'design/connect4.html',
     jump: 'design/jump.html',
-    uno: 'design/uno.html'
+    uno: 'design/uno.html',
+    cabin: 'design/cabin.html'
   };
 
   function gotoTablePage(code, game) {

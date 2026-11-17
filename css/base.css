@@ -144,6 +144,7 @@ html, body {
 .gc-art.rev  { background: linear-gradient(135deg, #74c98b, #2f7d55); }
 .gc-art.c4   { background: linear-gradient(135deg, #ff8b7c, #f7c13c); }
 .gc-art.jump { background: linear-gradient(135deg, #ffd166, #e07b39); }
+.gc-art.cabin { background: linear-gradient(135deg, #403a5c, #7c6a8f 55%, #b9a7d6); }
 
 .gc-title {
   display: flex;

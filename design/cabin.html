@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>林中小屋 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=3">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <div class="floorTabs" id="floorTabs" aria-label="楼层切换"></div>
+  <div class="scenarioBar" id="scenarioBar"></div>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner" aria-label="林中小屋地图"></div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="cabinCard" role="status" aria-live="polite"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">探索、抽卡、闹鬼检定与战斗都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/cabin.js"></script>
+<script src="games/shell.js"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const C = window.CabinEngine;
+  const W = C.W, H = C.H;
+  const CELL = 150;
+  const board = document.getElementById('boardInner');
+  const SEAT = ['#e2564a', '#3f7fe0', '#2f9e63', '#d9a13b', '#8f5bd9', '#e57bb4'];
+  const SYMBOL = {
+    event: { label: '事件', color: '#e2833f' },
+    item: { label: '物品', color: '#3f8fd6' },
+    omen: { label: '预兆', color: '#8f5bd9' }
+  };
+
+  let cur = null;
+  let svg = null;
+  let viewFloor = 'ground';
+  let lastCardKey = '';
+  let cardTimer = 0;
+  let narrow = false;
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const txt = (parent, x, y, content, attrs) => {
+    const t = el('text', Object.assign({ x: x, y: y, 'text-anchor': 'middle' }, attrs || {}), parent);
+    t.textContent = content;
+    return t;
+  };
+  function seatColor(i) { return SEAT[i % SEAT.length]; }
+
+  /* ---------------- 棋盘 ---------------- */
+  function buildBoard() {
+    board.innerHTML = '';
+    svg = el('svg', { viewBox: '0 0 ' + (W * CELL) + ' ' + (H * CELL), role: 'img', 'aria-label': '林中小屋地图' });
+    board.appendChild(svg);
+    svg.addEventListener('pointerdown', onTap);
+  }
+
+  function drawPill(parent, x, y, w, h, fill, stroke) {
+    el('rect', { x: x, y: y, width: w, height: h, rx: h / 2, fill: fill, stroke: stroke || 'none', 'stroke-width': stroke ? 2 : 0 }, parent);
+  }
+
+  function drawRoom(g, room, st) {
+    const px = room.x * CELL, py = room.y * CELL;
+    const x0 = px + 12, y0 = py + 10, w = CELL - 24, h = CELL - 26;
+
+    const tone = room.kind === 'stairs' ? '#f3e6c8' : (room.kind === 'start' ? '#ffe9c6' : '#fffdf6');
+    el('rect', { x: x0, y: y0 + 5, width: w, height: h, rx: 22, fill: 'rgba(90,70,40,.14)' }, g);
+    el('rect', { x: x0, y: y0, width: w, height: h, rx: 22, fill: tone, stroke: '#e6d7ba', 'stroke-width': 3 }, g);
+
+    // 门：门所在那一边画一道浅色缺口
+    const dirs = { N: [x0 + w / 2 - 17, y0 - 6, 34, 11], S: [x0 + w / 2 - 17, y0 + h - 5, 34, 11], W: [x0 - 5, y0 + h / 2 - 17, 11, 34], E: [x0 + w - 6, y0 + h / 2 - 17, 11, 34] };
+    (room.doors || '').split('').forEach((d) => {
+      const r = dirs[d];
+      if (r) el('rect', { x: r[0], y: r[1], width: r[2], height: r[3], rx: 5, fill: '#fff7e6' }, g);
+    });
+
+    txt(g, x0 + w / 2, y0 + h * 0.36, room.name, {
+      'font-size': narrow ? (room.name.length > 3 ? 29 : 33) : (room.name.length > 3 ? 23 : 27),
+      'font-weight': 800,
+      fill: '#3d3527',
+      'font-family': 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'
+    });
+
+    if (room.kind === 'stairs') {
+      txt(g, x0 + w / 2, y0 + h * 0.64, room.to === 'upper' ? '↑ 上楼' : '↓ 下楼', {
+        'font-size': narrow ? 22 : 16, 'font-weight': 700, fill: '#b08a52'
+      });
+    } else if (room.symbol && !room.resolved) {
+      const s = SYMBOL[room.symbol];
+      const cx = x0 + w / 2, cy = y0 + h * 0.64;
+      el('circle', { cx: cx - (narrow ? 32 : 24), cy: cy - 6, r: narrow ? 10 : 8, fill: s.color }, g);
+      txt(g, cx + (narrow ? 14 : 10), cy, s.label, { 'font-size': narrow ? 21 : 16, 'font-weight': 700, fill: s.color });
+    } else if (room.kind === 'start') {
+      txt(g, x0 + w / 2, y0 + h * 0.64, '起点', { 'font-size': narrow ? 22 : 16, 'font-weight': 700, fill: '#c59a5a' });
+    }
+
+    // 棋子：底边排一排，不挡住房间名
+    const here = st.players.filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
+    const n = Math.min(here.length, 4);
+    const R = narrow ? 20 : 15;
+    const GAP = narrow ? 44 : 34;
+    const AF = narrow ? 18 : 13;
+    here.slice(0, 4).forEach((p, k) => {
+      const i = st.players.indexOf(p);
+      const tx = x0 + w / 2 - (n - 1) * GAP / 2 + k * GAP;
+      const ty = y0 + h - (narrow ? 26 : 22);
+      el('circle', { cx: tx, cy: ty, r: R, fill: seatColor(i), stroke: '#fff', 'stroke-width': 2.5 }, g);
+      txt(g, tx, ty + (narrow ? 6 : 5), p.art || '?', { 'font-size': AF, 'font-weight': 800, fill: '#fff' });
+      if (st.haunt && st.haunt.active && st.haunt.traitor === i) {
+        el('circle', { cx: tx, cy: ty, r: R + 4, fill: 'none', stroke: '#7a2b3a', 'stroke-width': 3.5 }, g);
+      }
+    });
+  }
+
+  function drawEmpty(g, x, y) {
+    el('rect', {
+      x: x * CELL + 20, y: y * CELL + 18, width: CELL - 40, height: CELL - 40, rx: 18,
+      fill: 'rgba(255,255,255,.28)', stroke: 'rgba(120,150,130,.35)', 'stroke-width': 2, 'stroke-dasharray': '8 8'
+    }, g);
+  }
+
+  function renderBoard(st) {
+    if (!svg) buildBoard();
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    // 地板底
+    el('rect', { x: 0, y: 0, width: W * CELL, height: H * CELL, rx: 26, fill: '#f7f2e6' }, svg);
+    for (let y = 0; y <= H; y++) {
+      el('line', { x1: 0, y1: y * CELL, x2: W * CELL, y2: y * CELL, stroke: '#e9dfc8', 'stroke-width': 2 }, svg);
+    }
+    for (let x = 0; x <= W; x++) {
+      el('line', { x1: x * CELL, y1: 0, x2: x * CELL, y2: H * CELL, stroke: '#e9dfc8', 'stroke-width': 2 }, svg);
+    }
+
+    const gEmpty = el('g', {}, svg);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (!st.rooms.some((r) => r.floor === viewFloor && r.x === x && r.y === y)) drawEmpty(gEmpty, x, y);
+      }
+    }
+
+    const gRooms = el('g', {}, svg);
+    st.rooms.filter((r) => r.floor === viewFloor).forEach((room) => drawRoom(gRooms, room, st));
+  }
+
+  /* ---------------- 顶部 / 剧本条 ---------------- */
+  function renderFloorTabs(st) {
+    const bar = $('floorTabs');
+    bar.innerHTML = '';
+    C.FLOORS.slice().reverse().forEach((f) => {
+      const b = document.createElement('button');
+      b.className = 'floorTab';
+      b.type = 'button';
+      b.textContent = C.FLOOR_LABEL[f] + '（' + st.rooms.filter((r) => r.floor === f).length + '）';
+      b.setAttribute('aria-pressed', f === viewFloor ? 'true' : 'false');
+      b.addEventListener('click', () => { viewFloor = f; renderBoard(cur); renderFloorTabs(cur); });
+      bar.appendChild(b);
+    });
+  }
+
+  function renderScenario(st) {
+    const bar = $('scenarioBar');
+    if (!st.haunt || !st.haunt.active) { bar.classList.remove('show'); bar.innerHTML = ''; return; }
+    const h = st.haunt;
+    bar.classList.add('show');
+    bar.innerHTML = '<b>★ ' + h.name + '</b> 英雄：' + h.heroGoalText +
+      '（进度 ' + h.progress + '） · 叛徒：' + h.traitorGoalText;
+  }
+
+  /* ---------------- 我的判定 ---------------- */
+  function myIndex(st) {
+    const me = window.GameShell.isLocal() ? st.players[st.turn] : null;
+    const id = me ? me.id : window.Net.identity.id;
+    return st.players.findIndex((p) => p.id === id);
+  }
+
+  function myTurn(st) {
+    if (!st || st.phase !== 'playing') return false;
+    if (st.players[st.turn].dead) return false;
+    return window.GameShell.isLocal() ? true : st.players[st.turn].id === window.Net.identity.id;
+  }
+
+  function onTap(ev) {
+    const st = cur;
+    if (!st || st.phase !== 'playing') return;
+    if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+    if (!st.rolled) { window.GameShell.toast('先掷速度骰', true); return; }
+    if (st.moves <= 0) { window.GameShell.toast('移动点用完了，结束回合吧', true); return; }
+
+    const me = st.players[st.turn];
+    const rect = svg.getBoundingClientRect();
+    const vx = (ev.clientX - rect.left) / rect.width * (W * CELL);
+    const vy = (ev.clientY - rect.top) / rect.height * (H * CELL);
+    const tx = Math.floor(vx / CELL), ty = Math.floor(vy / CELL);
+    const dx = tx - me.x, dy = ty - me.y;
+    if (Math.abs(dx) + Math.abs(dy) !== 1) {
+      window.GameShell.toast('只能走到隔壁格子', true);
+      return;
+    }
+    const dir = dx === 1 ? 'E' : dx === -1 ? 'W' : dy === 1 ? 'S' : 'N';
+    window.GameShell.send({ type: 'move', dir: dir });
+  }
+
+  /* ---------------- 卡牌提示 ---------------- */
+  function renderCard(st) {
+    const box = $('cabinCard');
+    if (!st.lastCard) { box.className = ''; box.innerHTML = ''; lastCardKey = ''; return; }
+    const key = st.lastCard.kind + '|' + st.lastCard.title + '|' + (st.logs || []).length;
+    if (key === lastCardKey) return;
+    lastCardKey = key;
+
+    const c = st.lastCard;
+    box.className = 'show' + (c.tone === 'bad' ? ' bad' : '');
+    box.innerHTML = '<div class="k">' + (c.kind === 'omen' ? '预兆' : c.kind === 'item' ? '物品' : c.kind === 'haunt' ? '闹鬼' : '事件') +
+      '</div><div class="t">' + c.title + '</div><div class="d">' + c.text + '</div>';
+    if (st.lastRoll) {
+      const row = document.createElement('div');
+      row.className = 'cabinDice';
+      st.lastRoll.faces.forEach((f) => {
+        const d = document.createElement('div');
+        d.className = 'cabinDie';
+        d.textContent = f;
+        row.appendChild(d);
+      });
+      const sum = document.createElement('div');
+      sum.className = 'cabinDie';
+      sum.style.width = 'auto';
+      sum.style.padding = '0 8px';
+      sum.textContent = '= ' + st.lastRoll.total;
+      row.appendChild(sum);
+      box.appendChild(row);
+    }
+    clearTimeout(cardTimer);
+    cardTimer = setTimeout(() => { box.className = ''; }, 7000);
+  }
+
+  /* ---------------- 底部栏 ---------------- */
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    if (!info || !actions) return;
+
+    const mi = myIndex(st);
+    const me = st.players[mi];
+    info.innerHTML = '';
+    actions.innerHTML = '';
+
+    if (!me) return;
+
+    const head = document.createElement('div');
+    head.innerHTML = '<div class="ttl">' + me.name + ' · ' + me.charName + '（' + me.role + '）</div>' +
+      '<div class="traitRow"></div>' +
+      '<div class="sub">' + (st.haunt && st.haunt.active ? '闹鬼中 · 预兆 ' + st.omens : '探索中 · 预兆 ' + st.omens + ' / 6') +
+      ' · 物品 ' + (me.items || []).filter((it) => it.tag !== '预兆').length +
+      (st.rolled ? ' · 剩余移动 ' + st.moves : ' · 还没掷骰') + '</div>';
+    info.appendChild(head);
+
+    const row = head.querySelector('.traitRow');
+    C.TRAITS.forEach((t) => {
+      const chip = document.createElement('span');
+      chip.className = 'traitChip';
+      chip.innerHTML = t.label + ' <b>' + (me.traits[t.key] || 0) + '</b>';
+      row.appendChild(chip);
+    });
+
+    const isMine = myTurn(st);
+    const addBtn = (label, cls, fn, disabled) => {
+      const b = document.createElement('button');
+      b.className = 'btn ' + (cls || 'ghost');
+      b.type = 'button';
+      b.textContent = label;
+      if (disabled) b.disabled = true;
+      b.addEventListener('click', fn);
+      actions.appendChild(b);
+      return b;
+    };
+
+    if (!isMine) {
+      const span = document.createElement('div');
+      span.className = 'btn ghost';
+      span.style.display = 'grid';
+      span.style.placeItems = 'center';
+      span.textContent = '等 ' + st.players[st.turn].name + ' 行动…';
+      actions.appendChild(span);
+      return;
+    }
+
+    if (st.phase !== 'playing') return;
+
+    if (!st.rolled) {
+      addBtn('掷速度骰', 'primary', () => window.GameShell.send({ type: 'roll' }));
+    } else {
+      const pill = document.createElement('div');
+      pill.className = 'btn ghost';
+      pill.style.display = 'grid';
+      pill.style.placeItems = 'center';
+      pill.textContent = '可走 ' + st.moves + ' 步';
+      actions.appendChild(pill);
+    }
+
+    // 楼梯
+    const here = st.rooms.find((r) => r.floor === me.floor && r.x === me.x && r.y === me.y);
+    if (here && here.kind === 'stairs') {
+      addBtn(here.to === 'upper' ? '上楼' : '下楼', '', () => window.GameShell.send({ type: 'stair' }), !st.rolled || st.moves <= 0);
+    }
+
+    // 剧本判定
+    if (st.haunt && st.haunt.active && (st.haunt.heroGoal.type === 'ritual' || st.haunt.heroGoal.type === 'wolves') && mi !== st.haunt.traitor) {
+      const goal = st.haunt.heroGoal;
+      const inRoom = !goal.room || (here && here.name === goal.room);
+      const label = (goal.type === 'ritual' ? '进行' : '击退狼群') + '（' + (C.TRAITS.find((t) => t.key === goal.trait) || {}).label + '判定）';
+      addBtn(label, 'primary', () => window.GameShell.send({ type: 'check' }), !inRoom);
+    }
+
+    // 同房间对手
+    if (st.haunt && st.haunt.active) {
+      st.players.forEach((p, i) => {
+        if (i === mi || p.dead) return;
+        if (p.floor !== me.floor || p.x !== me.x || p.y !== me.y) return;
+        addBtn('攻击 ' + p.name, '', () => window.GameShell.send({ type: 'attack', target: p.id }));
+      });
+    }
+
+    addBtn('结束回合', 'ghost', () => window.GameShell.send({ type: 'end' }));
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+    narrow = window.innerWidth <= 720;
+    const me = st.players[myIndex(st)];
+    if (me && me.floor !== viewFloor && !st.viewLock) viewFloor = me.floor;
+    renderFloorTabs(st);
+    renderBoard(st);
+    renderScenario(st);
+    renderDock(st);
+    renderCard(st);
+  }
+
+  /* ---------------- 启动 ---------------- */
+  buildBoard();
+
+  window.GameShell.boot({
+    game: 'cabin',
+    title: '林中小屋',
+    blurb: '经典「山中小屋」：掷速度骰、推门翻房间，抽事件、物品与预兆；预兆攒多了会惊醒屋里的东西，抽预兆的人成为叛徒，其余人按剧本目标对抗。',
+    min: 2,
+    max: 6,
+    engine: window.CabinEngine,
+    seatColor: (p, i) => SEAT[i % SEAT.length],
+    seatTag: (p) => (cur && cur.haunt && cur.haunt.active && cur.players.indexOf(p) === cur.haunt.traitor ? '叛徒' : p.charName),
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      const p = st.players[st.turn];
+      return (st.haunt && st.haunt.active ? '闹鬼 · ' : '探索 · ') + (p ? p.name : '');
+    },
+    winnerTitle: (st) => (st.winner ? (st.winner.side === 'traitor' ? '叛徒获胜' : '英雄获胜') : '对局结束'),
+    winnerSub: (st) => (st.winner ? st.winner.text : ''),
+    onState: (st) => render(st),
+    onMount: () => { viewFloor = 'ground'; }
+  });
+})();
+</script>
+</body>
+</html>
