@@ -59,6 +59,9 @@ jobs:
       - name: Run cabin scenario rule-fix tests
         run: node tests/cabin-rule-fixes.test.js
 
+      - name: Run all 50 scenarios through the engine
+        run: node tests/cabin-all-scenarios.test.js
+
       - name: Run cabin private-state security tests
         run: node tests/cabin-security.test.js
 
