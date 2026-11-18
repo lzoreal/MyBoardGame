@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>卡卡颂 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .ccWrap {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 10px;
+    padding: 2px 10px 0;
+  }
+  .boardBox {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 26px;
+    border: 4px solid #fff;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+      linear-gradient(160deg, #d8ecd2 0%, #cfe3bd 55%, #c3d9ad 100%);
+    box-shadow: 0 8px 22px rgba(31,78,92,.16), inset 0 0 0 2px rgba(255,255,255,.35);
+    overflow: hidden;
+  }
+  .boardBox svg { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+  .boardHint {
+    position: absolute;
+    left: 12px; bottom: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.86);
+    border: 2px solid #fff;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5d6b45;
+    box-shadow: 0 3px 10px rgba(31,78,92,.12);
+    pointer-events: none;
+    max-width: calc(100% - 24px);
+  }
+
+  /* 右侧计分栏 */
+  .ccSide {
+    width: 218px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .ccSide::-webkit-scrollbar { display: none; }
+  .sideCard {
+    border-radius: 20px;
+    border: 3px solid #fff;
+    background: #fffdf7;
+    box-shadow: 0 4px 12px rgba(31,78,92,.12);
+    padding: 10px 12px;
+  }
+  .sideCard h4 {
+    margin: 0 0 6px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #8a7451;
+  }
+  .playerRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    border-radius: 12px;
+    transition: background .2s;
+  }
+  .playerRow.turn { background: #fff3d6; }
+  .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.18);
+    flex: none;
+  }
+  .playerRow .nm { flex: 1; font-size: 13px; font-weight: 800; color: #3f3a33; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .playerRow .sc { font-size: 15px; font-weight: 900; color: #c86a2c; }
+  .playerRow.bump .sc { animation: scoreBump .5s cubic-bezier(.2,.8,.3,1); }
+  @keyframes scoreBump {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.5); color: #e2564a; }
+    100% { transform: scale(1); }
+  }
+  .meepleDots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; }
+  .meepleDots i {
+    width: 8px; height: 10px;
+    border-radius: 4px 4px 2px 2px;
+    background: #e6ddcc;
+  }
+  .meepleDots i.on { background: var(--pc, #e2564a); }
+
+  /* 底部操作 */
+  .ccDock {
+    margin: 6px 10px calc(6px + var(--sa-bottom));
+    border-radius: 22px;
+    border: 3px solid #fff;
+    background: #fffdf7;
+    box-shadow: 0 6px 18px rgba(31,78,92,.14);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .tilePane {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+  }
+  .tileSlot {
+    width: 78px; height: 78px;
+    border-radius: 14px;
+    border: 3px solid #fff;
+    background: #cfe3bd;
+    box-shadow: 0 4px 10px rgba(31,78,92,.18);
+    overflow: hidden;
+    position: relative;
+  }
+  .tileSlot svg { width: 100%; height: 100%; display: block; }
+  .tileSlot.pop { animation: tilePop .32s cubic-bezier(.2,.9,.3,1.1); }
+  @keyframes tilePop {
+    0% { transform: scale(.55) rotate(-8deg); opacity: .4; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .rotBtn {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background: linear-gradient(180deg,#fff,#e9f6ff);
+    box-shadow: 0 4px 0 rgba(46,148,171,.18);
+    color: #2e94ab;
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .rotBtn:active { transform: translateY(2px); }
+  .ccInfo { flex: 1; min-width: 150px; font-size: 13px; color: #5b5347; font-weight: 700; line-height: 1.45; }
+  .ccInfo .sub { display: block; font-size: 11.5px; color: #8d7a5c; font-weight: 600; margin-top: 2px; }
+  .meepleBtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 3px solid #fff;
+    background: #f4ead5;
+    box-shadow: 0 3px 0 rgba(46,148,171,.12);
+    font-size: 13px;
+    font-weight: 800;
+    color: #5b4a33;
+    cursor: pointer;
+  }
+  .mBtn:active { transform: translateY(2px); }
+  .mBtn[disabled] { opacity: .45; cursor: default; }
+  .mBtn.none { background: #eef3ea; color: #5d6b45; }
+
+  /* 棋盘上的棋子与动效 */
+  .ccTileIn { animation: tileIn .28s cubic-bezier(.2,.9,.3,1); }
+  @keyframes tileIn {
+    0% { opacity: .2; transform: scale(.86); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .cand { cursor: pointer; }
+  .cand:hover rect { fill: rgba(255,255,255,.34); }
+
+  @media (max-width: 860px) {
+    .ccWrap { flex-direction: column-reverse; gap: 6px; padding: 2px 8px 0; }
+    .ccSide { width: 100%; flex-direction: row; gap: 6px; overflow-x: auto; overflow-y: hidden; max-height: none; }
+    .sideCard { flex: none; display: flex; align-items: center; gap: 4px; width: max-content; min-width: 100%; padding: 6px 8px; }
+    .sideCard h4 { display: none; }
+    .playerRow { flex: none; padding: 3px 5px; gap: 4px; }
+    .playerRow .nm { font-size: 12px; max-width: 58px; }
+    .playerRow .sc { font-size: 14px; }
+    .playerRow .dot { width: 9px; height: 9px; }
+    .meepleDots { display: none; }
+    .tileSlot { width: 64px; height: 64px; }
+    .ccDock { padding: 8px 10px; gap: 8px; }
+    .ccInfo { font-size: 12px; min-width: 120px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ccTileIn, .tileSlot.pop, .playerRow.bump .sc { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="ccWrap" aria-label="卡卡颂棋盘">
+    <div class="boardBox" id="boardBox">
+      <svg id="boardSvg" aria-label="拼图棋盘" role="img"></svg>
+      <div class="boardHint" id="boardHint">点发亮的格子放下板块</div>
+    </div>
+    <aside class="ccSide" id="side"></aside>
+  </main>
+
+  <footer class="ccDock">
+    <div class="tilePane">
+      <div class="tileSlot" id="tileSlot"></div>
+      <button class="rotBtn" id="rotBtn" type="button" aria-label="旋转板块" title="旋转板块（R）">⟳</button>
+    </div>
+    <div class="ccInfo" id="ccInfo">等待开局</div>
+    <div class="meepleBtns" id="meepleBtns"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">拼放、米宝与得分都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/carcassonne.js"></script>
+<script src="games/shell.js?v=9"></script>
+<script>
+(function () {
+  const E = window.CarcassonneEngine;
+  const TYPES = E.TYPES;
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = (id) => document.getElementById(id);
+
+  const C_FIELD = '#a9d17f';
+  const C_FIELD2 = '#9bc56f';
+  const C_CITY = '#d7a76b';
+  const C_CITY_DARK = '#8a5a34';
+  const C_ROAD = '#f3e6c6';
+  const C_ROAD_EDGE = '#b39a72';
+  const C_WALL = '#fff8e8';
+
+  let rot = 0;
+  let lastCur = -2;
+  let lastState = null;
+  let lastScore = {};
+
+  const MID = [[50, 0], [100, 50], [50, 100], [0, 50]];
+  const BAND = {
+    0: [0, 0, 100, 38], 1: [62, 0, 38, 100], 2: [0, 62, 100, 38], 3: [0, 0, 38, 100]
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function rotatePt(x, y, r) {
+    const cx = 50, cy = 50;
+    let nx = x - cx, ny = y - cy;
+    for (let i = 0; i < r; i++) { const t = nx; nx = -ny; ny = t; }
+    return { x: nx + cx, y: ny + cy };
+  }
+
+  function avgPoint(dirs) {
+    if (!dirs || !dirs.length) return { x: 50, y: 50 };
+    let x = 0, y = 0;
+    dirs.forEach((d) => { x += MID[d][0]; y += MID[d][1]; });
+    return { x: x / dirs.length, y: y / dirs.length };
+  }
+
+  function anchorOf(type, kind, i, r) {
+    let p = { x: 50, y: 50 };
+    if (kind === 'city') {
+      const seg = type.city[i] || [];
+      const m = avgPoint(seg);
+      if (seg.length === 1 || seg.length === 2) p = { x: 50 + (m.x - 50) * .44, y: 50 + (m.y - 50) * .44 };
+      else p = { x: 50 + (m.x - 50) * .22, y: 50 + (m.y - 50) * .22 };
+    } else if (kind === 'road') {
+      const seg = type.road[i] || [];
+      const m = avgPoint(seg);
+      if (seg.length === 1) p = { x: 50 + (m.x - 50) * .58, y: 50 + (m.y - 50) * .58 };
+      if (seg.length === 2) p = { x: 50 + (m.x - 50) * .5, y: 50 + (m.y - 50) * .5 };
+    } else if (kind === 'mon') {
+      p = { x: 50, y: 54 };
+    } else {
+      const fEdges = [0, 1, 2, 3].filter((d) => type.edges[d] === 'F');
+      const m = avgPoint(fEdges.length ? fEdges : [0]);
+      p = { x: 50 + (m.x - 50) * .62, y: 50 + (m.y - 50) * .62 };
+    }
+    return rotatePt(p.x, p.y, r);
+  }
+
+  function cityArt(type, r) {
+    let s = '<g transform="rotate(' + (r * 90) + ' 50 50)">';
+    (type.city || []).forEach((seg) => {
+      seg.forEach((d) => {
+        const b = BAND[d];
+        const horiz = (d === 0 || d === 2);
+        const innerY = d === 0 ? 32 : d === 2 ? 68 : 0;
+        const innerX = d === 1 ? 68 : d === 3 ? 32 : 0;
+        s += '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] +
+          '" fill="' + C_CITY + '" stroke="' + C_CITY_DARK + '" stroke-width="2.2"/>';
+
+        // 内侧城墙 + 垛口
+        if (horiz) {
+          s += '<line x1="0" y1="' + innerY + '" x2="100" y2="' + innerY + '" stroke="#b07c46" stroke-width="2.6"/>';
+          for (let k = 8; k < 96; k += 14) {
+            s += '<rect x="' + k + '" y="' + (innerY - 3) + '" width="6" height="6" fill="#e8c79a" stroke="#8a5a34" stroke-width="1.2"/>';
+          }
+        } else {
+          s += '<line x1="' + innerX + '" y1="0" x2="' + innerX + '" y2="100" stroke="#b07c46" stroke-width="2.6"/>';
+          for (let k = 8; k < 96; k += 14) {
+            s += '<rect x="' + (innerX - 3) + '" y="' + k + '" width="6" height="6" fill="#e8c79a" stroke="#8a5a34" stroke-width="1.2"/>';
+          }
+        }
+
+        // 两座方形塔楼
+        const towers = horiz
+          ? [[12, d === 0 ? 12 : 88], [88, d === 0 ? 12 : 88]]
+          : [[d === 1 ? 88 : 12, 12], [d === 1 ? 88 : 12, 88]];
+        towers.forEach((p) => {
+          const tx = p[0], ty = p[1];
+          s += '<rect x="' + (tx - 9) + '" y="' + (ty - 9) + '" width="18" height="18" rx="2" fill="#eac28f" stroke="' + C_CITY_DARK + '" stroke-width="2"/>' +
+            '<rect x="' + (tx - 9) + '" y="' + (ty - 9) + '" width="6" height="5" fill="#c97a5a"/>' +
+            '<rect x="' + (tx - 3) + '" y="' + (ty - 9) + '" width="6" height="5" fill="#c97a5a"/>' +
+            '<rect x="' + (tx + 3) + '" y="' + (ty - 9) + '" width="6" height="5" fill="#c97a5a"/>' +
+            '<rect x="' + (tx - 3) + '" y="' + (ty - 2) + '" width="6" height="7" rx="2" fill="#8a5a34"/>';
+        });
+      });
+    });
+    s += '</g>';
+    return s;
+  }
+
+  function roadArt(type, r) {
+    const roads = type.road || [];
+    if (!roads.length) return '';
+    let s = '<g transform="rotate(' + (r * 90) + ' 50 50)">';
+    roads.forEach((seg) => {
+      if (seg.length === 2) {
+        const a = MID[seg[0]], b = MID[seg[1]];
+        const opp = Math.abs(seg[0] - seg[1]) === 2;
+        const d = opp
+          ? 'M' + a[0] + ' ' + a[1] + ' L' + b[0] + ' ' + b[1]
+          : 'M' + a[0] + ' ' + a[1] + ' Q50 50 ' + b[0] + ' ' + b[1];
+        s += '<path d="' + d + '" fill="none" stroke="' + C_ROAD_EDGE + '" stroke-width="20" stroke-linecap="round"/>';
+        s += '<path d="' + d + '" fill="none" stroke="' + C_ROAD + '" stroke-width="13" stroke-linecap="round"/>';
+        s += '<path d="' + d + '" fill="none" stroke="#fffaf0" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" opacity=".8"/>';
+      } else {
+        const a = MID[seg[0]];
+        const d = 'M' + a[0] + ' ' + a[1] + ' L50 50';
+        s += '<path d="' + d + '" fill="none" stroke="' + C_ROAD_EDGE + '" stroke-width="19" stroke-linecap="round"/>';
+        s += '<path d="' + d + '" fill="none" stroke="' + C_ROAD + '" stroke-width="12" stroke-linecap="round"/>';
+      }
+    });
+    if ((type.road || []).filter((x) => x.length === 1).length >= 3) {
+      s += '<circle cx="50" cy="50" r="9" fill="#f4e4c2" stroke="' + C_CITY_DARK + '" stroke-width="2"/>' +
+        '<circle cx="50" cy="50" r="3.6" fill="#c97a5a"/>';
+    }
+    s += '</g>';
+    return s;
+  }
+
+  function monasteryArt(type, r) {
+    if (!type.mon) return '';
+    return '<g transform="rotate(' + (r * 90) + ' 50 50)">' +
+      '<rect x="35" y="44" width="30" height="24" rx="4" fill="#f8edd4" stroke="' + C_CITY_DARK + '" stroke-width="2.2"/>' +
+      '<path d="M32 45 L50 30 L68 45 Z" fill="#c97a5a" stroke="' + C_CITY_DARK + '" stroke-width="2.2" stroke-linejoin="round"/>' +
+      '<rect x="46" y="52" width="8" height="16" rx="2" fill="#8a5a34"/>' +
+      '<path d="M50 20 v7 M46.5 23.5 h7" stroke="#fff8e8" stroke-width="2.4"/>' +
+      '</g>';
+  }
+
+  function shieldArt(type, r) {
+    if (!type.shield) return '';
+    return '<g transform="rotate(' + (r * 90) + ' 50 50)">' +
+      '<path d="M50 26 L62 30 v10 c0 8 -12 14 -12 14 s-12 -6 -12 -14 v-10 Z" fill="#f0b429" stroke="#8a5a34" stroke-width="2"/>' +
+      '<path d="M50 32 v10 M45 36 h10" stroke="#fff8e8" stroke-width="2"/>' +
+      '</g>';
+  }
+
+  function fieldDots(type) {
+    const fEdges = [0, 1, 2, 3].filter((d) => type.edges[d] === 'F');
+    let s = '';
+    fEdges.forEach((d, k) => {
+      const p = { x: 50 + (MID[d][0] - 50) * .78, y: 50 + (MID[d][1] - 50) * .78 };
+      const off = (k % 2 ? 6 : -6);
+      s += '<circle cx="' + (p.x + off) + '" cy="' + (p.y - off) + '" r="2.2" fill="#7fae57" opacity=".55"/>';
+      s += '<circle cx="' + (p.x - off) + '" cy="' + (p.y + off) + '" r="1.6" fill="#cbe59b" opacity=".7"/>';
+    });
+    return s;
+  }
+
+  function meepleArt(x, y, color) {
+    return '<g transform="translate(' + x + ' ' + y + ')">' +
+      '<ellipse cx="0" cy="10" rx="7" ry="2.4" fill="rgba(30,40,20,.22)"/>' +
+      '<circle cx="0" cy="-8" r="6.2" fill="' + color + '" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M-6.6 10 q-1 -12 3.2 -12 h6.8 q4.2 0 3.2 12 Z" fill="' + color + '" stroke="#fff" stroke-width="2"/>' +
+      '</g>';
+  }
+
+  function tileSvg(t, r, opts) {
+    const o = opts || {};
+    const type = o.type || TYPES[t];
+    let s = '<rect x="0" y="0" width="100" height="100" fill="' + C_FIELD + '"/>' +
+      '<circle cx="26" cy="30" r="46" fill="' + C_FIELD2 + '" opacity=".35"/>' +
+      '<circle cx="80" cy="82" r="40" fill="#b9dc91" opacity=".3"/>';
+    s += fieldDots(type);
+    s += cityArt(type, r);
+    s += roadArt(type, r);
+    s += monasteryArt(type, r);
+    s += shieldArt(type, r);
+    s += '<rect x="0.8" y="0.8" width="98.4" height="98.4" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>';
+    return s;
+  }
+
+  function placedTileSvg(tile, animate) {
+    const type = TYPES[tile.t];
+    let s = '<g transform="translate(' + (tile.x * 100) + ' ' + (tile.y * 100) + ')">' +
+      '<g' + (animate ? ' class="ccTileIn"' : '') + '>' + tileSvg(tile.t, tile.r, { type: type }) + '</g>';
+    if (tile.meeple) {
+      const p = anchorOf(type, tile.meeple.k, tile.meeple.i, tile.r);
+      const pl = lastState && lastState.players.find((x) => x.id === tile.meeple.p);
+      s += meepleArt(p.x, p.y, pl ? pl.color : '#e2564a');
+    }
+    s += '</g>';
+    return s;
+  }
+
+  function myTurn(state) {
+    if (state.phase === 'ended') return false;
+    if (window.GameShell.isLocal()) return true;
+    return state.players[state.turn].id === window.Net.identity.id;
+  }
+
+  function drawBoard(state) {
+    const cells = state.board;
+    const keys = Object.keys(cells);
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+    keys.forEach((k) => {
+      const t = cells[k];
+      minX = Math.min(minX, t.x); maxX = Math.max(maxX, t.x);
+      minY = Math.min(minY, t.y); maxY = Math.max(maxY, t.y);
+    });
+    const pad = 1.2;
+    const x0 = (minX - pad) * 100, y0 = (minY - pad) * 100;
+    const w = (maxX - minX + 1 + pad * 2) * 100, h = (maxY - minY + 1 + pad * 2) * 100;
+
+    let s = '<g transform="translate(' + (-x0) + ' ' + (-y0) + ')">';
+    keys.forEach((k) => {
+      const anim = state.last && cells[k].x === state.last.x && cells[k].y === state.last.y && state.step === 'meeple';
+      s += placedTileSvg(cells[k], anim);
+    });
+
+    if (state.phase === 'playing' && state.step === 'place' && myTurn(state)) {
+      const cands = E.placements(state);
+      cands.forEach((c) => {
+        const ok = c.rots.indexOf(rot) >= 0;
+        s += '<g class="cand" data-x="' + c.x + '" data-y="' + c.y + '">' +
+          '<rect x="' + (c.x * 100 + 3) + '" y="' + (c.y * 100 + 3) + '" width="94" height="94" rx="8" ' +
+          'fill="' + (ok ? 'rgba(255,255,255,.20)' : 'rgba(255,255,255,.06)') + '" ' +
+          'stroke="' + (ok ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.4)') + '" stroke-width="2" stroke-dasharray="6 6"/>' +
+          '<text x="' + (c.x * 100 + 50) + '" y="' + (c.y * 100 + 56) + '" text-anchor="middle" ' +
+          'font-size="24" font-weight="900" fill="' + (ok ? '#3f6b2c' : 'rgba(63,107,44,.35)') + '">' +
+          (ok ? '+' : '·') + '</text></g>';
+      });
+    }
+    s += '</g>';
+    const svg = $('boardSvg');
+    const box = $('boardBox');
+    const ar = Math.max(0.6, (box.clientWidth || 4) / Math.max(1, box.clientHeight || 3));
+    const minSide = (box.clientWidth || 1000) < 560 ? 330 : 520;
+    let vw = Math.max(w, minSide);
+    let vh = Math.max(h, minSide);
+    if (vw / vh < ar) vw = vh * ar;
+    else vh = vw / ar;
+    const cx = x0 + w / 2, cy = y0 + h / 2;
+    svg.setAttribute('viewBox', (cx - vw / 2) + ' ' + (cy - vh / 2) + ' ' + vw + ' ' + vh);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = s;
+  }
+
+  function drawSide(state) {
+    const side = $('side');
+    side.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'sideCard';
+    card.innerHTML = '<h4>计分</h4>';
+    state.players.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'playerRow' + (state.turn === i && state.phase !== 'ended' ? ' turn' : '');
+      if (lastScore[p.id] != null && p.score > lastScore[p.id]) row.classList.add('bump');
+      row.innerHTML =
+        '<span class="dot" style="background:' + p.color + '"></span>' +
+        '<span class="nm">' + esc(p.name) + '</span>' +
+        '<span class="sc">' + p.score + '</span>' +
+        '<div class="meepleDots" style="--pc:' + p.color + '">' +
+        Array.from({ length: 7 }).map((_, k) => '<i class="' + (k < p.meeples ? 'on' : '') + '"></i>').join('') +
+        '</div>';
+      card.appendChild(row);
+    });
+    const deck = document.createElement('div');
+    deck.className = 'playerRow';
+    deck.style.marginTop = '4px';
+    deck.innerHTML = '<span class="dot" style="background:#8d7a5c"></span><span class="nm">牌堆剩余</span><span class="sc">' +
+      (state.deck.length + (state.step === 'place' && state.cur != null ? 1 : 0)) + '</span>';
+    card.appendChild(deck);
+    side.appendChild(card);
+    state.players.forEach((p) => { lastScore[p.id] = p.score; });
+  }
+
+  function drawDock(state) {
+    const slot = $('tileSlot');
+    const cur = state.cur;
+    if (cur == null || state.phase === 'ended') {
+      slot.innerHTML = '';
+      slot.style.background = '#e8e1d2';
+      $('ccInfo').innerHTML = state.phase === 'ended' ? '这一局结束了' : '牌堆已经空了';
+      $('meepleBtns').innerHTML = '';
+      $('rotBtn').disabled = true;
+      return;
+    }
+    if (cur !== lastCur) {
+      lastCur = cur;
+      slot.classList.remove('pop');
+      void slot.offsetWidth;
+      slot.classList.add('pop');
+    }
+    slot.innerHTML = '<svg viewBox="0 0 100 100">' + tileSvg(cur, rot) + '</svg>';
+    $('rotBtn').disabled = false;
+
+    const me = state.players[state.turn];
+    const mine = myTurn(state);
+    let info = '';
+    if (!mine) {
+      info = '轮到 <b>' + esc(me.name) + '</b>';
+    } else if (state.step === 'place') {
+      info = '<b>轮到你</b>：旋转板块，再点发亮的格子';
+    } else if (state.step === 'meeple') {
+      info = '<b>板块已放下</b>：可以派一个米宝，或直接跳过';
+    }
+    info += '<span class="sub">剩余 ' + (state.deck.length + (state.step === 'place' ? 1 : 0)) + ' 张 · 方向 ' + rot * 90 + '°</span>';
+    $('ccInfo').innerHTML = info;
+
+    const btns = $('meepleBtns');
+    btns.innerHTML = '';
+    if (state.step === 'meeple' && mine && state.last) {
+      const opts = E.meepleOptions(state, state.last.x, state.last.y);
+      opts.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'mBtn';
+        b.type = 'button';
+        b.disabled = o.blocked || me.meeples <= 0;
+        b.innerHTML = '<span class="dot" style="background:' + me.color + '"></span><span>' + o.label + '</span>';
+        b.addEventListener('click', () => {
+          window.GameShell.send({ type: 'meeple', k: o.k, i: o.i });
+        });
+        btns.appendChild(b);
+      });
+      const skip = document.createElement('button');
+      skip.className = 'mBtn none';
+      skip.type = 'button';
+      skip.textContent = '不放米宝';
+      skip.addEventListener('click', () => window.GameShell.send({ type: 'meeple', k: 'none' }));
+      btns.appendChild(skip);
+    }
+  }
+
+  function render(state, ctx) {
+    if (!state) return;
+    lastState = state;
+    drawBoard(state);
+    drawSide(state);
+    drawDock(state);
+    const hint = $('boardHint');
+    if (state.phase === 'ended') hint.textContent = '终局结算完成';
+    else if (!myTurn(state)) hint.textContent = '等 ' + state.players[state.turn].name + ' 拼板块';
+    else if (state.step === 'meeple') hint.textContent = '选一个地物放米宝，或跳过';
+    else hint.textContent = '点发亮的格子放下板块';
+    if (ctx && ctx.logs) {
+      const list = document.querySelector('#logSheet .logList');
+      if (list) list.innerHTML = ctx.logs.slice().reverse().map((l) => '<li>' + esc(l) + '</li>').join('');
+    }
+  }
+
+  function rotate() {
+    rot = (rot + 1) % 4;
+    if (lastState) drawDock(lastState);
+    if (lastState) drawBoard(lastState);
+  }
+
+  $('rotBtn').addEventListener('click', rotate);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') rotate();
+  });
+
+  $('boardSvg').addEventListener('click', function (e) {
+    if (!lastState || lastState.step !== 'place' || lastState.phase !== 'playing') return;
+    const g = e.target.closest ? e.target.closest('.cand') : null;
+    if (!g) return;
+    if (!myTurn(lastState)) { window.GameShell.toast('还没轮到你', true); return; }
+    const x = Number(g.getAttribute('data-x')), y = Number(g.getAttribute('data-y'));
+    const cands = E.placements(lastState);
+    const hit = cands.find((c) => c.x === x && c.y === y);
+    if (!hit) return;
+    if (hit.rots.indexOf(rot) < 0) {
+      window.GameShell.toast('这个方向接不上，先点 ⟳ 旋转', true);
+      return;
+    }
+    window.GameShell.send({ type: 'place', x: x, y: y, rot: rot });
+  });
+
+  window.GameShell.boot({
+    game: 'carcassonne',
+    title: '卡卡颂',
+    blurb: '官方基础版：72 张板块逐张拼成中世纪领地。每回合抽一块、旋转拼放，再决定是否派米宝占城市、道路、修道院或农田。完成城市每块 2 分（盾徽 +2），完成道路每块 1 分，修道院 9 分；终局农田每座相邻的完成城市 3 分。',
+    rules: [
+      { h: '目标', items: ['用板块拼出道路、城市、修道院与农田，靠米宝占领并计分；终局分数最高者获胜。'] },
+      { h: '每回合', items: [
+        '抽 1 张板块，可旋转任意方向，但必须和所有相邻板块的<b>边缘类型完全对齐</b>（城市接城市、道路接道路、农田接农田）。',
+        '拼好后可以派 <b>1 个米宝</b>到这张板块上的城市、道路、修道院或农田，也可以不派。',
+        '已有米宝的地物不能再放（哪怕后来连成一片）。每人共 <b>7 个米宝</b>。'
+      ] },
+      { h: '计分', items: [
+        '完成城市：每块 2 分，每个盾徽再 +2；完成道路：每块 1 分；修道院周围 8 格填满即完成，得 9 分。',
+        '同一个地物上有多人米宝时，<b>米宝多的一方</b>拿全分，并列则各拿全分。',
+        '城市、道路、修道院结算后米宝收回，可以继续用。'
+      ] },
+      { h: '农田', items: [
+        '农夫放到终局都不收回：每座与这块农田相邻的<b>已完成城市</b>值 3 分。',
+        '农田同样按米宝数量比多少，并列各得。'
+      ] },
+      { h: '终局', items: [
+        '牌堆抽完、最后一张板块结算后进入终局。',
+        '未完成城市每块 1 分（盾徽 +1）、未完成道路每块 1 分、修道院按 1 + 周围板块数计分，再加上农田分。'
+      ] }
+    ],
+    min: 2,
+    max: 4,
+    seatTag: function () { return '拼板块'; },
+    turnPill: function (s) { return '第 ' + (s.players.length) + ' 人 · ' + ((s.players[s.turn] || {}).name || ''); },
+    winnerTitle: function () { return '领地建成'; },
+    winnerSub: function (s) {
+      const w = s && s.players ? s.players.find(function (p) { return p.id === s.winner; }) : null;
+      return w ? (w.name + ' 拿到 ' + w.score + ' 分') : '';
+    },
+    engine: E,
+    onState: function (state, ctx) { render(state, ctx); },
+    onMount: function () {
+      const slot = $('tileSlot');
+      slot.innerHTML = '';
+    }
+  });
+})();
+</script>
+</body>
+</html>

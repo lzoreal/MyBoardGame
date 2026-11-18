@@ -35,7 +35,8 @@
     splendor: 'design/splendor.html',
     azul: 'design/azul.html',
     ticket: 'design/ticket.html',
-    catan: 'design/catan.html'
+    catan: 'design/catan.html',
+    carcassonne: 'design/carcassonne.html'
   };
 
   function gotoTablePage(code, game) {
