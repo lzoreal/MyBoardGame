@@ -43,6 +43,11 @@ button:disabled{cursor:not-allowed;opacity:.42}
    linear-gradient(rgba(58,50,41,.35) 1px,transparent 1px) 0 0/44px 44px,
    linear-gradient(90deg,rgba(58,50,41,.35) 1px,transparent 1px) 0 0/44px 44px,
    #12100d}
+.mapPanel::before{content:'';position:absolute;inset:-12%;pointer-events:none;z-index:0;
+  background:
+   radial-gradient(ellipse at 38% 32%,rgba(201,164,92,.11),transparent 55%),
+   radial-gradient(ellipse at 72% 72%,rgba(165,56,47,.09),transparent 55%);
+  animation:fogDrift 16s ease-in-out infinite alternate}
 .mapTop{position:absolute;inset:12px 12px auto;display:flex;gap:10px;z-index:6;flex-wrap:wrap}
 .track{flex:1;min-width:200px;background:rgba(23,20,17,.92);border:1px solid var(--line);
   border-radius:12px;padding:9px 12px}
@@ -57,7 +62,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
   color:var(--gold2);font-size:12px;background:rgba(201,164,92,.08)}
 .advBtn:hover{background:rgba(201,164,92,.18)}
 
-.map{position:absolute;inset:96px 0 0 0}
+.map{position:absolute;inset:96px 0 0 0;z-index:1}
 .map svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .map svg line{stroke:rgba(201,164,92,.30);stroke-width:1;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
 .loc{position:absolute;transform:translate(-50%,-50%);width:150px;padding:10px 10px 9px;
@@ -83,10 +88,18 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .enemy .stat{color:#d8b98a}
 .enemy button{font-size:10px;padding:3px 6px;border-radius:6px;border:1px solid #6d5a3f;color:#f0e6d6;background:#4a3b29}
 .enemy button:hover{background:#5d4a34}
-.enemy.boss{background:#4a1c18;border:1px solid #8c3a31}
+.enemy.boss{background:#4a1c18;border:1px solid #8c3a31;animation:bossBreath 2.4s ease-in-out infinite}
+.enemy.spawn{animation:enemyDrop .42s cubic-bezier(.2,.8,.2,1) both}
+.enemy.boss.spawn{animation:enemyDrop .42s cubic-bezier(.2,.8,.2,1) both,bossBreath 2.4s .42s ease-in-out infinite}
 .loc .go{position:absolute;right:-9px;top:-9px;width:26px;height:26px;border-radius:50%;
   border:1px solid var(--gold);background:#1a1713;color:var(--gold2);display:grid;place-items:center;font-size:12px}
 .loc .go:hover{background:var(--gold);color:#1a1713}
+.loc::after{content:'';position:absolute;inset:-7px;border-radius:18px;pointer-events:none;opacity:0;
+  box-shadow:0 0 0 2px rgba(230,201,138,.7),0 0 30px rgba(230,201,138,.35)}
+.loc.stepIn::after{animation:stepRing .65s ease-out both}
+.loc.intro{animation:locIn .55s cubic-bezier(.2,.7,.2,1) both}
+.loc.reveal{animation:locReveal .55s ease both}
+.loc:not(.here):hover{box-shadow:0 14px 30px rgba(0,0,0,.55)}
 
 /* —— 右侧角色栏 —— */
 .side{display:flex;flex-direction:column;gap:12px}
@@ -132,7 +145,9 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .card.event .cost{background:#6d2b24}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .actBtn{padding:11px 10px;border-radius:11px;border:1px solid var(--line);background:#1b1814;
-  font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
+  font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;
+  transition:transform .12s ease,border-color .15s ease,background .15s ease,color .15s ease}
+.actBtn:active:not(:disabled){transform:translateY(1px) scale(.985)}
 .actBtn:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);background:#241f19}
 .actBtn.primary{border-color:var(--gold);background:linear-gradient(180deg,#3a2f1d,#241d14);color:var(--gold2)}
 .actBtn.end{grid-column:1/-1;border-color:#6d2b24;color:#e7b3ac;background:#221514}
@@ -211,6 +226,52 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .endText{text-align:center;font-size:13px;line-height:1.9;color:#4a3d2b}
 .campaign{margin-top:12px;padding:10px;border-radius:10px;border:1px dashed rgba(42,33,24,.3);font-size:11.5px;color:#5b4a34}
 
+/* —— 动效 —— */
+@keyframes fogDrift{0%{transform:translate3d(-4%,-2%,0) scale(1)}100%{transform:translate3d(4%,3%,0) scale(1.08)}}
+@keyframes locIn{from{opacity:0;filter:blur(3px) brightness(.8)}to{opacity:1;filter:none}}
+@keyframes locReveal{0%{opacity:.35;filter:brightness(1.8) saturate(.2)}60%{filter:brightness(1.15)}100%{opacity:1;filter:none}}
+@keyframes stepRing{0%{opacity:.9;transform:scale(.94)}100%{opacity:0;transform:scale(1.12)}}
+@keyframes enemyDrop{0%{opacity:0;transform:translateY(-8px) scale(.94)}70%{transform:translateY(0) scale(1.02)}100%{opacity:1;transform:none}}
+@keyframes bossBreath{0%,100%{box-shadow:inset 0 0 0 1px rgba(140,58,49,.6)}50%{box-shadow:inset 0 0 0 1px rgba(214,96,80,.9),0 0 18px rgba(165,56,47,.35)}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes tokenIn{0%{opacity:0;transform:rotateY(80deg) scale(.72)}55%{opacity:1;transform:rotateY(-12deg) scale(1.06)}100%{transform:none}}
+@keyframes badShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes resultIn{from{opacity:0;transform:translateY(6px);letter-spacing:.4em}to{opacity:1;transform:none;letter-spacing:.14em}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.28);color:#fff2c8}100%{transform:scale(1)}}
+@keyframes barFlash{0%,100%{filter:none}35%{filter:brightness(1.8) saturate(1.4)}}
+@keyframes dangerGlow{0%,100%{border-color:#4a2a24;box-shadow:none}50%{border-color:#b6503f;box-shadow:0 0 18px rgba(182,80,63,.28)}}
+@keyframes tickFlip{0%{transform:rotateX(0)}50%{transform:rotateX(80deg);opacity:.45}100%{transform:rotateX(0);opacity:1}}
+@keyframes logIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+
+.modal.on .sheet{animation:sheetIn .34s cubic-bezier(.2,.8,.2,1) both}
+.sheet .x{transition:background .15s,color .15s}
+.sheet .x:hover{background:rgba(42,33,24,.12)}
+.chapterPick .chap{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
+.chapterPick .chap:nth-child(2){animation-delay:.06s}
+.chapterPick .chap:nth-child(3){animation-delay:.12s}
+.pickGrid .pick{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
+.pickGrid .pick:nth-child(2){animation-delay:.05s}
+.pickGrid .pick:nth-child(3){animation-delay:.1s}
+.pickGrid .pick:nth-child(4){animation-delay:.15s}
+.shopItem{animation:rise .3s ease both}
+.shopWrap[open] .shopGrid{animation:rise .28s ease both}
+.sheetBtn{transition:transform .12s ease,background .15s ease}
+.sheetBtn:active{transform:scale(.985)}
+.endBig{animation:endStamp .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes endStamp{0%{opacity:0;transform:scale(1.35);letter-spacing:.4em}100%{opacity:1;transform:none;letter-spacing:.16em}}
+.tokenBox{animation:tokenIn .58s cubic-bezier(.2,.8,.2,1) both}
+.tokenBox.bad{animation:tokenIn .58s cubic-bezier(.2,.8,.2,1) both,badShake .4s .62s ease}
+.result{animation:resultIn .38s .35s both}
+.pip.bump .v{animation:pop .32s ease}
+.hpBar.bump i{animation:barFlash .5s ease}
+.logBox p:first-child{animation:logIn .28s ease both}
+.track.warn{animation:dangerGlow 1.7s ease-in-out infinite}
+.chip.tick{display:inline-block;animation:tickFlip .45s ease}
+.toast{transition:opacity .25s,transform .25s}
+.toast.on{animation:toastIn .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px) scale(.97)}to{transform:translateX(-50%) translateY(0) scale(1)}}
+
 /* 顶部提示条 */
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
   max-width:min(520px,92vw);padding:11px 15px;border-radius:12px;border:1px solid var(--gold);
@@ -239,7 +300,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .track .lbl span{white-space:normal;overflow:visible;text-overflow:clip}
   .track .lbl b{margin-left:0;font-size:12px}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -260,7 +321,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <div class="bar gold"><i id="actBar" style="width:0%"></i></div>
         <button class="advBtn" id="btnAdvance">线索够了，推进密谋</button>
       </div>
-      <div class="track">
+      <div class="track" id="agendaTrack">
         <div class="lbl"><span id="agendaLabel">议程 · 黑暗逼近</span><b id="agendaProg">0 / 3</b></div>
         <div class="bar red"><i id="agendaBar" style="width:0%"></i></div>
       </div>
@@ -312,6 +373,12 @@ button:disabled{cursor:not-allowed;opacity:.42}
   let started = false;
   let interKey = '';
   let shopOpen = false;
+  let mapSig = '';
+  let seenReveal = new Set();
+  let seenEnemy = new Set();
+  let lastHere = '';
+  let lastRound = 0;
+  let lastGauge = { res: null, clues: null, actions: null, damage: null, horror: null };
 
   const STAT_LABEL = { will: '意志', int: '智力', combat: '战力', agi: '敏捷' };
 
@@ -324,6 +391,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
     $('#sheet').className = 'sheet' + (dark ? ' dark' : '');
     $('#sheet').innerHTML = html;
     $('#modal').classList.add('on');
+    const sh = $('#sheet');
+    sh.style.animation = 'none';
+    void sh.offsetWidth;
+    sh.style.animation = '';
   }
   function closeSheet(){
     if (state && state.pendingInterrogation) return;
@@ -445,6 +516,8 @@ button:disabled{cursor:not-allowed;opacity:.42}
       closeSheet();
       state = E.createInitial([], Math.random, { investigator: picked, scenario: pickedChapter, upgrades: currentUpgrades(picked) });
       seenTest = ''; seenEnc = ''; endShown = false; interKey = '';
+      mapSig = ''; seenReveal = new Set(); seenEnemy = new Set(); lastHere = '';
+      lastRound = 0; lastGauge = { res: null, clues: null, actions: null, damage: null, horror: null };
       render();
       toast('调查开始：' + state.inv.name + ' 进入了' + state.locations[state.inv.location].name);
     };
@@ -456,7 +529,21 @@ button:disabled{cursor:not-allowed;opacity:.42}
   function render(){
     if (!state) return;
     const inv = state.inv;
+    const bump = {
+      res: lastGauge.res !== null && inv.resources !== lastGauge.res,
+      clues: lastGauge.clues !== null && inv.clues !== lastGauge.clues,
+      actions: lastGauge.actions !== null && inv.actions !== lastGauge.actions,
+      damage: lastGauge.damage !== null && inv.damage > lastGauge.damage,
+      horror: lastGauge.horror !== null && inv.horror > lastGauge.horror
+    };
     $('#chipRound').innerHTML = '第 <b>' + state.round + '</b> 回合';
+    if (lastRound && lastRound !== state.round) {
+      const chip = $('#chipRound');
+      chip.classList.remove('tick');
+      void chip.offsetWidth;
+      chip.classList.add('tick');
+    }
+    lastRound = state.round;
     $('#gSub').textContent = state.subtitle || '第一章 · 集结号';
     document.title = '诡镇奇谈 · ' + (state.chapterLabel || '') + ' ' + (state.scenarioName || '');
     const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
@@ -484,6 +571,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
     }
     $('#agendaProg').textContent = state.agenda.doom + ' / ' + state.agenda.max + (state.ritual ? ' · 余 ' + state.ritual.left : '');
     $('#agendaBar').style.width = pct(state.agenda.doom, state.agenda.max) + '%';
+    $('#agendaTrack').classList.toggle('warn', !!(state.ritual && state.ritual.left <= 3));
     const btnAdv = $('#btnAdvance');
     btnAdv.style.display = (state.act.stage === 1 && state.act.clues > 0) ? 'block' : 'none';
     if (state.act.clues > 0) {
@@ -495,6 +583,9 @@ button:disabled{cursor:not-allowed;opacity:.42}
     // 地图
     const map = $('#map');
     map.querySelectorAll('.loc').forEach((n) => n.remove());
+    const firstMap = mapSig !== state.scenario;
+    if (firstMap) { mapSig = state.scenario; seenReveal.clear(); seenEnemy.clear(); lastHere = ''; }
+    const prevHere = lastHere;
     const svg = $('#links');
     let lines = '';
     Object.keys(state.locations).forEach((k) => {
@@ -507,23 +598,33 @@ button:disabled{cursor:not-allowed;opacity:.42}
     });
     svg.innerHTML = lines;
 
-    Object.keys(state.locations).forEach((k) => {
+    Object.keys(state.locations).forEach((k, i) => {
       const L = state.locations[k];
       const here = inv.location === k;
       const reachable = state.locations[inv.location].links.indexOf(k) >= 0;
       const el = document.createElement('div');
       el.className = 'loc' + (L.revealed ? '' : ' hidden') + (here ? ' here' : '');
+      if (firstMap) { el.classList.add('intro'); el.style.animationDelay = (i * 40) + 'ms'; }
+      else {
+        if (L.revealed && !seenReveal.has(k)) el.classList.add('reveal');
+        if (here && prevHere && prevHere !== inv.location) el.classList.add('stepIn');
+      }
+      seenReveal.add(k);
       el.style.left = L.x + '%';
       el.style.top = L.y + '%';
       let clues = '';
       for (let i = 0; i < L.clues; i++) clues += '<span class="clue"></span>';
       for (let i = 0; i < (L.clues0 || 0) - L.clues; i++) clues += '<span class="clue off"></span>';
-      const enemies = E.helpers.enemiesAt(state, k).map((e) => `
-        <div class="enemy ${e.boss ? 'boss' : ''}">
+      const enemies = E.helpers.enemiesAt(state, k).map((e) => {
+        const isNew = !seenEnemy.has(e.id);
+        seenEnemy.add(e.id);
+        return `
+        <div class="enemy ${e.boss ? 'boss' : ''}${isNew && !firstMap ? ' spawn' : ''}">
           <span class="en">${esc(e.name)}${e.exhausted ? '（已疲惫）' : ''}</span>
           <span class="stat">战 ${e.fight} / 闪 ${e.evade} / 血 ${Math.max(0, e.health)}</span>
           ${here && inv.actions > 0 ? `<button data-fight="${e.id}">战斗</button><button data-evade="${e.id}">闪避</button>` : ''}
-        </div>`).join('');
+        </div>`;
+      }).join('');
       const sigilRow = (isAbyss && L.sigil) ? `<div class="sigilRow"><span>仪式节点</span>${here && inv.actions > 0 && state.act.stage === 1 ? `<button data-sigil="${k}">熄灭</button>` : ''}</div>` : '';
       el.innerHTML = `
         <div class="name">${esc(L.name)}</div>
@@ -534,6 +635,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
         ${reachable && !here ? `<button class="go" data-move="${k}" title="移动到${esc(L.name)}">→</button>` : ''}`;
       map.appendChild(el);
     });
+    lastHere = inv.location;
 
     // 角色栏
     const combatBonus = E.helpers.totalStat(state, inv, 'combat') - inv.stats.combat;
@@ -549,14 +651,14 @@ button:disabled{cursor:not-allowed;opacity:.42}
       </div>
       <div class="hpRow">
         <div class="hpLabel"><span>伤害 <b>${inv.damage} / ${inv.maxHealth}</b></span><span>${Math.max(0, inv.maxHealth - inv.damage)} 点余量</span></div>
-        <div class="hpBar h"><i style="width:${pct(inv.damage, inv.maxHealth)}%"></i></div>
+        <div class="hpBar h ${bump.damage ? 'bump' : ''}"><i style="width:${pct(inv.damage, inv.maxHealth)}%"></i></div>
         <div class="hpLabel" style="margin-top:8px"><span>恐惧 <b>${inv.horror} / ${inv.maxSanity}</b></span><span>${Math.max(0, inv.maxSanity - inv.horror)} 点余量</span></div>
-        <div class="hpBar s"><i style="width:${pct(inv.horror, inv.maxSanity)}%"></i></div>
+        <div class="hpBar s ${bump.horror ? 'bump' : ''}"><i style="width:${pct(inv.horror, inv.maxSanity)}%"></i></div>
       </div>
       <div class="pips">
-        <div class="pip"><div class="k">资源</div><div class="v">${inv.resources}</div></div>
-        <div class="pip"><div class="k">线索</div><div class="v">${inv.clues}</div></div>
-        <div class="pip"><div class="k">行动</div><div class="v">${inv.actions}</div></div>
+        <div class="pip ${bump.res ? 'bump' : ''}"><div class="k">资源</div><div class="v">${inv.resources}</div></div>
+        <div class="pip ${bump.clues ? 'bump' : ''}"><div class="k">线索</div><div class="v">${inv.clues}</div></div>
+        <div class="pip ${bump.actions ? 'bump' : ''}"><div class="k">行动</div><div class="v">${inv.actions}</div></div>
       </div>
       <div class="assets">
         ${inv.assets.length ? inv.assets.map((a) => `<span class="asset">${esc(E.CARDS[a].name)}${E.CARDS[a].combat ? ' 战+' + E.CARDS[a].combat : ''}${E.CARDS[a].intellect ? ' 智+' + E.CARDS[a].intellect : ''}</span>`).join('') : '<span style="font-size:11px;color:var(--dim)">还没有资产在场</span>'}
@@ -584,6 +686,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
     $('#btnEnd').disabled = state.phase === 'ended';
 
     $('#logBox').innerHTML = state.logs.slice(-8).reverse().map((l) => '<p>' + esc(l) + '</p>').join('');
+    lastGauge = { res: inv.resources, clues: inv.clues, actions: inv.actions, damage: inv.damage, horror: inv.horror };
 
     // 审问弹层
     if (state.pendingInterrogation) {
@@ -746,7 +849,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
   $('#btnRestart').onclick = () => {
     if (!state) return;
     state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: state.scenario, upgrades: currentUpgrades(state.inv.id) });
-    seenTest = ''; seenEnc = ''; endShown = false; interKey = ''; closeSheet(); render(); toast('本章已重新开始');
+    seenTest = ''; seenEnc = ''; endShown = false; interKey = '';
+    mapSig = ''; seenReveal = new Set(); seenEnemy = new Set(); lastHere = ''; lastRound = 0;
+    lastGauge = { res: null, clues: null, actions: null, damage: null, horror: null };
+    closeSheet(); render(); toast('本章已重新开始');
   };
 
   $('#btnRules').onclick = () => {
