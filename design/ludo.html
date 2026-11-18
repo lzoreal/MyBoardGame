@@ -47,7 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/ludo.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -361,6 +361,15 @@
     game: 'ludo',
     title: '飞行棋',
     blurb: '2-4 人竞速：掷出 6 点起飞，踩到同色格顺风 +4，撞机把对手送回停机坪，先到第 52 格获胜。',
+    rules: [
+      { h: '目标', items: ['绕 52 格跑道竞速，最先<b>精确到达第 52 格</b>的飞机获胜。'] },
+      { h: '起飞与移动', items: [
+        '在停机坪时必须掷出 <b>6</b> 才能起飞到第 1 格。',
+        '落在与自己同色的格子会顺风飞行，再前进 <b>4 格</b>（回弹落点不算）。',
+        '点数超出第 52 格时，按多出的点数往回弹。'
+      ] },
+      { h: '撞机', items: ['落到对手所在的格子即为撞机，对手的飞机回到停机坪。'] }
+    ],
     min: 2,
     max: 4,
     engine: E,

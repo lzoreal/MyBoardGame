@@ -46,7 +46,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/jump.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -242,6 +242,14 @@
     game: 'jump',
     title: '跳棋',
     blurb: '星形棋盘 121 个孔位，2-6 人。走一步到相邻空孔，或隔一颗子跳到对面空孔并可连跳；先把 10 颗子全部送进对面三角区的人获胜。',
+    rules: [
+      { h: '目标', items: ['把自己一侧的 <b>10 颗棋子</b>全部送进对面的三角区，先完成者获胜。'] },
+      { h: '走法', items: [
+        '每次可走一步到相邻的空孔；或跳过紧邻的一颗棋子，落到它正对面的空孔。',
+        '只要条件允许，可以连续跳多步。'
+      ] },
+      { h: '人数', items: ['2 人、3 人、4 人或 6 人都可开局，各自占据星形的一个角。'] }
+    ],
     min: 2,
     max: 6,
     engine: J,

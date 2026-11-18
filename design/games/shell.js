@@ -427,6 +427,80 @@ window.GameShell = (function () {
     setState(st);
   }
 
+  /* ---------------- 规则查看 ---------------- */
+  function installRules() {
+    const bar = document.querySelector('.topbar');
+    if (bar && !$('btnRules')) {
+      const b = document.createElement('button');
+      b.className = 'icon-btn';
+      b.id = 'btnRules';
+      b.type = 'button';
+      b.setAttribute('aria-label', '查看规则');
+      b.title = '查看规则';
+      b.textContent = '?';
+      const log = $('btnLog');
+      if (log && log.parentNode === bar) bar.insertBefore(b, log);
+      else bar.appendChild(b);
+      b.addEventListener('click', () => {
+        if (!$('rulesSheet')) buildRulesSheet();
+        $('rulesSheet').classList.remove('hidden');
+      });
+    }
+    if (!document.getElementById('rulesStyle')) {
+      const style = document.createElement('style');
+      style.id = 'rulesStyle';
+      style.textContent =
+        '.rulesBody{margin-top:6px;display:grid;gap:12px}' +
+        '.rulesBody section h3{margin:0 0 5px;font-size:13px;letter-spacing:.5px;color:#8a7451}' +
+        '.rulesBody section ul{margin:0;padding-left:18px;display:grid;gap:5px}' +
+        '.rulesBody section li{font-size:13px;line-height:1.55;color:#4a4453}' +
+        '.rulesBody section li b{color:#c86a2c}' +
+        '.rulesBody .none{font-size:12px;color:#8d7a5c}';
+      document.head.appendChild(style);
+    }
+  }
+
+  function buildRulesSheet() {
+    const sheet = document.createElement('div');
+    sheet.className = 'sheet hidden';
+    sheet.id = 'rulesSheet';
+    const card = document.createElement('div');
+    card.className = 'sheetCard';
+    card.innerHTML =
+      '<h2>' + esc(cfg.title || '') + ' · 规则</h2>' +
+      '<p class="sub">' + esc(cfg.blurb || '') + '</p>' +
+      '<div class="rulesBody"></div>' +
+      '<div class="actions"><button class="btn ghost" type="button" id="rulesClose">收起</button></div>';
+    sheet.appendChild(card);
+    ($('app') || document.body).appendChild(sheet);
+
+    const body = card.querySelector('.rulesBody');
+    (cfg.rules || []).forEach((sec) => {
+      const s = document.createElement('section');
+      const h = document.createElement('h3');
+      h.textContent = sec.h;
+      s.appendChild(h);
+      const ul = document.createElement('ul');
+      (sec.items || []).forEach((it) => {
+        const li = document.createElement('li');
+        li.innerHTML = it;
+        ul.appendChild(li);
+      });
+      s.appendChild(ul);
+      body.appendChild(s);
+    });
+    if (!body.children.length) {
+      const p = document.createElement('div');
+      p.className = 'none';
+      p.textContent = '这一款的细则就以上面这段为准。';
+      body.appendChild(p);
+    }
+
+    const close = () => sheet.classList.add('hidden');
+    card.querySelector('#rulesClose').addEventListener('click', close);
+    sheet.addEventListener('click', (e) => { if (e.target === sheet) close(); });
+  }
+
   /* ---------------- 启动 ---------------- */
   function boot(c) {
     cfg = c;
@@ -447,6 +521,7 @@ window.GameShell = (function () {
     });
 
     if (cfg.onMount) cfg.onMount();
+    installRules();
 
     setInterval(() => { if (!localMode && state) renderSeats(); }, 5000);
 

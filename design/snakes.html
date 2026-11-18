@@ -47,7 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/snakes.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -343,6 +343,13 @@
     game: 'snakes',
     title: '蛇梯棋',
     blurb: '2-4 人从第 0 格出发，掷骰前进：踩到梯子就向上爬，碰到蛇头会被带回蛇尾，正好走到第 100 格才算赢。',
+    rules: [
+      { h: '目标', items: ['从第 0 格出发，最先<b>正好走到第 100 格</b>的人获胜。'] },
+      { h: '移动', items: [
+        '轮流掷骰，按点数前进；点数超出 100 时<b>原地不动</b>，必须正好落到终点。',
+        '踩到梯子底端直接爬到梯子顶端；踩到蛇头被送回蛇尾。'
+      ] }
+    ],
     min: 2,
     max: 4,
     engine: E,

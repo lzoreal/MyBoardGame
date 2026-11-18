@@ -248,7 +248,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/uno.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const U = window.UnoEngine;
@@ -413,6 +413,18 @@
     game: 'uno',
     title: 'UNO',
     blurb: '108 张牌，颜色或点数对上才能出。变色牌自己选颜色，+2 与 +4 让下家摸牌并跳过，出完手上最后一张就赢。抽一张后如果这张能出，可以接着出，也可以结束回合。',
+    rules: [
+      { h: '目标', items: ['先把手里所有牌出完的人获胜。'] },
+      { h: '出牌', items: [
+        '出牌必须与桌面牌<b>同色</b>或<b>同数字/同功能</b>；没有能出的牌就摸 1 张。',
+        '摸到的那张如果能出，可以立刻打出；也可以选择结束回合。'
+      ] },
+      { h: '功能牌', items: [
+        '跳过：下家失去一次出牌机会；反转：出牌顺序反向；+2：下家摸 2 张并跳过。',
+        '变色：打出时指定一种颜色，下家按新颜色接。',
+        '+4 变色：下家摸 4 张并跳过，同时指定颜色。'
+      ] }
+    ],
     min: 2,
     max: 6,
     engine: U,

@@ -46,7 +46,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/reversi.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -231,6 +231,15 @@
     game: 'reversi',
     title: '黑白棋',
     blurb: '8×8 棋盘，黑棋先行。落子要夹住对方棋子，被夹住的全部翻成自己颜色；两边都没位置可下就比子数，多者获胜。',
+    rules: [
+      { h: '目标', items: ['棋盘下满或双方都无法落子时结算，<b>棋子多的一方</b>获胜。'] },
+      { h: '落子与翻转', items: [
+        '黑棋先行。落子后，必须在新棋子的横、竖、斜方向上<b>夹住至少一颗</b>对方棋子。',
+        '被夹住的所有对方棋子都翻成自己的颜色。',
+        '没有合法落点的一方跳过，由对方继续。'
+      ] },
+      { h: '结束', items: ['双方都没有合法落点（或棋盘下满）即结束，按棋盘上的棋子数比胜负。'] }
+    ],
     min: 2,
     max: 2,
     engine: R,

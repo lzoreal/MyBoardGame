@@ -46,7 +46,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/connect4.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -220,6 +220,13 @@
     game: 'connect4',
     title: '四子连珠',
     blurb: '7 列 6 行，棋子落在该列最下面。横、竖、斜任意方向先连成四子者胜；列满了就换一列。',
+    rules: [
+      { h: '目标', items: ['在 7 列 6 行的棋盘上，横、竖、斜任意方向先连成 <b>4 颗</b>同色棋子者获胜。'] },
+      { h: '下法', items: [
+        '双方轮流选一列落子，棋子会落到该列最底下的空位。',
+        '某一列已满就不能再选；棋盘下满且无人四连则为平局。'
+      ] }
+    ],
     min: 2,
     max: 2,
     engine: C,

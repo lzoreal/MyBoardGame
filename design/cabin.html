@@ -52,7 +52,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/cabin.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -449,6 +449,24 @@
     game: 'cabin',
     title: '林中小屋',
     blurb: '经典「山中小屋」：掷速度骰、推门翻房间，抽事件、物品与预兆；预兆攒多了会惊醒屋里的东西，抽预兆的人成为叛徒，其余人按剧本目标对抗。',
+    rules: [
+      { h: '探索阶段', items: [
+        '每回合先掷速度骰（多颗骰子之和）得到移动点数，再推开相邻的门翻出新房间。',
+        '房间可旋转拼接；进入新房间后本回合移动结束，并按房型抽 <b>事件 / 物品 / 预兆</b>卡。'
+      ] },
+      { h: '属性与检定', items: [
+        '四围属性：力量、速度、知识、神智；检定按属性掷对应数量的骰子。',
+        '属性降到 0 的角色死亡。'
+      ] },
+      { h: '闹鬼', items: [
+        '每抽到一张预兆，掷 6 颗骰：总点数 < 已抽预兆数时，房子「醒了」。',
+        '抽到触发预兆的人成为<b>叛徒</b>，其余玩家组成英雄联盟，按剧本给出的双方目标对抗。'
+      ] },
+      { h: '剧本与胜负', items: [
+        '每个剧本有独立剧情、叛徒强化与双方目标（击败叛徒 / 撑过若干轮 / 护送物品到指定房间等）。',
+        '达成剧本目标的一方获胜；叛徒倒下或英雄全灭也会立即结算。'
+      ] }
+    ],
     min: 2,
     max: 6,
     engine: window.CabinEngine,

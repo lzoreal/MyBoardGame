@@ -98,7 +98,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/bigtwo.js?v=8"></script>
-<script src="games/shell.js?v=7"></script>
+<script src="games/shell.js?v=8?v=7"></script>
 <script>
 (function () {
   const B = window.BigTwoEngine;
@@ -246,6 +246,24 @@
     game: 'bigtwo',
     title: '大老二',
     blurb: '官方规则：4 人 52 张，首局由持 ♦3 的人先出且第一手必须带 ♦3。3 最小、2 最大，同点比花色 ♦<♣<♥<♠。顺子与同花顺不能含 2。出单张、一对、三张，或用 5 张组顺子 / 同花 / 葫芦 / 四条 / 同花顺，压过桌面就接着出，压不过就喊「不要」。三家都不要，由出牌的人重新起牌。',
+    rules: [
+      { h: '目标', items: ['先把手里 13 张牌出完的人获胜，其余人按剩余张数排座次。'] },
+      { h: '牌序', items: [
+        '点数 <b>3 最小、2 最大</b>（3-4-5-6-7-8-9-10-J-Q-K-A-2）；同点比花色 <b>♦ < ♣ < ♥ < ♠</b>。',
+        '首局由持 <b>♦3</b> 的人先出，并且第一手必须包含 ♦3。'
+      ] },
+      { h: '牌型', items: [
+        '单张、一对、三张。',
+        '5 张牌型：顺子、同花、葫芦（三张 + 一对）、四条（四张 + 任意一张）、同花顺。',
+        '<b>顺子与同花顺不能含 2</b>。',
+        '牌型不同不能互压；同型比点数，同点比花色。'
+      ] },
+      { h: '出牌流程', items: [
+        '必须压过桌面上的牌才能出；压不过就点「不要」。',
+        '其他三家都不要，桌面清空，由最后出牌的人重新起牌（可任意出合法牌型）。',
+        '出完手牌即结束，其余人按剩余张数记录名次。'
+      ] }
+    ],
     min: 4,
     max: 4,
     engine: B,

@@ -47,7 +47,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
 <script src="../js/games/gomoku.js"></script>
-<script src="games/shell.js"></script>
+<script src="games/shell.js?v=8"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -219,6 +219,13 @@
     game: 'gomoku',
     title: '五子棋',
     blurb: '十五路棋盘，两人对弈，横、竖、斜任意方向先连成五子者获胜。点击棋盘交叉点落子，黑棋先行。',
+    rules: [
+      { h: '目标', items: ['在 15×15 的交叉点上，横、竖、斜任意方向先连成 <b>5 颗同色</b>棋子的玩家获胜。'] },
+      { h: '下法', items: [
+        '黑棋先行，双方轮流在空交叉点落子，落下后不能移动。',
+        '本局不设禁手，五连即胜。'
+      ] }
+    ],
     min: 2,
     max: 2,
     engine: E,
