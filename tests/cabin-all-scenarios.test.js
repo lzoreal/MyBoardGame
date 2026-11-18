@@ -148,7 +148,52 @@ for (const sc of E.SCENARIOS) {
     ok(tag + ' 真实结束回合不抛异常', false, e.message);
   }
 
-  // 英雄目标（自由混战使用 ffaGoal）
+  // 真实跑一个剧本行动：按行动条件布置玩家/房间/标记/物品
+  const actions = (st.haunt && st.haunt.actions) || [];
+  const action = actions.find((a) => !a.side || a.side === 'traitor' || a.side === 'hero');
+  if (action) {
+    try {
+      const side = action.side || 'hero';
+      let actor = st.players.find((p) => !p.dead && p.side === side);
+      if (!actor && side === 'traitor' && st.players[st.haunt.traitor]) {
+        actor = st.players[st.haunt.traitor];
+      }
+      if (!actor && side === 'hero') actor = st.players.find((p) => !p.dead && p.side === 'hero');
+      if (actor) {
+        if (action.where === 'room') {
+          let room = E.helpers.roomByName(st, action.room);
+          if (!room) {
+            room = { floor: 'ground', x: 2, y: 1, name: action.room, doors: 'NEW', symbol: null, kind: 'normal' };
+            st.rooms.push(room);
+          }
+          actor.floor = room.floor; actor.x = room.x; actor.y = room.y;
+        } else if (action.where === 'symbol') {
+          const symbol = action.symbol || 'event';
+          let room = st.rooms.find((r) => r.symbol === symbol);
+          if (!room) {
+            room = { floor: 'ground', x: 1, y: 1, name: '测试' + symbol + '房', doors: 'NEW', symbol, kind: 'normal' };
+            st.rooms.push(room);
+          }
+          actor.floor = room.floor; actor.x = room.x; actor.y = room.y;
+        } else if (action.where === 'floors' && action.floors && action.floors.length) {
+          const room = firstRoom(st, action.floors[0]);
+          if (room) { actor.floor = room.floor; actor.x = room.x; actor.y = room.y; }
+        }
+        if (action.requireToken) {
+          const room = E.helpers.roomByName(st, action.room) || firstRoom(st, actor.floor);
+          E.helpers.addToken(st, action.requireToken, room, 1);
+        }
+        if (action.requireItem) actor.items = (actor.items || []).concat([{ name: action.requireItem, key: action.requireItem }]);
+        if (action.dead) actor.dead = true;
+        st.haunt.turnUsed = {};
+        st.turn = st.players.indexOf(actor);
+        const r = E.act(st, { type: 'hauntAction', key: action.key }, actor.id, high);
+        ok(tag + ' 真实剧本行动可执行', !!r && r.ok === true, r && r.msg);
+      }
+    } catch (e) {
+      ok(tag + ' 真实剧本行动可执行', false, e.message);
+    }
+  }
   const hst = makeState(sc.no, 3);
   try {
     if (hst.haunt.pvp) {
