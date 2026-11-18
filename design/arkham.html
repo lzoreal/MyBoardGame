@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>诡镇奇谈 · 第一章 集结号</title>
+<title>诡镇奇谈 · 单人调查</title>
 <style>
 *,*::before,*::after{box-sizing:border-box}
 :root{
@@ -375,6 +375,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
     const inv = state.inv;
     $('#chipRound').innerHTML = '第 <b>' + state.round + '</b> 回合';
     $('#gSub').textContent = state.subtitle || '第一章 · 集结号';
+    document.title = '诡镇奇谈 · ' + (state.chapterLabel || '') + ' ' + (state.scenarioName || '');
     const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
     $('#actLabel').textContent = state.act.label || sc.act[0].label;
     const ag = (state.agenda.stages || [])[state.agenda.stage - 1];
@@ -675,3 +676,4 @@ button:disabled{cursor:not-allowed;opacity:.42}
 </script>
 </body>
 </html>
+
