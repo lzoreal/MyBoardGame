@@ -257,6 +257,26 @@ lastMove.moves = 1;
 const oneMove = E.act(lastMove, { type: 'move', dir: 'E' }, 'a', seeded(77));
 ok('再重的减速也至少能走 1 格', oneMove.ok && oneMove.state.moves === 0);
 
+console.log('=== 事件掷骰 ===');
+const ev = E.createInitial(players, seeded(78), { skipSelect: true });
+ev.players[0].x = 4; ev.players[0].y = 5;
+ev.rooms.push({ floor: 'ground', x: 5, y: 5, name: '事件房', doors: 'W', symbol: 'event', kind: 'normal' });
+ev.decks.events = [{ name: '测试事件', text: '测试事件描述', roll: { trait: 'might', diff: 0 }, win: {}, lose: {} }];
+const evMove = E.act(ev, { type: 'move', dir: 'E' }, 'a', seeded(79));
+ok('事件先进入等待掷骰状态', evMove.ok && evMove.state.pendingRoll && evMove.state.pendingRoll.kind === 'event');
+ok('未掷骰不能结束回合', E.act(evMove.state, { type: 'end' }, 'a', seeded(80)).ok === false);
+const evRoll = E.act(evMove.state, { type: 'rollPending' }, 'a', queue([0.99, 0.99, 0.99, 0.99, 0.99]));
+ok('掷骰后才结算事件并显示结果', evRoll.ok && !evRoll.state.pendingRoll && evRoll.state.lastRoll && evRoll.state.lastRoll.total > 0);
+
+console.log('=== 房间判定掷骰 ===');
+const roomTest = E.createInitial(players, seeded(81), { skipSelect: true });
+roomTest.players[0].x = 4; roomTest.players[0].y = 5;
+roomTest.rooms.push({ floor: 'ground', x: 5, y: 5, name: '判定房', doors: 'W', kind: 'normal', effect: { type: 'test', trait: 'speed', diff: 2, damage: 1 }, effectUsed: false });
+const roomMove = E.act(roomTest, { type: 'move', dir: 'E' }, 'a', seeded(82));
+ok('房间判定先进入等待掷骰状态', roomMove.ok && roomMove.state.pendingRoll && roomMove.state.pendingRoll.kind === 'room');
+const roomRoll = E.act(roomMove.state, { type: 'rollPending' }, 'a', queue([0.0, 0.0, 0.0, 0.0]));
+ok('房间判定掷骰后显示结果', roomRoll.ok && !roomRoll.state.pendingRoll && roomRoll.state.lastRoll && roomRoll.state.lastRoll.label.indexOf('判定房') === 0 && roomRoll.state.lastDamageRoll);
+
 console.log('=== 剧本目标 ===');ok('剧本目标类型都在支持范围', E.SCENARIOS.every((sc) => ['killTraitor', 'ritual', 'escape', 'wolves', 'survive', 'hunt'].indexOf(sc.heroGoal.type) >= 0));
 ok('剧本目标房间都在 44 张房间牌或起点中', E.SCENARIOS.every((sc) => {
   const g = sc.heroGoal;

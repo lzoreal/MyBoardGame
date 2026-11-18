@@ -1,0 +1,16 @@
+{
+  "characters": [
+    {
+      "key": "example_character",
+      "name": "示例角色",
+      "role": "示例职业",
+      "art": "例",
+      "traits": {
+        "speed": { "start": 4, "min": 2, "max": 7 },
+        "might": { "start": 3, "min": 2, "max": 6 },
+        "known": { "start": 5, "min": 2, "max": 8 },
+        "sanity": { "start": 5, "min": 2, "max": 8 }
+      }
+    }
+  ]
+}

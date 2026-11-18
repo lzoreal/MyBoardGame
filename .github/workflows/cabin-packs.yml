@@ -1,0 +1,48 @@
+name: Sync cabin content packs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/cabin/**'
+      - 'tools/build-cabin-packs.mjs'
+      - '.github/workflows/cabin-packs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build content packs
+        run: node tools/build-cabin-packs.mjs
+
+      - name: Run cabin rules tests
+        run: node tests/cabin.test.js
+
+      - name: Run cabin content-pack tests
+        run: node tests/cabin-packs.test.js
+
+      - name: Commit generated manifest
+        run: |
+          if git diff --quiet -- js/games/cabin-packs.js; then
+            echo "No content-pack changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/games/cabin-packs.js
+          git commit -m "chore: sync cabin content packs"
+          git push origin HEAD:main

@@ -43,6 +43,11 @@ MyBoardGame/
 │   ├── arkham.html       诡镇奇谈（单人战役：集结号 / 午夜狂欢 / 深渊之下）
 │   └── preview/          三个预览壳（手机 / 桌面 / 宽屏）
 ├── sql/rooms.sql         ← 在 Supabase 里执行一次
+├── content/cabin/        林中小屋角色包 / 剧本包 JSON
+│   ├── characters/       角色包（自动扫描）
+│   └── scenarios/        剧本包（自动扫描）
+├── tools/build-cabin-packs.mjs 扫描内容包并生成 cabin-packs.js
+├── .github/workflows/cabin-packs.yml push 后自动构建内容包
 ├── tests/engine.test.js  大富翁规则单测 + 600 步随机对局压力测试
 ├── tests/games.test.js   七款小游戏的规则单测
 ├── tests/cabin.test.js   林中小屋规则单测
@@ -265,6 +270,23 @@ node tests/engine.test.js
 
 想换成自己的美术风格，改 `css/base.css` 顶部的设计令牌（颜色、圆角、阴影）和
 `js/scene.js` 里的 `COLORS` 就行。
+
+## 林中小屋内容包
+
+把 JSON 放进 `content/cabin/characters/` 或 `content/cabin/scenarios/`，push 到 `main` 后
+`.github/workflows/cabin-packs.yml` 会自动扫描、校验、生成 `js/games/cabin-packs.js` 并回写仓库；
+GitHub Pages 随后重新部署，页面加载时直接合并。
+
+本地手动构建：
+
+```bash
+node tools/build-cabin-packs.mjs
+```
+
+- 角色包字段：`key/name/role/art/traits{speed,might,known,sanity}`，每项属性写 `start/min/max`。
+- 剧本包字段：`key/name/story/trigger{room,omen}/traitorRule/heroGoal/traitorGoal/heroGoalText/traitorGoalText`。
+- 剧本必须写 `trigger`，命中的自定义剧本会覆盖内置查表；没命中仍走原来的 50 个剧本公式。
+- `content/cabin/README.md` 有完整格式和示例。
 
 ## 已知取舍
 

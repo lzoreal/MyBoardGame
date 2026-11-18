@@ -267,6 +267,55 @@ window.CabinEngine = (function () {
     S(50, 'survive_traitor_house', '房子的心跳', '所有墙都在往同一个方向收缩。', 'revealer', K, { type: 'survive', need: 5 }, '击败叛徒，让房子停止收缩', '撑过 5 轮', {})
   ];
 
+  /* ---------------- 内容包（content/cabin/*.json 构建生成） ---------------- */
+  function applyContentPacks() {
+    const packs = (typeof window !== 'undefined' && window.CABIN_PACKS) ? window.CABIN_PACKS : null;
+    if (!packs) return;
+    const charKeys = {};
+    CHARS.forEach((c) => { charKeys[c.key] = true; });
+    (packs.characters || []).forEach((c) => {
+      if (!c || !c.key || charKeys[c.key]) return;
+      const traits = {};
+      TRAITS.forEach((t) => {
+        const v = (c.traits || {})[t.key] || {};
+        const min = Number(v.min), start = Number(v.start), max = Number(v.max);
+        if (!Number.isFinite(min) || !Number.isFinite(start) || !Number.isFinite(max) || min > start || start > max) return;
+        traits[t.key] = track(start, min, max);
+      });
+      if (TRAITS.some((t) => !traits[t.key])) return;
+      CHARS.push({
+        key: c.key, name: c.name || c.key, role: c.role || '访客', art: c.art || '?',
+        traits: traits, custom: true
+      });
+      charKeys[c.key] = true;
+    });
+    const scenarioKeys = {};
+    SCENARIOS.forEach((s) => { scenarioKeys[s.key] = true; });
+    (packs.scenarios || []).forEach((s) => {
+      if (!s || !s.key || scenarioKeys[s.key] || !s.trigger) return;
+      const room = String(s.trigger.room || '').trim();
+      const omen = String(s.trigger.omen || '').trim();
+      if (!room && !omen) return;
+      SCENARIOS.push({
+        no: Number(s.no) || 0,
+        key: s.key,
+        name: s.name || s.key,
+        story: s.story || '',
+        trigger: { room: room, omen: omen },
+        traitorRule: s.traitorRule || 'revealer',
+        heroGoal: s.heroGoal || K,
+        traitorGoal: s.traitorGoal || KA,
+        heroGoalText: s.heroGoalText || '完成剧本目标',
+        traitorGoalText: s.traitorGoalText || '消灭所有英雄',
+        priority: Number(s.priority) || 0,
+        monsters: Array.isArray(s.monsters) ? s.monsters : undefined,
+        custom: true
+      });
+      scenarioKeys[s.key] = true;
+    });
+  }
+  applyContentPacks();
+
   /* ---------------- 工具 ---------------- */
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function shuffle(list, rand) {
@@ -461,6 +510,10 @@ window.CabinEngine = (function () {
     st.dropped = false;
     st.picked = false;
     st.taskRolled = false;
+    st.pendingRoll = null;
+    st.lastRoll = null;
+    st.lastDamageRoll = null;
+    st.lastCard = null;
     st.omenThisTurn = false;
     st.omenCard = null;
     st.omenRoom = null;
@@ -492,7 +545,7 @@ window.CabinEngine = (function () {
       },
       eventDiscard: [],
       omens: 0, haunt: null,
-      monsters: [], pendingTile: null, pendingDamage: null, pendingEnd: false,
+      monsters: [], pendingTile: null, pendingDamage: null, pendingRoll: null, pendingEnd: false,
       lastCard: null, lastRoll: null, winner: null,
       logs: [opts.skipSelect ? '开局：所有人站在入口大厅' : '开局：先各自挑一个角色']
     };
@@ -542,14 +595,16 @@ window.CabinEngine = (function () {
 
   function rollDamage(st, i, type, dice, source, rand) {
     const r = roll(Math.max(1, dice), rand);
-    st.lastRoll = { label: '伤害骰 · ' + (source || '卡牌'), faces: r.faces, total: r.total };
+    const dr = { label: '伤害骰 · ' + (source || '卡牌'), faces: r.faces, total: r.total };
+    st.lastDamageRoll = dr;
+    if (!st.lastRoll) st.lastRoll = dr;
     beginDamage(st, i, r.total, type || 'physical', source || '卡牌');
     pushLog(st, st.players[i].name + ' 承受 ' + r.total + ' 点' + (type === 'mental' ? '精神' : '物理') + '伤害');
     return r;
   }
 
   function resolveRoomSymbol(st, i, room, rand) {
-    if (!room || !room.symbol || room.resolved) return;
+    if (!room || !room.symbol || room.resolved || st.pendingRoll) return;
     room.resolved = true;
     const p = st.players[i];
     if (room.symbol === 'item') {
@@ -581,13 +636,16 @@ window.CabinEngine = (function () {
     }
     const c = drawCard(st, 'events', rand);
     if (c) {
-      st.lastCard = { kind: 'event', title: c.name, text: c.text, tone: 'bad' };
+      st.lastCard = { kind: 'event', title: c.name, text: c.text, tone: c.roll ? 'bad' : 'neutral', win: c.win, lose: c.lose, effect: c.effect };
+      st.lastRoll = null;
       pushLog(st, p.name + ' 在' + room.name + '遇到事件「' + c.name + '」');
       if (c.roll) {
-        const r = testRoll(st, i, c.roll.trait, c.roll.diff, rand);
-        st.lastRoll = { label: c.name + ' · ' + labelOf(c.roll.trait) + '判定', faces: r.faces, total: r.total, diff: c.roll.diff, ok: r.ok };
-        pushLog(st, c.name + '：' + labelOf(c.roll.trait) + ' ' + r.total + ' 对 ' + c.roll.diff + ' → ' + (r.ok ? '成功' : '失败'));
-        applyEffect(st, i, r.ok ? c.win : c.lose, rand);
+        st.pendingRoll = {
+          kind: 'event', index: i, card: c.name, title: c.name, text: c.text,
+          room: room.name, trait: c.roll.trait, diff: c.roll.diff,
+          win: c.win, lose: c.lose
+        };
+        pushLog(st, c.name + '：需要掷 ' + labelOf(c.roll.trait) + '判定（' + c.roll.diff + '）');
       } else applyEffect(st, i, c.effect, rand);
       st.moveLocked = true; st.moves = 0;
     }
@@ -601,14 +659,50 @@ window.CabinEngine = (function () {
       pushLog(st, room.name + '：' + labelOf(room.effect.trait) + ' +' + room.effect.amount);
     }
     if (room.effect.type === 'test') {
-      const r = testRoll(st, i, room.effect.trait, room.effect.diff, rand);
-      st.lastRoll = { label: room.name + ' · ' + labelOf(room.effect.trait) + '判定', faces: r.faces, total: r.total, diff: room.effect.diff, ok: r.ok };
-      if (!r.ok) rollDamage(st, i, 'physical', room.effect.damage || 1, room.name, rand);
+      st.lastCard = { kind: 'room', title: room.name, text: '房间判定：' + labelOf(room.effect.trait) + '，难度 ' + room.effect.diff + '。' };
+      st.pendingRoll = {
+        kind: 'room', index: i, room: room.name,
+        trait: room.effect.trait, diff: room.effect.diff, damage: room.effect.damage || 1
+      };
+      pushLog(st, room.name + '：需要掷 ' + labelOf(room.effect.trait) + '判定（' + room.effect.diff + '）');
+      st.moveLocked = true; st.moves = 0;
     }
   }
 
-  /* ---------------- 闹鬼 ---------------- */
+  function resolvePendingRoll(st, i, rand) {
+    const pr = st.pendingRoll;
+    if (!pr) return { ok: false, msg: '没有待掷的骰子' };
+    if (pr.index !== i) return { ok: false, msg: '不是你的判定' };
+    if (st.turn !== i) return { ok: false, msg: '还没轮到你' };
+    const me = st.players[i];
+    const r = testRoll(st, i, pr.trait, pr.diff, rand);
+    st.lastRoll = {
+      label: (pr.card || pr.room) + ' · ' + labelOf(pr.trait) + '判定',
+      faces: r.faces, total: r.total, diff: pr.diff, ok: r.ok, trait: pr.trait
+    };
+    st.pendingRoll = null;
+    pushLog(st, (pr.card || pr.room) + '：' + labelOf(pr.trait) + ' ' + r.total + ' 对 ' + pr.diff + ' → ' + (r.ok ? '成功' : '失败'));
+    if (pr.kind === 'event') applyEffect(st, i, r.ok ? pr.win : pr.lose, rand);
+    else if (!r.ok) {
+      rollDamage(st, i, 'physical', pr.damage || 1, pr.room, rand);
+      if (pr.room === '坍塌房间') {
+        const landing = roomByName(st, '地下室平台');
+        if (landing) { me.floor = landing.floor; me.x = landing.x; me.y = landing.y; pushLog(st, me.name + ' 掉到地下室平台'); }
+      }
+    }
+    st.moveLocked = true; st.moves = 0;
+    return { ok: true, state: st };
+  }
+
+
   function pickScenario(st, roomName, omenName) {
+    const room = String(roomName || '').trim();
+    const omen = String(omenName || '').trim();
+    const custom = SCENARIOS.filter((s) => s.trigger &&
+      (!s.trigger.room || s.trigger.room === '*' || s.trigger.room === room) &&
+      (!s.trigger.omen || s.trigger.omen === '*' || s.trigger.omen === omen)
+    ).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    if (custom.length) return custom[0];
     const roomIdx = Math.max(0, ROOMS.findIndex((r) => r.name === roomName)) + 1;
     const omenIdx = Math.max(0, OMENS.findIndex((o) => o.name === omenName)) + 1;
     const no = ((roomIdx * 7 + omenIdx * 11) % 50);
@@ -790,21 +884,18 @@ window.CabinEngine = (function () {
     st.pendingTile = null;
     pushLog(st, '「' + room.name + '」接入地图（旋转 ' + rot + '）');
     roomEffect(st, i, room, rand);
+    if (room.special === 'collapsed' && !st.pendingRoll) {
+      st.lastCard = { kind: 'room', title: '坍塌房间', text: '房间正在坍塌：掷速度骰，失败受 1 点物理伤害。' };
+      st.pendingRoll = { kind: 'room', index: i, room: '坍塌房间', trait: 'speed', diff: 4, damage: 1 };
+      pushLog(st, '坍塌房间：需要掷速度判定（4）');
+      st.moveLocked = true; st.moves = 0;
+    }
     resolveRoomSymbol(st, i, room, rand);
     if (room.special === 'coal') {
       const landing = roomByName(st, '地下室平台');
       if (landing) {
         me.floor = landing.floor; me.x = landing.x; me.y = landing.y;
         pushLog(st, me.name + ' 顺着煤槽滑到地下室平台');
-      }
-    }
-    if (room.special === 'collapsed') {
-      const r = testRoll(st, i, 'speed', 4, rand);
-      st.lastRoll = { label: '坍塌房间 · 速度判定', faces: r.faces, total: r.total, diff: 4, ok: r.ok };
-      if (!r.ok) {
-        rollDamage(st, i, 'physical', 1, '坍塌房间', rand);
-        const landing = roomByName(st, '地下室平台');
-        if (landing) { me.floor = landing.floor; me.x = landing.x; me.y = landing.y; }
       }
     }
     return { ok: true, state: st };
@@ -1056,6 +1147,7 @@ window.CabinEngine = (function () {
 
   function endTurn(st, i, rand) {
     if (st.pendingDamage) return { ok: false, msg: '先分配伤害' };
+    if (st.pendingRoll) return { ok: false, msg: '先掷骰' };
     if (st.pendingTile) return { ok: false, msg: '先放置房间' };
     if (st.phase === 'ended') return { ok: false, msg: '已经结束' };
     startHauntIfNeeded(st, rand);
@@ -1129,6 +1221,8 @@ window.CabinEngine = (function () {
     if (st.phase === 'ended') return { ok: false, msg: '对局已经结束' };
     if (st.pendingDamage && action.type === 'allocateDamage') return allocateDamage(st, i, action);
     if (st.pendingDamage) return { ok: false, msg: '先分配伤害' };
+    if (st.pendingRoll && action.type === 'rollPending') return resolvePendingRoll(st, i, rand);
+    if (st.pendingRoll) return { ok: false, msg: '先掷骰' };
     if (st.pendingTile && action.type !== 'placeTile') return { ok: false, msg: '先旋转并放置房间' };
     if (st.turn !== i) return { ok: false, msg: '还没轮到你' };
 

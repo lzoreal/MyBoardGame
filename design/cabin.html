@@ -43,6 +43,98 @@
   #cabinCard .d { color: #e8d6ba; }
   #cabinCard.bad { box-shadow: 0 18px 40px rgba(90,30,40,.6), inset 0 0 0 2px #b56c72; }
   #cabinCard .cabinDie { background: #f7ead2; color: #3a2819; box-shadow: inset 0 0 0 1.5px #a98a63; }
+  #cabinCard .rollResult { margin-top: 8px; font-size: 12px; font-weight: 800; color: #ffd68a; }
+  #cabinCard .rollApplied { margin-top: 4px; font-size: 12px; font-weight: 700; }
+  #cabinCard .rollApplied.good { color: #c8e8b6; }
+  #cabinCard .rollApplied.bad { color: #ffc1b6; }
+  #cabinCard .rollTop { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+  #cabinCard .rollAvatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 20px; font-weight: 900; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #8e6a43; flex: 0 0 auto; }
+  #cabinCard .rollWho { font-size: 13px; font-weight: 800; color: #f4e7d1; margin-top: 1px; }
+  #cabinCard .rollTarget { margin-left: auto; min-width: 58px; text-align: center; border-radius: 12px; background: #4b3823; border: 1px solid #a98a63; padding: 4px 8px; }
+  #cabinCard .rollTarget small { display: block; font-size: 9px; font-weight: 700; color: #c7b28e; letter-spacing: .08em; }
+  #cabinCard .rollTarget b { display: block; font-size: 23px; line-height: 1.1; color: #ffd68a; }
+  #cabinCard .rollStakes { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  #cabinCard .stake { font-size: 11px; font-weight: 700; border-radius: 8px; padding: 4px 7px; }
+  #cabinCard .stake.good { color: #d9f1c4; background: rgba(78,120,52,.32); border: 1px solid rgba(180,218,144,.25); }
+  #cabinCard .stake.bad { color: #ffc9c2; background: rgba(130,48,48,.3); border: 1px solid rgba(232,151,143,.25); }
+  #cabinCard.roomPrompt .t { color: #ffe2a8; }
+  #cabinCard .rollPrompt { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #3a2c21; border: 1px solid #8e6a43; }
+  #cabinCard .rollPrompt .need { font-size: 12px; color: #e8d6ba; }
+  #cabinCard .rollPrompt .need b { color: #ffd68a; }
+  #cabinCard .rollPrompt .rollDice { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  #cabinCard .rollPrompt .rollDice i { width: 30px; height: 30px; border-radius: 7px; background: #f7ead2; border: 1.5px solid #a98a63; display: grid; place-items: center; color: #a98a63; font-size: 17px; font-weight: 900; animation: cabinShake .55s ease-in-out infinite; }
+  #cabinCard .rollPrompt .rollDice i:nth-child(2) { animation-delay: .06s; }
+  #cabinCard .rollPrompt .rollDice i:nth-child(3) { animation-delay: .12s; }
+  #cabinCard .rollPrompt .rollDice i:nth-child(4) { animation-delay: .18s; }
+  #cabinCard .rollPrompt .btn.primary { animation: rollReady 1.5s ease-in-out infinite; }
+  @keyframes rollReady { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  #cabinCard .cabinDie.in { animation: cabinDieIn .42s cubic-bezier(.2,.9,.25,1.2) both; }
+  @keyframes cabinDieIn { 0% { transform: translateY(-14px) scale(.7) rotate(-8deg); opacity: 0; } 60% { transform: translateY(2px) scale(1.05) rotate(2deg); opacity: 1; } 100% { transform: translateY(0) scale(1) rotate(0); } }
+  @keyframes cabinShake { 0%,100% { transform: rotate(-6deg) translateY(0); } 50% { transform: rotate(7deg) translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) {
+    #cabinCard .cabinDie.in, #cabinCard .rollPrompt .rollDice i { animation: none; }
+  }
+
+  .situationBar {
+    width: min(100%, 980px);
+    margin: 0 auto 5px;
+    min-height: 34px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(35, 26, 19, .74);
+    border: 1px solid rgba(216, 169, 79, .32);
+    color: #f5e7cf;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .situationBar .sDot { width: 9px; height: 9px; border-radius: 50%; background: #d8a94f; box-shadow: 0 0 0 4px rgba(216,169,79,.14); flex: 0 0 auto; }
+  .situationBar .sText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .situationBar .sAction { margin-left: auto; color: #ffd68a; font-weight: 800; white-space: nowrap; }
+  .situationBar.hot { background: rgba(75, 54, 24, .9); border-color: #d8a94f; box-shadow: 0 0 0 1px rgba(216,169,79,.12); }
+  .situationBar.warn { background: rgba(88, 37, 43, .9); border-color: #c7777a; }
+  .situationBar.cool { background: rgba(28, 40, 48, .86); border-color: #7e9ba6; }
+  .turnBanner {
+    position: fixed;
+    left: 50%;
+    bottom: calc(128px + var(--sa-bottom));
+    z-index: 45;
+    min-width: 210px;
+    max-width: calc(100vw - 36px);
+    padding: 10px 18px 11px;
+    border-radius: 18px;
+    background: #fff3d9;
+    color: #332416;
+    box-shadow: 0 16px 36px rgba(0,0,0,.42), inset 0 0 0 2px #fff9eb;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(14px) scale(.92);
+    transition: opacity .22s ease, transform .3s cubic-bezier(.2,.9,.25,1.2);
+  }
+  .turnBanner.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  .turnBanner .bTitle { font-size: 18px; font-weight: 900; color: #352315; }
+  .turnBanner .bSub { margin-top: 2px; font-size: 12px; font-weight: 700; color: #7a6041; }
+  .turnBanner.haunt { background: #5a2430; color: #ffe8d2; box-shadow: 0 16px 36px rgba(60,10,20,.55), inset 0 0 0 2px #b56c72; }
+  .turnBanner.haunt .bTitle { color: #ffd68a; }
+  .turnBanner.haunt .bSub { color: #f0c7b4; }
+
+  .hotCell { animation: hotPulse 1.8s ease-in-out infinite; }
+  @keyframes hotPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  .roomNew { animation: roomNew 900ms ease-out both; }
+  @keyframes roomNew { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+  .cabinDock .moveMeter { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+  .cabinDock .moveMeter i { width: 8px; height: 8px; border-radius: 50%; background: #d8a94f; box-shadow: 0 1px 0 #9b6a2f; }
+  .cabinDock .moveMeter i.off { background: #d8cbb8; box-shadow: none; opacity: .55; }
+  .cabinDock .moveMeter span { margin-left: 3px; font-size: 11px; color: #6d5b47; font-weight: 700; }
+  @keyframes tokenPulse { 0%,100% { opacity: .35; transform: scale(.92); } 50% { opacity: .9; transform: scale(1.08); } }
+  .tokenCurrent { animation: tokenPulse 1.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @media (prefers-reduced-motion: reduce) {
+    .situationBar, .turnBanner, .hotCell, .tokenCurrent, .roomNew { animation: none !important; transition: none !important; }
+  }
   .cabinDock .btn { min-height: 44px; }
   .traitRow { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
   .traitChip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; background: #fff8e9; border: 1px solid #e5d3b4; color: #3a2c20; font-size: 12px; font-weight: 700; }
@@ -55,6 +147,15 @@
   .pickCard .role { color: #756046; }
   .pickCard .tr span { background: #fff9ec; color: #4b3a27; }
   .pickCard .tr b { color: #7b2e3b; }
+  .cabinBody .pickPanel { overscroll-behavior: contain; }
+  .cabinBody .pickCard .tr { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+  .cabinBody .pickCard .tr span { display: flex; align-items: baseline; gap: 3px; white-space: nowrap; }
+  .cabinBody .pickCard .tr em { font-style: normal; color: #9b8768; font-size: 10px; }
+  @media (max-width: 720px) {
+    .cabinBody .pickPanel { top: 56px; padding-bottom: calc(28px + var(--sa-bottom)); }
+    .cabinBody .pickCard { padding: 8px 10px; border-radius: 15px; }
+    .cabinBody .pickCard .tr { gap: 3px 6px; font-size: 11px; }
+  }
   .cModal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 18px; background: rgba(10,7,5,.72); backdrop-filter: blur(6px); }
   .cModal.hidden { display: none; }
   .cModalCard { width: min(760px, 100%); max-height: 86vh; overflow: auto; border-radius: 22px; padding: 18px; background: #f4e9d5; color: #2f241a; box-shadow: 0 30px 80px rgba(0,0,0,.55); border: 3px solid #fff4df; }
@@ -85,10 +186,16 @@
   .cabinCard.bad { box-shadow: 0 18px 40px rgba(90,30,40,.4), inset 0 0 0 2px #b56c72; }
   @media (max-width: 720px) {
     .cabinBoard { width: max(100%, 560px); max-height: none; }
-    .boardWrap { place-items: start; padding: 0 0 4px; overflow: auto; -webkit-overflow-scrolling: touch; }
+    .boardWrap { place-items: start; padding: 0 0 4px; overflow: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; scrollbar-width: none; }
+    .boardWrap::-webkit-scrollbar { width: 0; height: 0; }
     .cabinDock .dockInfo { width: 100%; }
     .cabinDock .dockActions { width: 100%; justify-content: center; }
     .cabinDock .dockActions .btn { flex: 1 1 42%; min-width: 0; font-size: 13px; }
+    .situationBar { font-size: 11px; padding: 6px 10px; min-height: 30px; margin-bottom: 4px; }
+    .situationBar .sAction { font-size: 10px; }
+    .turnBanner { bottom: calc(210px + var(--sa-bottom)); min-width: 190px; padding: 8px 14px 9px; }
+    .turnBanner .bTitle { font-size: 16px; }
+    .turnBanner .bSub { font-size: 11px; }
     .rotGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pickGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pickCard .tr { gap: 3px; }
@@ -115,6 +222,7 @@
 
   <div class="floorTabs" id="floorTabs" aria-label="楼层切换"></div>
   <div class="scenarioBar" id="scenarioBar"></div>
+  <div class="situationBar" id="situationBar" role="status" aria-live="polite"></div>
 
   <main class="boardWrap">
     <div class="boardInner cabinBoard" id="boardInner" aria-label="林中小屋地图"></div>
@@ -128,6 +236,7 @@
   </footer>
 
   <div id="cabinCard" role="status" aria-live="polite"></div>
+  <div id="turnBanner" class="turnBanner" role="status" aria-live="polite"></div>
   <div id="toast" role="status" aria-live="polite"></div>
 
   <div class="sheet hidden" id="logSheet">
@@ -147,6 +256,7 @@
 <script src="../js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
+<script src="../js/games/cabin-packs.js"></script>
 <script src="../js/games/cabin.js"></script>
 <script src="games/shell.js?v=8"></script>
 <script>
@@ -172,6 +282,17 @@
   let viewFloor = 'ground';
   let lastCardKey = '';
   let cardTimer = 0;
+  let rolling = false;
+  let rollFxTimer = 0;
+  let rollTickTimer = 0;
+  let lastTokenPos = {};
+  let lastAutoView = '';
+  let lastRoomKeys = null;
+  let lastTurnKey = '';
+  let lastPromptKey = '';
+  let lastHauntActive = false;
+  let bannerMoves = -1;
+  let bannerTimer = 0;
   let narrow = false;
   let modalMode = '';
 
@@ -213,6 +334,25 @@
   function traitLabel(key) {
     const t = C.TRAITS.find((x) => x.key === key);
     return t ? t.label : key;
+  }
+  const OPP = { N: 'S', S: 'N', E: 'W', W: 'E' };
+  const DIR_ARROW = { N: '↑', S: '↓', E: '→', W: '←' };
+  function hasDoor(doors, dir) { return String(doors || '').indexOf(dir) >= 0; }
+  function openExits(st, me) {
+    if (!st || !me) return 0;
+    const here = roomAt(st, me);
+    if (!here) return 0;
+    let n = 0;
+    [['N', 0, -1], ['S', 0, 1], ['W', -1, 0], ['E', 1, 0]].forEach((d) => {
+      const dir = d[0], nx = me.x + d[1], ny = me.y + d[2];
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H || !hasDoor(here.doors, dir)) return;
+      const target = st.rooms.find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
+      if (!target || hasDoor(target.doors, OPP[dir])) n += 1;
+    });
+    return n;
+  }
+  function haptic(pattern) {
+    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
   }
 
   /* ---------------- 通用弹层 ---------------- */
@@ -261,7 +401,7 @@
     });
   }
 
-  function drawRoom(g, room, st, isHere) {
+  function drawRoom(g, room, st, isHere, hotDir) {
     const px = room.x * CELL, py = room.y * CELL;
     const x0 = px + 11, y0 = py + 9, w = CELL - 22, h = CELL - 24;
     const tone = FLOOR_TONE[room.floor] || FLOOR_TONE.ground;
@@ -272,6 +412,11 @@
       stroke: isHere ? '#b13b32' : tone.stroke,
       'stroke-width': isHere ? 5 : 2.5
     }, g);
+    if (hotDir) {
+      el('rect', { x: x0 - 5, y: y0 - 5, width: w + 10, height: h + 10, rx: 22, fill: 'none', stroke: '#f0c85c', 'stroke-width': 4, 'stroke-dasharray': '9 5', class: 'hotCell' }, g);
+      el('rect', { x: x0 + 8, y: y0 + 8, width: 34, height: 26, rx: 13, fill: '#f0c85c' }, g);
+      txt(g, x0 + 25, y0 + 26, DIR_ARROW[hotDir] || '·', { 'font-size': 18, 'font-weight': 900, fill: '#3a2c1b' });
+    }
     drawDoors(g, room, x0, y0, w, h);
 
     if (room.special === 'goal') {
@@ -306,30 +451,54 @@
     all.slice(0, 5).forEach((o, k) => {
       const tx = x0 + w / 2 - (n - 1) * GAP / 2 + k * GAP;
       const ty = y0 + h - (narrow ? 24 : 21);
+      const tg = el('g', {}, g);
+      tg.style.transformOrigin = 'center';
+      const prev = lastTokenPos[o.p.id];
+      const moved = prev && prev.floor === room.floor && (prev.x !== room.x || prev.y !== room.y);
+      if (moved) {
+        const fx = tx + (prev.x - room.x) * CELL;
+        const fy = ty + (prev.y - room.y) * CELL;
+        tg.style.transform = 'translate(' + fx + 'px,' + fy + 'px)';
+        tg.style.transition = 'none';
+        requestAnimationFrame(() => {
+          tg.style.transition = 'transform .34s cubic-bezier(.2,.85,.25,1.15)';
+          tg.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+        });
+      } else {
+        tg.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+      }
       if (o.kind === 'player') {
         const isTraitor = st.haunt && st.haunt.active && st.haunt.traitor === o.i;
+        if (st.turn === o.i && st.phase === 'playing' && !o.p.dead) {
+          el('circle', { cx: 0, cy: 0, r: R + 6, fill: 'none', stroke: seatColor(o.i), 'stroke-width': 2.5, 'stroke-opacity': .55, class: 'tokenCurrent' }, tg);
+        }
         el('circle', {
-          cx: tx, cy: ty, r: R,
+          cx: 0, cy: 0, r: R,
           fill: seatColor(o.i), stroke: isTraitor ? '#3d1d24' : '#fff',
           'stroke-width': isTraitor ? 4 : 2.5
-        }, g);
-        txt(g, tx, ty + (narrow ? 6 : 5), o.p.art || '?', { 'font-size': AF, 'font-weight': 800, fill: '#fff' });
+        }, tg);
+        txt(tg, 0, narrow ? 6 : 5, o.p.art || '?', { 'font-size': AF, 'font-weight': 800, fill: '#fff' });
       } else {
-        el('circle', { cx: tx, cy: ty, r: R, fill: '#5d2430', stroke: '#f0cba0', 'stroke-width': 2.5 }, g);
-        txt(g, tx, ty + (narrow ? 6 : 5), '怪', { 'font-size': AF, 'font-weight': 800, fill: '#ffe7cb' });
+        el('circle', { cx: 0, cy: 0, r: R, fill: '#5d2430', stroke: '#f0cba0', 'stroke-width': 2.5 }, tg);
+        txt(tg, 0, narrow ? 6 : 5, '怪', { 'font-size': AF, 'font-weight': 800, fill: '#ffe7cb' });
       }
+      lastTokenPos[o.p.id] = { floor: room.floor, x: room.x, y: room.y };
     });
   }
 
-  function drawEmpty(g, x, y, hot) {
+  function drawEmpty(g, x, y, hotDir) {
+    const px = x * CELL + 20, py = y * CELL + 18;
     el('rect', {
-      x: x * CELL + 20, y: y * CELL + 18, width: CELL - 40, height: CELL - 40, rx: 16,
-      fill: hot ? 'rgba(216,169,79,.22)' : 'rgba(255,255,255,.05)',
-      stroke: hot ? '#d8a94f' : 'rgba(230,215,190,.18)',
-      'stroke-width': hot ? 3 : 1.5, 'stroke-dasharray': hot ? '0' : '7 7'
+      x: px, y: py, width: CELL - 40, height: CELL - 40, rx: 16,
+      fill: hotDir ? 'rgba(216,169,79,.22)' : 'rgba(255,255,255,.05)',
+      stroke: hotDir ? '#d8a94f' : 'rgba(230,215,190,.18)',
+      'stroke-width': hotDir ? 3 : 1.5, 'stroke-dasharray': hotDir ? '0' : '7 7',
+      class: hotDir ? 'hotCell' : ''
     }, g);
-    if (hot) {
-      txt(g, x * CELL + CELL / 2, y * CELL + CELL / 2 + 8, '推门', { 'font-size': narrow ? 22 : 18, 'font-weight': 800, fill: '#efd8a0' });
+    if (hotDir) {
+      el('circle', { cx: px + (CELL - 40) / 2, cy: py + (CELL - 40) / 2 - 12, r: 18, fill: 'rgba(216,169,79,.16)', stroke: '#f0c85c', 'stroke-width': 2 }, g);
+      txt(g, px + (CELL - 40) / 2, py + (CELL - 40) / 2 - 5, DIR_ARROW[hotDir] || '·', { 'font-size': 27, 'font-weight': 900, fill: '#ffe3a5' });
+      txt(g, px + (CELL - 40) / 2, py + (CELL - 40) / 2 + 24, '推门', { 'font-size': narrow ? 22 : 18, 'font-weight': 800, fill: '#efd8a0' });
     }
   }
 
@@ -344,29 +513,63 @@
 
     const me = st.players[myIndex(st)];
     const here = me ? (st.rooms.find((r) => r.floor === me.floor && r.x === me.x && r.y === me.y)) : null;
-    const canMove = st.phase === 'playing' && myTurn(st) && !me.dead && st.moves > 0 && !st.moveLocked && !st.pendingTile && !st.pendingDamage;
-    const hot = {};
-    if (canMove && me.floor === viewFloor && me) {
+    const canMove = st.phase === 'playing' && myTurn(st) && me && !me.dead && st.moves > 0 && !st.moveLocked && !st.pendingTile && !st.pendingDamage && !st.pendingRoll;
+    const hotEmpty = {};
+    const hotRooms = {};
+    if (canMove && me.floor === viewFloor) {
       [['N', 0, -1], ['S', 0, 1], ['W', -1, 0], ['E', 1, 0]].forEach((d) => {
-        const nx = me.x + d[1], ny = me.y + d[2];
-        if (nx >= 0 && ny >= 0 && nx < W && ny < H) hot[nx + ',' + ny] = true;
+        const dir = d[0], nx = me.x + d[1], ny = me.y + d[2];
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || !here || !hasDoor(here.doors, dir)) return;
+        const key = nx + ',' + ny;
+        const target = st.rooms.find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
+        if (!target) hotEmpty[key] = dir;
+        else if (hasDoor(target.doors, OPP[dir])) hotRooms[key] = dir;
       });
     }
 
     const gEmpty = el('g', {}, svg);
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
-        if (!st.rooms.some((r) => r.floor === viewFloor && r.x === x && r.y === y)) drawEmpty(gEmpty, x, y, hot[x + ',' + y]);
+        if (!st.rooms.some((r) => r.floor === viewFloor && r.x === x && r.y === y)) drawEmpty(gEmpty, x, y, hotEmpty[x + ',' + y]);
       }
     }
 
     const gRooms = el('g', {}, svg);
     const sorted = st.rooms.filter((r) => r.floor === viewFloor).sort((a, b) => (a.y - b.y) || (a.x - b.x));
-    sorted.forEach((room) => drawRoom(gRooms, room, st, here && room.x === here.x && room.y === here.y));
+    const roomKey = (r) => r.floor + '|' + r.x + '|' + r.y;
+    const newKeys = new Set();
+    if (lastRoomKeys) st.rooms.forEach((r) => { if (!lastRoomKeys.has(roomKey(r))) newKeys.add(roomKey(r)); });
+    lastRoomKeys = new Set(st.rooms.map(roomKey));
+    sorted.forEach((room) => {
+      drawRoom(gRooms, room, st, here && room.x === here.x && room.y === here.y, hotRooms[room.x + ',' + room.y]);
+      if (newKeys.has(roomKey(room))) {
+        el('rect', {
+          x: room.x * CELL + 5, y: room.y * CELL + 5, width: CELL - 10, height: CELL - 10, rx: 18,
+          fill: 'none', stroke: '#ffd76a', 'stroke-width': 5, class: 'roomNew', 'pointer-events': 'none'
+        }, gRooms);
+      }
+    });
+    keepPlayerInView(st);
 
     if (st.pendingTile && st.pendingTile.tile && st.pendingTile.floor === viewFloor) {
       el('rect', { x: st.pendingTile.x * CELL + 14, y: st.pendingTile.y * CELL + 14, width: CELL - 28, height: CELL - 28, rx: 16, fill: 'none', stroke: '#f0c85c', 'stroke-width': 4, 'stroke-dasharray': '8 6' }, el('g', {}, svg));
     }
+  }
+
+  function keepPlayerInView(st) {
+    if (!narrow || !board) return;
+    const me = st.players[myIndex(st)];
+    if (!me || me.floor !== viewFloor) return;
+    const wrap = board.parentElement;
+    if (!wrap) return;
+    const key = me.floor + '|' + me.x + '|' + me.y;
+    if (key === lastAutoView) return;
+    lastAutoView = key;
+    requestAnimationFrame(() => {
+      const targetX = (me.x + .5) / W * board.offsetWidth - wrap.clientWidth / 2;
+      const targetY = (me.y + .5) / H * board.offsetHeight - wrap.clientHeight / 2;
+      wrap.scrollTo({ left: Math.max(0, targetX), top: Math.max(0, targetY), behavior: 'smooth' });
+    });
   }
 
   /* ---------------- 楼层 / 剧本 ---------------- */
@@ -379,7 +582,7 @@
       b.type = 'button';
       b.textContent = C.FLOOR_LABEL[f] + ' ' + st.rooms.filter((r) => r.floor === f).length;
       b.setAttribute('aria-pressed', f === viewFloor ? 'true' : 'false');
-      b.addEventListener('click', () => { viewFloor = f; renderBoard(cur); renderFloorTabs(cur); });
+      b.addEventListener('click', () => { viewFloor = f; lastAutoView = ''; renderBoard(cur); renderFloorTabs(cur); });
       bar.appendChild(b);
     });
   }
@@ -396,6 +599,121 @@
       ' · 第 ' + (h.round || 0) + ' 轮';
   }
 
+  function showBanner(title, sub, tone) {
+    const b = $('turnBanner');
+    if (!b) return;
+    clearTimeout(bannerTimer);
+    b.className = 'turnBanner' + (tone ? ' ' + tone : '');
+    b.innerHTML = '<div class="bTitle">' + esc(title) + '</div>' + (sub ? '<div class="bSub">' + esc(sub) + '</div>' : '');
+    void b.offsetWidth;
+    b.classList.add('show');
+    bannerTimer = setTimeout(() => { b.classList.remove('show'); }, 2450);
+  }
+
+  function announceSituation(st) {
+    if (!st || st.phase === 'lobby') return;
+    if (st.phase === 'ended') return;
+    if (st.phase === 'select') {
+      const p = st.players[st.turn];
+      const key = 'select|' + st.turn + '|' + p.name;
+      if (key !== lastTurnKey) lastTurnKey = key;
+      const b = $('turnBanner');
+      if (b) b.classList.remove('show');
+      lastHauntActive = false;
+      return;
+    }
+    const p = st.players[st.turn];
+    const turnKey = 'play|' + st.turn + '|' + st.round;
+    if (turnKey !== lastTurnKey) {
+      lastTurnKey = turnKey;
+      bannerMoves = st.moves;
+      const isMine = myTurn(st);
+      const exits = openExits(st, p);
+      showBanner(isMine ? '你的回合' : '轮到 ' + p.name,
+        exits ? '移动 ' + st.moves + ' 步 · 点击发光格探索' : '当前房间没有可走的门 · 点结束回合');
+      haptic(18);
+    } else if (!st.pendingRoll && bannerMoves !== st.moves) {
+      const b = $('turnBanner');
+      if (b) b.classList.remove('show');
+    }
+    if (st.haunt && st.haunt.active && !lastHauntActive) {
+      lastHauntActive = true;
+      const traitor = st.players[st.haunt.traitor];
+      showBanner('闹鬼开始', '叛徒是 ' + (traitor ? traitor.name : '?') + ' · ' + (st.haunt.name || ''), 'haunt');
+      haptic([30, 40, 30]);
+    }
+    if (st.pendingRoll) {
+      const pr = st.pendingRoll;
+      const key = 'roll|' + (pr.card || pr.room) + '|' + pr.diff + '|' + pr.index;
+      if (key !== lastPromptKey) {
+        lastPromptKey = key;
+        showBanner('需要掷骰', (st.players[pr.index] || {}).name + ' · ' + traitLabel(pr.trait) + '判定 · 难度 ' + pr.diff);
+      }
+    } else lastPromptKey = '';
+    if (!st.haunt || !st.haunt.active) lastHauntActive = false;
+    if (!st.pendingRoll && (st.moveLocked || st.moves <= 0 || st.pendingTile || st.pendingDamage)) {
+      const b = $('turnBanner');
+      if (b) b.classList.remove('show');
+    }
+  }
+
+  function renderSituation(st) {
+    const bar = $('situationBar');
+    if (!bar) return;
+    let cls = '';
+    let text = '';
+    let action = '';
+    if (st.phase === 'select') {
+      text = '选角色阶段 · 轮到 ' + (st.players[st.turn] || {}).name;
+      action = '点角色卡选人';
+    } else if (st.phase === 'ended') {
+      text = '本局已结束';
+    } else if (st.pendingDamage) {
+      cls = 'warn';
+      text = (st.players[st.pendingDamage.index] || {}).name + ' 受到伤害，需要分配';
+      action = '在弹窗里确认';
+    } else if (st.pendingTile) {
+      cls = 'hot';
+      text = '推门成功：' + (st.pendingTile.tile ? st.pendingTile.tile.name : '新房间');
+      action = '选择方向放置';
+    } else if (st.pendingRoll) {
+      cls = 'hot';
+      text = (st.players[st.pendingRoll.index] || {}).name + ' 需要 ' + traitLabel(st.pendingRoll.trait) + '判定';
+      action = myTurn(st) ? '点掷骰' : '等待对方';
+    } else if (!myTurn(st)) {
+      cls = 'cool';
+      text = '等待 ' + (st.players[st.turn] || {}).name + ' 行动';
+    } else if (st.moveLocked) {
+      cls = 'cool';
+      text = '本回合已经翻房 / 抽卡，移动结束';
+      action = '结束回合';
+    } else if (st.moves <= 0) {
+      cls = 'cool';
+      text = '移动点已用完';
+      action = '结束回合';
+    } else if (st.haunt && st.haunt.active) {
+      cls = 'warn';
+      text = '闹鬼中 · 英雄目标：' + (st.haunt.heroGoalText || '完成剧本目标');
+      action = '移动 ' + st.moves + ' 步';
+    } else {
+      const me = st.players[myIndex(st)];
+      const here = me ? roomAt(st, me) : null;
+      if (!me || !openExits(st, me)) {
+        cls = 'cool';
+        text = '当前房间没有可走的门';
+        action = '结束回合';
+      } else {
+        cls = 'hot';
+        text = '你的回合 · 当前在「' + (here ? here.name : '未知房间') + '」';
+        action = '可走 ' + openExits(st, me) + ' 个方向 · 移动 ' + st.moves + ' 步';
+      }
+    }
+    bar.className = 'situationBar' + (cls ? ' ' + cls : '');
+    bar.innerHTML = '<span class="sDot"></span><span class="sText">' + esc(text) + '</span>' +
+      (action ? '<span class="sAction">' + esc(action) + '</span>' : '');
+  }
+
+
   /* ---------------- 选角色 ---------------- */
   function renderPick(st) {
     const panel = $('pickPanel');
@@ -409,7 +727,7 @@
     const head = document.createElement('div');
     head.className = 'pickHead';
     head.innerHTML = '<div style="font-size:19px;font-weight:800">轮到 ' + esc(current.name) + ' 选角色</div>' +
-      '<div style="font-size:12px;color:#c9b797;margin-top:4px">还剩 ' + left + ' 人没选 · 12 名探险者 · 官方 2E 属性轨道</div>';
+      '<div style="font-size:12px;color:#c9b797;margin-top:4px">还剩 ' + left + ' 人没选 · ' + C.CHARS.length + ' 名探险者 · 属性轨道</div>';
     panel.appendChild(head);
 
     const grid = document.createElement('div');
@@ -485,6 +803,7 @@
     $('cModalCard').querySelectorAll('.rotOpt').forEach((b) => {
       b.addEventListener('click', () => {
         if (b.disabled) return;
+        haptic(10);
         window.GameShell.send({ type: 'placeTile', rot: Number(b.dataset.rot) });
       });
     });
@@ -591,32 +910,127 @@
   }
 
   /* ---------------- 卡牌 ---------------- */
+  function effectSummary(eff) {
+    if (!eff) return '';
+    const parts = [];
+    if (eff.gain) parts.push(traitLabel(eff.gain.trait) + ' +' + eff.gain.amount);
+    if (eff.lose) parts.push(traitLabel(eff.lose.trait) + ' -' + eff.lose.amount);
+    if (eff.heal) parts.push(traitLabel(eff.heal.trait) + ' 回复 ' + eff.heal.amount);
+    if (eff.damage) {
+      const d = eff.damage;
+      parts.push((d.dice ? '掷 ' + d.dice + ' 颗伤害骰' : '受到 ' + d.amount + ' 点') + (d.type === 'mental' ? '精神伤害' : '物理伤害'));
+    }
+    return parts.join('；');
+  }
+
+  function renderRollPrompt(st) {
+    const pr = st.pendingRoll;
+    const box = $('cabinCard');
+    const label = traitLabel(pr.trait);
+    const canRoll = myTurn(st) && pr.index === myIndex(st);
+    const who = (st.players[pr.index] || {}).name || '玩家';
+    const owner = st.players[pr.index] || {};
+    const diceN = Math.max(1, (Number(owner.traits && owner.traits[pr.trait]) || 0) + (C.helpers.itemTestBonus ? C.helpers.itemTestBonus(st, pr.index, pr.trait) : 0));
+    const diceFaces = Array(diceN).fill('?').map((x) => '<i>' + x + '</i>').join('');
+    const winText = effectSummary(pr.win);
+    const loseText = effectSummary(pr.lose);
+    box.className = 'show' + (pr.kind === 'room' ? ' roomPrompt' : '');
+    box.innerHTML = '<div class="rollTop"><span class="rollAvatar" style="background:' + seatColor(pr.index) + '">' + esc(owner.art || '?') + '</span>' +
+      '<div><div class="k">' + (pr.kind === 'event' ? '事件判定' : '房间判定') + '</div><div class="rollWho">' + esc(who) + ' · ' + esc(label) + '判定</div></div>' +
+      '<div class="rollTarget"><small>难度</small><b>' + pr.diff + '</b></div></div>' +
+      '<div class="t">' + esc(pr.card || pr.room || '判定') + '</div>' +
+      '<div class="d">' + (pr.text ? esc(pr.text) + '<br>' : '') +
+      '掷 ' + diceN + ' 颗骰，总点数 ≥ ' + pr.diff + ' 即成功。' + (canRoll ? '点击下方按钮投掷。' : '等待 ' + esc(who) + ' 投掷。') + '</div>' +
+      (winText || loseText ? '<div class="rollStakes">' + (winText ? '<span class="stake good">成功 · ' + esc(winText) + '</span>' : '') +
+        (loseText ? '<span class="stake bad">失败 · ' + esc(loseText) + '</span>' : '') + '</div>' : '') +
+      (rolling ? '<div class="rollPrompt"><div class="need">骰子滚动中…</div><div class="rollDice">' + Array(diceN).fill('<i>?</i>').join('') + '</div></div>' :
+        '<div class="rollPrompt"><div class="need">掷 <b>' + esc(label) + '</b> 骰 · 目标 <b>' + pr.diff + '</b></div><div class="rollDice">' + diceFaces + '</div>' +
+        '<button class="btn primary" type="button" id="rollPendingBtn"' + (canRoll ? '' : ' disabled') + '>掷骰</button></div>');
+    clearTimeout(cardTimer);
+    if (canRoll && !rolling) {
+      const btn = $('rollPendingBtn');
+      if (btn) btn.addEventListener('click', () => {
+        if (rolling) return;
+        rolling = true;
+        haptic(12);
+        renderRollPrompt(cur);
+        clearInterval(rollTickTimer);
+        rollTickTimer = setInterval(() => {
+          const dice = box.querySelectorAll('.rollDice i');
+          dice.forEach((d) => { d.textContent = String([0, 1, 2][Math.floor(Math.random() * 3)]); });
+        }, 85);
+        rollFxTimer = setTimeout(() => {
+          clearInterval(rollTickTimer);
+          rolling = false;
+          window.GameShell.send({ type: 'rollPending' });
+          haptic([18, 30, 18]);
+        }, 680);
+      });
+    }
+  }
+
   function renderCard(st) {
     const box = $('cabinCard');
+    if (st.pendingRoll) { renderRollPrompt(st); return; }
     if (!st.lastCard) { box.className = ''; box.innerHTML = ''; lastCardKey = ''; return; }
-    const key = st.lastCard.kind + '|' + st.lastCard.title + '|' + (st.logs || []).length;
+    const key = st.lastCard.kind + '|' + st.lastCard.title + '|' + (st.logs || []).length + '|' + (st.lastRoll ? st.lastRoll.total + st.lastRoll.ok : '') + '|' + (st.lastDamageRoll ? st.lastDamageRoll.total : '');
     if (key === lastCardKey) return;
     lastCardKey = key;
     const c = st.lastCard;
     box.className = 'show' + (c.tone === 'bad' ? ' bad' : '');
-    box.innerHTML = '<div class="k">' + (c.kind === 'omen' ? '预兆' : c.kind === 'item' ? '物品' : c.kind === 'haunt' ? '闹鬼' : '事件') +
+    box.innerHTML = '<div class="k">' + (c.kind === 'omen' ? '预兆' : c.kind === 'item' ? '物品' : c.kind === 'haunt' ? '闹鬼' : c.kind === 'room' ? '房间' : '事件') +
       '</div><div class="t">' + esc(c.title) + '</div><div class="d">' + esc(c.text) + '</div>';
     if (st.lastRoll) {
+      const result = document.createElement('div');
+      result.className = 'rollResult';
+      const rr = st.lastRoll;
+      result.textContent = (rr.diff != null ? (rr.ok ? '判定成功' : '判定失败') + ' · ' : '掷骰结果 · ') +
+        '总点数 ' + rr.total + (rr.diff != null ? ' / 难度 ' + rr.diff : '');
+      box.appendChild(result);
+      if (rr.diff != null) {
+        const applied = rr.ok ? c.win : c.lose;
+        const appliedText = effectSummary(applied);
+        if (appliedText) {
+          const ae = document.createElement('div');
+          ae.className = 'rollApplied ' + (rr.ok ? 'good' : 'bad');
+          ae.textContent = '结果 · ' + appliedText;
+          box.appendChild(ae);
+        }
+      }
       const row = document.createElement('div');
       row.className = 'cabinDice';
-      (st.lastRoll.faces || []).forEach((f) => {
+      (rr.faces || []).forEach((f, idx) => {
         const d = document.createElement('div');
-        d.className = 'cabinDie';
+        d.className = 'cabinDie in';
+        d.style.animationDelay = (idx * 0.055) + 's';
         d.textContent = f;
         row.appendChild(d);
       });
       const sum = document.createElement('div');
-      sum.className = 'cabinDie';
+      sum.className = 'cabinDie in';
       sum.style.width = 'auto';
       sum.style.padding = '0 8px';
-      sum.textContent = '= ' + st.lastRoll.total;
+      sum.style.animationDelay = ((rr.faces || []).length * 0.055) + 's';
+      sum.textContent = '= ' + rr.total;
       row.appendChild(sum);
       box.appendChild(row);
+      const dr = st.lastDamageRoll;
+      if (dr && dr.label !== rr.label) {
+        const dh = document.createElement('div');
+        dh.className = 'rollResult';
+        dh.textContent = dr.label + ' · ' + dr.total + ' 点';
+        box.appendChild(dh);
+        const drRow = document.createElement('div');
+        drRow.className = 'cabinDice';
+        (dr.faces || []).forEach((f, idx) => {
+          const d = document.createElement('div');
+          d.className = 'cabinDie in';
+          d.style.animationDelay = (idx * 0.055) + 's';
+          d.textContent = f;
+          drRow.appendChild(d);
+        });
+        box.appendChild(drRow);
+      }
     }
     clearTimeout(cardTimer);
     cardTimer = setTimeout(() => { box.className = ''; }, 8000);
@@ -646,12 +1060,25 @@
 
     const here = roomAt(st, me);
     const head = document.createElement('div');
+    const statusNote = st.moveLocked ? ' · 本回合已翻房' : (st.attacked ? ' · 本回合已攻击' : '');
     head.innerHTML = '<div class="ttl">' + esc(me.name) + ' · ' + esc(me.charName) + '（' + esc(me.role) + '）</div>' +
       '<div class="traitRow"></div>' +
       '<div class="sub">' + (st.haunt && st.haunt.active ? '闹鬼 · 预兆 ' + st.omens : '探索 · 预兆 ' + st.omens) +
       ' · 移动 ' + st.moves + ' · 物品 ' + (me.items || []).filter((it) => it.tag !== 'omen' && it.tag !== '预兆').length +
-      (here ? ' · ' + esc(here.name) : '') + '</div>';
+      (here ? ' · ' + esc(here.name) : '') + statusNote + '</div>' +
+      '<div class="moveMeter" aria-label="剩余移动 ' + st.moves + ' 步"></div>';
     info.appendChild(head);
+
+    const meter = head.querySelector('.moveMeter');
+    const speedCap = Math.max(1, Number(me.traits.speed) || 1);
+    for (let k = 0; k < speedCap; k++) {
+      const pip = document.createElement('i');
+      if (k >= st.moves) pip.className = 'off';
+      meter.appendChild(pip);
+    }
+    const meterLabel = document.createElement('span');
+    meterLabel.textContent = st.moves + ' 步';
+    meter.appendChild(meterLabel);
 
     const row = head.querySelector('.traitRow');
     C.TRAITS.forEach((t) => {
@@ -663,11 +1090,12 @@
     });
 
     const isMine = myTurn(st);
-    const addBtn = (label, cls, fn, disabled) => {
+    const addBtn = (label, cls, fn, disabled, title) => {
       const b = document.createElement('button');
       b.className = 'btn ' + (cls || 'ghost');
       b.type = 'button';
       b.innerHTML = label;
+      if (title) b.title = title;
       if (disabled) b.disabled = true;
       b.addEventListener('click', fn);
       actions.appendChild(b);
@@ -686,6 +1114,7 @@
     }
 
     if (st.pendingDamage) return;
+    if (st.pendingRoll || st.pendingTile) return;
 
     // 当前房间动作
     addBtn('物品 ' + ((me.items || []).length), 'ghost', () => renderInventory(st, mi));
@@ -753,7 +1182,7 @@
       }
     }
 
-    addBtn('结束回合', 'ghost', () => window.GameShell.send({ type: 'end' }), !!st.pendingTile);
+    addBtn('结束回合', 'ghost', () => window.GameShell.send({ type: 'end' }), !!st.pendingTile || !!st.pendingRoll, st.pendingRoll ? '先掷骰' : st.pendingTile ? '先放置房间' : '');
 
     if (st.moves <= 0 && !st.moveLocked) {
       const tip = document.createElement('span');
@@ -769,7 +1198,7 @@
     const st = cur;
     if (!st || st.phase !== 'playing') return;
     if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
-    if (st.pendingTile || st.pendingDamage) return;
+    if (st.pendingTile || st.pendingDamage || st.pendingRoll) return;
     if (st.moveLocked) { window.GameShell.toast('本回合已经翻过房间', true); return; }
     if (st.moves <= 0) { window.GameShell.toast('移动点用完了', true); return; }
     const me = st.players[st.turn];
@@ -782,7 +1211,13 @@
     const dx = tx - me.x, dy = ty - me.y;
     if (Math.abs(dx) + Math.abs(dy) !== 1) { window.GameShell.toast('只能走到上下左右相邻格', true); return; }
     const dir = dx === 1 ? 'E' : dx === -1 ? 'W' : dy === 1 ? 'S' : 'N';
-    window.GameShell.send({ type: 'move', dir: dir });
+    const sent = window.GameShell.send({ type: 'move', dir: dir });
+    if (sent) {
+      haptic(8);
+      board.classList.remove('punch');
+      void board.offsetWidth;
+      board.classList.add('punch');
+    }
   }
 
   /* ---------------- 总渲染 ---------------- */
@@ -800,10 +1235,13 @@
     renderFloorTabs(st);
     renderBoard(st);
     renderScenario(st);
+    renderSituation(st);
+    announceSituation(st);
     renderDock(st);
     renderCard(st);
     if (st.pendingTile) renderTileModal(st);
     else if (st.pendingDamage) renderDamageModal(st);
+    else if (st.pendingRoll && modalMode) closeModal();
     else if (modalMode === 'tile' || modalMode === 'damage') closeModal();
   }
 
@@ -827,7 +1265,7 @@
       ] },
       { h: '闹鬼', items: [
         '每抽到一张预兆，回合结束时掷 6 颗骰；总点数<b>小于</b>全场预兆总数时闹鬼。',
-        '用<b>触发房间 + 预兆</b>查 50 个剧本之一，剧本决定叛徒，叛徒不一定是抽预兆的人。',
+        '用<b>触发房间 + 预兆</b>查 ' + C.SCENARIOS.length + ' 个剧本之一，剧本决定叛徒，叛徒不一定是抽预兆的人。',
         '闹鬼后同一房间的敌对角色移动额外消耗 1 点；每回合可攻击一次，双方掷同一属性，差值造成伤害。'
       ] },
       { h: '怪物与剧本', items: [
@@ -847,6 +1285,7 @@
       if (st.phase === 'select') return '选角色 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
       if (st.phase === 'ended') return '已结束';
       const p = st.players[st.turn];
+      if (st.pendingRoll) return '等待掷骰 · ' + (p ? p.name : '');
       return (st.haunt && st.haunt.active ? '闹鬼 · ' : '探索 · ') + (p ? p.name : '') + ' · 移动 ' + st.moves;
     },
     winnerTitle: (st) => (st.winner ? (st.winner.side === 'traitor' ? '叛徒获胜' : '英雄获胜') : '对局结束'),

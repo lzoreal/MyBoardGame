@@ -1,0 +1,16 @@
+{
+  "scenarios": [
+    {
+      "key": "example_scenario",
+      "name": "示例剧本",
+      "story": "这只是格式示例，不会参与构建。",
+      "trigger": { "room": "厨房", "omen": "婴啼" },
+      "traitorRule": "revealer",
+      "heroGoal": { "type": "killTraitor" },
+      "traitorGoal": { "type": "killAll" },
+      "heroGoalText": "击败叛徒，让哭声停下",
+      "traitorGoalText": "消灭所有英雄",
+      "priority": 20
+    }
+  ]
+}
