@@ -104,7 +104,7 @@ ok('击败主持者完成第二章', m.phase === 'ended' && m.resolution.result 
 let r = E.createInitial([], rngHigh, { investigator: 'reporter', scenario: 'midnight' });
 r = E.act(r, { type: 'resign' }, r.inv.id, rngHigh).state;
 eq('可以撤退', r.resolution && r.resolution.result, 'resign');
-ok('撤退文案带邪教徒战果', /邪教徒/.test(r.resolution.text), r.resolution.text);
+ok('撤退文案提到撤离', /撤出/.test(r.resolution.text), r.resolution.text);
 
 let mf = E.createInitial([], rngHigh, { investigator: 'scholar', scenario: 'midnight' });
 mf.enemies = [];

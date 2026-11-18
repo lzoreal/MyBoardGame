@@ -520,7 +520,10 @@ window.ArkhamEngine = (function () {
     if (action.type === 'resign') {
       if (state.scenario !== 'midnight') return { ok: false, msg: '这一章不能撤退' };
       const found = state.cultistsFound || 0;
-      endGame(state, 'resign', '你在午夜前撤出了阿卡姆，带走了 ' + found + ' 名邪教徒的线索。仪式还在继续。');
+      const text = found === 0
+        ? '你撤出了阿卡姆。仪式还在继续，钟声在雾里越敲越近。'
+        : '你在午夜前撤出了阿卡姆，带走了 ' + found + ' 名邪教徒的战果。仪式还在继续。';
+      endGame(state, 'resign', text);
       return { ok: true, state: state };
     }
 

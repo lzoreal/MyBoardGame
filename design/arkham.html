@@ -555,7 +555,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
       camp.xp += gain;
       if (camp.chapters.indexOf(sc.id) < 0) camp.chapters.push(sc.id);
     } else if (r.result === 'resign') {
-      gain = 1 + Math.min(2, state.cultistsFound || 0);
+      gain = Math.min(3, state.cultistsFound || 0);
       camp.xp += gain;
     } else {
       camp.trauma += 1;
