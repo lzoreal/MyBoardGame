@@ -223,9 +223,13 @@ window.GameShell = (function () {
 
     info.innerHTML = '';
     const box = document.createElement('div');
-    box.innerHTML = '<div class="ttl">等人齐再开局</div>' +
+    const count = state ? state.players.length : 0;
+    const need = Math.max(0, cfg.min - count);
+    box.innerHTML = '<div class="ttl">' + (need ? '等人齐再开局' : '人齐了，可以开局') + '</div>' +
       '<div class="sub">' + (localMode ? '本机热座：换人操作同一台设备' :
-        ('把邀请码 <b>' + esc(code || '') + '</b> 发给朋友，至少 ' + cfg.min + ' 人')) + '</div>';
+        (need
+          ? ('把邀请码 <b>' + esc(code || '') + '</b> 发给朋友，还差 ' + need + ' 人')
+          : ('已有 ' + count + ' 人，房主点「开始游戏」'))) + '</div>';
     info.appendChild(box);
 
     actions.innerHTML = '';

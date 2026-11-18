@@ -137,6 +137,7 @@
     #cabinCard .cabinDie.in, #cabinCard .rollPrompt .rollDice i { animation: none; }
   }
 
+  .situationBar.hidden { display: none; }
   .situationBar {
     width: min(100%, 980px);
     margin: 0 auto 5px;
@@ -250,8 +251,10 @@
     .cabinBoard { width: max(100%, 560px); max-height: none; }
     .boardWrap { place-items: start; padding: 0 0 4px; overflow: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; scrollbar-width: none; }
     .boardWrap::-webkit-scrollbar { width: 0; height: 0; }
-    .cabinDock .dockInfo { width: 100%; }
-    .cabinDock .dockActions { width: 100%; justify-content: center; }
+    .cabinDock { flex-wrap: wrap; row-gap: 8px; }
+    .cabinDock .dockInfo { width: 100%; flex: 1 1 100%; }
+    .cabinDock .dockInfo > div { width: 100%; }
+    .cabinDock .dockActions { width: 100%; flex: 1 1 100%; justify-content: center; }
     .cabinDock .dockActions .btn { flex: 1 1 42%; min-width: 0; font-size: 13px; }
     .situationBar { font-size: 11px; padding: 6px 10px; min-height: 30px; margin-bottom: 4px; }
     .situationBar .sAction { font-size: 10px; }
@@ -1033,6 +1036,12 @@
   function renderSituation(st) {
     const bar = $('situationBar');
     if (!bar) return;
+    if (!st || st.phase === 'lobby') {
+      bar.classList.add('hidden');
+      bar.innerHTML = '';
+      return;
+    }
+    bar.classList.remove('hidden');
     let cls = '';
     let text = '';
     let action = '';
@@ -1693,13 +1702,14 @@
     const info = $('dockInfo');
     const actions = $('dockActions');
     if (!info || !actions) return;
+    /* 等待开局：底栏由 GameShell 统一渲染人数提示和「开始游戏」，这里不要覆盖 */
+    if (!st || st.phase === 'lobby') return;
     const mi = myIndex(st);
     const me = playersOf(st)[mi];
     info.innerHTML = '';
     actions.innerHTML = '';
     if (!me) return;
-    /* 等待开局时还没分配角色，底栏只显示一句提示，不去读属性 */
-    if (st.phase === 'lobby' || !me.traits) {
+    if (!me.traits) {
       info.innerHTML = '<div class="ttl">等待开始</div><div class="sub">人齐后由房主点「开始游戏」，届时自动分配角色。</div>';
       return;
     }
