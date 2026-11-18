@@ -93,11 +93,34 @@ window.GameShell = (function () {
         div.appendChild(tag);
       }
 
+      if (cfg.onSeatClick) {
+        div.classList.add('seatClickable');
+        div.setAttribute('role', 'button');
+        div.setAttribute('tabindex', '0');
+        div.setAttribute('aria-label', '查看 ' + p.name + ' 的玩家信息');
+        div.title = '查看 ' + p.name + ' 的玩家信息';
+        div.addEventListener('click', () => cfg.onSeatClick(p, i, state));
+        div.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            cfg.onSeatClick(p, i, state);
+          }
+        });
+      }
+
       const live = document.createElement('span');
       const online = localMode || p.id === baseId || (Net.hasClient && Net.isOnline(p.id));
       live.className = online ? 'on' : 'off';
       live.title = online ? '在线' : '离线';
       div.appendChild(live);
+
+      if (cfg.onSeatClick) {
+        const hint = document.createElement('span');
+        hint.className = 'openHint';
+        hint.textContent = '›';
+        hint.setAttribute('aria-hidden', 'true');
+        div.appendChild(hint);
+      }
 
       strip.appendChild(div);
     });

@@ -25,6 +25,36 @@
   .cabinSeats .seat { background: rgba(243,231,208,.94); border-color: #f8eeda; }
   .cabinSeats .seat .tag { background: #4b6a52; }
   .cabinSeats .seat.active { background: #f6dcaa; border-color: #d8a94f; box-shadow: 0 3px 0 #a2762e; }
+  .cabinSeats .seat.seatClickable { cursor: pointer; }
+  .cabinSeats .seat.seatClickable:active { transform: translateY(1px) scale(.99); }
+  .cabinSeats .seat.seatClickable:focus-visible { outline: 3px solid #ffd68a; outline-offset: 3px; }
+  .cabinSeats .seatClickable .openHint { color: #9b6a2f; font-size: 14px; font-weight: 900; line-height: 1; }
+  .playerInfoHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .playerAvatar { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 27px; font-weight: 900; box-shadow: 0 0 0 3px #fff8e9, 0 0 0 5px #d8c3a1; flex: 0 0 auto; }
+  .playerInfoName { min-width: 0; }
+  .playerInfoName h2 { margin: 0; font-size: 21px; }
+  .playerInfoName h2 small { font-size: 11px; color: #8d7457; font-weight: 700; }
+  .playerInfoName p { margin: 3px 0 0; font-size: 12px; }
+  .playerClose { margin-left: auto; min-height: 38px; padding: 0 12px; }
+  .playerBadges { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 8px; }
+  .pBadge { padding: 3px 9px; border-radius: 999px; background: #e8d7bd; color: #5b432e; font-size: 11px; font-weight: 800; }
+  .pBadge.dead { background: #ead0cb; color: #91382f; }
+  .pBadge.traitor { background: #5a2630; color: #ffe0c2; }
+  .pBadge.hero { background: #dce7cf; color: #46602f; }
+  .playerPublicNote { margin: 0 0 7px !important; color: #8a7359 !important; font-size: 11px !important; }
+  .playerMeta { padding: 9px 11px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; font-size: 12px; color: #5c4631; }
+  .playerSectionTitle { margin: 15px 0 7px; font-size: 14px; font-weight: 900; color: #4a3424; }
+  .playerStats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .playerTrait { padding: 8px 10px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; }
+  .playerTrait .ptRow { display: flex; align-items: baseline; gap: 5px; }
+  .playerTrait .ptRow span { font-size: 12px; color: #756046; }
+  .playerTrait .ptRow b { font-size: 21px; color: #7b2e3b; line-height: 1; }
+  .playerTrait .ptRow em { margin-left: auto; font-style: normal; font-size: 10px; color: #9b8768; white-space: nowrap; }
+  .playerTrait .ptBar { display: block; height: 5px; margin-top: 6px; border-radius: 999px; background: #e8d7bd; overflow: hidden; }
+  .playerTrait .ptBar span { display: block; height: 100%; border-radius: inherit; background: #c68b2c; }
+  .playerTrait.low .ptRow b { color: #a33a2c; }
+  .playerTrait.low .ptBar span { background: #b65545; }
+  .itemRule { margin-top: 3px; font-size: 11px; color: #2f6fa3; font-weight: 700; }
   .floorTabs { justify-content: center; }
   .floorTab { background: #3a2c21; color: #f3e7d0; border: 2px solid #6b4e32; min-height: 40px; }
   .floorTab[aria-pressed="true"] { background: var(--c-paper); color: #3a2a1c; border-color: var(--c-paper); }
@@ -258,7 +288,7 @@
 <script src="../js/net.js"></script>
 <script src="../js/games/cabin-packs.js"></script>
 <script src="../js/games/cabin.js"></script>
-<script src="games/shell.js?v=8"></script>
+<script src="games/shell.js?v=10"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -295,6 +325,7 @@
   let bannerTimer = 0;
   let narrow = false;
   let modalMode = '';
+  let playerModalIndex = -1;
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -358,12 +389,16 @@
   /* ---------------- 通用弹层 ---------------- */
   function openModal(html, mode) {
     modalMode = mode || '';
+    clearTimeout(bannerTimer);
+    const banner = $('turnBanner');
+    if (banner) banner.classList.remove('show');
     const card = $('cModalCard');
     card.innerHTML = html;
     $('cModal').classList.remove('hidden');
   }
   function closeModal() {
     modalMode = '';
+    playerModalIndex = -1;
     $('cModal').classList.add('hidden');
     $('cModalCard').innerHTML = '';
   }
@@ -909,6 +944,91 @@
     }));
   }
 
+  /* ---------------- 玩家信息（公开查看） ---------------- */
+  function itemRuleSummary(it) {
+    const parts = [];
+    if (it.use) {
+      const u = it.use;
+      if (u.type === 'heal') parts.push('使用：' + traitLabel(u.trait) + ' 回复 ' + (u.amount || 1));
+      else if (u.type === 'gain') parts.push('使用：' + traitLabel(u.trait) + ' +' + (u.amount || 1));
+      else parts.push('可使用');
+    }
+    if (it.testTrait) parts.push('判定：' + traitLabel(it.testTrait) + ' +' + (it.testBonus || 1));
+    if (it.weapon) parts.push('武器：' + traitLabel(it.weapon) + '攻击' + (it.attackBonus ? ' +' + it.attackBonus : ''));
+    if (it.delta) parts.push((it.tag === 'omen' || it.omen ? '预兆影响：' : '属性：') + traitLabel(it.delta.trait) + ' ' + (it.delta.amount > 0 ? '+' : '') + it.delta.amount);
+    if (it.noTrade) parts.push('不可交易');
+    if (it.noDrop) parts.push('不可丢弃');
+    if (it.noSteal) parts.push('不可偷窃');
+    return parts.join(' · ');
+  }
+
+  function renderPlayerInfo(st, idx) {
+    const p = st.players[idx];
+    if (!p) { closeModal(); return; }
+    playerModalIndex = idx;
+    const mine = myIndex(st) === idx;
+    const active = st.phase === 'playing' && st.turn === idx;
+    const here = roomAt(st, p);
+    const h = st.haunt && st.haunt.active ? st.haunt : null;
+    const isTraitor = !!(h && h.traitor === idx);
+    const items = p.items || [];
+    let badges = '<span class="pBadge">' + (active ? '当前回合' : (mine ? '你' : '玩家 ' + (idx + 1))) + '</span>';
+    if (p.dead) badges += '<span class="pBadge dead">已死亡</span>';
+    if (h) badges += '<span class="pBadge ' + (isTraitor ? 'traitor' : 'hero') + '">' + (isTraitor ? '叛徒' : '英雄') + '</span>';
+    else badges += '<span class="pBadge">闹鬼前 · 阵营未定</span>';
+
+    let html = '<div class="playerInfoHead">' +
+      '<span class="playerAvatar" style="background:' + seatColor(idx) + '">' + esc(p.art || '?') + '</span>' +
+      '<div class="playerInfoName"><h2>' + esc(p.name) + (mine ? ' <small>你</small>' : '') + '</h2>' +
+      '<p>' + esc(p.charName || '未选角色') + (p.role ? ' · ' + esc(p.role) : '') + '</p></div>' +
+      '<button class="btn ghost playerClose" type="button" id="playerClose">关闭</button></div>' +
+      '<div class="playerBadges">' + badges + '</div>' +
+      '<p class="playerPublicNote">线下桌上公开的信息：角色卡、物品、位置和当前状态。</p>' +
+      '<div class="playerMeta">位置：<b>' + esc(C.FLOOR_LABEL[p.floor] || '未知') + ' · ' + esc(here ? here.name : '未知房间') + '</b>' +
+      (active ? ' · 本回合移动 ' + st.moves : '') +
+      (h ? ' · 剧本：' + esc(h.name) : '') + '</div>';
+
+    html += '<div class="playerSectionTitle">角色卡 · 四项属性</div><div class="playerStats">';
+    C.TRAITS.forEach((t) => {
+      const v = Number(p.traits && p.traits[t.key]) || 0;
+      const min = Number(p.min && p.min[t.key]);
+      const max = Number(p.max && p.max[t.key]);
+      const start = Number(p.start && p.start[t.key]);
+      const width = (Number.isFinite(min) && Number.isFinite(max) && max > min) ? Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100)) : 0;
+      html += '<div class="playerTrait' + (Number.isFinite(min) && v <= min ? ' low' : '') + '">' +
+        '<div class="ptRow"><span>' + esc(t.label) + '</span><b>' + v + '</b><em>' +
+        (Number.isFinite(min) && Number.isFinite(max) ? min + '–' + max : '?–?') +
+        (Number.isFinite(start) ? ' · 起始 ' + start : '') + '</em></div>' +
+        '<i class="ptBar"><span style="width:' + width + '%"></span></i></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="playerSectionTitle">物品 ' + items.length + '</div>';
+    if (!items.length) {
+      html += '<div class="emptyNote">没有物品。桌上的物品卡都是公开的；当前玩家可在自己的物品面板中使用或交易。</div>';
+    } else {
+      html += '<div class="itemList">';
+      items.forEach((it) => {
+        const isOmen = it.tag === 'omen' || it.omen;
+        const rule = itemRuleSummary(it);
+        html += '<div class="itemRow"><div><div class="nm">' + esc(it.name) + (isOmen ? ' · 预兆' : '') + '</div>' +
+          '<div class="ds">' + esc(it.text || '') + '</div>' +
+          (rule ? '<div class="itemRule">' + esc(rule) + '</div>' : '') + '</div></div>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" type="button" id="playerCloseBottom">收起</button></div>';
+    openModal(html, 'player');
+    const close = () => closeModal();
+    const a = $('playerClose'); if (a) a.addEventListener('click', close);
+    const b = $('playerCloseBottom'); if (b) b.addEventListener('click', close);
+  }
+
+  function openPlayerInfo(st, idx) {
+    if (!st || !st.players[idx]) return;
+    renderPlayerInfo(st, idx);
+  }
+
   /* ---------------- 卡牌 ---------------- */
   function effectSummary(eff) {
     if (!eff) return '';
@@ -1243,10 +1363,17 @@
     else if (st.pendingDamage) renderDamageModal(st);
     else if (st.pendingRoll && modalMode) closeModal();
     else if (modalMode === 'tile' || modalMode === 'damage') closeModal();
+    else if (modalMode === 'player' && playerModalIndex >= 0) renderPlayerInfo(st, playerModalIndex);
   }
 
   /* ---------------- 启动 ---------------- */
   buildBoard();
+  $('cModal').addEventListener('click', (e) => {
+    if (e.target === $('cModal')) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalMode) closeModal();
+  });
 
   window.GameShell.boot({
     game: 'cabin',
@@ -1279,6 +1406,7 @@
     engine: window.CabinEngine,
     seatColor: (p, i) => SEAT[i % SEAT.length],
     seatTag: (p) => (cur && cur.haunt && cur.haunt.active && cur.players.indexOf(p) === cur.haunt.traitor ? '叛徒' : p.charName),
+    onSeatClick: (p, i, st) => openPlayerInfo(st, i),
     turnPill: (st) => {
       if (!st) return '等待开始';
       if (st.phase === 'lobby') return '等待开始';
