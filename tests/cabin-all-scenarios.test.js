@@ -1,4 +1,5 @@
-// 50 个剧本真实引擎运行：开局、Setup、闹鬼、一次实际行动、英雄/叛徒目标分别结算
+// 50 个剧本真实引擎运行：开局、Setup、闹鬼、真实回合、真实剧本行动
+// 目标是否达成不在这里直接构造；独立验收见 cabin-scenario-acceptance.test.js
 const fs = require('fs');
 const path = require('path');
 let passed = 0, failed = 0;
@@ -25,99 +26,6 @@ function makeState(no, n = 3) {
 function firstRoom(st, floor) {
   return st.rooms.find((r) => r.floor === floor) || st.rooms.find((r) => r.floor === 'ground');
 }
-function forceGoal(st, g) {
-  if (!g) return;
-  const h = st.haunt;
-  if (g.type === 'anyOf') { forceGoal(st, g.goals[0]); return; }
-  if (g.type === 'allOf') { g.goals.forEach((x) => forceGoal(st, x)); return; }
-  if (g.type === 'killAll') {
-    st.players.forEach((p) => { if (p.side === 'hero') p.dead = true; });
-    return;
-  }
-  if (g.type === 'killTraitor') {
-    const idxs = (h.traitors && h.traitors.length) ? h.traitors : (h.traitor >= 0 ? [h.traitor] : []);
-    idxs.forEach((i) => { if (st.players[i]) st.players[i].dead = true; });
-    if (!idxs.length) h.sideCounts = Object.assign({}, h.sideCounts, { traitor: 0 });
-    return;
-  }
-  if (g.type === 'possessItem') {
-    const holder = (h.pvp && st.players.filter((p) => !p.dead && p.side === 'hero').length === 1)
-      ? st.players.find((p) => !p.dead && p.side === 'hero')
-      : st.players[h.traitor];
-    if (holder) holder.items = (holder.items || []).concat([{ name: g.item, key: g.item }]);
-    return;
-  }
-  if (g.type === 'convertAll') {
-    st.players.forEach((p) => { if (!p.dead) p.side = 'traitor'; });
-    return;
-  }
-  if (g.type === 'tokens') {
-    if (g.perHero && g.token === 'DNA') {
-      h.dnaCollected = {};
-      st.players.filter((p) => p.side === 'hero').forEach((p) => { h.dnaCollected[p.id] = true; });
-      return;
-    }
-    const need = g.perHero ? st.players.filter((p) => !p.dead && p.side === 'hero').length : (g.need || 1);
-    const room = firstRoom(st, 'ground');
-    E.helpers.addToken(st, g.token, room, need);
-    return;
-  }
-  if (g.type === 'evidence') { h.evidence = g.need || 1; return; }
-  if (g.type === 'treasure') { h.treasure = g.need || 1; return; }
-  if (g.type === 'hunt') { h.monsterBanish = g.need || 1; return; }
-  if (g.type === 'ritual') { h.progress = g.need || 1; return; }
-  if (g.type === 'escape') {
-    let room = E.helpers.roomByName(st, g.room || '入口大厅');
-    if (!room) {
-      room = { floor: 'ground', x: 2, y: 2, name: g.room || '入口大厅', doors: 'NEW', symbol: null, kind: 'normal' };
-      st.rooms.push(room);
-    }
-    const hero = st.players.find((p) => !p.dead && p.side === 'hero');
-    if (hero) {
-      hero.floor = room.floor; hero.x = room.x; hero.y = room.y;
-      const need = g.need || 0;
-      while ((hero.items || []).filter((it) => !it.omen).length < need) hero.items = (hero.items || []).concat([{ name: '临时物品' }]);
-    }
-    return;
-  }
-  if (g.type === 'placeTokens' && g.pairs) {
-    g.pairs.forEach((it) => E.helpers.addToken(st, it.token, E.helpers.roomByName(st, it.room) || firstRoom(st, 'ground'), g.need || 1));
-    return;
-  }
-  if (g.type === 'rig') {
-    E.FLOORS.forEach((f) => E.helpers.addToken(st, g.token, firstRoom(st, f), 1));
-    if ((g.need || 0) > E.FLOORS.length) E.helpers.addToken(st, g.token, firstRoom(st, 'ground'), (g.need || 0) - E.FLOORS.length);
-    return;
-  }
-  if (g.type === 'trackZero') {
-    if (g.track === 'number') h.numberTrack = 0;
-    else {
-      const hero = st.players.find((p) => !p.dead && p.side === 'hero');
-      if (hero && hero.track[g.track]) hero.track[g.track].pos = 0;
-    }
-    return;
-  }
-  if (g.type === 'destroyItem') { h.destroyedItems = (h.destroyedItems || []).concat([g.item]); return; }
-  if (g.type === 'survive') { h.round = Math.max(h.round || 0, g.need || 1); return; }
-  if (g.type === 'custom') {
-    if (g.key === 'wake_sleeping_one' || g.key === 'time_runs_out') h.numberTrack = 0;
-    else if (g.key === 'enlightenment') {
-      const tr = st.players[h.traitor];
-      if (tr && tr.track.sanity) tr.track.sanity.pos = tr.track.sanity.list.length - 1;
-    } else if (g.key === 'devour_the_house') {
-      h.devouredFloors = { upper: true, ground: true, basement: true };
-    } else if (g.key === 'spread_alien_words') {
-      h.wordSupply = 5; h.wordsPlaced = 5;
-    } else if (g.key === 'burn_the_house') {
-      h.burnedFloors = { upper: true, ground: true, basement: true };
-    } else if (g.key === 'bring_blood_person_blood') {
-      h.bloodHeroes = 1; h.bloodOffered = 1;
-    } else {
-      h.custom = h.custom || {}; h.custom[g.key] = true;
-    }
-    return;
-  }
-}
 
 console.log('=== 50 剧本真实引擎运行 ===');
 for (const sc of E.SCENARIOS) {
@@ -131,8 +39,10 @@ for (const sc of E.SCENARIOS) {
   }
   ok(tag + ' 进入闹鬼', !!(st.haunt && st.haunt.active), st.phase);
   ok(tag + ' Setup 使用中文译本', !/[A-Za-z]{4,}/.test((sc.setup.heroText || '') + (sc.setup.traitorText || '')) && !!sc.setup.summary, sc.setup.summary);
-  ok(tag + ' Setup 已执行', !!(st.haunt.setup && st.haunt.setup.summary), st.haunt.setup && st.haunt.summary);
+  ok(tag + ' Setup 已执行', !!(st.haunt.setup && st.haunt.setup.summary), st.haunt.setup && st.haunt.setup.summary);
   ok(tag + ' 有玩家行动入口', st.players.length === 3 && st.phase === 'playing', st.phase);
+  ok(tag + ' 英雄目标数据存在', !!st.haunt.heroGoal);
+  ok(tag + ' 叛徒目标数据符合阵营', !!st.haunt.traitorGoal || st.haunt.traitorRule === 'noTraitor' || st.haunt.traitorRule === 'freeForAll');
 
   // 跑一个真实回合：当前玩家结束回合；若进入怪物阶段，跑完怪物阶段
   try {
@@ -156,9 +66,7 @@ for (const sc of E.SCENARIOS) {
     try {
       const side = action.side || 'hero';
       let actor = st.players.find((p) => !p.dead && p.side === side);
-      if (!actor && side === 'traitor' && st.players[st.haunt.traitor]) {
-        actor = st.players[st.haunt.traitor];
-      }
+      if (!actor && side === 'traitor' && st.players[st.haunt.traitor]) actor = st.players[st.haunt.traitor];
       if (!actor && side === 'hero') actor = st.players.find((p) => !p.dead && p.side === 'hero');
       if (actor) {
         if (action.where === 'room') {
@@ -193,31 +101,6 @@ for (const sc of E.SCENARIOS) {
       }
     } catch (e) {
       ok(tag + ' 真实剧本行动可执行', false, e.message);
-    }
-  }
-  const hst = makeState(sc.no, 3);
-  try {
-    if (hst.haunt.pvp) {
-      const last = hst.players.find((p) => p.side === 'hero') || hst.players[0];
-      hst.players.forEach((p) => { if (p !== last) p.dead = true; });
-    }
-    const goal = hst.haunt.pvp ? hst.haunt.ffaGoal : hst.haunt.heroGoal;
-    if (goal) forceGoal(hst, goal);
-    E.helpers.checkWin(hst);
-    ok(tag + ' 英雄/混战目标可结算', hst.phase === 'ended' && hst.winner && hst.winner.side !== 'traitor', hst.winner && hst.winner.text);
-  } catch (e) {
-    ok(tag + ' 英雄/混战目标可结算', false, e.message);
-  }
-
-  // 叛徒目标
-  if (sc.traitorGoal) {
-    const tst = makeState(sc.no, 3);
-    try {
-      forceGoal(tst, tst.haunt.traitorGoal);
-      E.helpers.checkWin(tst);
-      ok(tag + ' 叛徒目标可结算', tst.phase === 'ended' && tst.winner && tst.winner.side === 'traitor', tst.winner && tst.winner.text);
-    } catch (e) {
-      ok(tag + ' 叛徒目标可结算', false, e.message);
     }
   }
 }

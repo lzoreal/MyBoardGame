@@ -62,6 +62,9 @@ jobs:
       - name: Run all 50 scenarios through the engine
         run: node tests/cabin-all-scenarios.test.js
 
+      - name: Run independent scenario acceptance
+        run: node tests/cabin-scenario-acceptance.test.js
+
       - name: Run cabin private-state security tests
         run: node tests/cabin-security.test.js
 
