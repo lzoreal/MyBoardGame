@@ -12,8 +12,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT = path.join(ROOT, 'content', 'cabin');
 const OUT = path.join(ROOT, 'js', 'games', 'cabin-packs.js');
 const TRAITS = ['speed', 'might', 'known', 'sanity'];
-const TRAITOR_RULES = ['revealer', 'lowestSanity', 'highestMight', 'lowestSpeed', 'highestKnowledge', 'lowestMight', 'omenHolder'];
-const GOAL_TYPES = ['killTraitor', 'killAll', 'survive', 'ritual', 'escape', 'hunt'];
+const TRAITOR_RULES = ['revealer', 'lowestSanity', 'highestMight', 'highestSpeed', 'lowestSpeed', 'highestKnowledge', 'lowestMight', 'omenHolder',
+  'hiddenTraitor', 'noTraitor', 'freeForAll', 'leftOfRevealer', 'oldest', 'mostOmens', 'seeEvent'];
+const GOAL_TYPES = ['killTraitor', 'killAll', 'survive', 'ritual', 'escape', 'hunt', 'tokens', 'rig', 'evidence', 'treasure', 'placeTokens', 'allOf'];
 
 function fail(file, message) {
   throw new Error((file ? file + ': ' : '') + message);
@@ -76,7 +77,8 @@ function validateCharacter(c, file, seen) {
     if (start < min || start > max) fail(file, 'traits.' + t + '.start 必须在 min–max 之间');
     traits[t] = { start, min, max };
   });
-  return { key, name, role, art, traits, custom: true };
+  const age = c.age === undefined ? 0 : integer(c.age, 'age', file, 1, 99);
+  return { key, name, role, art, age, traits, custom: true };
 }
 
 function validateGoal(goal, label, file) {
@@ -92,8 +94,57 @@ function validateGoal(goal, label, file) {
     requireString(goal.room, label + '.room', file);
     integer(goal.need, label + '.need', file, 1, 20);
   }
+  if (goal.type === 'tokens') {
+    requireString(goal.token, label + '.token', file, 20);
+    integer(goal.need, label + '.need', file, 1, 30);
+  }
+  if (goal.type === 'rig') {
+    requireString(goal.token, label + '.token', file, 20);
+    integer(goal.need, label + '.need', file, 1, 30);
+  }
   if (goal.type === 'survive' || goal.type === 'hunt') integer(goal.need, label + '.need', file, 1, 30);
+  if (goal.type === 'evidence' || goal.type === 'treasure') integer(goal.need, label + '.need', file, 1, 30);
+  if (goal.type === 'placeTokens') {
+    if (!Array.isArray(goal.pairs) || !goal.pairs.length) fail(file, label + '.pairs 必须是非空数组');
+    goal.pairs.forEach((it, k) => {
+      requireString(it.token, label + '.pairs[' + k + '].token', file);
+      requireString(it.room, label + '.pairs[' + k + '].room', file);
+    });
+    integer(goal.need, label + '.need', file, 1, 30);
+  }
+  if (goal.type === 'allOf') {
+    if (!Array.isArray(goal.goals) || !goal.goals.length) fail(file, label + '.goals 必须是非空数组');
+    goal.goals.forEach((g, k) => validateGoal(g, label + '.goals[' + k + ']', file));
+  }
   return goal;
+}
+
+function validateActions(list, label, file) {
+  if (!Array.isArray(list)) fail(file, label + ' 必须是数组');
+  return list.map((a, i) => {
+    if (!a || typeof a !== 'object') fail(file, label + '[' + i + '] 必须是对象');
+    const key = requireString(a.key, label + '[' + i + '].key', file, 40);
+    if (!/^[A-Za-z0-9_-]+$/.test(key)) fail(file, label + '[' + i + '].key 只能包含字母、数字、下划线、连字符');
+    const name = requireString(a.name, label + '[' + i + '].name', file, 40);
+    const trait = a.trait === undefined ? 'known' : a.trait;
+    if (TRAITS.indexOf(trait) < 0) fail(file, label + '[' + i + '].trait 必须是属性 key');
+    const where = a.where === undefined ? 'any' : a.where;
+    if (['any', 'room', 'symbol', 'floors'].indexOf(where) < 0) fail(file, label + '[' + i + '].where 不支持：' + where);
+    if (where === 'room') requireString(a.room, label + '[' + i + '].room', file);
+    if (Array.isArray(a.tiers)) {
+      a.tiers.forEach((t, k) => {
+        if (t.at === undefined) fail(file, label + '[' + i + '].tiers[' + k + '].at 必填');
+      });
+    }
+    return {
+      key, name, trait, where, room: a.room, symbol: a.symbol,
+      floors: Array.isArray(a.floors) ? a.floors : undefined,
+      once: a.once === 'game' ? 'game' : 'turn',
+      dead: !!a.dead,
+      side: a.side === 'traitor' || a.side === 'hero' ? a.side : undefined,
+      tiers: a.tiers, miss: a.miss
+    };
+  });
 }
 
 function validateMonster(m, label, file) {
@@ -119,7 +170,12 @@ function validateScenario(s, file, seen) {
   if (!s.trigger || typeof s.trigger !== 'object') fail(file, '缺少 trigger（至少写 room 或 omen）');
   const room = typeof s.trigger.room === 'string' ? s.trigger.room.trim() : '';
   const omen = typeof s.trigger.omen === 'string' ? s.trigger.omen.trim() : '';
-  if (!room && !omen) fail(file, 'trigger 至少要指定 room 或 omen；可用 "*" 表示任意');
+  const card = typeof s.trigger.card === 'string' ? s.trigger.card.trim() : '';
+  const event = typeof s.trigger.event === 'string' ? s.trigger.event.trim() : '';
+  if (!room && !omen && !card && !event) fail(file, 'trigger 至少要指定 room、omen、card 或 event；可用 "*" 表示任意');
+  const trigger = { room, omen };
+  if (card) trigger.card = card;
+  if (event) trigger.event = event;
   const rule = s.traitorRule === undefined ? 'revealer' : s.traitorRule;
   if (TRAITOR_RULES.indexOf(rule) < 0) fail(file, 'traitorRule 不支持：' + rule);
   const heroGoal = validateGoal(s.heroGoal, 'heroGoal', file);
@@ -134,9 +190,18 @@ function validateScenario(s, file, seen) {
   }
   return {
     no: s.no === undefined ? 0 : integer(s.no, 'no', file, 0, 9999),
-    key, name, story, trigger: { room, omen }, traitorRule: rule,
+    key, name, story, trigger: trigger, traitorRule: rule,
     heroGoal, traitorGoal, heroGoalText, traitorGoalText,
-    priority, monsters, custom: true
+    priority, monsters,
+    actions: s.actions === undefined ? undefined : validateActions(s.actions, 'actions', file),
+    monster: s.monster === undefined ? undefined : Object.assign(validateMonster(s.monster, 'monster', file),
+      { sanity: s.monster.sanity === undefined ? undefined : integer(s.monster.sanity, 'monster.sanity', file, 1, 10),
+        known: s.monster.known === undefined ? undefined : integer(s.monster.known, 'monster.known', file, 1, 10),
+        rule: typeof s.monster.rule === 'string' ? s.monster.rule : undefined,
+        endTurn: s.monster.endTurn }),
+    flipRooms: !!s.flipRooms,
+    dimension: !!s.dimension,
+    custom: true
   };
 }
 

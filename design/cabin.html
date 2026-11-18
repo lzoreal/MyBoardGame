@@ -340,6 +340,10 @@
   let cur = null;
   let svg = null;
   let viewFloor = 'ground';
+  /* #34 维度改写：三层同时显示，跨层同格视为同格 */
+  function isMerged(st) {
+    return !!(st && st.haunt && st.haunt.active && st.haunt.dimension);
+  }
   let lastCardKey = '';
   let cardDismissedKey = '';
   let cardTimer = 0;
@@ -490,6 +494,13 @@
       el('rect', { x: x0 + w - 44, y: y0 + 8, width: 42, height: 24, rx: 12, fill: '#f3e7d0', stroke: '#b99a6a', 'stroke-width': 1.5 }, g);
       txt(g, x0 + w - 23, y0 + 25, '物 ' + pile.length, { 'font-size': 12, 'font-weight': 900, fill: '#7b2e3b' });
     }
+    const tk = (st.tokens || []).filter((t) => t.floor === room.floor && t.x === room.x && t.y === room.y);
+    if (tk.length) {
+      const total = tk.reduce((s, t) => s + (t.count || 1), 0);
+      const label = (tk[0].type === 'rune' ? '符' : tk[0].type) + total;
+      el('rect', { x: x0 + 8, y: y0 + 8, width: 58, height: 24, rx: 12, fill: '#e8f3ff', stroke: '#6b8fb5', 'stroke-width': 1.5 }, g);
+      txt(g, x0 + 37, y0 + 25, label, { 'font-size': 12, 'font-weight': 900, fill: '#2c4b6b' });
+    }
     g.style.cursor = st.phase === 'playing' ? 'pointer' : '';
     g.setAttribute('data-room', room.floor + '|' + room.x + '|' + room.y);
     if (st.phase === 'playing') {
@@ -555,9 +566,14 @@
         el('circle', {
           cx: 0, cy: 0, r: R,
           fill: seatColor(o.i), stroke: isTraitor ? '#3d1d24' : '#fff',
-          'stroke-width': isTraitor ? 4 : 2.5
+          'stroke-width': isTraitor ? 4 : 2.5,
+          'stroke-dasharray': o.p.illusion ? '6 5' : null
         }, tg);
         txt(tg, 0, narrow ? 6 : 5, o.p.art || '?', { 'font-size': AF, 'font-weight': 800, fill: '#fff' });
+        if (o.p.trapped) {
+          el('circle', { cx: R + 4, cy: -R - 2, r: 9, fill: '#7b2e3b' }, tg);
+          txt(tg, R + 4, -R + 1, '困', { 'font-size': 11, 'font-weight': 800, fill: '#fff', 'text-anchor': 'middle' });
+        }
         tg.addEventListener('click', (ev) => {
           ev.stopPropagation();
           openPlayerInfo(st, o.i);
@@ -590,17 +606,29 @@
     if (!svg) buildBoard();
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-    el('rect', { x: 0, y: 0, width: W * CELL, height: H * CELL, rx: 24, fill: '#2b2119' }, svg);
-    el('rect', { x: 9, y: 9, width: W * CELL - 18, height: H * CELL - 18, rx: 20, fill: '#3a2c21' }, svg);
-    for (let y = 0; y <= H; y++) el('line', { x1: 0, y1: y * CELL, x2: W * CELL, y2: y * CELL, stroke: 'rgba(216,169,79,.12)', 'stroke-width': 1.5 }, svg);
-    for (let x = 0; x <= W; x++) el('line', { x1: x * CELL, y1: 0, x2: x * CELL, y2: H * CELL, stroke: 'rgba(216,169,79,.12)', 'stroke-width': 1.5 }, svg);
+    const merged = isMerged(st);
+    const bands = merged ? C.FLOORS.slice().reverse() : [viewFloor];
+    const GAP = merged ? 64 : 0;
+    const totalH = bands.length * H * CELL + (bands.length - 1) * GAP;
+    svg.setAttribute('viewBox', '0 0 ' + (W * CELL) + ' ' + totalH);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    if (board) {
+      board.style.aspectRatio = (W * CELL) + ' / ' + totalH;
+      board.style.width = merged
+        ? 'min(100%, calc((100vh - 300px) * ' + (W * CELL) + ' / ' + totalH + '))'
+        : '';
+    }
+
+    el('rect', { x: 0, y: 0, width: W * CELL, height: totalH, rx: 24, fill: '#2b2119' }, svg);
+    el('rect', { x: 9, y: 9, width: W * CELL - 18, height: totalH - 18, rx: 20, fill: '#3a2c21' }, svg);
 
     const me = st.players[myIndex(st)];
     const here = me ? (st.rooms.find((r) => r.floor === me.floor && r.x === me.x && r.y === me.y)) : null;
     const canMove = st.phase === 'playing' && myTurn(st) && me && !me.dead && st.moves > 0 && !st.moveLocked && !st.pendingTile && !st.pendingDamage && !st.pendingRoll;
     const hotEmpty = {};
     const hotRooms = {};
-    if (canMove && me.floor === viewFloor) {
+    if (canMove && (merged || me.floor === viewFloor)) {
       [['N', 0, -1], ['S', 0, 1], ['W', -1, 0], ['E', 1, 0]].forEach((d) => {
         const dir = d[0], nx = me.x + d[1], ny = me.y + d[2];
         if (nx < 0 || ny < 0 || nx >= W || ny >= H || !here || !hasDoor(here.doors, dir)) return;
@@ -611,47 +639,72 @@
       });
     }
 
-    const gEmpty = el('g', {}, svg);
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        if (!st.rooms.some((r) => r.floor === viewFloor && r.x === x && r.y === y)) drawEmpty(gEmpty, x, y, hotEmpty[x + ',' + y]);
+    bands.forEach((floor, k) => {
+      const off = k * (H * CELL + GAP);
+      const gBand = el('g', { transform: 'translate(0,' + off + ')' }, svg);
+      for (let y = 0; y <= H; y++) el('line', { x1: 0, y1: y * CELL, x2: W * CELL, y2: y * CELL, stroke: 'rgba(216,169,79,.12)', 'stroke-width': 1.5 }, gBand);
+      for (let x = 0; x <= W; x++) el('line', { x1: x * CELL, y1: 0, x2: x * CELL, y2: H * CELL, stroke: 'rgba(216,169,79,.12)', 'stroke-width': 1.5 }, gBand);
+      if (merged) {
+        el('rect', { x: 12, y: 10, width: 178, height: 34, rx: 10, fill: 'rgba(240,200,92,.16)', stroke: 'rgba(240,200,92,.5)', 'stroke-width': 1.5 }, gBand);
+        txt(gBand, 22, 35, C.FLOOR_LABEL[floor] + ' · 已并入同一层', { 'font-size': 19, 'font-weight': 800, fill: '#f0c85c' });
       }
-    }
 
-    const gRooms = el('g', {}, svg);
-    const sorted = st.rooms.filter((r) => r.floor === viewFloor).sort((a, b) => (a.y - b.y) || (a.x - b.x));
-    const roomKey = (r) => r.floor + '|' + r.x + '|' + r.y;
-    const newKeys = new Set();
-    if (lastRoomKeys) st.rooms.forEach((r) => { if (!lastRoomKeys.has(roomKey(r))) newKeys.add(roomKey(r)); });
-    lastRoomKeys = new Set(st.rooms.map(roomKey));
-    sorted.forEach((room) => {
-      drawRoom(gRooms, room, st, here && room.x === here.x && room.y === here.y, hotRooms[room.x + ',' + room.y]);
-      if (newKeys.has(roomKey(room))) {
+      const gEmpty = el('g', {}, gBand);
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          if (!st.rooms.some((r) => r.floor === floor && r.x === x && r.y === y)) {
+            drawEmpty(gEmpty, x, y, (merged || floor === viewFloor) && me && me.floor === floor ? hotEmpty[x + ',' + y] : '');
+          }
+        }
+      }
+
+      const gRooms = el('g', {}, gBand);
+      const sorted = st.rooms.filter((r) => r.floor === floor).sort((a, b) => (a.y - b.y) || (a.x - b.x));
+      const roomKey = (r) => r.floor + '|' + r.x + '|' + r.y;
+      const newKeys = new Set();
+      if (lastRoomKeys) st.rooms.forEach((r) => { if (!lastRoomKeys.has(roomKey(r))) newKeys.add(roomKey(r)); });
+      lastRoomKeys = new Set(st.rooms.map(roomKey));
+      sorted.forEach((room) => {
+        const isHere = !!(here && me.floor === room.floor && room.x === here.x && room.y === here.y);
+        drawRoom(gRooms, room, st, isHere, me && me.floor === floor ? hotRooms[room.x + ',' + room.y] : '');
+        if (newKeys.has(roomKey(room))) {
+          el('rect', {
+            x: room.x * CELL + 5, y: room.y * CELL + 5, width: CELL - 10, height: CELL - 10, rx: 18,
+            fill: 'none', stroke: '#ffd76a', 'stroke-width': 5, class: 'roomNew', 'pointer-events': 'none'
+          }, gRooms);
+        }
+      });
+
+      if (st.pendingTile && st.pendingTile.tile && st.pendingTile.floor === floor) {
         el('rect', {
-          x: room.x * CELL + 5, y: room.y * CELL + 5, width: CELL - 10, height: CELL - 10, rx: 18,
-          fill: 'none', stroke: '#ffd76a', 'stroke-width': 5, class: 'roomNew', 'pointer-events': 'none'
-        }, gRooms);
+          x: st.pendingTile.x * CELL + 14, y: st.pendingTile.y * CELL + 14, width: CELL - 28, height: CELL - 28, rx: 16,
+          fill: 'none', stroke: '#f0c85c', 'stroke-width': 4, 'stroke-dasharray': '8 6'
+        }, el('g', {}, gBand));
       }
     });
-    keepPlayerInView(st);
 
-    if (st.pendingTile && st.pendingTile.tile && st.pendingTile.floor === viewFloor) {
-      el('rect', { x: st.pendingTile.x * CELL + 14, y: st.pendingTile.y * CELL + 14, width: CELL - 28, height: CELL - 28, rx: 16, fill: 'none', stroke: '#f0c85c', 'stroke-width': 4, 'stroke-dasharray': '8 6' }, el('g', {}, svg));
-    }
+    keepPlayerInView(st);
   }
 
   function keepPlayerInView(st) {
     if (!narrow || !board) return;
     const me = st.players[myIndex(st)];
-    if (!me || me.floor !== viewFloor) return;
+    if (!me) return;
+    const merged = isMerged(st);
+    if (!merged && me.floor !== viewFloor) return;
     const wrap = board.parentElement;
     if (!wrap) return;
     const key = me.floor + '|' + me.x + '|' + me.y;
     if (key === lastAutoView) return;
     lastAutoView = key;
+    const bands = merged ? C.FLOORS.slice().reverse() : [viewFloor];
+    const GAP = merged ? 64 : 0;
+    const bandIdx = Math.max(0, bands.indexOf(me.floor));
+    const totalH = bands.length * H * CELL + (bands.length - 1) * GAP;
+    const pxY = bandIdx * (H * CELL + GAP) + (me.y + .5) * CELL;
     requestAnimationFrame(() => {
       const targetX = (me.x + .5) / W * board.offsetWidth - wrap.clientWidth / 2;
-      const targetY = (me.y + .5) / H * board.offsetHeight - wrap.clientHeight / 2;
+      const targetY = pxY / totalH * board.offsetHeight - wrap.clientHeight / 2;
       wrap.scrollTo({ left: Math.max(0, targetX), top: Math.max(0, targetY), behavior: 'smooth' });
     });
   }
@@ -660,6 +713,16 @@
   function renderFloorTabs(st) {
     const bar = $('floorTabs');
     bar.innerHTML = '';
+    if (isMerged(st)) {
+      const b = document.createElement('button');
+      b.className = 'floorTab';
+      b.type = 'button';
+      b.disabled = true;
+      b.textContent = '维度改写 · 三层合并显示';
+      b.setAttribute('aria-pressed', 'true');
+      bar.appendChild(b);
+      return;
+    }
     C.FLOORS.slice().reverse().forEach((f) => {
       const b = document.createElement('button');
       b.className = 'floorTab';
@@ -690,23 +753,48 @@
     const h = st.haunt;
     if (!h || !h.active) return;
     const traitor = st.players[h.traitor];
-    const prog = h.heroGoal && h.heroGoal.type === 'hunt' ? (h.monsterBanish || 0) : (h.progress || 0);
+    const traitorName = h.hidden ? '（隐藏叛徒，身份未知）' : (traitor ? traitor.name : '?');
+    const prog = h.heroGoal && (h.heroGoal.type === 'hunt') ? (h.monsterBanish || 0)
+      : h.heroGoal && h.heroGoal.type === 'evidence' ? (h.evidence || 0)
+      : h.heroGoal && h.heroGoal.type === 'treasure' ? (h.treasure || 0)
+      : (h.progress || 0);
     const need = h.heroGoal ? (h.heroGoal.need || 0) : 0;
     let html = '<h2>剧本 · ' + esc(h.name) + '</h2>' +
-      '<p>叛徒：' + esc(traitor ? traitor.name : '?') + ' · 第 ' + (h.round || 0) + ' 轮</p>' +
+      '<p>叛徒：' + esc(traitorName) + ' · 第 ' + (h.round || 0) + ' 轮' +
+      (h.dimension ? ' · 维度改写生效（跨层同格相接）' : '') + '</p>' +
       '<div class="infoSub">剧本故事</div>' +
       '<div class="infoStory">' + esc(h.story || '（这个剧本没有附故事文本）') + '</div>' +
       '<div class="goalBox"><b>英雄目标</b><br>' + esc(h.heroGoalText || '完成剧本目标') +
       (need ? '（进度 ' + prog + '/' + need + '）' : '') + '</div>' +
       '<div class="goalBox secret"><b>叛徒目标 · 秘密</b><br>' + esc(h.traitorGoalText || '消灭所有英雄') +
       '<br><span style="font-size:11px;color:#8d6458">线下由叛徒阅读；本机同屏时请注意避让。</span></div>';
+    const acts = h.actions || [];
+    if (acts.length) {
+      html += '<div class="infoSub">剧本行动</div>';
+      acts.forEach((a) => {
+        const where = a.where === 'room' ? '在「' + a.room + '」' :
+          a.where === 'symbol' ? '在有' + ({ event: '事件', item: '物品', omen: '预兆' }[a.symbol || 'event']) + '符号的房间' :
+          a.where === 'floors' ? '在' + (a.floors || []).map((f) => C.FLOOR_LABEL[f]).join('/') : '任意房间';
+        const tiers = (a.tiers || []).map((t) => t.at + '+').join(' / ');
+        html += '<div class="monsterCard"><b>' + esc(a.name) + '</b><br><span>' + esc(where) +
+          ' · ' + esc(traitLabel(a.trait || 'known')) + '判定' + (tiers ? '（' + esc(tiers) + '）' : '') +
+          ' · 每回合一次</span></div>';
+      });
+    }
+    if (h.monster) {
+      html += '<div class="infoSub">怪物面板</div>' +
+        '<div class="monsterCard"><b>' + esc(h.monster.name || '怪物') + '</b><br><span>力量 ' + (h.monster.might || '?') +
+        ' · 速度 ' + (h.monster.speed || '?') + ' · 神智 ' + (h.monster.sanity || '?') +
+        ' · 知识 ' + (h.monster.known || '?') + '</span></div>';
+    }
     const ms = st.monsters || [];
     if (ms.length) {
       html += '<div class="infoSub">怪物</div>';
       ms.forEach((m) => {
         const room = C.helpers.roomAt(st, m.floor, m.x, m.y);
         html += '<div class="monsterCard"><b>' + esc(m.name) + '</b> · ' + esc(C.FLOOR_LABEL[m.floor] || '') + ' · ' + esc(room ? room.name : '?') +
-          '<br><span>速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') + (m.stunned ? ' · 僵直' : '') + '</span></div>';
+          '<br><span>速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') +
+          (m.stunned ? ' · 僵直' : '') + (m.noAttack ? ' · 不可攻击' : '') + '</span></div>';
       });
     }
     html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" id="scClose" type="button">收起</button></div>';
@@ -1188,7 +1276,8 @@
     let html = '<div class="playerInfoHead">' +
       '<span class="playerAvatar" style="background:' + seatColor(idx) + '">' + esc(p.art || '?') + '</span>' +
       '<div class="playerInfoName"><h2>' + esc(p.name) + (mine ? ' <small>你</small>' : '') + '</h2>' +
-      '<p>' + esc(p.charName || '未选角色') + (p.role ? ' · ' + esc(p.role) : '') + '</p></div>' +
+      '<p>' + esc(p.charName || '未选角色') + (p.role ? ' · ' + esc(p.role) : '') +
+      (p.age ? ' · ' + p.age + ' 岁' : '') + '</p></div>' +
       '<button class="btn ghost playerClose" type="button" id="playerClose">关闭</button></div>' +
       '<div class="playerBadges">' + badges + '</div>' +
       '<p class="playerPublicNote">线下桌上公开的信息：角色卡、物品、位置和当前状态。</p>' +
@@ -1601,7 +1690,8 @@
     if (st.haunt && st.haunt.active) {
       const foes = [];
       st.players.forEach((p, i) => {
-        if (i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y && p.side !== me.side) {
+        if (i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y &&
+            (p.side !== me.side || (st.haunt && st.haunt.pvp))) {
           foes.push({ id: p.id, name: p.name, items: (p.items || []).filter((it) => !it.noSteal && !it.noTrade).length });
         }
       });
@@ -1658,6 +1748,27 @@
       }
     }
 
+    if (st.haunt && st.haunt.active && isMine) {
+      const h = st.haunt;
+      const usedMap = h.used || {};
+      (h.actions || []).forEach((a) => {
+        if (a.side && a.side !== me.side) return;
+        const used = !!usedMap[me.id + '|' + a.key];
+        const okWhere = !a.where || a.where === 'any' ||
+          (a.where === 'room' && here && here.name === a.room) ||
+          (a.where === 'symbol' && here && here.symbol === (a.symbol || 'event')) ||
+          (a.where === 'floors' && (!a.floors || a.floors.indexOf(me.floor) >= 0));
+        addBtn('⚄ ' + esc(a.name), 'primary',
+          () => window.GameShell.send({ type: 'hauntAction', key: a.key }),
+          used || !okWhere,
+          used ? '本回合已经做过' : (!okWhere ? (a.where === 'room' ? '必须在「' + a.room + '」里做' : '房间条件不满足') : '按属性掷骰后结算'));
+      });
+      if (h.flipRooms && me.side === 'traitor') {
+        addBtn('吞噬当前房间', 'ghost', () => window.GameShell.send({ type: 'flipTile' }),
+          !!(here && here.flipped), here && here.flipped ? '这个房间已经被吞噬' : '翻面：四边都算门，失去符号与文字');
+      }
+    }
+
     addBtn('结束回合', 'ghost', () => window.GameShell.send({ type: 'end' }), !!st.pendingTile || !!st.pendingRoll, st.pendingRoll ? '先掷骰' : st.pendingTile ? '先放置房间' : '');
 
     if (st.moves <= 0 && !st.moveLocked) {
@@ -1679,11 +1790,23 @@
     if (st.moveLocked) { window.GameShell.toast('本回合已经翻过房间', true); return; }
     if (st.moves <= 0) { window.GameShell.toast('移动点用完了', true); return; }
     const me = st.players[st.turn];
-    if (me.floor !== viewFloor) { window.GameShell.toast('先切到 ' + C.FLOOR_LABEL[me.floor], true); return; }
+    if (me.floor !== viewFloor && !isMerged(st)) { window.GameShell.toast('先切到 ' + C.FLOOR_LABEL[me.floor], true); return; }
 
     const rect = svg.getBoundingClientRect();
+    const merged = isMerged(st);
+    const bands = merged ? C.FLOORS.slice().reverse() : [viewFloor];
+    const GAP = merged ? 64 : 0;
+    const totalH = bands.length * H * CELL + (bands.length - 1) * GAP;
     const vx = (ev.clientX - rect.left) / rect.width * (W * CELL);
-    const vy = (ev.clientY - rect.top) / rect.height * (H * CELL);
+    let vy = (ev.clientY - rect.top) / rect.height * totalH;
+    let floor = viewFloor;
+    if (merged) {
+      const stride = H * CELL + GAP;
+      const k = Math.max(0, Math.min(bands.length - 1, Math.floor(vy / stride)));
+      floor = bands[k];
+      vy -= k * stride;
+    }
+    if (floor !== me.floor) { window.GameShell.toast('只能在' + C.FLOOR_LABEL[me.floor] + '上移动', true); return; }
     const tx = Math.floor(vx / CELL), ty = Math.floor(vy / CELL);
     const dx = tx - me.x, dy = ty - me.y;
     if (Math.abs(dx) + Math.abs(dy) !== 1) { window.GameShell.toast('只能走到上下左右相邻格', true); return; }

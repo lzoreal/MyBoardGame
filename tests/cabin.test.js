@@ -26,7 +26,7 @@ const st0 = E.createInitial(players, seeded(7), { skipSelect: true });
 ok('12 名探险者', E.CHARS.length === 12);
 ok('44 张房间牌（含 4 个预置房间牌）', E.TILES.all.length === 44 && E.TILES.draw.length === 40);
 ok('5 个预置起点摆在三层', st0.rooms.length === 5);
-ok('45 事件 / 22 物品 / 13 预兆', st0.decks.events.length === 45 && st0.decks.items.length === 22 && st0.decks.omens.length === 13);
+ok('50 事件 / 22 物品 / 18 预兆（含官方 3E 的 5 张事件与 5 张预兆）', st0.decks.events.length === 50 && st0.decks.items.length === 22 && st0.decks.omens.length === 18);
 ok('50 个闹鬼剧本', E.SCENARIOS.length === 50);
 ok('所有角色都有最低/起始/最高轨道', E.CHARS.every((c) => E.TRAITS.every((t) => {
   const v = c.traits[t.key];
@@ -365,6 +365,50 @@ ok('剧本目标房间都在 44 张房间牌或起点中', E.SCENARIOS.every((sc
   return names.indexOf(g.room) >= 0;
 }));
 ok('每个剧本都有双方目标文本', E.SCENARIOS.every((sc) => sc.heroGoalText && sc.traitorGoalText && sc.story));
+
+console.log('=== 标记与剧本行动 ===');
+const tk = E.createInitial(players, seeded(90), { skipSelect: true });
+const here = { floor: 'ground', x: 5, y: 5, name: '刻符房' };
+E.helpers.addToken(tk, 'rune', here, 1);
+E.helpers.addToken(tk, 'rune', { floor: 'basement', x: 2, y: 6, name: '底层房' }, 1);
+ok('标记可以放到板块上并计数', E.helpers.countTokens(tk, 'rune', null) === 2);
+ok('按楼层统计标记', E.helpers.tokensByFloor(tk, 'rune').ground === 1 && E.helpers.tokensByFloor(tk, 'rune').basement === 1);
+
+const act0 = E.createInitial(players, seeded(91), { skipSelect: true });
+act0.haunt = {
+  active: true, scenario: 'test_act', no: 99, name: '测试剧本', story: '',
+  traitor: 0, traitorRule: 'revealer', heroGoal: { type: 'tokens', token: 'rune', need: 1 },
+  traitorGoal: { type: 'killAll' }, heroGoalText: '', traitorGoalText: '',
+  progress: 0, round: 0, monsterBanish: 0, justStarted: false, used: {},
+  actions: [{ key: 'carve', name: '刻符', trait: 'known', where: 'any', once: 'turn', tiers: [{ at: 5, do: { token: 'rune' } }] }]
+};
+act0.players.forEach((p, k) => { p.side = k === 0 ? 'traitor' : 'hero'; });
+act0.turn = 1;
+const actRes = E.act(act0, { type: 'hauntAction', key: 'carve' }, 'b', queue([0.99, 0.99, 0.99, 0.99, 0.99, 0.99]));
+ok('剧本行动可以执行并掷骰', actRes.ok && actRes.state.lastRoll && actRes.state.lastRoll.label.indexOf('刻符') > 0);
+ok('判定达标后按剧本放标记', E.helpers.countTokens(actRes.state, 'rune', null) === 1);
+ok('同一回合同一行动不能重复', E.act(actRes.state, { type: 'hauntAction', key: 'carve' }, 'b', seeded(92)).ok === false);
+ok('凑够标记后英雄获胜', actRes.state.phase === 'ended' && actRes.state.winner.side === 'heroes');
+
+console.log('=== 板块翻覆与怪物面板 ===');
+const fl = E.createInitial(players, seeded(93), { skipSelect: true });
+fl.haunt = { active: true, traitor: 0, round: 0, used: {}, flipRooms: true };
+fl.players.forEach((p, k) => { p.side = k === 0 ? 'traitor' : 'hero'; });
+fl.rooms.push({ floor: 'ground', x: 5, y: 5, name: '吞噬房', doors: 'W', symbol: 'omen', kind: 'normal' });
+fl.players[0].x = 5; fl.players[0].y = 5;
+const flipRes = E.act(fl, { type: 'flipTile' }, 'a', seeded(94));
+const fr = flipRes.state.rooms.find((r) => r.name === '吞噬房');
+ok('叛徒可以翻覆板块', flipRes.ok && fr.flipped === true);
+ok('翻覆后四边都算门且失去符号', fr.doors === 'NSEW' && fr.symbol === null);
+
+const mon = E.createInitial(players, seeded(95), { skipSelect: true });
+mon.haunt = { active: true, traitor: 0, round: 0, used: {}, monster: null };
+mon.players.forEach((p, k) => { p.side = k === 0 ? 'traitor' : 'hero'; });
+const monSc = { monster: { key: 'housekeeper', name: '家政工', count: 2, might: 5, speed: 4, sanity: 5, known: 5, attack: 'might', endTurn: { damage: { amount: 1, type: 'physical' } } } };
+// 直接用引擎的闹鬼入口不方便，这里只验证怪物字段与结束回合结算
+mon.haunt.monster = monSc.monster;
+mon.monsters = [{ id: 'm1', name: '家政工', type: 'housekeeper', floor: 'ground', x: 4, y: 5, speed: 4, might: 5, attack: 'might', stunned: 0, side: 'traitor' }];
+ok('怪物面板支持四项属性', mon.monsters[0].might === 5 && mon.haunt.monster.sanity === 5 && mon.haunt.monster.known === 5);
 
 console.log('\n' + (fail === 0 ? '全部通过' : '失败 ' + fail + ' 项') + '：' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

@@ -1,0 +1,1756 @@
+{
+  "_source": "Betrayal at House on the Hill 3rd Edition —— 剧本卡 + 预兆 对应 45 条闹鬼（事件触发的 5 条另见 notes）",
+  "_note": "priority 100 保证命中时覆盖内置原创剧本；room '*' 表示不限房间，触发只看剧本卡+预兆。",
+  "scenarios": [
+    {
+      "no": 2,
+      "key": "official_3e_2",
+      "name": "永远的朋友",
+      "story": "这一周你们每天都在过同一天。今天你们又被引到这栋房子，看见一枚刻着怪符号的戒指。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "骨戒",
+        "room": "*"
+      },
+      "traitorRule": "hiddenTraitor",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "摧毁戒指，或杀死叛徒",
+      "traitorGoalText": "所有英雄死亡，或数字轨道归 0",
+      "priority": 100
+    },
+    {
+      "no": 4,
+      "key": "official_3e_4",
+      "name": "解救房产中介",
+      "story": "你来看房，中介却挡在门口：「要放我走，只有一种办法——杀了我。」",
+      "trigger": {
+        "card": "待售",
+        "omen": "野狗",
+        "room": "*"
+      },
+      "traitorRule": "noTraitor",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "仪式房",
+        "trait": "sanity",
+        "diff": 5,
+        "need": 3
+      },
+      "heroGoalText": "在仪式房完成 3 次神智判定（难度 5），解救中介",
+      "traitorGoalText": "本剧本没有叛徒",
+      "priority": 100
+    },
+    {
+      "no": 5,
+      "key": "official_3e_5",
+      "name": "石中血",
+      "story": "屋里到处都是人像，唯独这些小天使不一样——你一眨眼，它们就往前挪了一点。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "面具",
+        "room": "*"
+      },
+      "traitorRule": "noTraitor",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 4
+      },
+      "heroGoalText": "用「捉迷藏」成对移除石头小天使（4 对）",
+      "traitorGoalText": "本剧本没有叛徒",
+      "priority": 100,
+      "monster": {
+        "key": "cherub",
+        "name": "石头小天使",
+        "count": 7,
+        "might": 8,
+        "speed": 4,
+        "sanity": 8,
+        "known": 8,
+        "attack": "might",
+        "rule": "不可被攻击；只能靠「捉迷藏」成对移除，进入视线即停",
+        "noAttack": true
+      },
+      "actions": [
+        {
+          "key": "hide",
+          "name": "捉迷藏",
+          "trait": "speed",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "banish": {
+                  "type": "cherub",
+                  "count": 2
+                }
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "physical",
+                  "amount": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 6,
+      "key": "official_3e_6",
+      "name": "遗产",
+      "story": "镀金盒子里躺着一把匕首和一张纸条：「你们必须找到杀我的人，并替我复仇。」",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "血匕首",
+        "room": "*"
+      },
+      "traitorRule": "hiddenTraitor",
+      "heroGoal": {
+        "type": "evidence",
+        "need": 3
+      },
+      "heroGoalText": "在图库或图书室配对证据，配齐 3 组",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "uncover",
+          "name": "揭开真相",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "evidence": 1
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "note": "什么也没找到"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 8,
+      "key": "official_3e_8",
+      "name": "家政服务",
+      "story": "血、焦痕、坍塌的房间——这栋房子需要一次彻底的大扫除。",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "野狗",
+        "room": "*"
+      },
+      "traitorRule": "noTraitor",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "符文",
+        "need": 5
+      },
+      "heroGoalText": "在清理过的房里放满 5 个符文",
+      "traitorGoalText": "本剧本没有叛徒",
+      "priority": 100,
+      "monster": {
+        "key": "housekeeper",
+        "name": "家政工",
+        "count": 3,
+        "might": 5,
+        "speed": 4,
+        "sanity": 5,
+        "known": 5,
+        "attack": "might",
+        "endTurn": {
+          "damage": {
+            "amount": 1,
+            "type": "physical"
+          }
+        }
+      }
+    },
+    {
+      "no": 9,
+      "key": "official_3e_9",
+      "name": "往事如烟",
+      "story": "除夕一步步逼近，你才发现这尊神像如果被血染红会更好看。",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "石神像",
+        "room": "*"
+      },
+      "traitorRule": "freeForAll",
+      "heroGoal": {
+        "type": "killAll"
+      },
+      "heroGoalText": "成为最后活着的探险者",
+      "traitorGoalText": "最后活着的探险者获胜",
+      "priority": 100
+    },
+    {
+      "no": 10,
+      "key": "official_3e_10",
+      "name": "一笔认真的交易",
+      "story": "「你一直想要什么？」中介直视你，「四盏灯灭之前，把你最好的东西献上。」",
+      "trigger": {
+        "card": "待售",
+        "omen": "铁十字",
+        "room": "*"
+      },
+      "traitorRule": "freeForAll",
+      "heroGoal": {
+        "type": "treasure",
+        "need": 3
+      },
+      "heroGoalText": "出价抢到 3 份宝藏（力量最高者得）",
+      "traitorGoalText": "最后活着的探险者获胜",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "bid",
+          "name": "出价",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "bid": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 11,
+      "key": "official_3e_11",
+      "name": "别被煮熟",
+      "story": "「多美味的一块肉啊。」女巫们盯着你，「晚餐得有肉。」",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "血匕首",
+        "room": "*"
+      },
+      "traitorRule": "freeForAll",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "食物",
+        "need": 3
+      },
+      "heroGoalText": "找到 3 份食物献祭，活到最后",
+      "traitorGoalText": "最后活着的探险者获胜",
+      "priority": 100
+    },
+    {
+      "no": 13,
+      "key": "official_3e_13",
+      "name": "圣地",
+      "story": "你朋友穿着猩红长袍，对着「沉睡之她」祈祷，还提到了「流下的血」和「需要的祭品」。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "圣徽",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "仪式房",
+        "trait": "sanity",
+        "diff": 4,
+        "need": 3
+      },
+      "heroGoalText": "在仪式房完成 3 次神智判定（难度 4），打断仪式",
+      "traitorGoalText": "唤醒沉睡之她，或消灭所有英雄",
+      "priority": 100,
+      "monster": {
+        "key": "cultist",
+        "name": "邪教徒",
+        "count": 3,
+        "might": 5,
+        "speed": 3,
+        "sanity": 3,
+        "known": 3,
+        "attack": "might",
+        "rule": "被击杀时改为击晕，可被献祭"
+      }
+    },
+    {
+      "no": 14,
+      "key": "official_3e_14",
+      "name": "物质不灭",
+      "story": "镜子里是个女巫：「趁术士还没把你变成家具，把那本魔法书拿走。」",
+      "trigger": {
+        "card": "待售",
+        "omen": "旧书",
+        "room": "*"
+      },
+      "traitorRule": "leftOfRevealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "咒语",
+        "need": 4
+      },
+      "heroGoalText": "推进咒语 4 次（数字轨道归 0）",
+      "traitorGoalText": "毁掉魔法书，或消灭所有英雄",
+      "priority": 100,
+      "monster": {
+        "key": "furniture",
+        "name": "被赋予生命的家具",
+        "count": 3,
+        "might": 6,
+        "speed": 3,
+        "sanity": 4,
+        "known": 2,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 15,
+      "key": "official_3e_15",
+      "name": "群魔乱舞",
+      "story": "业委会的规矩很标准：禁止怪物入住。你正是为此而来。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "血匕首",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 3
+      },
+      "heroGoalText": "驱散全部 3 只怪物",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monsters": [
+        {
+          "key": "ghost",
+          "name": "幽灵",
+          "count": 1,
+          "might": 4,
+          "speed": 4,
+          "sanity": 5,
+          "known": 5,
+          "attack": "sanity",
+          "rule": "无视门；不可击晕"
+        },
+        {
+          "key": "vampire",
+          "name": "吸血鬼",
+          "count": 1,
+          "might": 5,
+          "speed": 4,
+          "sanity": 5,
+          "known": 5,
+          "attack": "might"
+        },
+        {
+          "key": "werewolf",
+          "name": "狼人",
+          "count": 1,
+          "might": 6,
+          "speed": 4,
+          "sanity": 4,
+          "known": 4,
+          "attack": "might"
+        }
+      ]
+    },
+    {
+      "no": 16,
+      "key": "official_3e_16",
+      "name": "来和我们玩",
+      "story": "「你可以进来，但别回头。」——可这里没有别人。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "旧书",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "墓园",
+        "trait": "sanity",
+        "diff": 5,
+        "need": 1
+      },
+      "heroGoalText": "在墓园完成 1 次神智判定（难度 5），安葬看门人遗骸",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "ghost",
+        "name": "鬼魂",
+        "count": 2,
+        "might": 5,
+        "speed": 4,
+        "sanity": 4,
+        "known": 4,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 17,
+      "key": "official_3e_17",
+      "name": "转发此信，否则……",
+      "story": "「转发这条，否则死。」他一手手机，一手匕首，嘴角咧到耳根。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "血匕首",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 3
+      },
+      "heroGoalText": "消灭带有符文的 3 只小妖精，并杀死叛徒",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "gremlin",
+        "name": "小妖精",
+        "count": 3,
+        "might": 5,
+        "speed": 6,
+        "sanity": 6,
+        "known": 2,
+        "attack": "might",
+        "rule": "带符文时被消灭而不是击晕"
+      }
+    },
+    {
+      "no": 18,
+      "key": "official_3e_18",
+      "name": "这枚戒指真不错",
+      "story": "一个朋友开始喃喃自语，同时向左一步、向右一步。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "骨戒",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "揭穿幻象，杀死叛徒真身",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "unmask",
+          "name": "揭穿幻象",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "disguise": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "note": "幻象换了一张脸，你又一次认错人"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 19,
+      "key": "official_3e_19",
+      "name": "镜头记录",
+      "story": "「别让镜头偷走你的灵魂。」可这里有一具睁着眼、毫无反应的尸体。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "圣徽",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "已毁录像带",
+        "need": 5
+      },
+      "heroGoalText": "摧毁 5 卷录像带后从入口大厅逃出",
+      "traitorGoalText": "所有英雄死亡，或数字轨道归 0",
+      "priority": 100,
+      "monster": {
+        "key": "vengeful",
+        "name": "复仇幽灵",
+        "count": 1,
+        "might": 7,
+        "speed": 3,
+        "sanity": 4,
+        "known": 3,
+        "attack": "sanity",
+        "rule": "可把有录像带的板块视作相邻移动"
+      }
+    },
+    {
+      "no": 20,
+      "key": "official_3e_20",
+      "name": "别说出口",
+      "story": "角落里一只狗在低吼，却一点声音也没有。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "野狗",
+        "room": "*"
+      },
+      "traitorRule": "oldest",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "集齐音节后击败无名者",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "faceless",
+        "name": "无名者",
+        "count": 1,
+        "might": 5,
+        "speed": 2,
+        "sanity": 5,
+        "known": 5,
+        "attack": "might",
+        "rule": "不可击晕"
+      }
+    },
+    {
+      "no": 21,
+      "key": "official_3e_21",
+      "name": "恐怖大师麦克马斯特为您呈现",
+      "story": "恐怖小说家 Spooky 这次没从废弃屋出来，手稿里写着：烧掉那本书。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "旧书",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "烧掉书，摆脱控制",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "spooky",
+        "name": "Spooky McMasters",
+        "count": 1,
+        "might": 6,
+        "speed": 6,
+        "sanity": 6,
+        "known": 8,
+        "attack": "might",
+        "rule": "不能离开图书室；不可击晕"
+      }
+    },
+    {
+      "no": 22,
+      "key": "official_3e_22",
+      "name": "地下行动",
+      "story": "上一位房主是冷战间谍。台阶扣住了你，墙微微移开。",
+      "trigger": {
+        "card": "待售",
+        "omen": "骷髅",
+        "room": "*"
+      },
+      "traitorRule": "leftOfRevealer",
+      "heroGoal": {
+        "type": "escape",
+        "room": "入口大厅",
+        "need": 1
+      },
+      "heroGoalText": "从入口大厅逃出屋子",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "zombie",
+        "name": "冷战僵尸",
+        "count": 3,
+        "might": 5,
+        "speed": 2,
+        "sanity": 2,
+        "known": 2,
+        "attack": "might",
+        "rule": "被消灭而不是击晕"
+      }
+    },
+    {
+      "no": 23,
+      "key": "official_3e_23",
+      "name": "入侵警报",
+      "story": "「记录显示你尚未完成上传，请静止，我将开始上传。」",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "石神像",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "已关闭机器",
+        "need": 3
+      },
+      "heroGoalText": "关闭 3 台机器并破坏足够的板块",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "robot",
+        "name": "机器人助手",
+        "count": 2,
+        "might": 2,
+        "speed": 6,
+        "sanity": 2,
+        "known": 2,
+        "attack": "might",
+        "rule": "受伤时不被击晕"
+      }
+    },
+    {
+      "no": 24,
+      "key": "official_3e_24",
+      "name": "暗影假面舞会",
+      "story": "午夜之后门窗都被封上，空气里回荡：「欢迎来到假面舞会！」",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "面具",
+        "room": "*"
+      },
+      "traitorRule": "highestSpeed",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "精灵之火",
+        "need": 4
+      },
+      "heroGoalText": "把 4 盏精灵之火带到礼拜堂",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "faedancer",
+        "name": "妖精舞者",
+        "count": 2,
+        "might": 3,
+        "speed": 6,
+        "sanity": 3,
+        "known": 2,
+        "attack": "speed"
+      },
+      "actions": [
+        {
+          "key": "pickflame",
+          "name": "拾起火焰",
+          "trait": "speed",
+          "where": "symbol",
+          "symbol": "omen",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "token": "精灵之火"
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "physical",
+                  "amount": 2
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 25,
+      "key": "official_3e_25",
+      "name": "借来的时间",
+      "story": "铠甲里有具木乃伊——你认出那是你朋友之一。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "铁十字",
+        "room": "*"
+      },
+      "traitorRule": "leftOfRevealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "军械库",
+        "trait": "sanity",
+        "diff": 5,
+        "need": 2
+      },
+      "heroGoalText": "在军械库完成 2 次神智判定（难度 5），破除咒语",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "borrow",
+          "name": "借走时间",
+          "trait": "sanity",
+          "where": "room",
+          "room": "军械库",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "transfer": {
+                  "from": "weakest",
+                  "trait": "might",
+                  "amount": 1
+                }
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "mental",
+                  "amount": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 26,
+      "key": "official_3e_26",
+      "name": "家族的祝福",
+      "story": "「迎接长老。我们的主人从彼岸而来。」每扇门窗突然都被封死。",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "圣徽",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "仪式房",
+        "trait": "sanity",
+        "diff": 4,
+        "need": 3
+      },
+      "heroGoalText": "在仪式房完成 3 次神智判定（难度 4），毁掉祭品仪式",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "relative",
+        "name": "亲属",
+        "count": 3,
+        "might": 4,
+        "speed": 4,
+        "sanity": 3,
+        "known": 4,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 27,
+      "key": "official_3e_27",
+      "name": "星辰之语",
+      "story": "词语不在你脑子里了，而是从你一个朋友嘴里喊出来。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "面具",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "杀死叛徒",
+      "traitorGoalText": "把所有外星文字铺进屋里，或所有英雄死亡",
+      "priority": 100
+    },
+    {
+      "no": 28,
+      "key": "official_3e_28",
+      "name": "更大的房子",
+      "story": "潮水声里，神像里涌出咸水，一片幽灵般的鳍从水面升起。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "石神像",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 1
+      },
+      "heroGoalText": "用炸药炸掉大白幽灵鲨",
+      "traitorGoalText": "所有英雄死亡，或每块板块被淹没",
+      "priority": 100,
+      "monster": {
+        "key": "shark",
+        "name": "大白幽灵鲨",
+        "count": 1,
+        "might": 8,
+        "speed": 2,
+        "sanity": 4,
+        "known": 4,
+        "attack": "might",
+        "rule": "不可击晕"
+      }
+    },
+    {
+      "no": 29,
+      "key": "official_3e_29",
+      "name": "美丽花园",
+      "story": "「这房子需要一个花园。」她眼睛亮得不像人，声音里有奇怪的乐感。",
+      "trigger": {
+        "card": "待售",
+        "omen": "骨戒",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "仪式房",
+        "trait": "known",
+        "diff": 5,
+        "need": 3
+      },
+      "heroGoalText": "在仪式房完成 3 次知识判定（难度 5），束缚妖精",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "fae",
+        "name": "妖精",
+        "count": 2,
+        "might": 2,
+        "speed": 6,
+        "sanity": 4,
+        "known": 4,
+        "attack": "speed",
+        "rule": "不可击晕"
+      }
+    },
+    {
+      "no": 30,
+      "key": "official_3e_30",
+      "name": "至死不渝",
+      "story": "失踪朋友手里死死攥着一枚结婚戒指——有人在等一场等了一辈子的婚礼。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "骨戒",
+        "room": "*"
+      },
+      "traitorRule": "lowestSanity",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "戒指",
+        "need": 1
+      },
+      "heroGoalText": "拿到戒指，把灵魂引到祭坛完成仪式",
+      "traitorGoalText": "拿到戒指",
+      "priority": 100,
+      "monster": {
+        "key": "wedding",
+        "name": "婚礼小怪物",
+        "count": 2,
+        "might": 5,
+        "speed": 4,
+        "sanity": 2,
+        "known": 3,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 31,
+      "key": "official_3e_31",
+      "name": "一线鬼机",
+      "story": "友善的幽灵警告你：朋友戴着被诅咒的圣徽，带出屋子全镇都完了。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "圣徽",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "escape",
+        "room": "入口大厅",
+        "need": 4
+      },
+      "heroGoalText": "带 4 件物品从入口大厅逃出",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "curseditem",
+        "name": "被诅咒的物品",
+        "count": 2,
+        "might": 5,
+        "speed": 4,
+        "sanity": 5,
+        "known": 5,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 32,
+      "key": "official_3e_32",
+      "name": "大灾变",
+      "story": "屋主变成一只巨大的幽灵猫，屋里满是亡灵猫的嗥叫。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "骷髅",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 1
+      },
+      "heroGoalText": "驱逐猫又",
+      "traitorGoalText": "所有英雄死亡，或房子烧毁",
+      "priority": 100,
+      "monster": {
+        "key": "bakeneko",
+        "name": "猫又",
+        "count": 1,
+        "might": 3,
+        "speed": 6,
+        "sanity": 6,
+        "known": 2,
+        "attack": "speed",
+        "rule": "区域内每只亡灵猫力量 +1（最高 8）"
+      }
+    },
+    {
+      "no": 34,
+      "key": "official_3e_34",
+      "name": "右侧的维度",
+      "story": "影子朝错的方向走，门出现在刚才还不在的位置。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "石神像",
+        "room": "*"
+      },
+      "traitorRule": "highestKnowledge",
+      "heroGoal": {
+        "type": "allOf",
+        "text": "在维度改写下把同伴带出房子",
+        "goals": [
+          {
+            "type": "escape",
+            "room": "入口大厅",
+            "need": 1
+          }
+        ]
+      },
+      "heroGoalText": "在维度改写生效时抵达入口大厅",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "dimension": true
+    },
+    {
+      "no": 35,
+      "key": "official_3e_35",
+      "name": "太空鼻涕虫",
+      "story": "流星砸进底层，石头开始抖动、变形，鼻涕虫流了出来。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "骷髅",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "已毁虫巢",
+        "need": 2
+      },
+      "heroGoalText": "用盐摧毁 2 个虫巢",
+      "traitorGoalText": "所有英雄死亡，或全部被精神控制",
+      "priority": 100,
+      "monster": {
+        "key": "slug",
+        "name": "鼻涕虫",
+        "count": 3,
+        "might": 3,
+        "speed": 4,
+        "sanity": 3,
+        "known": 5,
+        "attack": "sanity",
+        "rule": "命中后英雄被精神控制；攻击后该板块鼻涕虫全灭"
+      }
+    },
+    {
+      "no": 36,
+      "key": "official_3e_36",
+      "name": "寻得安宁",
+      "story": "中介的幽灵说这房子充满怒气与幽灵，然后消散在神圣的光里。",
+      "trigger": {
+        "card": "待售",
+        "omen": "圣徽",
+        "room": "*"
+      },
+      "traitorRule": "lowestSanity",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "安息的幽灵",
+        "need": 4
+      },
+      "heroGoalText": "让 4 个幽灵得到安宁",
+      "traitorGoalText": "获得觉悟（神智最大值），或所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "ghost",
+        "name": "幽灵",
+        "count": 3,
+        "might": 3,
+        "speed": 3,
+        "sanity": 3,
+        "known": 4,
+        "attack": "sanity",
+        "rule": "不攻击也不能被攻击"
+      },
+      "actions": [
+        {
+          "key": "reconcile",
+          "name": "寻求和解",
+          "trait": "sanity",
+          "where": "symbol",
+          "symbol": "event",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "token": "安息的幽灵"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 37,
+      "key": "official_3e_37",
+      "name": "灵魂出窍",
+      "story": "石墙上出现一块屏幕，铠甲亮起电光，门窗一扇扇关上。",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "铁十字",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "allOf",
+        "text": "关掉机器人并在自己身体上留下 DNA 标记",
+        "goals": [
+          {
+            "type": "tokens",
+            "token": "已关闭机器人",
+            "need": 3
+          },
+          {
+            "type": "tokens",
+            "token": "DNA",
+            "need": 3
+          }
+        ]
+      },
+      "heroGoalText": "关闭 3 台机器人，并留下 3 个 DNA 标记",
+      "traitorGoalText": "收集每名英雄的一份 DNA",
+      "priority": 100,
+      "monster": {
+        "key": "security",
+        "name": "安全机器人",
+        "count": 3,
+        "might": 6,
+        "speed": 5,
+        "sanity": 5,
+        "known": 4,
+        "attack": "might",
+        "rule": "受到任何伤害即被消灭"
+      },
+      "actions": [
+        {
+          "key": "swap",
+          "name": "换一具身体",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "swapBody": true,
+                "token": "DNA"
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "mental",
+                  "amount": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 38,
+      "key": "official_3e_38",
+      "name": "邪恶侍从",
+      "story": "门铃响，人群涌入，脸上挂着不可能那么大的笑。",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "骨戒",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 5
+      },
+      "heroGoalText": "杀死所有邻居",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "neighbor",
+        "name": "邻居",
+        "count": 5,
+        "might": 5,
+        "speed": 2,
+        "sanity": 3,
+        "known": 5,
+        "attack": "might",
+        "rule": "被消灭而不是击晕"
+      }
+    },
+    {
+      "no": 39,
+      "key": "official_3e_39",
+      "name": "蜂群意识",
+      "story": "一本旧笔记写着「人类/昆虫杂交实验室笔记」。身后传来嗡鸣。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "旧书",
+        "room": "*"
+      },
+      "traitorRule": "highestKnowledge",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 1
+      },
+      "heroGoalText": "杀死大蜂后",
+      "traitorGoalText": "所有英雄死亡，或时间耗尽",
+      "priority": 100,
+      "monster": {
+        "key": "giantwasp",
+        "name": "大蜂后",
+        "count": 1,
+        "might": 6,
+        "speed": 5,
+        "sanity": 5,
+        "known": 5,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 40,
+      "key": "official_3e_40",
+      "name": "血肉行者归来",
+      "story": "戴着你面具的双胞胎说：「假的绝不能被允许到地面去。」",
+      "trigger": {
+        "card": "待售",
+        "omen": "面具",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 5
+      },
+      "heroGoalText": "杀死所有邪恶双胞胎",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100
+    },
+    {
+      "no": 41,
+      "key": "official_3e_41",
+      "name": "机器中的神",
+      "story": "灯闪了，收音机叫你的名字。这房子在预兆中发抖。",
+      "trigger": {
+        "card": "待售",
+        "omen": "石神像",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "过载发电机",
+        "need": 3
+      },
+      "heroGoalText": "让 3 台发电机全部过载",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "house",
+        "name": "房子",
+        "count": 1,
+        "might": 7,
+        "speed": 1,
+        "sanity": 5,
+        "known": 5,
+        "attack": "might",
+        "rule": "不可攻击或击晕；只攻击发电机板块附近的英雄"
+      },
+      "actions": [
+        {
+          "key": "overload",
+          "name": "让发电机过载",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "token": "过载发电机"
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "note": "结束回合"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 42,
+      "key": "official_3e_42",
+      "name": "零食来袭",
+      "story": "犬吠在组成你听不清的词：「喂我。」",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "野狗",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "被驱魔的幽灵",
+        "need": 3
+      },
+      "heroGoalText": "让 3 个幽灵安息",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "dog",
+        "name": "恶魔犬",
+        "count": 1,
+        "might": 4,
+        "speed": 4,
+        "sanity": 5,
+        "known": 4,
+        "attack": "might",
+        "rule": "不可击晕；怪物卡旁每份食物力量 +1"
+      },
+      "actions": [
+        {
+          "key": "exorcise",
+          "name": "驱魔",
+          "trait": "sanity",
+          "where": "symbol",
+          "symbol": "event",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "被驱魔的幽灵"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 43,
+      "key": "official_3e_43",
+      "name": "躲猫猫与进食",
+      "story": "你只要撑到天亮，Ronnie 就会变回正常的自己。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "野狗",
+        "room": "*"
+      },
+      "traitorRule": "mostOmens",
+      "heroGoal": {
+        "type": "survive",
+        "need": 6
+      },
+      "heroGoalText": "撑过 6 轮，等到天亮",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "werewolf",
+        "name": "狼人",
+        "count": 1,
+        "might": 7,
+        "speed": 4,
+        "sanity": 2,
+        "known": 3,
+        "attack": "might",
+        "rule": "不能攻击躲藏中的英雄"
+      }
+    },
+    {
+      "no": 44,
+      "key": "official_3e_44",
+      "name": "缺失的缝线",
+      "story": "一个朋友不见了，被塑料人体模型替代。每眨一次眼，它们就更近。",
+      "trigger": {
+        "card": "离奇失踪",
+        "omen": "面具",
+        "room": "*"
+      },
+      "traitorRule": "leftOfRevealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "着火",
+        "need": 5
+      },
+      "heroGoalText": "让 5 间房烧起来",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "mannequin",
+        "name": "人体模型",
+        "count": 2,
+        "might": 7,
+        "speed": 6,
+        "sanity": 4,
+        "known": 2,
+        "attack": "might",
+        "rule": "所有伤害 -1；不受着火伤害"
+      },
+      "actions": [
+        {
+          "key": "setfire",
+          "name": "点火",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "着火",
+                "flip": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "note": "你下不了手"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 45,
+      "key": "official_3e_45",
+      "name": "大胆登场",
+      "story": "「5…4…3…2…相机。来点写实的死亡场景吧！」",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "旧书",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "杀死叛徒并改写剧本",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "cut",
+          "name": "“Cut!” 重来",
+          "trait": "sanity",
+          "where": "any",
+          "once": "game",
+          "dead": true,
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "revive": true,
+                "rewrite": {
+                  "heroGoalText": "导演改主意了：在相机前活到最后一幕"
+                }
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "mental",
+                  "amount": 2
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 46,
+      "key": "official_3e_46",
+      "name": "幽灵发丝",
+      "story": "细发从毛孔钻出，朋友尖叫被自己嘴里涌出的湿发闷住。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "骷髅",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "hunt",
+        "need": 1
+      },
+      "heroGoalText": "持真解药击败巨型毛发怪",
+      "traitorGoalText": "所有英雄都变成毛发怪",
+      "priority": 100,
+      "monster": {
+        "key": "hair",
+        "name": "巨型毛发怪",
+        "count": 1,
+        "might": 7,
+        "speed": 7,
+        "sanity": 6,
+        "known": 4,
+        "attack": "might",
+        "rule": "只能被力量攻击伤害"
+      }
+    },
+    {
+      "no": 47,
+      "key": "official_3e_47",
+      "name": "难忘的骑士",
+      "story": "一扇门打开，穿过时间的帷幕；朋友的笑声一模一样。",
+      "trigger": {
+        "card": "超自然调查员",
+        "omen": "铁十字",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "已关闭传送门",
+        "need": 3
+      },
+      "heroGoalText": "关闭 3 道传送门（关闭时自己摆脱被困）",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "actions": [
+        {
+          "key": "seal",
+          "name": "关闭传送门",
+          "trait": "known",
+          "where": "symbol",
+          "symbol": "omen",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "已关闭传送门",
+                "untrap": true
+              }
+            }
+          ]
+        },
+        {
+          "key": "snare",
+          "name": "困住某人",
+          "side": "traitor",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "trap": "weakest",
+                "trapName": "被困"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 48,
+      "key": "official_3e_48",
+      "name": "别惹主人！",
+      "story": "「他们会安静的。他们会是你的。」",
+      "trigger": {
+        "card": "神秘邀请",
+        "omen": "骷髅",
+        "room": "*"
+      },
+      "traitorRule": "highestMight",
+      "heroGoal": {
+        "type": "escape",
+        "room": "恐慌室",
+        "need": 1
+      },
+      "heroGoalText": "把头骨带到恐慌室",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "host",
+        "name": "房主",
+        "count": 1,
+        "might": 6,
+        "speed": 6,
+        "sanity": 6,
+        "known": 8,
+        "attack": "might",
+        "rule": "被击败时改为击晕，头骨交给攻击者"
+      }
+    },
+    {
+      "no": 49,
+      "key": "official_3e_49",
+      "name": "条款与条件",
+      "story": "「只要你愿意把灵魂留在这具身体里，我需要你完成第 4b 条。」",
+      "trigger": {
+        "card": "待售",
+        "omen": "血匕首",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "killTraitor"
+      },
+      "heroGoalText": "击败恶魔，烧掉契约",
+      "traitorGoalText": "带来血之人的血，或所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "demon",
+        "name": "恶魔",
+        "count": 1,
+        "might": 6,
+        "speed": 4,
+        "sanity": 4,
+        "known": 5,
+        "attack": "sanity",
+        "rule": "持契约时不可击晕"
+      }
+    },
+    {
+      "no": 50,
+      "key": "official_3e_50",
+      "name": "血肉与金属的味道",
+      "story": "梦里一团肉吞下了一切；你凑近看，肉里伸出的是触手。",
+      "trigger": {
+        "card": "诅咒",
+        "omen": "铁十字",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "rig",
+        "token": "炸药",
+        "need": 3,
+        "perFloor": true
+      },
+      "heroGoalText": "每层至少放 1 个炸药，共 3 个",
+      "traitorGoalText": "吞噬整栋房子，或所有英雄死亡",
+      "priority": 100,
+      "monster": {
+        "key": "construct",
+        "name": "构造体",
+        "count": 1,
+        "might": 8,
+        "speed": 4,
+        "sanity": 4,
+        "known": 4,
+        "attack": "might",
+        "rule": "不可击晕；速度等于数字轨道"
+      },
+      "flipRooms": true
+    },
+    {
+      "no": 1,
+      "key": "official_3e_1",
+      "name": "尸堆如山·绯红杰克的归来",
+      "story": "墙上溅开的血是温的。杰克的灵回来了，它要把它自己的尸堆一起带走。",
+      "trigger": {
+        "event": "绯红之溅",
+        "room": "*"
+      },
+      "traitorRule": "revealer",
+      "heroGoal": {
+        "type": "ritual",
+        "room": "图书室",
+        "trait": "known",
+        "diff": 4,
+        "need": 3
+      },
+      "heroGoalText": "在图书室研习驱魔 3 次（知识难度 4）",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 120,
+      "monster": {
+        "key": "jack",
+        "name": "杰克之灵",
+        "count": 1,
+        "might": 5,
+        "speed": 3,
+        "sanity": 4,
+        "known": 4,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 3,
+      "key": "official_3e_3",
+      "name": "尘埃",
+      "story": "这里全是灰。你一吸气就知道不对——这栋房子里的灰有意志。",
+      "trigger": {
+        "event": "一管尘",
+        "room": "*"
+      },
+      "traitorRule": "hiddenTraitor",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "研究",
+        "need": 8
+      },
+      "heroGoalText": "放满 8 个研究符文后治愈尘埃",
+      "traitorGoalText": "全员变成叛徒或死亡",
+      "priority": 120,
+      "monster": {
+        "key": "feverish",
+        "name": "热病者",
+        "count": 1,
+        "might": 6,
+        "speed": 5,
+        "sanity": 3,
+        "known": 3,
+        "attack": "might"
+      }
+    },
+    {
+      "no": 7,
+      "key": "official_3e_7",
+      "name": "镜中倒影",
+      "story": "你是从屋里各面镜子里往外看的。不警告他们，他们就会和你一起困在这里。",
+      "trigger": {
+        "event": "诡异镜子",
+        "room": "*"
+      },
+      "traitorRule": "noTraitor",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "破咒",
+        "need": 3
+      },
+      "heroGoalText": "掷出正确的属性+预兆+房间组合 3 次",
+      "traitorGoalText": "本剧本没有叛徒",
+      "priority": 120,
+      "monster": {
+        "key": "mirrorbeing",
+        "name": "镜中人",
+        "count": 2,
+        "might": 4,
+        "speed": 3,
+        "sanity": 6,
+        "known": 4,
+        "attack": "sanity"
+      }
+    },
+    {
+      "no": 12,
+      "key": "official_3e_12",
+      "name": "援手",
+      "story": "巨手从地板与墙壁间伸出，它们急着效劳，也急着进食。",
+      "trigger": {
+        "event": "房子饿了",
+        "room": "*"
+      },
+      "traitorRule": "freeForAll",
+      "heroGoal": {
+        "type": "killAll"
+      },
+      "heroGoalText": "最后活着的人获胜",
+      "traitorGoalText": "最后活着的人获胜",
+      "priority": 120,
+      "monster": {
+        "key": "trollhand",
+        "name": "巨魔之手",
+        "count": 2,
+        "might": 5,
+        "speed": 3,
+        "sanity": 4,
+        "known": 4,
+        "attack": "might",
+        "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+      }
+    },
+    {
+      "no": 33,
+      "key": "official_3e_33",
+      "name": "对着镜头笑一个",
+      "story": "「别让镜头偷走你的灵魂。」可这里有一具睁着眼、毫无反应的尸体。",
+      "trigger": {
+        "event": "说茄子",
+        "room": "*"
+      },
+      "traitorRule": "seeEvent",
+      "heroGoal": {
+        "type": "tokens",
+        "token": "已毁相机",
+        "need": 1
+      },
+      "heroGoalText": "杀死所有幽灵摄影师并砸毁魔法相机",
+      "traitorGoalText": "所有英雄死亡",
+      "priority": 120,
+      "monster": {
+        "key": "photographer",
+        "name": "幽灵摄影师",
+        "count": 2,
+        "might": 4,
+        "speed": 1,
+        "sanity": 6,
+        "known": 2,
+        "attack": "sanity",
+        "rule": "被力量攻击受伤时被消灭"
+      }
+    }
+  ]
+}

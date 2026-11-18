@@ -1,0 +1,353 @@
+{
+  "_note": "官方《山中小屋》第三版 12 位调查员，中文名与属性轨道按卡面抄录；art 为项目头像占位字。",
+  "characters": [
+    {
+      "key": "anita",
+      "name": "安妮塔·赫尔南德斯",
+      "role": "中学生·标本制作",
+      "art": "安",
+      "traits": {
+        "speed": {
+          "start": 5,
+          "min": 2,
+          "max": 8
+        },
+        "might": {
+          "start": 4,
+          "min": 2,
+          "max": 7
+        },
+        "known": {
+          "start": 5,
+          "min": 4,
+          "max": 8
+        },
+        "sanity": {
+          "start": 3,
+          "min": 2,
+          "max": 6
+        }
+      },
+      "age": 16
+    },
+    {
+      "key": "brittani",
+      "name": "布里塔妮·“节拍”·鲍恩",
+      "role": "夜店 DJ",
+      "art": "节",
+      "traits": {
+        "speed": {
+          "start": 3,
+          "min": 2,
+          "max": 6
+        },
+        "might": {
+          "start": 5,
+          "min": 3,
+          "max": 8
+        },
+        "known": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        },
+        "sanity": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        }
+      },
+      "age": 26
+    },
+    {
+      "key": "dan",
+      "name": "阮医生",
+      "role": "内科医生",
+      "art": "阮",
+      "traits": {
+        "speed": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        },
+        "might": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        },
+        "known": {
+          "start": 5,
+          "min": 3,
+          "max": 8
+        },
+        "sanity": {
+          "start": 4,
+          "min": 2,
+          "max": 8
+        }
+      },
+      "age": 42
+    },
+    {
+      "key": "warren",
+      "name": "梁神父",
+      "role": "本堂神父",
+      "art": "梁",
+      "traits": {
+        "speed": {
+          "start": 4,
+          "min": 2,
+          "max": 6
+        },
+        "might": {
+          "start": 3,
+          "min": 2,
+          "max": 6
+        },
+        "known": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        },
+        "sanity": {
+          "start": 5,
+          "min": 3,
+          "max": 8
+        }
+      },
+      "age": 47
+    },
+    {
+      "key": "isa",
+      "name": "伊莎·瓦伦西亚",
+      "role": "小学生·灵异博主",
+      "art": "伊",
+      "traits": {
+        "speed": {
+          "start": 5,
+          "min": 4,
+          "max": 8
+        },
+        "might": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        },
+        "known": {
+          "start": 4,
+          "min": 2,
+          "max": 7
+        },
+        "sanity": {
+          "start": 4,
+          "min": 2,
+          "max": 8
+        }
+      },
+      "age": 10
+    },
+    {
+      "key": "jaden",
+      "name": "杰登·琼斯",
+      "role": "小学生·小侦探",
+      "art": "杰",
+      "traits": {
+        "speed": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        },
+        "might": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        },
+        "known": {
+          "start": 5,
+          "min": 3,
+          "max": 7
+        },
+        "sanity": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        }
+      },
+      "age": 9
+    },
+    {
+      "key": "josef",
+      "name": "约瑟夫·“布罗”·胡珀",
+      "role": "大学生·橄榄球员",
+      "art": "约",
+      "traits": {
+        "speed": {
+          "start": 4,
+          "min": 2,
+          "max": 8
+        },
+        "might": {
+          "start": 5,
+          "min": 4,
+          "max": 8
+        },
+        "known": {
+          "start": 3,
+          "min": 2,
+          "max": 6
+        },
+        "sanity": {
+          "start": 4,
+          "min": 2,
+          "max": 6
+        }
+      },
+      "age": 21
+    },
+    {
+      "key": "michelle",
+      "name": "米歇尔·门罗",
+      "role": "长曲棍球队员",
+      "art": "米",
+      "traits": {
+        "speed": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        },
+        "might": {
+          "start": 4,
+          "min": 2,
+          "max": 8
+        },
+        "known": {
+          "start": 4,
+          "min": 2,
+          "max": 8
+        },
+        "sanity": {
+          "start": 3,
+          "min": 2,
+          "max": 6
+        }
+      },
+      "age": 20
+    },
+    {
+      "key": "oliver",
+      "name": "奥利弗·斯威夫特",
+      "role": "哲学讲师·长跑者",
+      "art": "奥",
+      "traits": {
+        "speed": {
+          "start": 5,
+          "min": 3,
+          "max": 8
+        },
+        "might": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        },
+        "known": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        },
+        "sanity": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        }
+      },
+      "age": 34
+    },
+    {
+      "key": "persephone",
+      "name": "珀耳塞福涅·普莱里",
+      "role": "药草店老板",
+      "art": "珀",
+      "traits": {
+        "speed": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        },
+        "might": {
+          "start": 4,
+          "min": 3,
+          "max": 7
+        },
+        "known": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        },
+        "sanity": {
+          "start": 5,
+          "min": 3,
+          "max": 8
+        }
+      },
+      "age": 30
+    },
+    {
+      "key": "sammy",
+      "name": "萨米·安格勒",
+      "role": "小学生·魔术爱好者",
+      "art": "萨",
+      "traits": {
+        "speed": {
+          "start": 5,
+          "min": 2,
+          "max": 8
+        },
+        "might": {
+          "start": 4,
+          "min": 3,
+          "max": 8
+        },
+        "known": {
+          "start": 3,
+          "min": 2,
+          "max": 8
+        },
+        "sanity": {
+          "start": 4,
+          "min": 2,
+          "max": 7
+        }
+      },
+      "age": 8
+    },
+    {
+      "key": "stephanie",
+      "name": "斯蒂芬妮·里希特",
+      "role": "纪录片导演",
+      "art": "斯",
+      "traits": {
+        "speed": {
+          "start": 3,
+          "min": 2,
+          "max": 7
+        },
+        "might": {
+          "start": 4,
+          "min": 2,
+          "max": 6
+        },
+        "known": {
+          "start": 4,
+          "min": 2,
+          "max": 6
+        },
+        "sanity": {
+          "start": 5,
+          "min": 4,
+          "max": 8
+        }
+      },
+      "age": 39
+    }
+  ]
+}
