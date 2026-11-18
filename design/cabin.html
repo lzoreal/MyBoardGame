@@ -433,8 +433,8 @@
     $('cModal').classList.add('hidden');
     $('cModalCard').innerHTML = '';
   }
-  function chooseTarget(title, options, onPick) {
-    let html = '<h2>' + esc(title) + '</h2><p>选择一个目标。</p><div class="itemList">';
+  function chooseTarget(title, options, onPick, hint) {
+    let html = '<h2>' + esc(title) + '</h2><p>' + esc(hint || '选择一个目标。') + '</p><div class="itemList">';
     options.forEach((o, k) => {
       html += '<button class="btn ghost" type="button" data-pick="' + k + '" style="min-height:48px">' + esc(o.name) + '</button>';
     });
@@ -789,12 +789,16 @@
         (here.length && monsters.length ? '；' : '') + monsters.map((m) => esc(m.name) + (m.stunned ? '（僵直）' : '')).join('、') + '</div>';
     }
     html += '<div class="infoSub">地面物品 ' + pile.length + '</div>';
+    const availablePile = pile.filter((it) => !(st.itemActions || {})[it.name]);
+    const canPick = !!(availablePile.length && me && me.floor === room.floor && me.x === room.x && me.y === room.y && myTurn(st));
     if (!pile.length) html += '<div class="emptyNote">地上没有物品。</div>';
     else {
-      html += '<div class="itemList">' + pile.map((it) => '<div class="itemRow"><div><div class="nm">' + esc(it.name) + '</div><div class="ds">' + esc(it.text || '') + '</div></div></div>').join('') + '</div>';
+      html += '<div class="itemList">' + pile.map((it, idx) => '<div class="itemRow"><div><div class="nm">' + esc(it.name) + '</div><div class="ds">' + esc(it.text || '') + '</div></div>' +
+        (canPick && !(st.itemActions || {})[it.name] ? '<div class="ops"><button class="btn ghost" type="button" data-room-pick="' + idx + '">拾取</button></div>' : '') +
+        '</div>').join('') + '</div>';
     }
     html += '<div class="actions" style="margin-top:14px">';
-    if (pile.length && me && me.floor === room.floor && me.x === room.x && me.y === room.y && myTurn(st)) {
+    if (canPick) {
       html += '<button class="btn primary" id="roomPick" type="button">拾取全部</button>';
     }
     html += '<button class="btn ghost" id="roomClose" type="button">收起</button></div>';
@@ -803,8 +807,12 @@
     if (close) close.addEventListener('click', () => closeModal());
     const pick = $('roomPick');
     if (pick) pick.addEventListener('click', () => {
-      window.GameShell.send({ type: 'pickup' });
-      closeModal();
+      if (window.GameShell.send({ type: 'pickup' })) closeModal();
+    });
+    $('cModalCard').querySelectorAll('[data-room-pick]').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (window.GameShell.send({ type: 'pickup', index: Number(b.dataset.roomPick) })) closeModal();
+      });
     });
   }
 
@@ -1075,6 +1083,25 @@
   }
 
   /* ---------------- 物品 ---------------- */
+  function beginTradeOffer(st, me, mi, target, idx) {
+    const own = me.items[idx];
+    if (!own) return;
+    const requestables = (target.items || []).filter((it) => !it.noTrade && !(st.itemActions || {})[it.name]);
+    if (!requestables.length) {
+      const sent = window.GameShell.send({ type: 'tradeOffer', target: target.id, index: idx, requestIndex: -1 });
+      if (sent) closeModal(); else renderInventory(cur, mi);
+      return;
+    }
+    const options = [{ name: '不要对方物品（纯赠送）', gift: true }].concat(requestables.map((it) => ({
+      name: '要「' + it.name + '」', item: it
+    })));
+    chooseTarget('想向 ' + target.name + ' 换什么？', options, (pick) => {
+      const requestIndex = pick.gift ? -1 : target.items.indexOf(pick.item);
+      const sent = window.GameShell.send({ type: 'tradeOffer', target: target.id, index: idx, requestIndex: requestIndex });
+      if (sent) closeModal(); else renderInventory(cur, mi);
+    }, '你可以只送出「' + own.name + '」，也可以指定要对方一件物品；对方确认后才会交换。');
+  }
+
   function renderInventory(st, mi) {
     const me = st.players[mi];
     const items = me.items || [];
@@ -1116,13 +1143,11 @@
       const idx = Number(b.dataset.trade);
       const others = st.players.filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
       if (others.length === 1) {
-        window.GameShell.send({ type: 'tradeOffer', target: others[0].id, index: idx });
-        renderInventory(cur, mi);
+        beginTradeOffer(st, me, mi, others[0], idx);
         return;
       }
       chooseTarget('把「' + me.items[idx].name + '」交易给谁？', others, (pick) => {
-        window.GameShell.send({ type: 'tradeOffer', target: pick.id, index: idx });
-        renderInventory(cur, mi);
+        beginTradeOffer(st, me, mi, pick, idx);
       });
     }));
   }
@@ -1358,9 +1383,13 @@
     actions.innerHTML = '';
     const box = document.createElement('div');
     box.className = 'tradePrompt';
-    const title = isTo ? '<b>' + esc(from ? from.name : '对方') + '</b> 想把「<b>' + esc(o.itemName) + '</b>」交易给你。'
-      : local ? '把设备交给 <b>' + esc(to ? to.name : '接收方') + '</b>，由对方决定是否接受「<b>' + esc(o.itemName) + '</b>」。'
-      : '已向 <b>' + esc(to ? to.name : '对方') + '</b> 发起交易：<b>' + esc(o.itemName) + '</b>，等待对方回应。';
+    const hasRequest = o.requestIndex !== null && o.requestIndex !== undefined && o.requestIndex >= 0 && o.requestName;
+    const swap = hasRequest ? '，并要你的「<b>' + esc(o.requestName) + '</b>」' : '';
+    const title = isTo ? (hasRequest
+      ? '<b>' + esc(from ? from.name : '对方') + '</b> 想用「<b>' + esc(o.itemName) + '</b>」换你的「<b>' + esc(o.requestName) + '</b>」。'
+      : '<b>' + esc(from ? from.name : '对方') + '</b> 想把「<b>' + esc(o.itemName) + '</b>」交易给你。')
+      : local ? '把设备交给 <b>' + esc(to ? to.name : '接收方') + '</b>，由对方决定是否接受「<b>' + esc(o.itemName) + '</b>」' + swap + '。'
+      : '已向 <b>' + esc(to ? to.name : '对方') + '</b> 发起交易：<b>' + esc(o.itemName) + '</b>' + swap + '，等待对方回应。';
     box.innerHTML = title + '<div class="tradeBtns"></div>';
     const btns = box.querySelector('.tradeBtns');
     const add = (label, cls, fn, disabled) => {
@@ -1499,6 +1528,16 @@
       return b;
     };
 
+    if (me.dead) {
+      actions.innerHTML = '';
+      const note = document.createElement('span');
+      note.className = 'sub';
+      note.style.cssText = 'font-size:12px;color:#e6c8a8;align-self:center;line-height:1.5';
+      note.textContent = '你已经倒下，物品已掉在「' + (here ? here.name : '原地') + '」，点结束回合跳过。';
+      actions.appendChild(note);
+      addBtn('结束回合', 'primary', () => window.GameShell.send({ type: 'end' }));
+      return;
+    }
     if (st.tradeOffer) {
       renderTradePrompt(st, me, actions);
       return;
@@ -1583,7 +1622,17 @@
         if (stealFoes.length) {
           addBtn('偷窃', 'ghost', () => {
             chooseTarget('从谁身上偷物品？', stealFoes, (f) => {
-              window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true });
+              const victim = st.players.find((p) => p.id === f.id);
+              const loot = victim ? (victim.items || []).filter((it) => !it.noSteal && !it.noTrade) : [];
+              if (!loot.length) {
+                window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true });
+                return;
+              }
+              const options = loot.map((it) => ({ name: '偷「' + it.name + '」', item: it }));
+              chooseTarget('偷哪件物品？', options, (pick) => {
+                const itemIndex = victim.items.indexOf(pick.item);
+                window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true, stealIndex: itemIndex });
+              }, '偷窃也要先攻击命中，且差值至少 2 点才能抢走选定的物品。');
             });
           }, !!st.attacked);
         }
@@ -1708,8 +1757,11 @@
       ] },
       { h: '物品与交易', items: [
         '物品卡在桌上公开；每件物品每回合只能执行<b>使用 / 交易 / 丢弃 / 偷窃 / 拾取</b>其中一项。',
-        '交易必须先向同房间玩家发起请求，<b>由接收方确认</b>后才转移；对方拒绝或发起方撤回则物品留在原主。',
-        '丢在地上的物品形成公开物品堆，同房间玩家可拾取；地上物品不会消失。'
+        '判定或攻击中用到物品，也会把该物品标记为本回合已使用，不能再用它交易或丢弃。',
+        '交易必须先向同房间玩家发起请求，<b>由接收方确认</b>后才转移。可以一件换一件，也可以纯赠送；对方拒绝或发起方撤回则双方物品都不动。',
+        '角色死亡时会把身上的物品全部掉在所在房间，其他玩家可拾取。',
+        '丢在地上的物品形成公开物品堆，同房间玩家可逐件拾取，也可以一次拿全部；地上物品不会消失。',
+        '偷窃命中且差值达到 2 点时，可以先选择目标身上的一件可偷物品。'
       ] },
       { h: '怪物与剧本', items: [
         '怪物默认不能被杀死；英雄击中怪物使其僵直并跳过下一个怪物阶段。',

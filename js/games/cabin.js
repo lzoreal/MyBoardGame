@@ -364,21 +364,27 @@ window.CabinEngine = (function () {
 
   function itemTestBonus(st, i, trait) {
     const p = st.players[i] || {};
-    return (p.items || []).reduce((sum, it) => sum + (it.testTrait === trait ? (it.testBonus || 0) : 0), 0);
+    return (p.items || []).reduce((sum, it) => sum + (it.testTrait === trait && !itemActionOf(st, it) ? (it.testBonus || 0) : 0), 0);
   }
   function bestWeapon(st, i, trait) {
     const p = st.players[i] || {};
-    const list = (p.items || []).filter((it) => it.weapon === trait).sort((a, b) => (b.attackBonus || 0) - (a.attackBonus || 0));
+    const list = (p.items || []).filter((it) => it.weapon === trait && !itemActionOf(st, it)).sort((a, b) => (b.attackBonus || 0) - (a.attackBonus || 0));
     return list[0] || null;
+  }
+  function markTraitItems(st, i, trait) {
+    const p = st.players[i] || {};
+    (p.items || []).forEach((it) => {
+      if (it.testTrait === trait && !itemActionOf(st, it)) markItemAction(st, it, 'use');
+    });
   }
   function armorValue(st, i) {
     return (st.players[i].items || []).reduce((sum, it) => sum + (it.armor || 0), 0);
   }
 
   function testRoll(st, i, trait, diff, rand) {
-    const p = st.players[i];
     const dice = Math.max(1, traitVal(st, i, trait) + itemTestBonus(st, i, trait));
     const r = roll(dice, rand);
+    markTraitItems(st, i, trait);
     return { trait: trait, diff: diff, total: r.total, faces: r.faces, ok: r.total >= diff, dice: dice };
   }
 
@@ -394,6 +400,17 @@ window.CabinEngine = (function () {
     return t ? t.label : trait;
   }
 
+  function dropItemsOnDeath(st, i) {
+    const p = st.players[i];
+    if (!p || !p.items || !p.items.length) return;
+    const key = p.floor + '|' + p.x + '|' + p.y;
+    const room = roomAt(st, p.floor, p.x, p.y);
+    st.itemPiles = st.itemPiles || {};
+    st.itemPiles[key] = (st.itemPiles[key] || []).concat(p.items);
+    pushLog(st, '☠ ' + p.name + ' 的物品掉在「' + (room ? room.name : '原地') + '」：' + p.items.map((it) => it.name).join('、'));
+    p.items = [];
+  }
+
   function loseTraitDirect(st, i, trait, amount, reason) {
     const p = st.players[i];
     if (!p) return;
@@ -402,7 +419,10 @@ window.CabinEngine = (function () {
     if (st.haunt && st.haunt.active) {
       if (next < min) {
         p.traits[trait] = Math.max(0, next);
-        p.dead = true;
+        if (!p.dead) {
+          p.dead = true;
+          dropItemsOnDeath(st, i);
+        }
         pushLog(st, '☠ ' + p.name + ' 的' + labelOf(trait) + '跌破下限，倒下了');
       } else p.traits[trait] = next;
     } else {
@@ -723,7 +743,9 @@ window.CabinEngine = (function () {
     else if (sc.traitorRule === 'highestKnowledge') idx = high('known');
     else if (sc.traitorRule === 'lowestMight') idx = low('might');
     else if (sc.traitorRule === 'omenHolder') idx = revealer;
-    if (idx === undefined || idx < 0) idx = revealer;
+    if (idx === undefined || idx < 0 || !st.players[idx] || st.players[idx].dead) {
+      idx = aliveIdx.length ? aliveIdx[0] : revealer;
+    }
     return idx;
   }
 
@@ -790,6 +812,11 @@ window.CabinEngine = (function () {
     const traitor = st.players[h.traitor];
     const hg = h.heroGoal || {};
     const tg = h.traitorGoal || {};
+    if (!heroes.length) {
+      if (traitor && !traitor.dead) win(st, 'traitor', '英雄全灭，叛徒获胜');
+      else win(st, 'heroes', '叛徒与英雄均已倒下');
+      return;
+    }
     if (hg.type === 'killTraitor' && traitor && traitor.dead) {
       win(st, 'heroes', '叛徒倒下，英雄达成目标'); return;
     }
@@ -974,7 +1001,7 @@ window.CabinEngine = (function () {
 
   function hasDistanceWeapon(st, i, trait) {
     const p = st.players[i];
-    return (p.items || []).some((it) => it.distance && (!it.weapon || it.weapon === trait));
+    return (p.items || []).some((it) => it.distance && (!it.weapon || it.weapon === trait) && !itemActionOf(st, it));
   }
 
   function attack(st, i, targetId, trait, rand, opts) {
@@ -993,13 +1020,21 @@ window.CabinEngine = (function () {
       const wpn = bestWeapon(st, i, tr);
       const ar = roll(traitVal(st, i, tr) + itemTestBonus(st, i, tr) + (wpn ? (wpn.attackBonus || 0) : 0), rand);
       const dr = roll(traitVal(st, st.players.indexOf(targetP), tr), rand);
+      if (wpn) markItemAction(st, wpn, 'use');
+      markTraitItems(st, i, tr);
       st.lastRoll = { label: me.name + (ranged ? ' 远程攻击 ' : ' 攻击 ') + targetP.name, faces: ar.faces, foeFaces: dr.faces, total: ar.total, foe: dr.total };
       const diff = ar.total - dr.total;
       const physical = (tr === 'might' || tr === 'speed');
       let stolen = null;
       if (diff > 0 && physical && !ranged && opts.steal && diff >= 2) {
         const victim = targetP.items || [];
-        const pick = victim.find((it) => !it.noSteal && !it.noTrade);
+        let pick = null;
+        if (opts.stealIndex !== undefined && opts.stealIndex !== null) {
+          const wanted = victim[opts.stealIndex];
+          if (wanted && !wanted.noSteal && !wanted.noTrade) pick = wanted;
+        } else {
+          pick = victim.find((it) => !it.noSteal && !it.noTrade) || null;
+        }
         if (pick) {
           targetP.items = victim.filter((it) => it !== pick);
           me.items = me.items.concat(pick);
@@ -1027,6 +1062,8 @@ window.CabinEngine = (function () {
     const wpnM = bestWeapon(st, i, tr);
     const ar = roll(traitVal(st, i, tr) + itemTestBonus(st, i, tr) + (wpnM ? (wpnM.attackBonus || 0) : 0), rand);
     const dr = roll(monster[tr], rand);
+    if (wpnM) markItemAction(st, wpnM, 'use');
+    markTraitItems(st, i, tr);
     const diff = ar.total - dr.total;
     st.lastRoll = { label: me.name + (ranged ? ' 远程攻击 ' : ' 攻击 ') + monster.name, faces: ar.faces, foeFaces: dr.faces, total: ar.total, foe: dr.total };
     st.attacked = true;
@@ -1216,16 +1253,18 @@ window.CabinEngine = (function () {
 
   /* ---------------- 回合 ---------------- */
   function nextTurn(st) {
+    const from = st.turn;
     let i = st.turn;
     for (let k = 0; k < st.players.length; k++) {
       i = (i + 1) % st.players.length;
       if (!st.players[i].dead) {
         st.turn = i;
-        if (i === 0) {
+        if (i <= from) {
           st.round += 1;
           if (st.haunt && st.haunt.active) {
             st.haunt.round += 1;
             checkWin(st);
+            if (st.phase === 'ended') return;
           }
         }
         beginTurn(st, i);
@@ -1242,6 +1281,15 @@ window.CabinEngine = (function () {
     if (st.pendingTile) return { ok: false, msg: '先放置房间' };
     if (st.tradeOffer) return { ok: false, msg: '先处理交易请求' };
     if (st.phase === 'ended') return { ok: false, msg: '已经结束' };
+    if (st.players[i] && st.players[i].dead) {
+      startHauntIfNeeded(st, rand);
+      checkWin(st);
+      if (st.phase === 'ended') return { ok: true, state: st };
+      if (st.haunt && st.haunt.active) st.haunt.justStarted = false;
+      nextTurn(st);
+      pushLog(st, '倒下的角色跳过回合，轮到 ' + st.players[st.turn].name);
+      return { ok: true, state: st };
+    }
     startHauntIfNeeded(st, rand);
     checkWin(st);
     if (st.phase === 'ended') return { ok: true, state: st };
@@ -1255,7 +1303,7 @@ window.CabinEngine = (function () {
     return { ok: true, state: st };
   }
 
-  function allocateDamage(st, i, action) {
+  function allocateDamage(st, i, action, rand) {
     const pd = st.pendingDamage;
     if (!pd) return { ok: false, msg: '没有待分配的伤害' };
     if (pd.player !== st.players[i].id) return { ok: false, msg: '只有受伤者可以分配伤害' };
@@ -1279,6 +1327,8 @@ window.CabinEngine = (function () {
     if (end) {
       nextTurn(st);
       pushLog(st, '轮到 ' + st.players[st.turn].name);
+    } else if (st.phase === 'playing' && st.players[st.turn].dead) {
+      endTurn(st, st.turn, rand);
     }
     checkWin(st);
     return { ok: true, state: st };
@@ -1305,12 +1355,26 @@ window.CabinEngine = (function () {
     const item = from.items[offer.index];
     if (!item) { st.tradeOffer = null; return { ok: false, msg: '发起者已经没有这件物品' }; }
     if (item.noTrade) { st.tradeOffer = null; return { ok: false, msg: '这件物品不能交易' }; }
+    let wanted = null;
+    if (offer.requestIndex !== null && offer.requestIndex !== undefined && offer.requestIndex >= 0) {
+      wanted = me.items[offer.requestIndex];
+      if (!wanted) { st.tradeOffer = null; return { ok: false, msg: '接收方已经没有这件物品' }; }
+      if (wanted.noTrade) { st.tradeOffer = null; return { ok: false, msg: '接收方的物品不能交易' }; }
+      if (itemActionOf(st, wanted)) { st.tradeOffer = null; return { ok: false, msg: '接收方的物品本回合已经执行过其他操作' }; }
+    }
     from.items.splice(offer.index, 1);
     me.items = me.items.concat(item);
+    if (wanted) {
+      me.items = me.items.filter((it) => it !== wanted);
+      from.items = from.items.concat(wanted);
+    }
     st.traded = true;
     markItemAction(st, item, 'trade');
+    if (wanted) markItemAction(st, wanted, 'trade');
     st.tradeOffer = null;
-    pushLog(st, from.name + ' 把「' + item.name + '」交给 ' + me.name + '（' + me.name + ' 接受）');
+    pushLog(st, from.name + ' 把「' + item.name + '」交给 ' + me.name +
+      (wanted ? '，' + me.name + ' 把「' + wanted.name + '」交给 ' + from.name : '') +
+      '（双方确认）');
     return { ok: true, state: st };
   }
 
@@ -1324,11 +1388,23 @@ window.CabinEngine = (function () {
     if (!item) return { ok: false, msg: '没有这件物品' };
     if (item.noTrade) return { ok: false, msg: '这件物品不能交易' };
     if (itemActionOf(st, item)) return { ok: false, msg: '这件物品本回合已经执行过其他操作' };
+    let requestIndex = null;
+    let requestName = '';
+    if (action.requestIndex !== null && action.requestIndex !== undefined && action.requestIndex >= 0) {
+      const wanted = other.items[action.requestIndex];
+      if (!wanted) return { ok: false, msg: '对方没有这件物品' };
+      if (wanted.noTrade) return { ok: false, msg: '对方这件物品不能交易' };
+      if (itemActionOf(st, wanted)) return { ok: false, msg: '对方这件物品本回合已经执行过其他操作' };
+      requestIndex = action.requestIndex;
+      requestName = wanted.name;
+    }
     st.tradeOffer = {
       from: p.id, to: other.id, index: action.index,
-      itemName: item.name, fromName: p.name, toName: other.name
+      itemName: item.name, fromName: p.name, toName: other.name,
+      requestIndex: requestIndex, requestName: requestName
     };
-    pushLog(st, p.name + ' 向 ' + other.name + ' 发起交易：' + item.name);
+    pushLog(st, p.name + ' 向 ' + other.name + ' 发起交易：' + item.name +
+      (requestName ? ' 换 ' + requestName : '（纯赠送）'));
     return { ok: true, state: st };
   }
 
@@ -1363,7 +1439,7 @@ window.CabinEngine = (function () {
     }
 
     if (st.phase === 'ended') return { ok: false, msg: '对局已经结束' };
-    if (st.pendingDamage && action.type === 'allocateDamage') return allocateDamage(st, i, action);
+    if (st.pendingDamage && action.type === 'allocateDamage') return allocateDamage(st, i, action, rand);
     if (st.pendingDamage) return { ok: false, msg: '先分配伤害' };
     if (st.pendingRoll && action.type === 'rollPending') return resolvePendingRoll(st, i, rand);
     if (st.pendingRoll) return { ok: false, msg: '先掷骰' };
@@ -1377,6 +1453,7 @@ window.CabinEngine = (function () {
       return { ok: false, msg: '先完成怪物阶段' };
     }
     if (st.turn !== i) return { ok: false, msg: '还没轮到你' };
+    if (st.players[i] && st.players[i].dead && action.type !== 'end') return { ok: false, msg: '你已经倒下，只能结束回合' };
 
     switch (action.type) {
       case 'monsterMove': return monsterAct(st, i, action, rand);
@@ -1394,7 +1471,7 @@ window.CabinEngine = (function () {
       case 'stair': return stairMove(st, i);
       case 'attack': return attack(st, i, action.target, action.trait, rand, action);
       case 'check': return heroCheck(st, i, rand);
-      case 'allocateDamage': return allocateDamage(st, i, action);
+      case 'allocateDamage': return allocateDamage(st, i, action, rand);
       case 'useItem': {
         const p = st.players[i];
         const idx = action.index;
@@ -1428,10 +1505,17 @@ window.CabinEngine = (function () {
         if (!pile.length) return { ok: false, msg: '这里没有物品堆' };
         const available = pile.filter((it) => !itemActionOf(st, it));
         if (!available.length) return { ok: false, msg: '这些物品本回合已经执行过其他操作' };
-        p.items = p.items.concat(available);
-        st.itemPiles[key] = pile.filter((it) => available.indexOf(it) < 0);
-        available.forEach((it) => markItemAction(st, it, 'pickup'));
-        pushLog(st, p.name + ' 捡起了 ' + available.length + ' 件物品');
+        let picked = available;
+        if (action.index !== undefined && action.index !== null) {
+          const one = pile[action.index];
+          if (!one) return { ok: false, msg: '这件物品不在物品堆里' };
+          if (itemActionOf(st, one)) return { ok: false, msg: '这件物品本回合已经执行过其他操作' };
+          picked = [one];
+        }
+        p.items = p.items.concat(picked);
+        st.itemPiles[key] = pile.filter((it) => picked.indexOf(it) < 0);
+        picked.forEach((it) => markItemAction(st, it, 'pickup'));
+        pushLog(st, p.name + ' 捡起了 ' + picked.map((it) => it.name).join('、'));
         return { ok: true, state: st };
       }
       case 'trade': return makeTradeOffer(st, i, action);
