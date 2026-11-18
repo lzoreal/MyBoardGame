@@ -115,6 +115,17 @@ ok('50 条剧本都带中文对照', P.scenarios.filter((s) => s.official && s.o
 const s13 = P.scenarios.find((s) => s.no === 13);
 ok('圣地能读出英雄 Setup 与叛徒 Setup', !!(s13.official.hero.setup && s13.official.traitor.setup));
 
+console.log('=== 内容合同 ===');
+ok('50 条剧本都带 factions', P.scenarios.every((s) => s.factions && s.factions.type), String(P.scenarios.filter((s) => !s.factions).length));
+const needGoal = P.scenarios.filter((s) => s.factions.type === 'traitor_vs_heroes' || s.factions.type === 'hidden_traitor');
+ok('叛徒剧本都有显式 traitorGoal', needGoal.every((s) => s.traitorGoal), String(needGoal.filter((s) => !s.traitorGoal).map((s) => s.no)));
+ok('运行时没有默认 killAll 或 killTraitor', P.scenarios.every((s) => !(s.traitorGoal === null && s.factions.type === 'traitor_vs_heroes')));
+const eventEmpty = P.events.filter((e) => !e.roll && !e.effect && !e.tiers && !e.win && !e.lose);
+ok('43 张事件没有空分支', eventEmpty.length === 0, eventEmpty.map((e) => e.name).join(','));
+const itemFields = ['weapon','testTrait','attackDice','attackResult','testBonus','armor','use','distance','noNormalAttack','mentalReduce','defenseDice','physicalToSanity','eventDice','endTurnHeal','knowledgeWithSanity','damageConvert','fate','teleport','extraTurn','wallMove','reroll'];
+const itemEmpty = P.items.filter((it) => !itemFields.some((f) => it[f] !== undefined));
+ok('22 张物品没有纯文本卡', itemEmpty.length === 0, itemEmpty.map((it) => it.name).join(','));
+
 console.log('\n' + (fail ? '失败 ' + fail + '，通过 ' + pass : '全部通过：' + pass + ' passed, 0 failed'));
 process.exit(fail ? 1 : 0);
 

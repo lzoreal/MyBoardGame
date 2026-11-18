@@ -13,8 +13,9 @@ const CONTENT = path.join(ROOT, 'content', 'cabin');
 const OUT = path.join(ROOT, 'js', 'games', 'cabin-packs.js');
 const TRAITS = ['speed', 'might', 'known', 'sanity'];
 const TRAITOR_RULES = ['revealer', 'lowestSanity', 'highestMight', 'highestSpeed', 'lowestSpeed', 'highestKnowledge', 'lowestMight', 'omenHolder',
-  'hiddenTraitor', 'noTraitor', 'freeForAll', 'leftOfRevealer', 'oldest', 'mostOmens', 'seeEvent'];
-const GOAL_TYPES = ['killTraitor', 'killAll', 'survive', 'ritual', 'escape', 'hunt', 'tokens', 'rig', 'evidence', 'treasure', 'placeTokens', 'allOf'];
+  'hiddenTraitor', 'noTraitor', 'freeForAll', 'leftOfRevealer', 'oldest', 'mostOmens', 'seeEvent', 'magicCamera'];
+const GOAL_TYPES = ['killTraitor', 'killAll', 'survive', 'ritual', 'escape', 'hunt', 'tokens', 'rig', 'evidence', 'treasure', 'placeTokens', 'allOf', 'anyOf', 'possessItem', 'destroyItem', 'trackZero', 'convertAll', 'custom'];
+const FACTION_TYPES = ['traitor_vs_heroes', 'hidden_traitor', 'cooperative', 'free_for_all'];
 
 function fail(file, message) {
   throw new Error((file ? file + ': ' : '') + message);
@@ -112,7 +113,7 @@ function validateGoal(goal, label, file) {
   }
   if (goal.type === 'tokens') {
     requireString(goal.token, label + '.token', file, 20);
-    integer(goal.need, label + '.need', file, 1, 30);
+    if (!goal.perHero) integer(goal.need, label + '.need', file, 1, 30);
   }
   if (goal.type === 'rig') {
     requireString(goal.token, label + '.token', file, 20);
@@ -128,10 +129,15 @@ function validateGoal(goal, label, file) {
     });
     integer(goal.need, label + '.need', file, 1, 30);
   }
-  if (goal.type === 'allOf') {
+  if (goal.type === 'allOf' || goal.type === 'anyOf') {
     if (!Array.isArray(goal.goals) || !goal.goals.length) fail(file, label + '.goals 必须是非空数组');
     goal.goals.forEach((g, k) => validateGoal(g, label + '.goals[' + k + ']', file));
   }
+  if (goal.type === 'possessItem' || goal.type === 'destroyItem') {
+    requireString(goal.item, label + '.item', file, 60);
+  }
+  if (goal.type === 'custom') requireString(goal.key, label + '.key', file, 60);
+  if (goal.type === 'trackZero') requireString(goal.track, label + '.track', file, 30);
   return goal;
 }
 
@@ -170,10 +176,13 @@ function validateMonster(m, label, file) {
   const count = integer(m.count === undefined ? 1 : m.count, label + '.count', file, 1, 20);
   const speed = integer(m.speed, label + '.speed', file, 1, 10);
   const might = integer(m.might, label + '.might', file, 1, 10);
+  const sanity = m.sanity === undefined ? undefined : integer(m.sanity, label + '.sanity', file, 1, 10);
+  const known = m.known === undefined ? undefined : integer(m.known, label + '.known', file, 1, 10);
   const attack = m.attack === undefined ? 'might' : m.attack;
   if (TRAITS.indexOf(attack) < 0) fail(file, label + '.attack 必须是属性 key');
-  const noAttack = m.noAttack === true || /不可攻击|不可被攻击|不能攻击/.test(m.rule || '');
-  const boundMatch = /不能离开(.+?)(；|;|。|$)/.exec(m.rule || '');
+  const rule = typeof m.rule === 'string' ? m.rule : '';
+  const noAttack = m.noAttack === true || /不可攻击|不可被攻击|不能攻击/.test(rule);
+  const boundMatch = /不能离开(.+?)(；|;|。|$)/.exec(rule);
   const boundRoom = boundMatch ? boundMatch[1].trim() : '';
   let counts = null;
   if (m.counts && typeof m.counts === 'object') {
@@ -182,7 +191,19 @@ function validateMonster(m, label, file) {
       if (m.counts[k] !== undefined) counts[k] = integer(m.counts[k], label + '.counts.' + k, file, 0, 20);
     });
   }
-  return { key, name, count, speed, might, attack, noAttack, counts, boundRoom };
+  const attackOnly = (() => {
+    const hit = /只能被(力量|速度|知识|神智)攻击/.exec(rule);
+    return hit ? ({ 力量: 'might', 速度: 'speed', 知识: 'known', 神智: 'sanity' })[hit[1]] : '';
+  })();
+  return {
+    key, name, count, speed, might, sanity, known, attack, noAttack, counts, boundRoom, rule,
+    noStun: /不可击晕|不被击晕|不会击晕|不僵直|不可僵直/.test(rule),
+    oneHit: /受到任何伤害.*消灭|受到.*伤害.*消灭|被消灭而不是击晕|受伤.*即.*消灭/.test(rule),
+    ignoreDoors: /无视门|穿门|不受门/.test(rule),
+    damageReduce: /伤害减免|减伤|所有伤害 -1|减少.*伤害/.test(rule),
+    attackOnly,
+    endTurn: m.endTurn
+  };
 }
 
 function validateScenario(s, file, seen) {
@@ -204,11 +225,28 @@ function validateScenario(s, file, seen) {
   if (event) trigger.event = event;
   const rule = s.traitorRule === undefined ? 'revealer' : s.traitorRule;
   if (TRAITOR_RULES.indexOf(rule) < 0) fail(file, 'traitorRule 不支持：' + rule);
+  if (!s.factions || typeof s.factions !== 'object') fail(file, '缺少 factions（阵营合同）');
+  if (FACTION_TYPES.indexOf(s.factions.type) < 0) fail(file, 'factions.type 不支持：' + s.factions.type);
+  if (s.factions.type !== 'cooperative' && s.factions.type !== 'free_for_all' &&
+      s.factions.type !== 'traitor_vs_heroes' && s.factions.type !== 'hidden_traitor') {
+    fail(file, 'factions.type 非法');
+  }
   const heroGoal = validateGoal(s.heroGoal, 'heroGoal', file);
-  const traitorGoal = validateGoal(s.traitorGoal || { type: 'killAll' }, 'traitorGoal', file);
+  let traitorGoal = null;
+  if (s.traitorGoal) traitorGoal = validateGoal(s.traitorGoal, 'traitorGoal', file);
+  else if (rule !== 'noTraitor' && rule !== 'freeForAll') fail(file, '剧本缺少 traitorGoal（禁止默认杀光英雄）');
   const heroGoalText = requireString(s.heroGoalText, 'heroGoalText', file, 200);
   const traitorGoalText = requireString(s.traitorGoalText, 'traitorGoalText', file, 200);
   const priority = s.priority === undefined ? 10 : integer(s.priority, 'priority', file, -999, 999);
+  if (!s.setup || typeof s.setup !== 'object') fail(file, '剧本缺少 setup 合同');
+  if (s.setup.mode !== 'manual' && s.setup.mode !== 'scripted') fail(file, 'setup.mode 必须是 manual 或 scripted');
+  if (s.setup.mode === 'manual' && !s.setup.heroText && !s.setup.traitorText) fail(file, '手动 setup 缺少官方步骤文本');
+  if (s.setup.placements !== undefined) {
+    if (!Array.isArray(s.setup.placements)) fail(file, 'setup.placements 必须是数组');
+    s.setup.placements.forEach((p, i) => {
+      if (!p.monster || !p.room) fail(file, 'setup.placements[' + i + '] 需要 monster 与 room');
+    });
+  }
   let monsters;
   if (s.monsters !== undefined) {
     if (!Array.isArray(s.monsters)) fail(file, 'monsters 必须是数组');
@@ -216,23 +254,12 @@ function validateScenario(s, file, seen) {
   }
   return {
     no: s.no === undefined ? 0 : integer(s.no, 'no', file, 0, 9999),
-    key, name, story, trigger: trigger, traitorRule: rule,
+    key, name, story, trigger: trigger, traitorRule: rule, factions: s.factions,
     heroGoal, traitorGoal, heroGoalText, traitorGoalText,
+    setup: s.setup,
     priority, monsters,
     actions: s.actions === undefined ? undefined : validateActions(s.actions, 'actions', file),
-    monster: s.monster === undefined ? undefined : Object.assign(validateMonster(s.monster, 'monster', file),
-      { sanity: s.monster.sanity === undefined ? undefined : integer(s.monster.sanity, 'monster.sanity', file, 1, 10),
-        known: s.monster.known === undefined ? undefined : integer(s.monster.known, 'monster.known', file, 1, 10),
-        rule: typeof s.monster.rule === 'string' ? s.monster.rule : undefined,
-        noStun: /不可击晕|不被击晕|不会击晕|不僵直|不可僵直/.test(s.monster.rule || ''),
-        oneHit: /受到任何伤害.*消灭|受到.*伤害.*消灭|被消灭而不是击晕|受伤.*即.*消灭/.test(s.monster.rule || ''),
-        ignoreDoors: /无视门|穿门|不受门/.test(s.monster.rule || ''),
-        damageReduce: /伤害减免|减伤|所有伤害 -1|减少.*伤害/.test(s.monster.rule || ''),
-        attackOnly: (() => {
-          const m2 = /只能被(力量|速度|知识|神智)攻击/.exec(s.monster.rule || '');
-          return m2 ? ({ 力量: 'might', 速度: 'speed', 知识: 'known', 神智: 'sanity' })[m2[1]] : '';
-        })(),
-        endTurn: s.monster.endTurn }),
+    monster: s.monster === undefined ? undefined : validateMonster(s.monster, 'monster', file),
     flipRooms: !!s.flipRooms,
     dimension: !!s.dimension,
     custom: true
@@ -251,6 +278,7 @@ function validateEvent(e, file, seen) {
     const trait = e.roll.trait === 'none' ? 'none' : e.roll.trait;
     if (trait !== 'none' && TRAITS.indexOf(trait) < 0) fail(file, 'roll.trait 不支持：' + e.roll.trait);
     roll = { trait, diff: integer(e.roll.diff, 'roll.diff', file, 1, 10), hauntRoll: !!e.roll.hauntRoll };
+    if (e.roll.dice !== undefined) roll.dice = integer(e.roll.dice, 'roll.dice', file, 1, 6);
   }
   let tiers;
   if (e.tiers !== undefined) {
@@ -260,10 +288,23 @@ function validateEvent(e, file, seen) {
       effect: t.effect && typeof t.effect === 'object' ? t.effect : {}
     }));
   }
+  let hauntCheck;
+  if (e.hauntCheck !== undefined) {
+    if (!roll || !roll.hauntRoll) fail(file, 'hauntCheck 只能用于闹鬼检定事件');
+    const hc = e.hauntCheck;
+    if (!hc || typeof hc !== 'object') fail(file, 'hauntCheck 必须是对象');
+    hauntCheck = {
+      scenarioNo: integer(hc.scenarioNo, 'hauntCheck.scenarioNo', file, 1, 99),
+      successText: typeof hc.successText === 'string' ? hc.successText.trim() : '',
+      fail: hc.fail && typeof hc.fail === 'object' ? hc.fail : undefined,
+      afterHaunt: hc.afterHaunt && typeof hc.afterHaunt === 'object' ? hc.afterHaunt : undefined
+    };
+  }
   return {
     key, name, text, roll, tiers, effect: e.effect || undefined,
     win: e.win || undefined, lose: e.lose || undefined,
-    hauntNo: e.hauntNo === undefined ? 0 : integer(e.hauntNo, 'hauntNo', file, 0, 99)
+    hauntNo: e.hauntNo === undefined ? 0 : integer(e.hauntNo, 'hauntNo', file, 0, 99),
+    hauntCheck
   };
 }
 
@@ -276,10 +317,23 @@ function validateItem(it, file, seen) {
   const text = typeof it.text === 'string' ? it.text.trim() : '';
   const out = { key, name, text };
   ['weapon'].forEach((f) => { if (it[f] !== undefined) { if (TRAITS.indexOf(it[f]) < 0) fail(file, f + ' 必须是属性 key'); out[f] = it[f]; } });
-  ['attackBonus', 'testBonus', 'armor'].forEach((f) => { if (it[f] !== undefined) out[f] = integer(it[f], f, file, -5, 9); });
+  ['attackBonus', 'attackDice', 'attackResult', 'testBonus', 'armor', 'mentalReduce', 'defenseDice', 'physicalToSanity', 'eventDice', 'endTurnHeal'].forEach((f) => { if (it[f] !== undefined) out[f] = integer(it[f], f, file, -5, 9); });
   if (it.testTrait !== undefined) { if (TRAITS.indexOf(it.testTrait) < 0) fail(file, 'testTrait 必须是属性 key'); out.testTrait = it.testTrait; }
-  if (it.use !== undefined) out.use = it.use;
-  ['noSteal', 'noDrop', 'noTrade', 'distance'].forEach((f) => { if (it[f]) out[f] = true; });
+  if (it.use !== undefined) {
+    if (!it.use || typeof it.use !== 'object') fail(file, 'use 必须是对象');
+    const allowedUse = ['heal','gain','healMany','healAll','teleportAny','extraTurn','knowledgeSanity','fate','wallMode'];
+    if (allowedUse.indexOf(it.use.type) < 0) fail(file, 'use.type 不支持：' + it.use.type);
+    out.use = { type: it.use.type, consume: !!it.use.consume };
+    if (it.use.trait !== undefined) { if (TRAITS.indexOf(it.use.trait) < 0) fail(file, 'use.trait 必须是属性 key'); out.use.trait = it.use.trait; }
+    if (it.use.traits !== undefined) out.use.traits = it.use.traits.filter((t) => TRAITS.indexOf(t) >= 0);
+    if (it.use.amount !== undefined) out.use.amount = integer(it.use.amount, 'use.amount', file, -5, 9);
+  }
+  ['noSteal', 'noDrop', 'noTrade', 'distance', 'noNormalAttack', 'knowledgeWithSanity', 'damageConvert', 'fate', 'teleport', 'extraTurn', 'wallMove'].forEach((f) => { if (it[f]) out[f] = true; });
+  if (it.reroll !== undefined) {
+    if (!['blank', 'one', 'all'].includes(it.reroll)) fail(file, 'reroll 不支持：' + it.reroll);
+    out.reroll = it.reroll;
+  }
+  if (it.cost !== undefined) out.cost = it.cost;
   return out;
 }
 
@@ -296,6 +350,8 @@ function validateOmen(o, file, seen) {
   }
   if (o.weapon !== undefined) { if (TRAITS.indexOf(o.weapon) < 0) fail(file, 'weapon 必须是属性 key'); out.weapon = o.weapon; }
   if (o.attackBonus !== undefined) out.attackBonus = integer(o.attackBonus, 'attackBonus', file, 0, 9);
+  if (o.attackDice !== undefined) out.attackDice = integer(o.attackDice, 'attackDice', file, -5, 9);
+  if (o.attackResult !== undefined) out.attackResult = integer(o.attackResult, 'attackResult', file, -5, 9);
   return out;
 }
 

@@ -18,7 +18,29 @@
       },
       "heroGoalText": "摧毁戒指，或杀死叛徒",
       "traitorGoalText": "所有英雄死亡，或数字轨道归 0",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "hidden_traitor",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "trackZero",
+            "track": "number"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "YoumayrevealyourNumbertokenjustbeforesomeonesuccessfully 1.FindtheNumbertokenslabeled1through{3/4/5/63andshufflethem,face-down.Giveonetoeachplayer DestroystheRing!Ifyoudo，rturnallheroestoanyLandingtilesof IFTHETRAITORWINS 2.Eachplayerthenlooksattheirtokenwithoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is yourchoice.TheherotryingtoDestroytheRing!canfailasaresult. Youdiscoveredtatyoucouldcontrol thetraitor Whenyourevealyourselfasthetraitor,healallofyourtraitsandgain timewiththering.Luckilyyour 3.SettheNumberTrackto{6/5/4/3} 1Might. annoying“friends”didn'tcatchon 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. thatyou'retheonewhocreatedthe Ifyouhaverevealedyourself，ounottakedamageifyoudonot timeloop.Theydidn'tknowthatthis returntoaLandingtileattheendofthehauntrevealer'sturn wasn'tthefirsttimeyou²dmurdered HIDDENTRAITOR them...andnowtheyneverwill.",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 4,
@@ -40,7 +62,18 @@
       },
       "heroGoalText": "在仪式房完成 3 次神智判定（难度 5），解救中介",
       "traitorGoalText": "本剧本没有叛徒",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "cooperative",
+        "traitorCount": 0
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "Armory-Basement/GroundFloor WhileonthesametileastheDemonRealtormakeaSanityroll.Add Graveyard-GroundFloor 1.PlacetheDemontokenontheEntranceHalltile.ThisistheDemonRealtor 1totheresultofyourrollforeachFiretokenonatileinyourregion 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheDemonRealtorwilltakeitsturnafterthatplayer IfyourexplorerisontheRitualRoomtile,lsoadd1totheresult.If 3.Find6Firetokens.Place{3/2/1/0}ofthemontileswithheroes.ThesemarkCleansedRooms,whichwillhelp",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 5,
@@ -100,7 +133,18 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "cooperative",
+        "traitorCount": 0
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "ties)butimmediatelystopassoonastheyenteranyhero'sline petrifiedhands.Youarenowapartof ofsight. 1.EachexplorerplacesaSmallMonstertokenontheirtile.TheseareStoneCherubs. thehouse.justanotherstatuelost tohistory 2.Find{3/4/5/6]additionalStoneCherubs.Ifpossible,placethemontilesthatarenotinheroes'linesofsight Cherubsthatstarttheirturninahero'slineofsightwillnotmove Ifyoucannot,placetherestaroundthehousehoweveryoulike duringthatturn. PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer 3. ATTHEENDOFTHEMONSTERTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. EachherotakesonedieofGeneraldamageforeachCherubintheir lineofsight COOPERATIVEHAUNT",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 6,
@@ -142,7 +186,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "hidden_traitor",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "IFYOUDIE Withtherestofthe'familyburied TurnyourNumbertokenface-up 1.ThehauntrevealerplaceseachTraittokenface-uponadifferenttile,inadifferentregionfromitsmatchingTrait yougoaboutsearchingfortheold token.(Example:IftheMighttokenisontheUpperFloor,theotherMighttokenmustbeplacedontheGround man'sdocuments.Withanedithere ATTHEENDOFYOURTURN FloororBasement.）ThesetokensrepresentEvidence. andaforgedsignaturethere,the fyoudidnotattack,taketwodiceofMentaldamage.Yourgreat-uncle' 2.ShuffletheNumbertokenslabeled1through{3/4/5/6y,face-down.Giveoneofthesetokenstoeachplayer houseandallthewealthandstatus ghostdemandsvengeance.Itdoesn'tcarewho'sonthereceivingend thatcomeswithit、isnowyours 3.Eachplayerthenlooksattheirtoken,withoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is thetraitor. IFYOUARETHETRAITOR 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. Youmayrevealyourselfatan",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 8,
@@ -184,6 +241,17 @@
           "5": 5,
           "6": 6
         }
+      },
+      "factions": {
+        "type": "cooperative",
+        "traitorCount": 0
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "HousekeepersattackwithMightandmovetoward vanishwithoutatraceaghostly “thankyou”echoesinyourears theclosesthero.Ifthereisatie,theHousekeeprs 1.Ifthehousecontainsfewerthan{3/4/5/63tileswithEventsymbols,drawandplacetilesfromthetilestack Finally，thehouseisclean. until{3/4/5/63tileswithEventsymbolshavebeenplaced.Whenplacingthesetiles,donotresolvetheir willmovetowardtheeldesthero. effects. IFYOULOSE ATTHEENDOFTHEMONSTERTURN 2.Place{3/4/5/6}SmallMonstertokensonseparatetileswithEventsymbols,distributedasevenlyaspossible Deal1GeneraldamagetoeachexplorerChoking Youturntodustintheshapesofyour betweenregions.TheseareHousekeepers. witheringdust. formerselves.Slowlyyoucrumble 3.Setthe5Runetokensofftotheside yourremainsdriftingthroughthe 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. houseasspecksintheair.Youdon't evercompletelysettlebecausenow you'reapartofthishouse-andthe COOPE",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -202,7 +270,18 @@
       },
       "heroGoalText": "成为最后活着的探险者",
       "traitorGoalText": "最后活着的探险者获胜",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "free_for_all",
+        "teams": "individual"
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "",
+        "traitorText": "1.S SettheNumberTrackto1 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 10,
@@ -238,7 +317,18 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "free_for_all",
+        "teams": "individual"
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "",
+        "traitorText": "1.IftheVaultisnotinthehouse,thehauntrevealersearchesthetilestackforitandplacesitontheGroundFloor asfaraspossiblefromtheEntranceHall 2.AssembletwosetsofNumberTokensnumberedbetween1and{2/3/4/53（Example:ina4-playergame,take tw1s.two2s.andtwo3s.)TheseareTreasures Placeoneofthehighest-numberedTreasuretokensontheVaulttile.Shuffletherestface-downandplacethem 3 randomlyontilesthathaveOmensymbols,distributedasevenlyaspossiblebetweenregions SettheNumberTrackto4 4S 5.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 11,
@@ -258,7 +348,18 @@
       },
       "heroGoalText": "找到 3 份食物献祭，活到最后",
       "traitorGoalText": "最后活着的探险者获胜",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "free_for_all",
+        "teams": "individual"
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "",
+        "traitorText": "1.Setaside{2/3/4/5}Foodtokens.Leaetherestinthebox. 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheWitcheswilleatexplorersattheendofthatplayer'sturn 3.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 13,
@@ -297,6 +398,29 @@
           "5": 5,
           "6": 6
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "wake_sleeping_one",
+            "text": "唤醒沉睡之她"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.SettheNumberTrackto3.ThisrepresentsyourRitualProgress. IftheRitualRoomandChasmtileshavenotbeendiscoveredindtheminthetilestackandplacetheminthe 4 Basement,followingnormaltile-placementrules. Place{3/4/5/6}SmallMonstertokensintheRitualRoom.TheseareCultists. 5. 6.Healallofyourtraits.Gain1Mightand1Speed HeavyBurden",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -333,6 +457,28 @@
           "5": 3,
           "6": 4
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "destroyItem",
+            "item": "魔法书"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "SettheNumberTrackto{4/4/5/5} 1.S 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Find{1/2/3/4}SmallMonstertokens.TheserepresentAnimatedFurniture.PlaceoneAnimatedFurniture tokenneachtilewithahero.Ifatilehasmorethanoneheroplaceatokenforeachheroonthattile.Donot placeatokenfortheherowhohastheBook Whenyoudie",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -385,7 +531,20 @@
           "known": 4,
           "attack": "might"
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+        "traitorText": "1.Yourexplorerhasdied.Younowcontrolthemonsters.GhostsandWerewolvesandVampires,ohmy 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours. 3.FindtheLargeMonstertokensfortheGhost,VampireandWerewolfSelect{1/2//fthosetokensat randomandplacethemonthetilewhereyourexplorerdied.Returnany unselectedtokenstothegamebox Insteadofyourturn,takeaturnwitheachmonster",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 16,
@@ -417,6 +576,19 @@
         "sanity": 4,
         "known": 4,
         "attack": "might"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.IftheGraveyardtilehasnotalreadybeenplaced,searchthetilestackforitandplaceitusingnormal tile-placementrules 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup REMAINS",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.FindoneofeachNumberTokenlabeled1through{4/5/6/7.TheseareHumanRemains.Thetokenlabeled “1”representstheCaretaker'sRemains 5.PlacetheRemainstokensface-downthroughoutthehouse,keepingtheirnumberssecretfromtheheroes.(You maylookatthem.)YoumustplaceatleastoneRemainstokenineachregionofthehouse.Donotplacemore thanonetokenpertile Place2SmallMonstertokensonanytilewithoutahero.TheseareAngryGhosts.Setaside{2/3/5more 6. AngryGhosttokens Onceduringyourturnoumay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -447,6 +619,19 @@
         "known": 2,
         "attack": "might",
         "rule": "带符文时被消灭而不是击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. GREMLINMAGIC",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4Place3SmallMonstertokensonyourtile.ThesearetheGrmlins 5.Take{6/5/4/3}scrapsofpaperandwritean“X”oneverypieceexceptone.Thefinalpieceshouldsay“DIE.” Foldthesescraps,shufflethemandplacetheminthetopofthegamebox.Thesewillrepresenttheemails receivedbytheheroes Attheendofeachhero'sturn",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -488,7 +673,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THERINGOFILLUSIONS",
+        "traitorText": "1.Removeyourexplorerfromthehouse.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Anymonstersinthehousewilltaketheirturninplaceofyours 3.Healallofyourtraits 4FindoneofeachNumberTokenlabeled1through{3/4/5/6y.Theseareyourlllusions.The“1”tokenisthe realyou 5.Shufflethelllusionsface-down(youmaylookatthematanytime)andplaceoneonyourtile.Thenplacethe restofthelllusionsaroundthehouseontilesfartherawaythanthevalueofyourSpeedtrait.Ifpossible youmustplaceeachIllusiononadifferenttile.Removeyourexplorerfromthehouse,youarenowHidden Amonglllusions TheRingofIllusions",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 19,
@@ -519,6 +717,28 @@
         "known": 3,
         "attack": "sanity",
         "rule": "可把有录像带的板块视作相邻移动"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "trackZero",
+            "track": "number"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonstertakesitsturnafteryours 3.Gain1Sanity 4.SettheNumberTrackto{6/4/3/2} Place5Videotapetokensonfivedifferenttiles,asfarfromtheheroesaspossible 5. 6.PlacetheGhosttokenonanytilewithaVideotapetoken.ThisistheVengefulSpirit WhenYouAttack",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -548,6 +768,19 @@
         "known": 5,
         "attack": "might",
         "rule": "不可击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Iftherearefewerthanfivenon-Landingtilesinthehouse,drawtilesfromthetilestackandplacetheminthe houseuntiltherearefive 2.Setaside{2/3//53Runetokens.ThesearetheSyllablesoftheFacelessMan'sName. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Choose{2/3/4/5}roomsinthehouseetwitetheirnamesonasheetofpapertandnumberthem 4 ThesetilesholdtheSyllablesoftheFacelessMan'sName.Theseroomsmaybelocatedinanyorallregionsofthe house.(Example:ina4-playergame,writedownthenamesofthreetilesandnumberthem12d.) 5.PlacetheFacelessMantokenonyourtile GuessingtheFacelessMan'sName",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -577,6 +810,19 @@
         "known": 8,
         "attack": "might",
         "rule": "不能离开图书室；不可击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.IftheLibrarytileisnotinthehousefinditinthetilestackandplaceitinaregionotherthantheonecurrently occupiedbythetraitor 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEBOOK",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlacetheDemontokenintheLibrary.ThisisSpookyMcMasters 4GiveSpookyMcMasterstheBookOmencard.PlaceitnexttotheMonsterCard 5.PlaceaSmallMonstertokenonyourtile.ThisisaHorror Healallofyourtraits. 6 Gain{1/1/2/3}MightandSpeed. TheBook",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -608,6 +854,19 @@
         "known": 2,
         "attack": "might",
         "rule": "被消灭而不是击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.ShufflealloftheBasementtiles(otherthantheBasementLandingtile)backintothetilestack. 2.EachheroplacestheirfigureontheBasementLandingtile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours IftheLaboratorytilehasnotbeendiscoveredsarchthetilestackforitandplaceitontheGroundFloor 3. Placeyourexploreronthattile MissionFirst",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -639,6 +898,19 @@
         "known": 2,
         "attack": "might",
         "rule": "受伤时不被击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "SettheNumberTrackto{2/3/4/5} 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours. 3.Healallofyourtraits 4Place{2/3/4/5}ONtokensanywhereinthehousedistributedasevenlyaspossiblebetweenregions. 5.PlaceaSmallMonstertokenoneachtilewithanONtoken.TheseareyourRobotAssistants WreckedRooms",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -702,7 +974,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Find{2/3/4/5}Firetokens-theseareSeelieFlames.Placeoneofthesetokensoneachofthefollowing rooms(iftheyhavebeendiscovered):Tower,StatuaryCorridor,sevtoryaardUgodCavern， andUndergroundLake 2.SetanyremainingSeelieFlamestotheside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SEELIEFLAME",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor. 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBallroomand/orChapeltileshavenotbeendiscovered,findtheminthetilestackandplacethemonthe GroundFloor,followingnormaltile-placementrules 5.PlaceyourexplorerintheBallroom，alongwith{1/2/3/4}SmallMonstertokens.TheseareFaeDancers 6.SettheDarkQueentokenaside.Shemaycomeintoplaylater CometotheDance",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 25,
@@ -755,7 +1040,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.SetasideaMight,Speed,Knowledge,andSitytoe.TheseareSpellIngredients 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits WhenyouwinaMightattackagainstahero",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 26,
@@ -793,6 +1091,19 @@
           "5": 4,
           "6": 5
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.PlacetheAltartokenonanyGroundFloortile 2.IftheRitualRoomhasnotbeendiscovered,earchthetilestackforitandplaceitintheBasement,usingnorma tile-placementrules. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 Place{2/3/4/5}SmallMonstertokensondifferenttileswithOmensymbols.TheseareyourRelatives.Ifthere arenotenoughtileswithOmensymbols,placetheremainingRelativesontheEntranceHall. SettheDarkQueentokenaside.ThisisTheElderItwillcomeintoplaylater 5.S Onceduringyourturn，ouma",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -811,7 +1122,30 @@
       },
       "heroGoalText": "杀死叛徒",
       "traitorGoalText": "把所有外星文字铺进屋里，或所有英雄死亡",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "spread_alien_words",
+            "text": "把所有外星文字铺进屋里"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. 3.Find{3/4/4/5}Runetokensandsetthemasidefortheheroes.TheseareAlienWords ALIENWORDS",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{5/4/4/3}Runetokensandsetthemtothesideinfrontofyou.TheseareAlienWords PlaceanAlienWordonyourtile 4、 AlienWords",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 28,
@@ -841,6 +1175,19 @@
         "known": 4,
         "attack": "might",
         "rule": "不可击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup FLIPPEDTILES",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -880,6 +1227,19 @@
           "5": 3,
           "6": 3
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "Theheroeshavenoadditionalsetupsteps. 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Place{1/2/3/3}SmallMonstertokensonthetilewithyou.ThesearetheFae WhenyouAttackaHero",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -916,6 +1276,20 @@
           "5": 3,
           "6": 4
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "possessItem",
+        "item": "戒指"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.IftheSecretStairstilehasnotbeendiscovered,searchthetilestackforthattileandplaceitinthehouse,using normaltile-placementrules 2.Setasidethetop{4/6/9/12}tilesfromthetilestackandreturntheremainingtilestothegamebox.Ifthere arefewertilesthanthisinthestack，kipthisstep 3.TakeanyOmensheldbythetraitorandgivethemtothehauntrevealer 4.ThetraitoristryingtofindtheRing.Whentheteamsseparate,theheroesmayfreelytradeOmens,usingthe normaltradingrules.EachheromustplacetheirOmensface-downonthetableinfrontofthem 5.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. OMENS",
+        "traitorText": "1.Youhavebeenpossessedbyaspirit!Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 PlaceyourexplorerontheEntranceHall. Place{1/2/3/4}SmallMonstertokensondifferenttileswithOmensymbols.ThesearetheWeddingParty 5. IftherearenotenoughtileswithOmensymbols,placetheremainingmembersoftheWeddingPartyonthe GroundFloorStaircase. Whenyouattackahero",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -946,6 +1320,19 @@
         "sanity": 5,
         "known": 5,
         "attack": "might"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKACURSEDITEMONYOURTILE",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. 4TakeallltemsandOmensfromeveryplayerStartingwiththeHolySymbol,set{4/5/7/9}ofthosecards asideface-up.Iftherearefewercardsthanthis,ettemllaside BuryanyremainingltemsandOmens. 5.B PlaceonesetofNumbertokensontheset-asideltemandOmens,thenplaceamatchingNumberTokeninthe 6. house.ThesetokensrepresentCursedItems.EachCursedItemmustbeplacedonadifferentItemorOmentile IfanyCursedItemsremainplacethemontheEntranceHall Onceduringyourturnyoumay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -982,6 +1369,29 @@
           "5": 5,
           "6": 7
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "burn_the_house",
+            "text": "烧毁房子"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUENTERATILEWITHAFIRETOKEN",
+        "traitorText": "Catsswarmyou.Yourexplorerhasdied.BuryyourltemsandOmensandremoveyourfigurefromthehouse 1 PlacetheBakenekotokenonyourtile.YounowcommandtheBakenekoandtheUndeadCats. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Findandsetaside{6/5/4/3}Firetokens.Puttherestbackinthebox. 4.Place{3/4/5/7}SmallMonstertokensinyourregion.TheseareyourUndeadCats Insteadofyourturn,takeaturnwiththeBakeneko",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1009,7 +1419,20 @@
       "heroGoalText": "在维度改写生效时抵达入口大厅",
       "traitorGoalText": "所有英雄死亡",
       "priority": 100,
-      "dimension": true
+      "dimension": true,
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.SetasideaSmallMonstertoken.Thisisyourfriendhristina 2.ReturnthedeckofEventcardstothegamebox 3.SettheNumberTrackto{6/3/1/0} 4.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 35,
@@ -1046,6 +1469,28 @@
           "5": 5,
           "6": 5
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "convertAll",
+            "key": "mind_control_all_heroes"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SALT FOOD",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaNesttokenonanyBasementtile.PlaceasecondNesttokenonanyUpperFloortile 4Place{2/3/5}SmallMonstertokensonyourtile.TheseareSlugs NEST Nesttoken",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1095,7 +1540,30 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "enlightenment",
+            "text": "获得觉悟（神智达到最大值）"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1 Yourexplorerisstillinthegame.Youarethetraitor 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaSmallMonstertokenoneachtilethathasanEventsymbol.TheseareGhosts Onceduringyourturn，youmay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 37,
@@ -1164,7 +1632,22 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "tokens",
+        "token": "DNA",
+        "perHero": true
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.GiveeachherotheircorrespondingHerotokentoplaceontheirrespectivecharacterboards.ThisistheirDNA 2.SettheNumberTrackto{2/3/4/5} 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. BODYSWAPS",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.BurytheArmorandsetallofyourtraitstotheirstartingvalues 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4PlaceyourfigureontheEntranceHallalongwith/1/1/2SmallMonstertokens.Theseareyour SecurityRobots. 5.EachheroplacesaSecurityRobotontheirtile DNA",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 38,
@@ -1200,6 +1683,19 @@
           "5": 5,
           "6": 6
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "Theheroeshavenoadditionalsetupsteps 1. 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. THERINGOFFEASTS",
+        "traitorText": "1.IftheKitchentilehasnotbeendiscoveredtetilestackforitandplaceitontheGroundFloorasfaras possiblefromtheEntranceHall 2.Healallofyourtraits. 3.SettheNumberTrackto{2/3/4/4} Place{3/4/5/6]SmallMonstertokensaroundthehouse,oneoneachtilewithanEventsymbol.These 4. areNeighbors.lfyoumustplacemoreNeighborsthantherearetileswithEventsymbols,placetherestof thoseNeighborsintheEntranceHall. 5.PlacetheMonsterCardonyourleft.Themonsterswilltaketheirturnaferyours Whenyoudie",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1229,6 +1725,29 @@
         "sanity": 5,
         "known": 5,
         "attack": "might"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "time_runs_out",
+            "text": "时间耗尽"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.SettheNumberTrackto{5/4/4/3} 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup NEST WASPEGGS",
+        "traitorText": "1.Youcompleteyourmetamorphosis.RemoveyourexplorerfromthehouseandreplaceitwiththeGiantWasp BuryallofyourltemsandOmens. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Distribute5NesttokensacrossdifferentGroundand/orUpperFloortiles.ThesearetheWaspEggsthatthe heroesaretryingtodestroy Place{o/2/3mllMonstertokensonyourtile.TheseareyourWorkerWasps 4.F Insteadofyourturn,takeaturnwitheach",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1248,7 +1767,20 @@
       },
       "heroGoalText": "杀死所有邪恶双胞胎",
       "traitorGoalText": "所有英雄死亡",
-      "priority": 100
+      "priority": 100,
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.Place{2/3/4/5}SmallMonstertokensontoyourtile.Thesearetheheroes'EvilTwins Findeachhero'smatchingHerotoken.ThesearetheTwins'ldentities.PlaceoneunderneatheachEvilTwin. 5. Onceduringyourturnyoumay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 41,
@@ -1302,7 +1834,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.SettheNumberTrackto0. 2.Place5SearchedtokensneartheNumberTrack. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup TRIGGERINGATRAP",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaTraptokenonyourtile.SettheremainingTraptokensaside 4.Take{3/3/4/5}ON/OFFtokensandreturntheresttothebox.TheseareGenerators.Placeoneonyourtile andthenoneoneachtileofyourchoicethathasanItemorOmensymbol.Ifanytokensremainpacetheseon Landingtiles Onceduringyourturnyoumay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 42,
@@ -1351,7 +1896,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.IftheLardertilehasnotbeendiscoveredfinditinthetilestackandplaceitintheBasement 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturnafteryours 4.BurytheDogPlacetheDemonDogtokenonyourtile. 5.Place{0/1/1/2}FoodtokensontheMonsterCard.Settheresttotheside. Onceduringyourturn，youmay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 43,
@@ -1381,6 +1939,19 @@
         "known": 3,
         "attack": "might",
         "rule": "不能攻击躲藏中的英雄"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.SettheNumberTrackto{6/7/8/9} 2.BurytheDog PlacetheWerewolftokenonthehauntrevealer'stile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2 PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours HiddenHeroes HIDDEN",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1442,7 +2013,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Thehauntrevealermustturntheirtileface-downandplacetheirfigurinebackonthattile.Thattileisnow Burning.Ifthereareonlythreeplayers,fliptheotherhero'stileaswell(unlesstheyareonaLandingtile) 2.Find5Firetokensandsetthemaside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEHOUSEISONFIRE",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.Place{1/2/3/4}SmallMonstertokensonLandingtiles.TheseareyourMannequins. Thehouseisonfire",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 45,
@@ -1490,7 +2074,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.IftheArmorytilehasnotbeendiscoveredsearchthetilestackforitandplaceitontheGroundFloorof thehouse. 4 Drawcardsfromtheltemdeckuntilyouhave2weaponsTakethose2weaponsandplacetherestofthedrawn cardsonthebottomoftheltemdeck.Ifnoweaponsremainintheltemdeck,skipthisstep. 5.SettheNumberTrackto{2/3/4/5} Whenyoudie",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 46,
@@ -1520,6 +2117,20 @@
         "known": 4,
         "attack": "might",
         "rule": "只能被力量攻击伤害"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "convertAll",
+        "key": "all_heroes_become_werewolves"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANTIDOTES 1",
+        "traitorText": "YouhavebeenconsumedbyhairReplaceyourfigurewiththeGiantHairMonstertoken.Buryallofyourltems 1. andOmens. 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours FindoneofeachNumberTokenlabeled1through{4/6/8/10}.TheseareAntidotes.Shufflethemandplace 3 themface-downaroundthehousearrangedhoweveyoulike Place1SmallMonstertokenontheEntranceHall.ThisisaSmallHairMonster 4、 Findandsetaside{1/2/3/4additionalSmallHairMonsters 5. Whenaherodies",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1576,7 +2187,20 @@
             }
           ]
         }
-      ]
+      ],
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{2/3/4/5}Portaltokens.ThenforeachheroplaceaPortaltokeninthathero'sregiononthetile farthestfromthathero GiveeachherotheirHeromatchingtoken.AherowhohastheirHerotokenisTrapped 4 AnotherDimension",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 48,
@@ -1607,6 +2231,19 @@
         "known": 8,
         "attack": "might",
         "rule": "被击败时改为击晕，头骨交给攻击者"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKTHEHEADOFTHEHOUSE",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits.Gain1Might 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBloodyRoomtilehasnotbeendiscoveredchthetilestackforitandplaceitontheGroundFloor PlacetheHeadoftheHousetokenontheBloodyRoom 5. PlacetheSkullundertheMonsterCard.TheHeadoftheHouseiscarryingit 6 Onceduringyourturn，youmay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1636,6 +2273,29 @@
         "known": 5,
         "attack": "sanity",
         "rule": "持契约时不可击晕"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "bring_blood_person_blood",
+            "text": "带来血之人的血"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.EachherotakesaBloodtokenandplacesitontheircharacterboard 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. THECONTRACT",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltaketheirturnafteryours 4Gain/1/2/2MightandSpeed. 5.PlacetheDemontokenontheBasementtilefarthestfromtheBasementLanding PlacetheContracttokenontheDemon.ItisholdingtheContract. 6. WhenyouattackaHero",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1669,7 +2329,30 @@
         "attack": "might",
         "rule": "不可击晕；速度等于数字轨道"
       },
-      "flipRooms": true
+      "flipRooms": true,
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "anyOf",
+        "goals": [
+          {
+            "type": "killAll"
+          },
+          {
+            "type": "custom",
+            "key": "devour_the_house",
+            "text": "吞噬整栋房子"
+          }
+        ]
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Setaside(3/4/4/5)Traptokens.TheseareExplosives 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+        "traitorText": "1.Youhavebeenconsumed.BuryallofyourltemsandOmens.Removeyourexplorerfromthehouseandreplace itwiththeConstructtoken 2.Turnthetileyouareonface-down.ThattilehasbeenConsumed. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturninplaceofyours 4.SettheNumberTrackto{2/3/3/4.ThisisyourSpeed. ConsumedRooms",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+      }
     },
     {
       "no": 1,
@@ -1700,6 +2383,19 @@
         "sanity": 4,
         "known": 4,
         "attack": "might"
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "seems,wasoutafterdark... Ifyoursidehasanyspecificsetupsteps,thisiswheretheywillbelisted Bothsideswillhavedifferentsetuprequirements.Allsetuphappensbefore SETUP thefirstturnofthehaunt,anditmaysignificantlychangewhatthehouse 1.Theheroeshavenoadditionalsetupsteps lookslike 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay SPECIALACTIONS",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1729,6 +2425,20 @@
         "sanity": 3,
         "known": 3,
         "attack": "might"
+      },
+      "factions": {
+        "type": "hidden_traitor",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "convertAll",
+        "key": "all_heroes_become_traitors"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "Whileonatilewithanotherexploreryoumaytradeoneofyour Thefeverishrushoutofthehouse 1.FindthreeNumbertokensforeachplayerTheserepresenttheSickness.Ingameswith3-5players,thereshould Sicknesstokensatrandomwiththatexplorer.Thatexplorermust towreakhavocuponthetown.Dust beone“1”token.Ina6-playergame,thereshouldbetwo“1”tokens agreetothetrade.Thedustwantstospread todust. 2.ShuffletheSicknesstokensface-down,andgivethreetoeachplayer 3.PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer ATTHEENDOFYOURTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup Ifyouareonatilewithanotherexplorer,swaponeofyourSickness tokensatrandomwiththem.Ifmultipleexplorersareonyourtile swaptokenswitheachofthemoneatatime.Anexplorerwho HIDDENTRAITOR",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1764,6 +2474,17 @@
           "5": 4,
           "6": 5
         }
+      },
+      "factions": {
+        "type": "cooperative",
+        "traitorCount": 0
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "theMirrorBeingmoves.IfaMirrorBeingendsitsturnonaspace Thecreaturesfinalassaultdrawsyou 1.Thehauntrevealertipstheirfigureover.Theyarestillinthegame,butdeadtheirsoulistrappedinthe withanexplorer,itattacksthatexplorerusingSanity intotheMirrorRealm，whereyouand MirrorRealm. yourfriendsaretrappedforevermore 2.ThehauntrevealerselectsaTrait，Omen,andRoomatrandom(seebelow),notingtheirnamesonasheetof paper.Thisinformationshouldnotbesharedwithanyotherplayers. Onceduringyourturn，youmay ShuffletheTraittokensface-down，andselectoneatrandomMakeanoteofwhichtokewaschosen a. BreaktheSpell 福 b. ShuffleNumbertokensnumbered1-9face-down,andselectoneatrandom Whileonanytileheaitandrollit.Tellthehauntrevealerthe MakeanoteofwhichOmenthattokenrepresents: nameofoneofyourOmens. 2:Dog 4:Dagger 3:ldol 5:Armor 1:Mask 6:Ring IfyouhavethecorrectcombinationofTrait，Omen,andRoom， 7:Book 8:HolySymbol 5+ 9:Skull thehauntreveale",
+        "traitorText": "",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1792,6 +2513,17 @@
         "known": 4,
         "attack": "might",
         "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+      },
+      "factions": {
+        "type": "free_for_all",
+        "teams": "individual"
+      },
+      "traitorGoal": null,
+      "setup": {
+        "mode": "manual",
+        "heroText": "",
+        "traitorText": "1.IfnoonehastheStrangeAmuletltemcard,finditintheltemdeckandgiveittothehauntrevealer 2.PlacetheMonsterCardtotheleftofthehauntrevealerThemonsterswilltaketheirturnafterthehauntrevealer 3.PlaceoneTrollHandtokenontheEntranceHallandanotherontheBasementLanding 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     },
     {
@@ -1803,7 +2535,7 @@
         "event": "说茄子",
         "room": "*"
       },
-      "traitorRule": "seeEvent",
+      "traitorRule": "magicCamera",
       "heroGoal": {
         "type": "tokens",
         "token": "已毁相机",
@@ -1828,6 +2560,19 @@
           "5": 4,
           "6": 5
         }
+      },
+      "factions": {
+        "type": "traitor_vs_heroes",
+        "traitorCount": 1
+      },
+      "traitorGoal": {
+        "type": "killAll"
+      },
+      "setup": {
+        "mode": "manual",
+        "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Place{2/3/4/5}SmallMonstertokensonanynon-Landingtileistributedasevenlyaspossibleamongregions.Theseare PhantomPhotographers 3.IftheMagicCamerahasnotbeendiscoveredachtheltemdeckfortheMagicCameraandplaceitface-upinfrontofyou GiveeachherotheirmatchingHerotoken.ThisistheirEssence 4 Onceduringyourturnyoumay",
+        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
       }
     }
   ]

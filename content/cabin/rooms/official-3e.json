@@ -1,5 +1,4 @@
 {
-  "_source": "3E 房间牌 46 张（design/cabin/rooms-3e.json 门位逐张复核结果）+ 5 个起始房间",
   "rooms": [
     {
       "key": "entrance_hall",
@@ -63,7 +62,10 @@
       "floor": "ground",
       "doors": "NEW",
       "symbol": "item",
-      "text": "翻开物品堆直到出现一件武器，取走后把其余埋回堆底。"
+      "text": "翻开物品堆直到出现一件武器，取走后把其余埋回堆底。",
+      "effect": {
+        "type": "drawWeapon"
+      }
     },
     {
       "key": "ballroom",
@@ -177,7 +179,12 @@
       "floor": "basement",
       "doors": "ESW",
       "symbol": "event",
-      "text": "结束回合时受 1 点物理伤害。"
+      "text": "结束回合时受 1 点物理伤害。",
+      "effect": {
+        "type": "endTurnDamage",
+        "damage": "physical",
+        "amount": 1
+      }
     },
     {
       "key": "gallery",
@@ -360,7 +367,12 @@
       "floor": "basement",
       "doors": "N",
       "symbol": "omen",
-      "text": "若密梯尚未放置，从牌堆找出并放到下层，然后洗牌。"
+      "text": "若密梯尚未放置，从牌堆找出并放到下层，然后洗牌。",
+      "effect": {
+        "type": "placeSpecial",
+        "room": "密梯",
+        "floor": "basement"
+      }
     },
     {
       "key": "primary_bedroom",
@@ -388,7 +400,12 @@
       "doors": "N",
       "symbol": "item",
       "text": "若时光树尚未放置，从牌堆找出并放到上层，然后洗牌；本板块通向时光树。",
-      "link": "时光树"
+      "link": "时光树",
+      "effect": {
+        "type": "placeSpecial",
+        "room": "时光树",
+        "floor": "upper"
+      }
     },
     {
       "key": "salon",

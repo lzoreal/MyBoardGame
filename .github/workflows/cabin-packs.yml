@@ -6,6 +6,10 @@ on:
     paths:
       - 'content/cabin/**'
       - 'tools/build-cabin-packs.mjs'
+      - 'tools/audit-cabin-content.mjs'
+      - 'js/games/cabin.js'
+      - 'js/games/cabin-packs.js'
+      - 'tests/cabin*.test.js'
       - '.github/workflows/cabin-packs.yml'
   workflow_dispatch:
 
@@ -29,11 +33,23 @@ jobs:
       - name: Build content packs
         run: node tools/build-cabin-packs.mjs
 
+      - name: Audit 3E content baseline
+        run: node tools/audit-cabin-content.mjs --summary
+
       - name: Run cabin rules tests
         run: node tests/cabin.test.js
 
       - name: Run cabin content-pack tests
         run: node tests/cabin-packs.test.js
+
+      - name: Run cabin official 3E tests
+        run: node tests/cabin-official.test.js
+
+      - name: Run cabin 3E rule tests
+        run: node tests/cabin-3e-rules.test.js
+
+      - name: Run cabin scenario special tests
+        run: node tests/cabin-specials.test.js
 
       - name: Commit generated manifest
         run: |

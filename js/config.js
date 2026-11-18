@@ -23,5 +23,7 @@
 
 window.SUPABASE_CONFIG = {
   url: 'https://wvgxzuecgpaathnpybfi.supabase.co',
-  anonKey: 'sb_publishable_tyjmG-Y3KsaLuhyIOLS-cQ_tUFzz3y2'
+  anonKey: 'sb_publishable_tyjmG-Y3KsaLuhyIOLS-cQ_tUFzz3y2',
+  // 已执行 sql/rooms-private.sql；关闭它会退回旧的整包 rooms.state 读写
+  privateMode: true
 };

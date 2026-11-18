@@ -90,6 +90,7 @@ start(st25, 25);
 const armory = E.helpers.roomByName(st25, '军械库') || { floor: 'ground', x: 6, y: 6, name: '军械库', doors: 'NSEW', kind: 'normal' };
 if (!E.helpers.roomByName(st25, '军械库')) st25.rooms.push(armory);
 st25.players[0].traits.might = 4;
+E.helpers.setTrack(st25, 0, 'might', 4, '测试：固定到 4');
 if (armory) {
   teleport(st25.players[0], armory);
   const before = st25.players.map((p) => p.traits.might);
@@ -135,6 +136,8 @@ console.log('=== 难忘的骑士 #47：被困 ===');
 const st47 = fresh(471);
 start(st47, 47);
 st47.players[1].traits.might = 1; st47.players[2].traits.might = 5;
+E.helpers.setTrack(st47, 1, 'might', 1, '测试：最弱者');
+E.helpers.setTrack(st47, 2, 'might', st47.players[2].track.might.list.length, '测试：最强者');
 const snare = E.act(st47, { type: 'hauntAction', key: 'snare' }, 'a', high);
 ok('叛徒可以困住最弱的人', snare.ok && st47.players[1].trapped === true, snare.msg);
 const stuckMove = (function () { st47.turn = 1; return E.act(st47, { type: 'move', dir: 'E' }, 'b', seeded(472)); })();
@@ -143,12 +146,53 @@ st47.turn = 1; st47.moves = 3;
 const stuckTrade = E.act(st47, { type: 'trade', target: 'a', index: 0 }, 'b', seeded(473));
 ok('被困者不能交易', stuckTrade.ok === false, stuckTrade.msg);
 
-console.log('=== 隐藏叛徒 ===');
-const stH = fresh(901);
+console.log('=== 怪物运行时 flags ===');
+const stM = fresh(1501);
+start(stM, 15);
+const ghost = stM.monsters.find((m) => m.name === '幽灵');
+ok('幽灵保留无视门 flag', !!ghost && ghost.ignoreDoors === true, ghost && JSON.stringify(ghost));
+ok('幽灵保留不可击晕 flag', !!ghost && ghost.noStun === true, ghost && JSON.stringify(ghost));
+
+console.log('=== 房间特殊连接 ===');
+const stLink = fresh(1801);
+stLink.phase = 'playing'; stLink.moves = 3;
+const roomData = (name) => JSON.parse(JSON.stringify(E.ROOMS.find((r) => r.name === name)));
+const gallery = roomData('画廊'), ballroom = roomData('舞厅');
+stLink.rooms.push(gallery, ballroom);
+stLink.players[0].floor = gallery.floor; stLink.players[0].x = gallery.x; stLink.players[0].y = gallery.y;
+const movedLink = E.act(stLink, { type: 'moveRoom', room: '舞厅' }, 'a', seeded(1802));
+ok('画廊可经特殊连接到舞厅', movedLink.ok && stLink.players[0].floor === ballroom.floor && stLink.players[0].x === ballroom.x, movedLink.msg);
+
+console.log('=== 特殊事件完整抽牌路径 ===');
+const eventCard = (name) => JSON.parse(JSON.stringify(E.EVENTS.find((e) => e.name === name)));
+function roomWithEvent(st) {
+  const r = JSON.parse(JSON.stringify(E.ROOMS.find((x) => x.name === '入口大厅')));
+  r.kind = 'normal'; r.symbol = 'event'; r.resolved = false;
+  st.rooms.push(r);
+  st.players[0].floor = r.floor; st.players[0].x = r.x; st.players[0].y = r.y;
+  return r;
+}
+const stEvLow = fresh(101);
+const roomLow = roomWithEvent(stEvLow);
+stEvLow.decks.events = [eventCard('绯红之溅')];
+E.helpers.setTrack(stEvLow, 0, 'speed', 2, '测试：失败前');
+const speedPosBefore = stEvLow.players[0].track.speed.pos;
+E.helpers.resolveRoomSymbol(stEvLow, 0, roomLow, low);
+ok('闹鬼检定失败不会误开闹鬼', !(stEvLow.haunt && stEvLow.haunt.active), stEvLow.lastRoll && stEvLow.lastRoll.total);
+ok('闹鬼检定失败执行失败分支', stEvLow.players[0].track.speed.pos === speedPosBefore + 1, speedPosBefore + ' -> ' + stEvLow.players[0].track.speed.pos);
+const stEvHigh = fresh(102);
+const roomHigh = roomWithEvent(stEvHigh);
+stEvHigh.decks.events = [eventCard('绯红之溅')];
+E.helpers.resolveRoomSymbol(stEvHigh, 0, roomHigh, high);
+ok('闹鬼检定成功只触发一次对应剧本', !!stEvHigh.haunt && stEvHigh.haunt.no === 1, stEvHigh.haunt && stEvHigh.haunt.no);
+
+console.log('=== 隐藏叛徒 ===');const stH = fresh(901);
 const sc6 = JSON.parse(JSON.stringify(scenario(6)));
 E.helpers.startHaunt(stH, 0, '骨戒', '入口大厅', seeded(902), sc6);
 ok('隐藏叛徒开局不点名', stH.haunt.hidden === true);
-const hiddenAtk = E.act(stH, { type: 'attack', target: 'b', trait: 'might' }, 'a', high);
+const hiddenIdx = stH.haunt.traitor;
+const hiddenTarget = stH.players.find((p, k) => k !== hiddenIdx && !p.dead);
+const hiddenAtk = E.act(stH, { type: 'attack', target: hiddenTarget.id, trait: 'might' }, stH.players[hiddenIdx].id, high);
 ok('隐藏叛徒一动手就暴露', hiddenAtk.ok === false || stH.haunt.hidden === false, hiddenAtk.msg);
 
 console.log('=== 人物年龄 ===');
@@ -183,6 +227,73 @@ const stLow2 = fresh(802);
 const lowSc = { key: 'tmp_low', no: 0, name: '低理智', heroGoal: { type: 'killTraitor' }, traitorGoal: { type: 'killAll' }, traitorRule: 'lowestSanity' };
 E.helpers.startHaunt(stLow2, 0, null, null, seeded(803), lowSc);
 ok('最低理智判定会排除揭示者本人', stLow2.haunt.traitor !== 0, stLow2.haunt.traitor);
+
+console.log('=== 主动物品 ===');
+const stMap = fresh(201);
+const mapItem = E.ITEMS.find((x) => x.name === '地图');
+E.helpers.grantItem(stMap, 0, mapItem);
+const mapUse = E.act(stMap, { type: 'useItem', index: 0, room: '门厅' }, 'a', high);
+ok('地图能把玩家送到已发现房间', mapUse.ok && stMap.players[0].x === 3 && stMap.players[0].y === 5, mapUse.msg);
+ok('地图使用后埋掉', stMap.players[0].items.every((it) => it.name !== '地图'));
+
+const stWatch = fresh(202);
+start(stWatch, 5);
+const watch = E.ITEMS.find((x) => x.name === '神秘秒表');
+E.helpers.grantItem(stWatch, 0, watch);
+const watchUse = E.act(stWatch, { type: 'useItem', index: 0 }, 'a', high);
+ok('闹鬼后能用神秘秒表', watchUse.ok && stWatch.extraTurn === true, watchUse.msg);
+const watchEnd = E.act(stWatch, { type: 'end' }, 'a', high);
+ok('秒表让同一玩家再行动一次', watchEnd.ok && stWatch.turn === 0 && stWatch.extraTurn === false, watchEnd.msg);
+
+const stBrooch = fresh(203);
+const brooch = E.ITEMS.find((x) => x.name === '胸针');
+E.helpers.grantItem(stBrooch, 0, brooch);
+E.helpers.beginDamage(stBrooch, 0, 2, 'physical', '测试');
+ok('胸针把物理伤害转成通用伤害', stBrooch.pendingDamage && stBrooch.pendingDamage.kind === 'general', JSON.stringify(stBrooch.pendingDamage));
+
+const stWall = fresh(204);
+const key = E.ITEMS.find((x) => x.name === '万能钥匙');
+E.helpers.grantItem(stWall, 0, key);
+E.act(stWall, { type: 'useItem', index: 0 }, 'a', high);
+const hereWall = E.helpers.roomAt(stWall, stWall.players[0].floor, stWall.players[0].x, stWall.players[0].y);
+stWall.rooms.push({ floor: hereWall.floor, x: hereWall.x + 1, y: hereWall.y, name: '测试墙后房间', doors: 'W', symbol: null, kind: 'normal' });
+const wallUse = E.act(stWall, { type: 'wallMove', x: hereWall.x + 1, y: hereWall.y }, 'a', () => 0.5);
+ok('万能钥匙可以穿没有门的墙', wallUse.ok && stWall.players[0].x === hereWall.x + 1, wallUse.msg);
+
+console.log('=== 房间效果 ===');
+const stArm = fresh(205);
+E.helpers.roomEffect(stArm, 0, { name: '军械库', effect: { type: 'drawWeapon' } }, high);
+ok('军械库翻到武器并拿走', stArm.players[0].items.some((it) => it.weapon), stArm.players[0].items.map((it) => it.name).join(','));
+
+const stFur = fresh(206);
+stFur.rooms[0].effect = { type: 'endTurnDamage', damage: 'physical', amount: 1 };
+stFur.rooms[0].name = '锅炉房';
+const furEnd = E.act(stFur, { type: 'end' }, 'a', high);
+ok('锅炉房结束回合受 1 点物理伤害', furEnd.ok && stFur.pendingDamage && stFur.pendingDamage.amount === 1 && stFur.pendingDamage.kind === 'physical', JSON.stringify(stFur.pendingDamage));
+
+const stPanic = fresh(207);
+const secretTile = { name: '密梯', floors: ['basement'], doors: 'NSEW' };
+stPanic.roomDeck.push(secretTile);
+E.helpers.roomEffect(stPanic, 0, { name: '恐慌室', effect: { type: 'placeSpecial', room: '密梯', floor: 'basement' } }, high);
+ok('恐慌室从板块堆找出密梯并放到地下室', stPanic.rooms.some((r) => r.name === '密梯' && r.floor === 'basement'), stPanic.rooms.map((r) => r.name).join(','));
+
+const stRoot = fresh(208);
+const treeTile = { name: '时光树', floors: ['upper'], doors: 'NSEW' };
+stRoot.roomDeck.push(treeTile);
+E.helpers.roomEffect(stRoot, 0, { name: '根窖', effect: { type: 'placeSpecial', room: '时光树', floor: 'upper' } }, high);
+ok('根窖把时光树放到二层', stRoot.rooms.some((r) => r.name === '时光树' && r.floor === 'upper'), stRoot.rooms.map((r) => r.name).join(','));
+
+console.log('=== 判定重掷窗口 ===');
+const stReroll = fresh(209);
+const foot = E.ITEMS.find((x) => x.name === '兔脚');
+E.helpers.grantItem(stReroll, 0, foot);
+stReroll.pendingRoll = { kind: 'event', index: 0, card: '测试事件', trait: 'might', diff: 1, win: {}, lose: {} };
+const firstRoll = E.act(stReroll, { type: 'rollPending' }, 'a', high);
+ok('掷骰后停在等待确认', firstRoll.ok && stReroll.pendingRoll.await === true && !!stReroll.pendingRoll.result, firstRoll.msg);
+const rerolled = E.act(stReroll, { type: 'rerollPending', index: 0 }, 'a', high);
+ok('兔脚能重掷一颗骰', rerolled.ok && stReroll.pendingRoll.await === true, rerolled.msg);
+const confirmed = E.act(stReroll, { type: 'confirmPendingRoll' }, 'a', high);
+ok('确认结果后才结算并清空判定', confirmed.ok && stReroll.pendingRoll === null, confirmed.msg);
 
 console.log(failed ? '失败 ' + failed + ' 项：' + fails.join(' | ') : '全部通过：' + passed + ' passed, 0 failed');
 process.exit(failed ? 1 : 0);
