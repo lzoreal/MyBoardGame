@@ -1466,10 +1466,16 @@ window.CabinEngine = (function () {
       } else if (op.type === 'assignDNA') {
         st.players.forEach((p) => { p.dna = true; h.setup.dna[p.id] = 1; });
       } else if (op.type === 'assignBlood') {
-        st.players.filter((p) => p.side === 'hero').forEach((p) => { p.blood = 1; });
+        const heroes = st.players.filter((p) => p.side === 'hero');
+        heroes.forEach((p) => { p.blood = 1; });
+        h.bloodHeroes = heroes.length;
       } else if (op.type === 'trapHeroes') {
         st.players.filter((p) => p.side === 'hero' && !p.dead).forEach((p) => { p.trapped = true; });
       } else if (op.type === 'custom') {
+        if (op.key === 'alienWordSupply') {
+          h.wordSupply = Number(op.valueByPlayers ? op.valueByPlayers[String(st.players.length)] : op.value) || 1;
+          h.wordsPlaced = 1;
+        }
         h.setup.flags[op.key] = op.value === undefined ? true : op.value;
       }
     });
@@ -1522,6 +1528,47 @@ window.CabinEngine = (function () {
       st.haunt.devouredFloors = st.haunt.devouredFloors || {};
       st.haunt.devouredFloors[p.floor] = true;
       pushLog(st, p.name + ' 吞噬了「' + (FLOOR_LABEL[p.floor] || p.floor) + '」');
+    }
+    if (ops.spreadWord) {
+      if ((st.haunt.wordsPlaced || 0) >= (st.haunt.wordSupply || 0)) {
+        pushLog(st, '外星文字已经全部铺进屋里');
+      } else {
+        addToken(st, '外星文字', room, 1);
+        st.haunt.wordsPlaced = (st.haunt.wordsPlaced || 0) + 1;
+        pushLog(st, p.name + ' 在「' + (room ? room.name : '这里') + '」放下一个外星文字（' + st.haunt.wordsPlaced + '/' + st.haunt.wordSupply + '）');
+      }
+    }
+    if (ops.igniteFloor) {
+      st.haunt.burnedFloors = st.haunt.burnedFloors || {};
+      st.haunt.burnedFloors[p.floor] = true;
+      addToken(st, '火焰', room, 1);
+      pushLog(st, p.name + ' 点燃了「' + (FLOOR_LABEL[p.floor] || p.floor) + '」');
+    }
+    if (ops.drainTime) {
+      const cur = Number(st.haunt.numberTrack || 0);
+      st.haunt.numberTrack = Math.max(0, cur - 1);
+      pushLog(st, '时间流逝，数字轨道变为 ' + st.haunt.numberTrack);
+    }
+    if (ops.collectBlood) {
+      const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.blood > 0 && q.floor === p.floor && q.x === p.x && q.y === p.y);
+      if (hero) {
+        hero.blood = 0;
+        st.haunt.bloodCollected = (st.haunt.bloodCollected || 0) + 1;
+        st.haunt.bloodTokens = (st.haunt.bloodTokens || 0) + 1;
+        pushLog(st, p.name + ' 从 ' + hero.name + ' 身上取得血液');
+      } else {
+        pushLog(st, '同房间没有带血标记的英雄');
+      }
+    }
+    if (ops.offerBlood) {
+      const demon = st.monsters.find((m) => (m.key === 'demon' || m.name === '恶魔') && !m.dead && m.floor === p.floor && m.x === p.x && m.y === p.y);
+      if (demon && st.haunt.bloodTokens > 0) {
+        st.haunt.bloodOffered = (st.haunt.bloodOffered || 0) + st.haunt.bloodTokens;
+        st.haunt.bloodTokens = 0;
+        pushLog(st, p.name + ' 把血液献给恶魔（' + st.haunt.bloodOffered + '/' + st.haunt.bloodHeroes + '）');
+      } else {
+        pushLog(st, '要和恶魔同房间并且带着血液，才能献祭');
+      }
     }
     if (ops.token) addToken(st, ops.token, room, ops.count || 1);
     if (ops.gain) gainTrait(st, i, ops.gain.trait, ops.gain.amount, '剧本');
@@ -1827,6 +1874,18 @@ window.CabinEngine = (function () {
       }
       if (g.key === 'devour_the_house') {
         return FLOORS.every((f) => !!(h.devouredFloors && h.devouredFloors[f]));
+      }
+      if (g.key === 'spread_alien_words') {
+        return !!h.wordSupply && (h.wordsPlaced || 0) >= h.wordSupply;
+      }
+      if (g.key === 'burn_the_house') {
+        return FLOORS.every((f) => !!(h.burnedFloors && h.burnedFloors[f]));
+      }
+      if (g.key === 'time_runs_out') {
+        return h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0;
+      }
+      if (g.key === 'bring_blood_person_blood') {
+        return (h.bloodOffered || 0) >= (h.bloodHeroes || 0) && (h.bloodHeroes || 0) > 0;
       }
       return !!(h.custom && h.custom[g.key]);
     }

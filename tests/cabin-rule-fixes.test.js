@@ -129,6 +129,53 @@ console.log('=== custom 目标不再被 Setup 标志直接满足 ===');
   ok('#13 轨道归零才唤醒沉睡之她', st13.phase === 'ended' && st13.winner && st13.winner.side === 'traitor', st13.winner && st13.winner.text);
 }
 
+console.log('=== #27 / #32 / #39 / #49 custom 目标 ===');
+{
+  const st27 = start(27);
+  const tr27 = st27.players[st27.haunt.traitor];
+  st27.turn = st27.haunt.traitor;
+  ok('#27 Setup 给出外星文字供应与已放 1 个', st27.haunt.wordSupply === 5 && st27.haunt.wordsPlaced === 1, st27.haunt.wordSupply + '/' + st27.haunt.wordsPlaced);
+  const w = E.act(st27, { type: 'hauntAction', key: 'spread_word' }, tr27.id, high);
+  ok('#27 铺下一个外星文字', w.ok === true && st27.haunt.wordsPlaced === 2, w.msg);
+  st27.haunt.wordsPlaced = st27.haunt.wordSupply;
+  E.helpers.checkWin(st27);
+  ok('#27 全部铺完后叛徒获胜', st27.phase === 'ended' && st27.winner && st27.winner.side === 'traitor', st27.winner && st27.winner.text);
+
+  const st32 = start(32);
+  const tr32 = st32.players[st32.haunt.traitor];
+  st32.turn = st32.haunt.traitor;
+  const fire = E.act(st32, { type: 'hauntAction', key: 'spread_fire' }, tr32.id, high);
+  ok('#32 点燃当前楼层', fire.ok === true && st32.haunt.burnedFloors && st32.haunt.burnedFloors[tr32.floor] === true, fire.msg);
+  st32.haunt.burnedFloors = { upper: true, ground: true, basement: true };
+  E.helpers.checkWin(st32);
+  ok('#32 三层烧起来后叛徒获胜', st32.phase === 'ended' && st32.winner && st32.winner.side === 'traitor', st32.winner && st32.winner.text);
+
+  const st39 = start(39);
+  const tr39 = st39.players[st39.haunt.traitor];
+  st39.turn = st39.haunt.traitor;
+  const t = E.act(st39, { type: 'hauntAction', key: 'drain_time' }, tr39.id, high);
+  ok('#39 时间流逝降低数字轨道', t.ok === true && st39.haunt.numberTrack === 4, st39.haunt.numberTrack);
+  st39.haunt.numberTrack = 0;
+  E.helpers.checkWin(st39);
+  ok('#39 轨道归零后时间耗尽', st39.phase === 'ended' && st39.winner && st39.winner.side === 'traitor', st39.winner && st39.winner.text);
+
+  const st49 = start(49);
+  const tr49 = st49.players[st49.haunt.traitor];
+  st49.turn = st49.haunt.traitor;
+  const hero49 = st49.players.find((q) => q.side === 'hero' && q.blood > 0);
+  tr49.floor = hero49.floor; tr49.x = hero49.x; tr49.y = hero49.y;
+  const blood = E.act(st49, { type: 'hauntAction', key: 'collect_blood' }, tr49.id, high);
+  ok('#49 从同房间英雄取得血液', blood.ok === true && st49.haunt.bloodCollected === 1, blood.msg);
+  const demon = st49.monsters.find((m) => m.name === '恶魔' && !m.dead);
+  tr49.floor = demon.floor; tr49.x = demon.x; tr49.y = demon.y;
+  st49.haunt.turnUsed = {};
+  const offer = E.act(st49, { type: 'hauntAction', key: 'offer_blood' }, tr49.id, high);
+  ok('#49 把血献给恶魔', offer.ok === true && st49.haunt.bloodOffered === 1, offer.msg);
+  st49.haunt.bloodOffered = st49.haunt.bloodHeroes;
+  E.helpers.checkWin(st49);
+  ok('#49 献上所有英雄之血后叛徒获胜', st49.phase === 'ended' && st49.winner && st49.winner.side === 'traitor', st49.winner && st49.winner.text);
+}
+
 console.log('=== 事件 token 效果 ===');
 {
   const st = start(8);

@@ -77,6 +77,37 @@ s50.actions = (s50.actions || []).filter((a) => a.key !== 'devour_room').concat(
   tiers: [{ at: 4, do: { devourRoom: true } }, { at: 0, do: {} }]
 }]);
 
+// #27：叛徒逐个把外星文字铺进房间；全部铺完即获胜
+const s27 = byNo(27);
+s27.actions = (s27.actions || []).filter((a) => a.key !== 'spread_word').concat([{
+  key: 'spread_word', name: '铺下外星文字', trait: 'known', where: 'any', once: 'turn', side: 'traitor',
+  tiers: [{ at: 0, do: { spreadWord: true } }]
+}]);
+
+// #32：叛徒逐层点火，三层都烧起来即“烧毁房子”
+const s32 = byNo(32);
+s32.actions = (s32.actions || []).filter((a) => a.key !== 'spread_fire').concat([{
+  key: 'spread_fire', name: '点燃当前楼层', trait: 'might', where: 'any', once: 'turn', side: 'traitor', dead: true,
+  tiers: [{ at: 4, do: { igniteFloor: true } }, { at: 0, do: {} }]
+}]);
+
+// #39：叛徒推进时间，数字轨道归零即“时间耗尽”
+const s39 = byNo(39);
+s39.actions = (s39.actions || []).filter((a) => a.key !== 'drain_time').concat([{
+  key: 'drain_time', name: '让时间流逝', trait: 'known', where: 'any', once: 'turn', side: 'traitor',
+  tiers: [{ at: 0, do: { drainTime: true } }]
+}]);
+
+// #49：叛徒从英雄身上取血，再把血献给同房间的恶魔
+const s49 = byNo(49);
+s49.actions = (s49.actions || []).filter((a) => a.key !== 'collect_blood' && a.key !== 'offer_blood').concat([{
+  key: 'collect_blood', name: '夺取英雄之血', trait: 'might', where: 'any', once: 'turn', side: 'traitor',
+  tiers: [{ at: 4, do: { collectBlood: true } }, { at: 0, do: {} }]
+}, {
+  key: 'offer_blood', name: '把血献给恶魔', trait: 'known', where: 'any', once: 'turn', side: 'traitor',
+  tiers: [{ at: 0, do: { offerBlood: true } }]
+}]);
+
 // #46：叛徒把同房间英雄变成毛发怪；全部转化后达成 convertAll
 const s46 = byNo(46);
 s46.actions = (s46.actions || []).filter((a) => a.key !== 'infect_hero').concat([{

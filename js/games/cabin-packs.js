@@ -3620,22 +3620,41 @@ window.CABIN_PACKS = {
             "type": "placeToken",
             "token": "外星文字",
             "room": "traitor",
-            "countByPlayers": {
-              "3": 6,
-              "4": 5,
-              "5": 5,
-              "6": 4
-            }
+            "count": 1
           },
           {
             "type": "custom",
-            "key": "alienWords",
-            "value": true
+            "key": "alienWordSupply",
+            "valueByPlayers": {
+              "3": 5,
+              "4": 4,
+              "5": 4,
+              "6": 3
+            }
           }
         ]
       },
       "priority": 100,
       "monsters": [],
+      "actions": [
+        {
+          "key": "spread_word",
+          "name": "铺下外星文字",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "spreadWord": true
+              }
+            }
+          ]
+        }
+      ],
       "flipRooms": false,
       "dimension": false,
       "custom": true,
@@ -4179,6 +4198,29 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "spread_fire",
+          "name": "点燃当前楼层",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": true,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "igniteFloor": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ]
+        }
+      ],
       "monster": {
         "key": "bakeneko",
         "name": "猫又",
@@ -4953,6 +4995,25 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "drain_time",
+          "name": "让时间流逝",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "drainTime": true
+              }
+            }
+          ]
+        }
+      ],
       "monster": {
         "key": "giantwasp",
         "name": "大蜂后",
@@ -6198,6 +6259,46 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "collect_blood",
+          "name": "夺取英雄之血",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "collectBlood": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ]
+        },
+        {
+          "key": "offer_blood",
+          "name": "把血献给恶魔",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "offerBlood": true
+              }
+            }
+          ]
+        }
+      ],
       "monster": {
         "key": "demon",
         "name": "恶魔",

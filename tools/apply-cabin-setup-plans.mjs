@@ -238,8 +238,8 @@ const plans = {
     summary: '英雄拿 3/4/4/5 个外星文字；叛徒拿 5/4/4/3 并在自己板块放 1 个。',
     ops: [
       { type: 'placeToken', token: '外星文字', room: 'heroTiles', countByPlayers: track(3, 4, 4, 5) },
-      { type: 'placeToken', token: '外星文字', room: 'traitor', countByPlayers: track(6, 5, 5, 4) },
-      { type: 'custom', key: 'alienWords', value: true }
+      { type: 'placeToken', token: '外星文字', room: 'traitor', count: 1 },
+      { type: 'custom', key: 'alienWordSupply', valueByPlayers: track(5, 4, 4, 3) }
     ]
   },
   28: {
