@@ -36,7 +36,8 @@
     azul: 'design/azul.html',
     ticket: 'design/ticket.html',
     catan: 'design/catan.html',
-    carcassonne: 'design/carcassonne.html'
+    carcassonne: 'design/carcassonne.html',
+    arkham: 'design/arkham.html'
   };
 
   function gotoTablePage(code, game) {

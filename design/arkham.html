@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>诡镇奇谈 · 第一章 集结号</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#0d0b09; --panel:#171411; --panel2:#1f1b17; --line:#3a3229;
+  --ink:#e9e0cf; --dim:#a89a84; --gold:#c9a45c; --gold2:#e6c98a;
+  --blood:#a5382f; --teal:#3d7d75; --paper:#e8dcc4; --paper2:#dbcdb1; --paperInk:#2a2118;
+}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+body{background:
+  radial-gradient(1200px 600px at 20% -10%,rgba(201,164,92,.08),transparent 60%),
+  radial-gradient(900px 500px at 110% 110%,rgba(165,56,47,.10),transparent 60%),
+  var(--bg);}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:disabled{cursor:not-allowed;opacity:.42}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px;
+  padding:10px 14px;background:rgba(13,11,9,.97);border-bottom:1px solid var(--line)}
+.iconBtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);display:grid;place-items:center;font-size:16px}
+.iconBtn:hover{border-color:var(--gold);color:var(--gold2)}
+.titleWrap{min-width:0;flex:1}
+.titleWrap h1{margin:0;font-size:17px;letter-spacing:.12em;font-weight:600;
+  font-family:Georgia,"Songti SC",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titleWrap p{margin:2px 0 0;font-size:11px;color:var(--dim);letter-spacing:.16em}
+.chip{padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel2);font-size:12px;color:var(--dim);white-space:nowrap}
+.chip b{color:var(--gold2);font-weight:600}
+.wrap{max-width:1380px;margin:0 auto;padding:14px 14px 96px;display:grid;
+  grid-template-columns:minmax(0,1fr) 356px;gap:14px}
+.wrap > *{min-width:0}
+@media(max-width:980px){.wrap{grid-template-columns:1fr;padding-bottom:120px}}
+
+/* —— 棋盘地图 —— */
+.mapPanel{position:relative;min-height:600px;border:1px solid var(--line);border-radius:16px;
+  overflow:hidden;background:
+   radial-gradient(closest-side at 50% 40%,rgba(201,164,92,.06),transparent 70%),
+   linear-gradient(rgba(58,50,41,.35) 1px,transparent 1px) 0 0/44px 44px,
+   linear-gradient(90deg,rgba(58,50,41,.35) 1px,transparent 1px) 0 0/44px 44px,
+   #12100d}
+.mapTop{position:absolute;inset:12px 12px auto;display:flex;gap:10px;z-index:6;flex-wrap:wrap}
+.track{flex:1;min-width:200px;background:rgba(23,20,17,.92);border:1px solid var(--line);
+  border-radius:12px;padding:9px 12px}
+.track .lbl{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.12em;color:var(--dim)}
+.track .lbl b{color:var(--gold2);letter-spacing:0}
+.bar{height:7px;border-radius:6px;background:#2a241d;margin-top:7px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px;transition:width .35s ease}
+.bar.gold i{background:linear-gradient(90deg,#8a6a33,var(--gold2))}
+.bar.red i{background:linear-gradient(90deg,#5e211d,#c9564a)}
+.advBtn{margin-top:8px;width:100%;padding:7px 8px;border-radius:9px;border:1px solid var(--gold);
+  color:var(--gold2);font-size:12px;background:rgba(201,164,92,.08)}
+.advBtn:hover{background:rgba(201,164,92,.18)}
+
+.map{position:absolute;inset:96px 0 0 0}
+.map svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map svg line{stroke:rgba(201,164,92,.30);stroke-width:1;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
+.loc{position:absolute;transform:translate(-50%,-50%);width:150px;padding:10px 10px 9px;
+  border-radius:12px;border:1px solid #8d7752;color:var(--paperInk);
+  background:linear-gradient(160deg,var(--paper),var(--paper2));
+  box-shadow:0 10px 24px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.18);
+  transition:transform .18s ease,box-shadow .18s ease}
+.loc.hidden{filter:brightness(.55) saturate(.6)}
+.loc.here{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(230,201,138,.55),0 14px 30px rgba(0,0,0,.55);transform:translate(-50%,-50%) scale(1.03)}
+.loc .name{font-family:Georgia,"Songti SC",serif;font-size:15px;font-weight:700;letter-spacing:.06em}
+.loc .meta{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:#6a5740}
+.loc .meta b{color:#3d3021}
+.loc .clues{margin-top:6px;display:flex;gap:3px;flex-wrap:wrap}
+.clue{width:8px;height:8px;border-radius:50%;background:#8a6a33;box-shadow:0 0 0 1px rgba(42,33,24,.4)}
+.clue.off{background:rgba(42,33,24,.18);box-shadow:none}
+.enemy{margin-top:8px;padding:6px 7px;border-radius:8px;background:rgba(42,33,24,.92);color:#f0e6d6;
+  font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.enemy .en{flex:1;min-width:70px;font-weight:600}
+.enemy .stat{color:#d8b98a}
+.enemy button{font-size:10px;padding:3px 6px;border-radius:6px;border:1px solid #6d5a3f;color:#f0e6d6;background:#4a3b29}
+.enemy button:hover{background:#5d4a34}
+.enemy.boss{background:#4a1c18;border:1px solid #8c3a31}
+.loc .go{position:absolute;right:-9px;top:-9px;width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--gold);background:#1a1713;color:var(--gold2);display:grid;place-items:center;font-size:12px}
+.loc .go:hover{background:var(--gold);color:#1a1713}
+
+/* —— 右侧角色栏 —— */
+.side{display:flex;flex-direction:column;gap:12px}
+.panel{background:linear-gradient(180deg,rgba(31,27,23,.96),rgba(23,20,17,.96));
+  border:1px solid var(--line);border-radius:14px;padding:12px}
+.invHead{display:flex;gap:11px;align-items:center}
+.portrait{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;
+  font-family:Georgia,"Songti SC",serif;font-size:22px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.22)}
+.invName{font-family:Georgia,"Songti SC",serif;font-size:18px;font-weight:700;letter-spacing:.05em}
+.invRole{font-size:11px;color:var(--dim);letter-spacing:.14em;margin-top:2px}
+.ability{margin-top:9px;font-size:11px;line-height:1.55;color:#c3b49c;border-left:2px solid var(--gold);
+  padding-left:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
+.statBox{border:1px solid var(--line);border-radius:9px;padding:6px 4px;text-align:center;background:#14110e}
+.statBox .k{font-size:10px;color:var(--dim);letter-spacing:.1em}
+.statBox .v{font-size:17px;font-weight:700;color:var(--gold2);font-family:Georgia,serif;margin-top:1px}
+.hpRow{margin-top:11px}
+.hpLabel{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
+.hpLabel b{color:var(--ink);font-weight:600}
+.hpBar{height:8px;border-radius:6px;background:#2a241d;margin-top:5px;overflow:hidden}
+.hpBar i{display:block;height:100%;transition:width .3s}
+.hpBar.h i{background:linear-gradient(90deg,#742c25,#d16354)}
+.hpBar.s i{background:linear-gradient(90deg,#2c5a55,#57a49a)}
+.pips{display:flex;gap:8px;margin-top:11px}
+.pip{flex:1;border:1px solid var(--line);border-radius:10px;padding:7px 9px;background:#14110e}
+.pip .k{font-size:10px;color:var(--dim);letter-spacing:.1em}
+.pip .v{font-size:18px;font-weight:700;color:var(--gold2);font-family:Georgia,serif}
+.assets{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px}
+.asset{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid #6b5836;color:#e3d2ac;background:#2a2318}
+.handWrap{margin-top:12px}
+.handHead{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
+.handHead b{color:var(--gold2)}
+.hand{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 4px;scrollbar-width:thin}
+.card{min-width:108px;max-width:118px;flex:0 0 auto;border-radius:10px;padding:8px;
+  border:1px solid #8d7752;background:linear-gradient(160deg,#efe4cf,#dfd0b3);color:#2a2118;
+  box-shadow:0 6px 14px rgba(0,0,0,.35);text-align:left;transition:transform .15s}
+.card:hover:not(:disabled){transform:translateY(-3px)}
+.card .cost{float:right;width:20px;height:20px;border-radius:50%;background:#2a2118;color:#e8dcc4;
+  font-size:11px;display:grid;place-items:center;font-weight:700}
+.card .cn{font-size:12.5px;font-weight:700;line-height:1.25;margin-top:2px}
+.card .ct{font-size:10px;color:#77644a;margin-top:2px}
+.card .cx{font-size:10px;line-height:1.4;color:#4a3d2b;margin-top:5px;max-height:44px;overflow:hidden}
+.card.event .cost{background:#6d2b24}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.actBtn{padding:11px 10px;border-radius:11px;border:1px solid var(--line);background:#1b1814;
+  font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px}
+.actBtn:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);background:#241f19}
+.actBtn.primary{border-color:var(--gold);background:linear-gradient(180deg,#3a2f1d,#241d14);color:var(--gold2)}
+.actBtn.end{grid-column:1/-1;border-color:#6d2b24;color:#e7b3ac;background:#221514}
+.actBtn.end:hover{border-color:#b6503f;background:#301a18}
+.phaseLine{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-bottom:2px}
+.logBox{margin-top:12px;max-height:150px;overflow:auto;font-size:11.5px;line-height:1.65;color:#bcae97}
+.logBox p{margin:0 0 4px;padding-left:9px;border-left:2px solid #3a3229}
+.logBox p:first-child{border-color:var(--gold);color:#e6d6b4}
+.deckLine{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:8px}
+
+/* —— 弹层 —— */
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  background:rgba(6,5,4,.86);padding:18px}
+.modal.on{display:flex}
+.sheet{width:calc(100vw - 32px);max-width:560px;max-height:88vh;overflow:auto;border-radius:16px;border:1px solid #6e5b3c;
+  background:linear-gradient(170deg,#efe4cf,#ddcdb0);color:#2a2118;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.sheetHead{padding:16px 18px 10px;border-bottom:1px solid rgba(42,33,24,.22);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sheetHead h2{margin:0;font-family:Georgia,"Songti SC",serif;font-size:24px;letter-spacing:.1em}
+.sheetHead p{margin:4px 0 0;font-size:11px;letter-spacing:.16em;color:#6a5740}
+.x{width:32px;height:32px;border-radius:9px;border:1px solid rgba(42,33,24,.3);display:grid;place-items:center;font-size:15px}
+.sheetBody{padding:14px 18px 18px;font-size:13.5px;line-height:1.8}
+.sheetBody h3{margin:14px 0 6px;font-size:14px;letter-spacing:.08em;border-left:3px solid #8a6a33;padding-left:8px}
+.sheetBody p{margin:6px 0}
+.sheetBody ul{margin:6px 0 0 18px;padding:0}
+.sheetBody li{margin:3px 0}
+.dark .sheet{background:linear-gradient(170deg,#241f19,#171411);color:var(--ink);border-color:var(--line)}
+.dark .sheetHead{border-color:var(--line)}
+.dark .sheetHead p{color:var(--dim)}
+
+/* 检定 */
+.testWrap{text-align:center;padding:8px 6px 4px}
+.testWrap .versus{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 4px}
+.testWrap .num{font-family:Georgia,serif;font-size:40px;color:#7a2f27}
+.testWrap .num small{display:block;font-family:inherit;font-size:10px;letter-spacing:.18em;color:#6a5740;margin-top:2px}
+.tokenBox{width:104px;height:104px;border-radius:50%;margin:12px auto 4px;display:grid;place-items:center;
+  font-family:Georgia,"Songti SC",serif;font-size:26px;font-weight:700;color:#f0e3c7;
+  background:radial-gradient(circle at 35% 30%,#5d4a34,#1c1814 70%);
+  border:2px solid #c9a45c;box-shadow:0 0 26px rgba(201,164,92,.28),inset 0 0 18px rgba(0,0,0,.6)}
+.tokenBox.bad{border-color:#b6503f;box-shadow:0 0 26px rgba(182,80,63,.35)}
+.result{font-family:Georgia,"Songti SC",serif;font-size:22px;letter-spacing:.14em;margin-top:8px}
+.result.ok{color:#2f6b4f}.result.no{color:#8e2e25}
+.testHint{font-size:11.5px;color:#6a5740;margin-top:6px}
+.sheetBtn{margin-top:16px;width:100%;padding:12px;border-radius:11px;border:1px solid #7a5f36;
+  background:linear-gradient(180deg,#3a2f1d,#241d14);color:#e6c98a;font-size:14px}
+.sheetBtn:hover{background:#4a3b25}
+
+/* 开局 / 结算 */
+.pickGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+@media(max-width:520px){.pickGrid{grid-template-columns:1fr}}
+.pick{border:1px solid rgba(42,33,24,.28);border-radius:12px;padding:11px;text-align:left;background:rgba(255,255,255,.32)}
+.pick:hover{border-color:#7a5f36;background:rgba(255,255,255,.5)}
+.pick.sel{border-color:#7a2f27;box-shadow:0 0 0 2px rgba(122,47,39,.22);background:rgba(255,255,255,.55)}
+.pick .pn{font-family:Georgia,"Songti SC",serif;font-size:16px;font-weight:700}
+.pick .pr{font-size:10.5px;color:#6a5740;letter-spacing:.12em}
+.pick .ps{font-size:11px;color:#4a3d2b;margin-top:5px;line-height:1.55}
+.endBig{font-family:Georgia,"Songti SC",serif;font-size:30px;letter-spacing:.16em;text-align:center;margin:6px 0 2px}
+.endBig.win{color:#2f6b4f}.endBig.lose{color:#8e2e25}
+.endText{text-align:center;font-size:13px;line-height:1.9;color:#4a3d2b}
+.campaign{margin-top:12px;padding:10px;border-radius:10px;border:1px dashed rgba(42,33,24,.3);font-size:11.5px;color:#5b4a34}
+
+/* 顶部提示条 */
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+  max-width:min(520px,92vw);padding:11px 15px;border-radius:12px;border:1px solid var(--gold);
+  background:rgba(24,20,16,.96);color:#e9dcc0;font-size:12.5px;z-index:90;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.mobileBar{display:none}
+@media(max-width:980px){
+  .mapPanel{min-height:560px}
+  .map{inset:110px 0 0 0}
+  .loc{width:126px;padding:8px}
+  .loc .name{font-size:13px}
+}
+@media(max-width:520px){
+  #chipRound,#btnRestart{display:none}
+  .mapPanel{min-height:0;padding-bottom:10px}
+  .map{position:static;inset:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:112px 8px 10px}
+  .map svg{display:none}
+  .loc{position:static;transform:none;width:auto;padding:8px 7px}
+  .loc.here{transform:none}
+  .loc .name{font-size:13px}
+  .loc .meta{font-size:9.5px}
+  .mapTop{inset:8px 8px auto;gap:6px}
+  .track{padding:7px 9px;min-width:0}
+  .track .lbl{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="iconBtn" id="btnBack" title="返回大厅">←</button>
+  <div class="titleWrap"><h1>诡镇奇谈</h1><p>第一章 · 集结号</p></div>
+  <span class="chip" id="chipRound">第 <b>1</b> 回合</span>
+  <button class="iconBtn" id="btnRestart" title="重开本章">↻</button>`n  <button class="iconBtn" id="btnRules" title="规则">?</button>
+  <button class="iconBtn" id="btnLog" title="日志">≡</button>
+</header>
+
+<main class="wrap">
+  <section class="mapPanel" id="mapPanel">
+    <div class="mapTop">
+      <div class="track">
+        <div class="lbl"><span id="actLabel">密谋 · 第一幕</span><b id="actProg">0 / 3</b></div>
+        <div class="bar gold"><i id="actBar" style="width:0%"></i></div>
+        <button class="advBtn" id="btnAdvance">线索够了，推进密谋</button>
+      </div>
+      <div class="track">
+        <div class="lbl"><span id="agendaLabel">议程 · 黑暗逼近</span><b id="agendaProg">0 / 3</b></div>
+        <div class="bar red"><i id="agendaBar" style="width:0%"></i></div>
+      </div>
+    </div>
+    <div class="map" id="map"><svg id="links" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
+  </section>
+
+  <aside class="side">
+    <section class="panel" id="invPanel"></section>
+    <section class="panel">
+      <div class="phaseLine"><span id="phaseText">调查阶段</span><span id="actionText">行动 3 / 3</span></div>
+      <div class="actions">
+        <button class="actBtn primary" id="btnInvestigate">调查 <span style="opacity:.6;font-size:11px">1 行动</span></button>
+        <button class="actBtn" id="btnDraw">抽牌</button>
+        <button class="actBtn" id="btnResource">拿资源</button>
+        <button class="actBtn" id="btnSkill">查看检定</button>
+        <button class="actBtn end" id="btnEnd">结束回合 · 进入敌影</button>
+      </div>
+      <div class="logBox" id="logBox"></div>
+    </section>
+  </aside>
+</main>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="../js/games/arkham.js"></script>
+<script>
+(function(){
+  const E = window.ArkhamEngine;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot'}[c]));
+  const STORE = 'arkham:campaign';
+  let state = null;
+  let picked = 'detective';
+  let sug = null;
+  let seenTest = '';
+  let seenEnc = '';
+  let endShown = false;
+  let started = false;
+
+  const STAT_LABEL = { will: '意志', int: '智力', combat: '战力', agi: '敏捷' };
+  const ACT_NAME = ['', '第一幕 · 屋子里的低语', '第二幕 · 地下室的门', '第三幕 · 黎明之前'];
+
+  function toast(msg){
+    const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2600);
+  }
+
+  function openSheet(html, dark){
+    $('#sheet').className = 'sheet' + (dark ? ' dark' : '');
+    $('#sheet').innerHTML = html;
+    $('#modal').classList.add('on');
+  }
+  function closeSheet(){
+    $('#modal').classList.remove('on');
+    if (state && state.phase === 'ended' && state.resolution && !endShown) {
+      setTimeout(() => { if (!endShown) showEnd(); }, 80);
+    }
+  }
+
+  /* ---------------- 开局 ---------------- */
+  function showStart(){
+    const invs = E.INVESTIGATORS;
+    openSheet(`
+      <div class="sheetHead">
+        <div><h2>集结号</h2><p>第一章 · 单人调查</p></div>
+        <button class="x" data-close="1">✕</button>
+      </div>
+      <div class="sheetBody">
+        <p>雨夜，你站在失踪屋主的房门前。书房里的笔记只写了半句话：<b>“他们在地下室喂养它。”</b></p>
+        <p>选择一名调查员，进入这栋房子。你只有一晚上的时间。</p>
+        <h3>选择调查员</h3>
+        <div class="pickGrid">
+          ${invs.map((x) => `
+            <button class="pick ${x.id === picked ? 'sel' : ''}" data-pick="${x.id}">
+              <div class="pn" style="color:${x.color}">${esc(x.name)}</div>
+              <div class="pr">${esc(x.role)} · ${x.health} 生命 / ${x.sanity} 理智</div>
+              <div class="ps">意志 ${x.stats.will} · 智力 ${x.stats.int} · 战力 ${x.stats.combat} · 敏捷 ${x.stats.agi}<br>${esc(x.abilityText)}</div>
+            </button>`).join('')}
+        </div>
+        <h3>这一章怎么玩</h3>
+        <p style="font-size:12.5px;color:#5b4a34">每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。</p>
+        <button class="sheetBtn" id="btnStart">进入屋子</button>
+      </div>`);
+    $('#sheet').querySelectorAll('[data-pick]').forEach((b) => {
+      b.onclick = () => { picked = b.dataset.pick; showStart(); };
+    });
+    $('#sheet').querySelector('[data-close]').onclick = closeSheet;
+    $('#btnStart').onclick = () => {
+      started = true;
+      closeSheet();
+      state = E.createInitial([], Math.random, { investigator: picked });
+      seenTest = ''; seenEnc = ''; endShown = false;
+      render();
+      toast('调查开始：' + state.inv.name + ' 进入了书房');
+    };
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function pct(a, b){ return Math.max(0, Math.min(100, Math.round(a / b * 100))); }
+
+  function render(){
+    if (!state) return;
+    const inv = state.inv;
+    $('#chipRound').innerHTML = '第 <b>' + state.round + '</b> 回合';
+    $('#actLabel').textContent = ACT_NAME[state.act.stage] || '密谋';
+    $('#agendaLabel').textContent = state.agenda.stage === 1 ? '议程 · 黑暗逼近' : '议程 · 房子醒了';
+    $('#actProg').textContent = inv.clues + ' / ' + state.act.clues;
+    $('#actBar').style.width = pct(inv.clues, state.act.clues) + '%';
+    const boss = state.enemies.find((e) => e.boss && e.health > 0);
+    if (state.act.stage >= 2) {
+      $('#actLabel').textContent = ACT_NAME[2] || '密谋';
+      $('#actProg').textContent = boss ? '祭司 ' + Math.max(0, boss.health) + ' / ' + boss.maxHealth : '祭司已倒下';
+      $('#actBar').style.width = boss ? pct(boss.maxHealth - boss.health, boss.maxHealth) + '%' : '100%';
+    }
+    $('#agendaProg').textContent = state.agenda.doom + ' / ' + state.agenda.max;
+    $('#agendaBar').style.width = pct(state.agenda.doom, state.agenda.max) + '%';
+    const btnAdv = $('#btnAdvance');
+    btnAdv.style.display = state.act.stage === 1 ? 'block' : 'none';
+    btnAdv.disabled = inv.clues < state.act.clues;
+    btnAdv.textContent = state.act.stage === 1
+      ? (inv.clues >= state.act.clues ? '线索够了，推进密谋' : '还需要 ' + (state.act.clues - inv.clues) + ' 个线索')
+      : '';
+
+    // 地图
+    const map = $('#map');
+    map.querySelectorAll('.loc').forEach((n) => n.remove());
+    const svg = $('#links');
+    let lines = '';
+    Object.keys(state.locations).forEach((k) => {
+      const L = state.locations[k];
+      L.links.forEach((to) => {
+        if (k < to) {
+          lines += '<line x1="' + L.x + '" y1="' + L.y + '" x2="' + state.locations[to].x + '" y2="' + state.locations[to].y + '"/>';
+        }
+      });
+    });
+    svg.innerHTML = lines;
+
+    Object.keys(state.locations).forEach((k) => {
+      const L = state.locations[k];
+      const here = inv.location === k;
+      const reachable = state.locations[inv.location].links.indexOf(k) >= 0;
+      const el = document.createElement('div');
+      el.className = 'loc' + (L.revealed ? '' : ' hidden') + (here ? ' here' : '');
+      el.style.left = L.x + '%';
+      el.style.top = L.y + '%';
+      let clues = '';
+      for (let i = 0; i < L.clues; i++) clues += '<span class="clue"></span>';
+      for (let i = 0; i < (L.clues0 || 0) - L.clues; i++) clues += '<span class="clue off"></span>';
+      const enemies = E.helpers.enemiesAt(state, k).map((e) => `
+        <div class="enemy ${e.boss ? 'boss' : ''}">
+          <span class="en">${esc(e.name)}${e.exhausted ? '（已疲惫）' : ''}</span>
+          <span class="stat">战 ${e.fight} / 闪 ${e.evade} / 血 ${Math.max(0, e.health)}</span>
+          ${here && inv.actions > 0 ? `<button data-fight="${e.id}">战斗</button><button data-evade="${e.id}">闪避</button>` : ''}
+        </div>`).join('');
+      el.innerHTML = `
+        <div class="name">${esc(L.name)}</div>
+        <div class="meta"><span>隐蔽 ${L.shroud}</span><span>线索 <b>${L.clues}</b></span></div>
+        <div class="clues">${clues}</div>
+        ${enemies}
+        ${reachable && !here ? `<button class="go" data-move="${k}" title="移动到${esc(L.name)}">→</button>` : ''}`;
+      map.appendChild(el);
+    });
+
+    // 角色栏
+    const combatBonus = E.helpers.totalStat(state, inv, 'combat') - inv.stats.combat;
+    const intBonus = E.helpers.totalStat(state, inv, 'int') - inv.stats.int;
+    $('#invPanel').innerHTML = `
+      <div class="invHead">
+        <div class="portrait" style="background:${inv.color}">${esc(inv.name.slice(0, 1))}</div>
+        <div><div class="invName">${esc(inv.name)}</div><div class="invRole">${esc(inv.role)}</div></div>
+      </div>
+      <div class="ability">${esc(inv.abilityText)}</div>
+      <div class="stats">
+        ${Object.keys(STAT_LABEL).map((k) => `<div class="statBox"><div class="k">${STAT_LABEL[k]}</div><div class="v">${E.helpers.totalStat(state, inv, k)}</div></div>`).join('')}
+      </div>
+      <div class="hpRow">
+        <div class="hpLabel"><span>伤害 <b>${inv.damage} / ${inv.maxHealth}</b></span><span>${Math.max(0, inv.maxHealth - inv.damage)} 点余量</span></div>
+        <div class="hpBar h"><i style="width:${pct(inv.damage, inv.maxHealth)}%"></i></div>
+        <div class="hpLabel" style="margin-top:8px"><span>恐惧 <b>${inv.horror} / ${inv.maxSanity}</b></span><span>${Math.max(0, inv.maxSanity - inv.horror)} 点余量</span></div>
+        <div class="hpBar s"><i style="width:${pct(inv.horror, inv.maxSanity)}%"></i></div>
+      </div>
+      <div class="pips">
+        <div class="pip"><div class="k">资源</div><div class="v">${inv.resources}</div></div>
+        <div class="pip"><div class="k">线索</div><div class="v">${inv.clues}</div></div>
+        <div class="pip"><div class="k">行动</div><div class="v">${inv.actions}</div></div>
+      </div>
+      <div class="assets">
+        ${inv.assets.length ? inv.assets.map((a) => `<span class="asset">${esc(E.CARDS[a].name)}${E.CARDS[a].combat ? ' 战+' + E.CARDS[a].combat : ''}${E.CARDS[a].intellect ? ' 智+' + E.CARDS[a].intellect : ''}</span>`).join('') : '<span style="font-size:11px;color:var(--dim)">还没有资产在场</span>'}
+      </div>
+      <div class="handWrap">
+        <div class="handHead"><span>手牌 <b>${inv.hand.length}</b> / 牌库 ${inv.deck.length}</span><span>点击出牌</span></div>
+        <div class="hand">
+          ${inv.hand.map((id, i) => {
+            const c = E.CARDS[id];
+            return `<button class="card ${c.type === 'event' ? 'event' : ''}" data-play="${i}" ${(inv.resources < c.cost || inv.actions < 1) ? 'disabled' : ''}>
+              <span class="cost">${c.cost}</span>
+              <div class="cn">${esc(c.name)}</div>
+              <div class="ct">${c.type === 'asset' ? '资产' : '事件'}</div>
+              <div class="cx">${esc(c.text)}</div>
+            </button>`;
+          }).join('') || '<span style="font-size:11px;color:var(--dim)">手牌空了</span>'}
+        </div>
+      </div>`;
+
+    $('#phaseText').textContent = state.phase === 'ended' ? '本章结束' : '调查阶段';
+    $('#actionText').textContent = '行动 ' + inv.actions + ' / 3';
+    $('#btnInvestigate').disabled = inv.actions < 1 || state.locations[inv.location].clues <= 0 || state.phase === 'ended';
+    $('#btnDraw').disabled = inv.actions < 1 || state.phase === 'ended';
+    $('#btnResource').disabled = inv.actions < 1 || state.phase === 'ended';
+    $('#btnEnd').disabled = state.phase === 'ended';
+
+    $('#logBox').innerHTML = state.logs.slice(-8).reverse().map((l) => '<p>' + esc(l) + '</p>').join('');
+
+    // 检定弹层
+    if (state.lastTest) {
+      const sig = JSON.stringify(state.lastTest) + '|' + state.round + '|' + state.inv.actions;
+      if (sig !== seenTest) { seenTest = sig; showTest(state.lastTest); }
+    }
+    // 遭遇弹层
+    if (state.encounterCurrent) {
+      const sig = state.round + '|' + state.encounterCurrent.key;
+      if (sig !== seenEnc) { seenEnc = sig; showEncounter(state.encounterCurrent); }
+    }
+    if (state.phase === 'ended' && state.resolution && !endShown) showEnd();
+  }
+
+  function showTest(t){
+    const label = STAT_LABEL[t.stat];
+    openSheet(`
+      <div class="sheetHead"><div><h2>技能检定</h2><p>${esc(label)} · 难度 ${t.difficulty}</p></div><button class="x" data-close="1">✕</button></div>
+      <div class="sheetBody">
+        <div class="testWrap">
+          <div class="versus">
+            <div class="num">${t.base}<small>${esc(label)}</small></div>
+            <div style="font-size:20px;color:#6a5740">+</div>
+            <div class="num" style="font-size:30px">${t.mod >= 0 ? '+' : ''}${t.mod}<small>混沌标记</small></div>
+          </div>
+          <div class="tokenBox ${t.success ? '' : 'bad'}">${esc(t.tokenText)}</div>
+          <div class="result ${t.success ? 'ok' : 'no'}">${t.success ? '成功' : '失败'}</div>
+          <div class="testHint">${t.total} 对 难度 ${t.difficulty}${t.token === 'auto' ? ' · 自动失败' : ''}</div>
+        </div>
+        <button class="sheetBtn" data-close="1">收起</button>
+      </div>`);
+    bindClose();
+  }
+
+  function showEncounter(c){
+    openSheet(`
+      <div class="sheetHead"><div><h2>遭遇</h2><p>第 ${state.round} 回合 · 神秘阶段</p></div><button class="x" data-close="1">✕</button></div>
+      <div class="sheetBody">
+        <p style="font-family:Georgia,'Songti SC',serif;font-size:20px;margin-top:4px">${esc(c.name)}</p>
+        <p style="color:#5b4a34">${esc(c.text)}</p>
+        <p style="font-size:11.5px;color:#6a5740">${state.agenda.doom} / ${state.agenda.max} doom</p>
+        <button class="sheetBtn" data-close="1">面对它</button>
+      </div>`);
+    bindClose();
+  }
+
+  function showEnd(){
+    if (endShown) return;
+    endShown = true;
+    const r = state.resolution;
+    let camp = null;
+    try { camp = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { camp = null; }
+    if (!camp) camp = { xp: 0, trauma: 0, chapters: [] };
+    if (r.result === 'win' && camp.chapters.indexOf('gathering') < 0) {
+      camp.xp += 2;
+      camp.chapters.push('gathering');
+      localStorage.setItem(STORE, JSON.stringify(camp));
+    }
+    openSheet(`
+      <div class="sheetHead"><div><h2>${r.result === 'win' ? '第一章完成' : '调查终止'}</h2><p>集结号 · 结局</p></div></div>
+      <div class="sheetBody">
+        <div class="endBig ${r.result}">${r.result === 'win' ? '天亮之前' : '黑暗吞没'}</div>
+        <p class="endText">${esc(r.text)}</p>
+        <div class="campaign">
+          战役记录：经验 <b>${camp.xp}</b> · 创伤 <b>${camp.trauma}</b> · 已完成章节 <b>${camp.chapters.length}</b><br>
+          ${r.result === 'win' ? '下一章「午夜狂欢」将沿用它继续；本章奖励 2 点经验。' : '本局不计入战役进度，可以重开一次。'}
+        </div>
+        <button class="sheetBtn" id="btnAgain">再调查一次</button>
+        <button class="sheetBtn" id="btnHome" style="margin-top:8px;background:transparent;color:#5b4a34">返回大厅</button>
+      </div>`);
+    $('#btnAgain').onclick = () => { state = E.createInitial([], Math.random, { investigator: state.inv.id }); seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render(); };
+    $('#btnHome').onclick = () => { location.href = '../index.html'; };
+  }
+
+  function bindClose(){
+    $('#sheet').querySelectorAll('[data-close]').forEach((b) => { b.onclick = closeSheet; });
+  }
+
+  /* ---------------- 操作 ---------------- */
+  function doAct(action){
+    if (!state) return;
+    const r = E.act(state, action, state.inv.id, Math.random);
+    if (r.state) state = r.state;
+    if (!r.ok && r.msg) toast(r.msg);
+    render();
+  }
+
+  $('#map').addEventListener('click', (ev) => {
+    const mv = ev.target.closest('[data-move]');
+    if (mv) { doAct({ type: 'move', to: mv.dataset.move }); return; }
+    const f = ev.target.closest('[data-fight]');
+    if (f) { doAct({ type: 'fight', enemy: f.dataset.fight }); return; }
+    const e = ev.target.closest('[data-evade]');
+    if (e) { doAct({ type: 'evade', enemy: e.dataset.evade }); return; }
+  });
+  $('#invPanel').addEventListener('click', (ev) => {
+    const p = ev.target.closest('[data-play]');
+    if (p) doAct({ type: 'play', index: Number(p.dataset.play) });
+  });
+  $('#btnMoveNone');
+  $('#btnInvestigate').onclick = () => doAct({ type: 'investigate' });
+  $('#btnDraw').onclick = () => doAct({ type: 'draw' });
+  $('#btnResource').onclick = () => doAct({ type: 'resource' });
+  $('#btnSkill').onclick = () => {
+    if (state && state.lastTest) showTest(state.lastTest);
+    else toast('还没有进行过检定');
+  };
+  $('#btnEnd').onclick = () => doAct({ type: 'endTurn' });
+  $('#btnAdvance').onclick = () => doAct({ type: 'advanceAct' });
+  $('#btnBack').onclick = () => { location.href = '../index.html'; };
+  $('#btnRestart').onclick = () => {
+    if (!state) return;
+    state = E.createInitial([], Math.random, { investigator: state.inv.id });
+    seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render(); toast('本章已重新开始');
+  };
+
+  $('#btnRules').onclick = () => {
+    openSheet(`
+      <div class="sheetHead"><div><h2>规则速查</h2><p>诡镇奇谈 · 第一章</p></div><button class="x" data-close="1">✕</button></div>
+      <div class="sheetBody">
+        <h3>回合结构</h3>
+        <ul><li><b>调查阶段</b>：3 个行动，可移动 / 调查 / 战斗 / 闪避 / 出牌 / 抽牌 / 拿资源。</li>
+        <li><b>敌影阶段</b>：与你交战且未疲惫的敌人各攻击一次（伤害 + 恐惧）。</li>
+        <li><b>维持阶段</b>：抽 1 张牌、拿 1 资源、敌人恢复、行动点重置。</li>
+        <li><b>神秘阶段</b>：抽 1 张遭遇牌并结算，议程 +1 doom；doom 满则议程推进。</li></ul>
+        <h3>检定与混沌袋</h3>
+        <p>属性 + 混沌标记修正 ≥ 难度即成功。骷髅按场上食尸鬼数量加重，石碑 −3，自动失败直接失败，古神印记 +1。</p>
+        <h3>线索与密谋</h3>
+        <p>调查成功在所在地点获得 1 个线索。集齐 3 个线索后推进密谋，第二幕会打开地下室并放出「食尸鬼祭司」。</p>
+        <h3>战斗与闪避</h3>
+        <p>战斗成功造成 1 + 武器加值伤害；闪避成功让敌人疲惫并解除交战，但它下个敌影阶段仍会恢复。</p>
+        <h3>失败条件</h3>
+        <p>生命或理智归零、议程第二幕 doom 满，都会结束本章。击败祭司则完成第一章。</p>
+        <h3>战役</h3>
+        <p>胜利获得 2 点经验，记录在本地战役档；后续章节会沿用经验与创伤。</p>
+      </div>`);
+    bindClose();
+  };
+
+  $('#btnLog').onclick = () => {
+    openSheet(`
+      <div class="sheetHead"><div><h2>调查日志</h2><p>第 ${state ? state.round : 1} 回合</p></div><button class="x" data-close="1">✕</button></div>
+      <div class="sheetBody">${state ? state.logs.slice().reverse().map((l) => '<p>' + esc(l) + '</p>').join('') : ''}</div>`);
+    bindClose();
+  };
+
+  // 关闭弹层
+  $('#modal').addEventListener('click', (ev) => {
+    if (ev.target.id === 'modal') closeSheet();
+  });
+
+  // 初始化
+  showStart();
+})();
+</script>
+</body>
+</html>

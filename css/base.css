@@ -151,6 +151,7 @@ html, body {
 .gc-art.ticket { background: linear-gradient(135deg, #3c5a43, #7fa45c 45%, #d7c16a 75%, #b5673e); }
 .gc-art.catan { background: linear-gradient(135deg, #3f7d4c, #c2a15a 40%, #8a5a34 70%, #6f8fbd); }
 .gc-art.carc { background: linear-gradient(135deg, #5f8f4a, #a9d17f 38%, #d7a76b 68%, #8a5a34); }
+.gc-art.ark { background: linear-gradient(135deg, #16120e, #3a2f22 40%, #8a6a33 66%, #5e211d); }
 
 .gc-title {
   display: flex;
