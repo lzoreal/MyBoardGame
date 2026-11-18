@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>大老二 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .btTable { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 6px 12px 8px; }
+  .btTurn { text-align: center; font-size: 13px; font-weight: 800; color: #6b5433; }
+  .btSeatHands { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; font-size: 12px; color: #6b5433; }
+  .btSeatHands b { color: #c86a2c; }
+  .felt {
+    flex: 1; min-height: 150px; border-radius: 22px; padding: 14px;
+    background: radial-gradient(circle at 50% 45%, #fdf6e4, #efe0bf 70%, #e4d2ab);
+    border: 3px solid #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5), 0 8px 22px rgba(120,96,50,.14);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btLast { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .btHint { text-align: center; color: #8d7a5c; font-size: 13px; }
+  .btCard {
+    width: 54px; height: 78px; border-radius: 10px; background: #fffdf6;
+    border: 2px solid #e8ddc4; box-shadow: 0 3px 0 #ded0b2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; font-weight: 800; flex: none;
+  }
+  .btCard .r { font-size: 19px; line-height: 1; }
+  .btCard .s { font-size: 15px; line-height: 1; }
+  .btCard.red { color: #cf3f34; }
+  .btCard.black { color: #2f2a24; }
+  .btCard.up { transform: translateY(-10px); border-color: #f0a92f; box-shadow: 0 6px 0 #d8b46a; }
+  .btHand { flex: none; display: flex; gap: 6px; padding: 10px 4px 2px; flex-wrap: wrap; justify-content: center; }
+  .btHand .btCard { cursor: pointer; }
+  @media (max-width: 720px) {
+    .btCard { width: 44px; height: 64px; }
+    .btCard .r { font-size: 16px; }
+    .btHand { gap: 4px; }
+  }
+
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; }
+  @media (max-width: 720px) {
+    .dock { flex-wrap: wrap; row-gap: 8px; }
+    .dockInfo { flex: 1 1 100%; }
+    .dockActions { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; }
+    .boardInner { width: 100%; height: auto; min-height: 0; }
+  }
+  .boardWrap { display: block; padding-top: 4px; }
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; overflow: hidden; }
+  .btTable, .spWrap, .azWrap, .tkWrap { height: 100%; }</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <div class="btTable" id="btTable">
+        <div class="btTurn" id="btTurn"></div>
+        <div class="btSeatHands" id="btSeatHands"></div>
+        <div class="felt">
+          <div class="btHint" id="btHint"></div>
+          <div class="btLast" id="btLast"></div>
+        </div>
+        <div class="btHand" id="btHand"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">出牌、不要、重新起牌都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/bigtwo.js?v=8"></script>
+<script src="games/shell.js?v=7"></script>
+<script>
+(function () {
+  const B = window.BigTwoEngine;
+  const $ = (id) => document.getElementById(id);
+  let cur = null;
+  let selected = [];
+
+  function mySeat(st) {
+    if (window.GameShell.isLocal()) return st.turn;
+    const i = st.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+  function myTurn(st) {
+    if (!st || st.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return st.players[st.turn].id === window.Net.identity.id;
+  }
+
+  function cardNode(id, up) {
+    const c = B.card(id);
+    const d = document.createElement('div');
+    d.className = 'btCard ' + (c.s === 0 || c.s === 2 ? 'red' : 'black') + (up ? ' up' : '');
+    d.innerHTML = '<span class="r">' + c.label.replace(/[♦♣♥♠]/, '') + '</span><span class="s">' + B.SUITS[c.s] + '</span>';
+    return d;
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+
+    $('btTurn').textContent = st.phase === 'ended' ? '这一局结束了' : (st.players[st.turn].name + ' 的回合');
+
+    const sh = $('btSeatHands');
+    sh.innerHTML = '';
+    st.players.forEach((p, i) => {
+      const d = document.createElement('div');
+      d.textContent = p.name + ' · ';
+      const b = document.createElement('b');
+      b.textContent = (st.hands[i] || []).length + ' 张';
+      d.appendChild(b);
+      if (i === st.turn && st.phase === 'playing') d.style.color = '#c86a2c';
+      sh.appendChild(d);
+    });
+
+    const last = $('btLast');
+    last.innerHTML = '';
+    if (st.lastPlay) {
+      const box = document.createElement('div');
+      box.style.display = 'flex';
+      box.style.gap = '6px';
+      box.style.flexWrap = 'wrap';
+      box.style.justifyContent = 'center';
+      const tag = document.createElement('div');
+      tag.className = 'btHint';
+      tag.style.flexBasis = '100%';
+      tag.textContent = (st.players.find((p) => p.id === st.lastPlay.pid) || {}).name + ' 出的' + B.TYPE_LABEL[st.lastPlay.combo.type];
+      box.appendChild(tag);
+      st.lastPlay.cards.forEach((id) => box.appendChild(cardNode(id, false)));
+      last.appendChild(box);
+    } else {
+      const p = document.createElement('div');
+      p.className = 'btHint';
+      p.textContent = st.needLowest
+        ? '首局起手：' + (st.players[st.turn] ? st.players[st.turn].name : '') + ' 的第一手必须带 ♦3'
+        : '新的一轮，' + (st.players[st.turn] ? st.players[st.turn].name : '') + ' 随便出（不必压牌）';
+      last.appendChild(p);
+    }
+
+    const handWrap = $('btHand');
+    handWrap.innerHTML = '';
+    const seat = mySeat(st);
+    const hand = st.hands[seat] || [];
+    hand.forEach((id) => {
+      const node = cardNode(id, selected.indexOf(id) >= 0);
+      node.addEventListener('click', () => {
+        if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+        const idx = selected.indexOf(id);
+        if (idx >= 0) selected.splice(idx, 1); else selected.push(id);
+        render(st);
+      });
+      handWrap.appendChild(node);
+    });
+
+    renderDock(st);
+  }
+
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    info.innerHTML = '';
+    actions.innerHTML = '';
+
+    const seat = mySeat(st);
+    const hand = st.hands[seat] || [];
+    const selCombo = B.combo(selected);
+    let ttl = '';
+    let sub = '';
+    if (st.phase === 'ended') {
+      const w = st.players.find((p) => p.id === st.winner);
+      ttl = w ? w.name + ' 出完了所有牌' : '对局结束';
+      sub = '座次：' + (st.outs || []).map((o) => o.name + '（剩 ' + o.left + '）').join(' · ');
+    } else {
+      ttl = st.players[st.turn].name + ' 出牌';
+      sub = selected.length
+        ? (selCombo ? '当前选择：' + B.TYPE_LABEL[selCombo.type] : '这几张不成牌型')
+        : (st.needLowest ? '首局第一手必须带 ♦3；顺子 / 同花顺不能含 2' : '点手牌选中，再点「出牌」；压不过就「不要」');
+    }
+    info.innerHTML = '<div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div>';
+
+    if (st.phase !== 'playing') return;
+    const on = myTurn(st);
+
+    const play = document.createElement('button');
+    play.className = 'btn primary';
+    play.type = 'button';
+    play.textContent = '出牌';
+    play.disabled = !on || !selected.length;
+    play.addEventListener('click', () => {
+      const r = window.GameShell.send({ type: 'play', cards: selected.slice() });
+      if (r) selected = [];
+      render(cur);
+    });
+    actions.appendChild(play);
+
+    const pass = document.createElement('button');
+    pass.className = 'btn ghost';
+    pass.type = 'button';
+    pass.textContent = '不要';
+    pass.disabled = !on || !st.lastPlay;
+    pass.addEventListener('click', () => {
+      if (window.GameShell.send({ type: 'pass' })) selected = [];
+    });
+    actions.appendChild(pass);
+
+    const clear = document.createElement('button');
+    clear.className = 'btn sm ghost';
+    clear.type = 'button';
+    clear.textContent = '取消选择';
+    clear.disabled = !selected.length;
+    clear.addEventListener('click', () => { selected = []; render(cur); });
+    actions.appendChild(clear);
+  }
+
+  window.GameShell.boot({
+    game: 'bigtwo',
+    title: '大老二',
+    blurb: '官方规则：4 人 52 张，首局由持 ♦3 的人先出且第一手必须带 ♦3。3 最小、2 最大，同点比花色 ♦<♣<♥<♠。顺子与同花顺不能含 2。出单张、一对、三张，或用 5 张组顺子 / 同花 / 葫芦 / 四条 / 同花顺，压过桌面就接着出，压不过就喊「不要」。三家都不要，由出牌的人重新起牌。',
+    min: 4,
+    max: 4,
+    engine: B,
+    seatTag: (p, i, st) => (st && st.hands ? (st.hands[i] || []).length + ' 张' : ''),
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      return '出牌 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+    },
+    winnerTitle: (st) => {
+      const w = st.players.find((p) => p.id === st.winner);
+      return w ? w.name + ' 出完了' : '对局结束';
+    },
+    winnerSub: (st) => (st.outs || []).map((o) => o.name + ' 剩 ' + o.left + ' 张').join(' · '),
+    onState: (st) => { selected = selected.filter((id) => (st.hands[mySeat(st)] || []).indexOf(id) >= 0); render(st); },
+    onMount: () => {}
+  });
+})();
+</script>
+</body>
+</html>

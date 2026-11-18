@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>璀璨宝石 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .spWrap { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow-y: auto; justify-content: flex-start; }
+  .spNobles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start; }
+  .noble {
+    border-radius: 14px; padding: 6px 10px; background: #fffdf6; border: 2px solid #e8ddc4;
+    font-size: 12px; font-weight: 700; color: #6b5433; display: flex; align-items: center; gap: 6px;
+  }
+  .noble .pv { color: #c86a2c; font-weight: 800; }
+  .spRow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 900px; margin: 0 auto; }
+  .spCard {
+    position: relative; border-radius: 14px; padding: 8px 8px 26px; background: #fffdf6;
+    border: 2px solid #e8ddc4; box-shadow: 0 3px 0 #ded0b2; text-align: left; font: inherit; cursor: pointer;
+    min-height: 92px;
+  }
+  .spCard .pts { position: absolute; top: 6px; right: 8px; font-size: 16px; font-weight: 900; color: #c86a2c; }
+  .spCard .bar { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 13px; }
+  .spCard .cost { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  .costChip { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 800; color: #3d3527; }
+  .costChip .dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); }
+  .spReserve {
+    position: absolute; right: 6px; bottom: 5px; border: 0; border-radius: 8px; padding: 3px 8px;
+    font-size: 11px; font-weight: 800; background: #f3e6c9; color: #7a5b1f; cursor: pointer;
+  }
+  .spCard.cheap { border-color: #8fd0a0; }
+  .spBank { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 4px 0; }
+  .bankChip {
+    min-width: 56px; border-radius: 14px; border: 2px solid #e8ddc4; background: #fffdf6; padding: 6px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 800; cursor: pointer; color: #4a4453;
+  }
+  .bankChip .dot { width: 20px; height: 20px; border-radius: 50%; }
+  .bankChip.on { border-color: #f0a92f; box-shadow: 0 0 0 3px rgba(240,169,47,.25); }
+  .bankChip .n { color: #c86a2c; }
+  .spMine { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; font-size: 12px; color: #6b5433; }
+  .spMine b { color: #c86a2c; }
+  .spReserved { display: flex; gap: 8px; justify-content: flex-start; }
+
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; }
+  @media (max-width: 720px) {
+    .dock { flex-wrap: wrap; row-gap: 8px; }
+    .dockInfo { flex: 1 1 100%; }
+    .dockActions { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; }
+    .boardInner { width: 100%; height: auto; min-height: 0; }
+  }
+  .boardWrap { display: block; padding-top: 4px; }
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; overflow: hidden; }
+  .btTable, .spWrap, .azWrap, .tkWrap { height: 100%; }</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <div class="spWrap" id="spWrap">
+        <div class="spNobles" id="spNobles"></div>
+        <div class="spRow" id="spRow3"></div>
+        <div class="spRow" id="spRow2"></div>
+        <div class="spRow" id="spRow1"></div>
+        <div class="spBank" id="spBank"></div>
+        <div class="spMine" id="spMine"></div>
+        <div class="spReserved" id="spReserved"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">拿宝石、买卡、贵族来访都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/splendor.js?v=8"></script>
+<script src="games/shell.js?v=7"></script>
+<script>
+(function () {
+  const S = window.SplendorEngine;
+  const $ = (id) => document.getElementById(id);
+  let cur = null;
+  let picked = [];
+  let returnSel = {};
+
+  function mySeat(st) {
+    if (window.GameShell.isLocal()) return st.turn;
+    const i = st.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+  function myTurn(st) {
+    if (!st || st.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return st.players[st.turn].id === window.Net.identity.id;
+  }
+
+  function chip(color, n) {
+    const s = document.createElement('span');
+    s.className = 'costChip';
+    const d = document.createElement('span');
+    d.className = 'dot';
+    d.style.background = S.COLOR_HEX[color];
+    s.appendChild(d);
+    const t = document.createElement('span');
+    t.textContent = '×' + n;
+    s.appendChild(t);
+    return s;
+  }
+
+  function cardNode(st, id) {
+    const c = S.cardOf(st, id);
+    const me = st.players[mySeat(st)];
+    const afford = me ? S.canAfford(st, me, id) : false;
+    const b = document.createElement('div');
+    b.className = 'spCard' + (afford ? ' cheap' : '');
+    b.innerHTML = '<div class="bar" style="background:' + S.COLOR_HEX[c.color] + '">' + S.COLOR_NAME[c.color] + '</div>' +
+      (c.pts ? '<div class="pts">' + c.pts + '</div>' : '');
+    const cost = document.createElement('div');
+    cost.className = 'cost';
+    Object.keys(c.cost).forEach((col) => cost.appendChild(chip(col, c.cost[col])));
+    b.appendChild(cost);
+
+    b.addEventListener('click', () => {
+      if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+      window.GameShell.send({ type: 'buy', id: id });
+    });
+
+    const rv = document.createElement('button');
+    rv.className = 'spReserve';
+    rv.type = 'button';
+    rv.textContent = '预留';
+    rv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+      window.GameShell.send({ type: 'reserve', id: id });
+    });
+    b.appendChild(rv);
+    return b;
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+
+    const nobles = $('spNobles');
+    nobles.innerHTML = '';
+    st.nobles.forEach((id) => {
+      const n = S.NOBLES.find((x) => x.id === id);
+      if (!n) return;
+      const d = document.createElement('div');
+      d.className = 'noble';
+      const need = Object.keys(n.need).map((c) => S.COLOR_NAME[c] + n.need[c]).join(' ');
+      d.innerHTML = '<span class="pv">' + n.pts + '</span><span>' + need + '</span>';
+      nobles.appendChild(d);
+    });
+
+    [3, 2, 1].forEach((tier) => {
+      const row = $('spRow' + tier);
+      row.innerHTML = '';
+      st.board[tier].forEach((id) => row.appendChild(cardNode(st, id)));
+    });
+
+    const bank = $('spBank');
+    bank.innerHTML = '';
+    ['w', 'u', 'g', 'r', 'k', 'gold'].forEach((c) => {
+      const d = document.createElement('button');
+      d.className = 'bankChip' + (picked.indexOf(c) >= 0 ? ' on' : '');
+      d.type = 'button';
+      d.innerHTML = '<span class="dot" style="background:' + S.COLOR_HEX[c] + '"></span>' +
+        '<span>' + S.COLOR_NAME[c] + '</span><span class="n">' + (st.bank[c] || 0) + '</span>';
+      d.addEventListener('click', () => {
+        if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+        if (c === 'gold') return;
+        const cnt = picked.filter((x) => x === c).length;
+        if (cnt === 0) {
+          if (picked.length >= 3) { window.GameShell.toast('一次最多拿 3 种', true); return; }
+          picked.push(c);
+        } else if (cnt === 1) {
+          if ((st.bank[c] || 0) >= 4) picked.push(c);
+          else picked = picked.filter((x) => x !== c);
+        } else {
+          picked = picked.filter((x) => x !== c);
+        }
+        render(st);
+      });
+      bank.appendChild(d);
+    });
+
+    const me = st.players[mySeat(st)];
+    const mine = $('spMine');
+    mine.innerHTML = '';
+    if (me) {
+      const b = S.bonuses(st, me);
+      const tok = ['w', 'u', 'g', 'r', 'k', 'gold'].map((c) => S.COLOR_NAME[c] + ' ' + me.tokens[c]).join(' · ');
+      mine.innerHTML = '<span>' + me.name + ' · <b>' + me.pts + '</b> 分</span>' +
+        '<span>宝石：' + tok + '</span>' +
+        '<span>折扣：' + ['w', 'u', 'g', 'r', 'k'].map((c) => S.COLOR_NAME[c] + b[c]).join(' ') + '</span>';
+    }
+
+    const res = $('spReserved');
+    res.innerHTML = '';
+    if (me && (me.reserved || []).length) {
+      me.reserved.forEach((id) => {
+        const node = cardNode(st, id);
+        node.querySelector('.spReserve').remove();
+        res.appendChild(node);
+      });
+    }
+
+    renderDock(st);
+  }
+
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    info.innerHTML = '';
+    actions.innerHTML = '';
+    const me = st.players[mySeat(st)];
+    const on = myTurn(st);
+
+    let ttl = '', sub = '';
+    if (st.phase === 'ended') {
+      const w = st.players.find((p) => p.id === st.winner);
+      ttl = w ? w.name + ' 获胜' : '对局结束';
+      sub = st.players.map((p) => p.name + ' ' + p.pts + ' 分').join(' · ');
+    } else {
+      ttl = st.players[st.turn].name + ' 行动';
+      sub = picked.length
+        ? '已选：' + picked.map((c) => S.COLOR_NAME[c]).join('、') + '（再点一次取消）'
+        : '点宝石再点「拿取」；同色点两次可拿 2 颗（池里要有 4 颗）；点卡买下；点「预留」先扣一张';
+    }
+    info.innerHTML = '<div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div>';
+
+    if (st.phase !== 'playing') return;
+
+    // 官方：回合末手牌超过 10 颗要退回
+    if (st.pendingReturn && st.pendingReturn.pid === me.id) {
+      const left = st.pendingReturn.count - ['w', 'u', 'g', 'r', 'k', 'gold'].reduce((s, c) => s + (returnSel[c] || 0), 0);
+      info.innerHTML = '<div class="ttl">退回多余宝石（还要退 ' + left + ' 颗）</div>' +
+        '<div class="sub">手里最多只能留 10 颗（含金块），点宝石选择要退回的数量</div>';
+      ['w', 'u', 'g', 'r', 'k', 'gold'].forEach((c) => {
+        if (!me.tokens[c]) return;
+        const b = document.createElement('button');
+        b.className = 'btn sm' + ((returnSel[c] || 0) > 0 ? ' primary' : ' ghost');
+        b.type = 'button';
+        b.textContent = S.COLOR_NAME[c] + ' ×' + me.tokens[c] + ((returnSel[c] || 0) ? '（退 ' + returnSel[c] + '）' : '');
+        b.disabled = left <= 0 || (returnSel[c] || 0) >= me.tokens[c];
+        b.addEventListener('click', () => {
+          returnSel[c] = (returnSel[c] || 0) + 1;
+          render(cur);
+        });
+        actions.appendChild(b);
+      });
+      if (left <= 0) {
+        const okBtn = document.createElement('button');
+        okBtn.className = 'btn primary';
+        okBtn.type = 'button';
+        okBtn.textContent = '确认退回';
+        okBtn.addEventListener('click', () => {
+          window.GameShell.send({ type: 'return', tokens: returnSel });
+          returnSel = {};
+        });
+        actions.appendChild(okBtn);
+      }
+      return;
+    }
+
+    // 官方：多个贵族同时达标，由玩家选 1 位
+    if (st.noblePick && st.noblePick.pid === me.id) {
+      info.innerHTML = '<div class="ttl">贵族来访</div><div class="sub">你同时满足多位贵族，只能迎来 1 位</div>';
+      st.noblePick.ids.forEach((id) => {
+        const n = S.NOBLES.find((x) => x.id === id);
+        if (!n) return;
+        const b = document.createElement('button');
+        b.className = 'btn ghost';
+        b.type = 'button';
+        b.textContent = n.name + ' +' + n.pts;
+        b.addEventListener('click', () => window.GameShell.send({ type: 'pickNoble', id: id }));
+        actions.appendChild(b);
+      });
+      return;
+    }
+
+    const take = document.createElement('button');
+    take.className = 'btn primary';
+    take.type = 'button';
+    take.textContent = '拿取宝石';
+    take.disabled = !on || picked.length < 2;
+    take.addEventListener('click', () => {
+      const r = window.GameShell.send({ type: 'take', colors: picked.slice() });
+      if (r) picked = [];
+      render(cur);
+    });
+    actions.appendChild(take);
+
+    const clear = document.createElement('button');
+    clear.className = 'btn sm ghost';
+    clear.type = 'button';
+    clear.textContent = '清空';
+    clear.disabled = !picked.length;
+    clear.addEventListener('click', () => { picked = []; render(cur); });
+    actions.appendChild(clear);
+
+    if (me && me.reserved && me.reserved.length) {
+      const note = document.createElement('div');
+      note.className = 'btn ghost';
+      note.style.display = 'grid';
+      note.style.placeItems = 'center';
+      note.textContent = '预留 ' + me.reserved.length + '/3';
+      actions.appendChild(note);
+    }
+  }
+
+  window.GameShell.boot({
+    game: 'splendor',
+    title: '璀璨宝石',
+    blurb: '官方规则：拿 3 种不同色宝石或同色 2 颗（池里要剩 4 颗），也能预留卡片换 1 块金；回合末手里最多留 10 颗（含金）。卡上的颜色变成永久折扣，同时满足多位贵族时只能选 1 位来访。有人到 15 分后打完这一轮，最高分获胜（同分比发展卡少者）。',
+    min: 2,
+    max: 4,
+    engine: S,
+    seatTag: (p) => p.pts + ' 分',
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      return '行动 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+    },
+    winnerTitle: (st) => {
+      const w = st.players.find((p) => p.id === st.winner);
+      return w ? w.name + ' 凑到 15 分' : '对局结束';
+    },
+    winnerSub: (st) => st.players.map((p) => p.name + '：' + p.pts + ' 分').join(' · '),
+    onState: (st) => render(st),
+    onMount: () => {}
+  });
+})();
+</script>
+</body>
+</html>

@@ -89,7 +89,7 @@ window.GameShell = (function () {
       if (cfg.seatTag) {
         const tag = document.createElement('span');
         tag.className = 'tag';
-        tag.textContent = cfg.seatTag(p, i);
+        tag.textContent = cfg.seatTag(p, i, state);
         div.appendChild(tag);
       }
 
@@ -243,11 +243,12 @@ window.GameShell = (function () {
   }
 
   /* ---------------- 动作派发 ---------------- */
-  function send(action) {
+  function send(action, asPid) {
     if (!state) return false;
 
     if (localMode) {
-      const pid = state.players[state.turn] ? state.players[state.turn].id : null;
+      const seatIdx = state.phase === 'setup' && typeof state.setupIdx === 'number' ? state.setupIdx : state.turn;
+      const pid = asPid || (state.players[seatIdx] ? state.players[seatIdx].id : null);
       const copy = JSON.parse(JSON.stringify(state));
       const r = cfg.engine.act(copy, action, pid, Math.random);
       if (!r.ok) { toast(r.msg, true); return false; }

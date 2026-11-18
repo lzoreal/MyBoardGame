@@ -454,6 +454,66 @@ html, body {
 }
 
 /* ---------- 林中小屋 ---------- */
+.pickPanel {
+  position: fixed;
+  left: 0; right: 0; top: 62px; bottom: 0;
+  z-index: 30;
+  padding: 14px;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(247, 242, 230, .97), rgba(238, 246, 232, .97));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.pickPanel.hidden { display: none; }
+.pickHead {
+  font-size: 14px;
+  font-weight: 800;
+  color: #6b5433;
+  text-align: center;
+  line-height: 1.5;
+}
+.pickHead b { color: #c86a2c; }
+.pickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 760px;
+}
+.pickCard {
+  border: 0;
+  border-radius: 18px;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: #fffdf6;
+  box-shadow: 0 8px 18px rgba(120, 96, 50, .16), inset 0 0 0 2px #efe2c9;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.pickCard:active { transform: translateY(2px); }
+.pickCard:disabled { cursor: not-allowed; opacity: .5; }
+.pickCard .top { display: flex; align-items: center; gap: 8px; }
+.pickCard .art {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: #fff; font-weight: 800; font-size: 15px;
+  flex: 0 0 auto;
+}
+.pickCard .nm { font-size: 15px; font-weight: 800; color: #3d3527; }
+.pickCard .role { font-size: 12px; color: #8d7a5c; }
+.pickCard .tr { margin-top: 7px; font-size: 12px; color: #6b5433; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 1px 10px; }
+.pickCard .tr span { white-space: nowrap; }
+.pickCard .tr b { font-size: 13px; color: #2f2a24; }
+.pickCard .who { margin-top: 6px; font-size: 12px; font-weight: 700; color: #b0642e; }
+@media (max-width: 720px) {
+  .pickPanel { padding: 10px 10px calc(10px + var(--sa-bottom)); top: 56px; }
+  .pickGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .pickCard { padding: 8px 10px; }
+  .pickHead { font-size: 13px; }
+}
 .floorTabs {
   display: flex;
   gap: 6px;

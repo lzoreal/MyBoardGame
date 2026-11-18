@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#7fd0ea">
 <title>林中小屋 · 萌趣街区</title>
-<link rel="stylesheet" href="games/games.css?v=4">
+<link rel="stylesheet" href="games/games.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -24,6 +24,8 @@
   <main class="boardWrap">
     <div class="boardInner" id="boardInner" aria-label="林中小屋地图"></div>
   </main>
+
+  <section class="pickPanel hidden" id="pickPanel" aria-label="选角色"></section>
 
   <footer class="dock">
     <div class="dockInfo" id="dockInfo"></div>
@@ -214,8 +216,9 @@
   }
 
   function myTurn(st) {
-    if (!st || st.phase !== 'playing') return false;
-    if (st.players[st.turn].dead) return false;
+    if (!st) return false;
+    if (st.phase !== 'playing' && st.phase !== 'select') return false;
+    if (st.phase === 'playing' && st.players[st.turn].dead) return false;
     return window.GameShell.isLocal() ? true : st.players[st.turn].id === window.Net.identity.id;
   }
 
@@ -274,6 +277,52 @@
   }
 
   /* ---------------- 底部栏 ---------------- */
+  /* ---------------- 选角色 ---------------- */
+  function renderPick(st) {
+    const panel = $('pickPanel');
+    if (!st || st.phase !== 'select') {
+      panel.classList.add('hidden');
+      panel.innerHTML = '';
+      return;
+    }
+    panel.classList.remove('hidden');
+
+    const current = st.players[st.turn];
+    const left = st.players.filter((p) => !p.char).length;
+    const mine = myTurn(st);
+
+    panel.innerHTML = '';
+    const head = document.createElement('div');
+    head.className = 'pickHead';
+    head.innerHTML = '轮到 <b>' + current.name + '</b> 选角色 · 还剩 ' + left + ' 人没选' +
+      '<br>' + (mine ? '点一张角色卡就位' : '等 ' + current.name + ' 选完再轮到你') +
+      '<br>剧本库 ' + C.SCENARIOS.length + ' 个闹鬼剧本，随机开一局';
+    panel.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'pickGrid';
+    panel.appendChild(grid);
+
+    C.CHARS.forEach((ch, idx) => {
+      const owner = st.charTaken && st.charTaken[ch.key] !== undefined ? st.players[st.charTaken[ch.key]] : null;
+      const b = document.createElement('button');
+      b.className = 'pickCard';
+      b.type = 'button';
+      b.disabled = !!owner || !mine;
+      const tr = C.TRAITS.map((t) => '<span>' + t.label + ' <b>' + ch.traits[t.key] + '</b></span>').join('');
+      b.innerHTML =
+        '<div class="top"><span class="art" style="background:' + SEAT[idx % SEAT.length] + '">' + ch.art + '</span>' +
+        '<span><div class="nm">' + ch.name + '</div><div class="role">' + ch.role + '</div></span></div>' +
+        '<div class="tr">' + tr + '</div>' +
+        (owner ? '<div class="who">已被 ' + owner.name + ' 选走</div>' : '');
+      b.addEventListener('click', () => {
+        if (owner) return;
+        window.GameShell.send({ type: 'pick', char: ch.key });
+      });
+      grid.appendChild(b);
+    });
+  }
+
   function renderDock(st) {
     const info = $('dockInfo');
     const actions = $('dockActions');
@@ -285,6 +334,20 @@
     actions.innerHTML = '';
 
     if (!me) return;
+
+    if (st.phase === 'select') {
+      const who = st.players[st.turn];
+      const left = st.players.filter((p) => !p.char).length;
+      info.innerHTML = '<div class="ttl">选角色阶段</div>' +
+        '<div class="sub">轮到 ' + who.name + ' 挑角色 · 还剩 ' + left + ' 人 · 剧本库 ' + C.SCENARIOS.length + ' 个</div>';
+      const hintBtn = document.createElement('div');
+      hintBtn.className = 'btn ghost';
+      hintBtn.style.display = 'grid';
+      hintBtn.style.placeItems = 'center';
+      hintBtn.textContent = myTurn(st) ? '点上面的卡片选角色' : '等 ' + who.name + ' 选';
+      actions.appendChild(hintBtn);
+      return;
+    }
 
     const head = document.createElement('div');
     head.innerHTML = '<div class="ttl">' + me.name + ' · ' + me.charName + '（' + me.role + '）</div>' +
@@ -367,8 +430,11 @@
     cur = st;
     if (!st) return;
     narrow = window.innerWidth <= 720;
+    const selecting = st.phase === 'select';
+    $('floorTabs').style.display = selecting ? 'none' : '';
+    renderPick(st);
     const me = st.players[myIndex(st)];
-    if (me && me.floor !== viewFloor && !st.viewLock) viewFloor = me.floor;
+    if (me && me.floor !== viewFloor && st.phase === 'playing') viewFloor = me.floor;
     renderFloorTabs(st);
     renderBoard(st);
     renderScenario(st);
@@ -390,6 +456,7 @@
     seatTag: (p) => (cur && cur.haunt && cur.haunt.active && cur.players.indexOf(p) === cur.haunt.traitor ? '叛徒' : p.charName),
     turnPill: (st) => {
       if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'select') return '选角色 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
       if (st.phase === 'ended') return '已结束';
       const p = st.players[st.turn];
       return (st.haunt && st.haunt.active ? '闹鬼 · ' : '探索 · ') + (p ? p.name : '');

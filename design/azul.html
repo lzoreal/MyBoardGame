@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>花砖物语 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .azWrap { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 8px 10px; overflow-y: auto; }
+  .azFactories { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .factory {
+    width: 108px; height: 108px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, #fff8e8, #efe3c8);
+    border: 3px solid #fff; box-shadow: 0 6px 16px rgba(120,96,50,.16);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px; place-items: center; padding: 10px;
+  }
+  .tile { width: 30px; height: 30px; border-radius: 8px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); cursor: pointer; flex: none; }
+  .tile.sel { outline: 3px solid #f0a92f; outline-offset: 2px; }
+  .azCenter { border-radius: 20px; background: #fffdf6; border: 2px solid #e8ddc4; padding: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 52px; align-items: center; }
+  .azBoard { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .azPlayer { border-radius: 18px; background: #fffdf6; border: 2px solid #e8ddc4; padding: 10px; display: flex; gap: 12px; }
+  .azPlayer.self { border-color: #f0a92f; box-shadow: 0 0 0 3px rgba(240,169,47,.18); }
+  .lines { display: flex; flex-direction: column; gap: 5px; }
+  .ln { display: flex; align-items: center; gap: 4px; height: 20px; }
+  .ln .cap { font-size: 10px; color: #8d7a5c; width: 12px; }
+  .ln .slot { width: 18px; height: 18px; border-radius: 5px; background: #f2ead6; border: 1px solid #e2d6bd; }
+  .ln .slot.fill { border: 0; box-shadow: inset 0 -2px 0 rgba(0,0,0,.18); }
+  .wall { display: grid; grid-template-columns: repeat(5, 18px); gap: 3px; }
+  .wall .cell { width: 18px; height: 18px; border-radius: 5px; background: #f2ead6; border: 1px solid #e2d6bd; display: grid; place-items: center; font-size: 9px; }
+  .wall .cell.done { border: 0; color: #fff; font-weight: 800; }
+  .floorRow { display: flex; gap: 4px; align-items: center; font-size: 11px; color: #8d7a5c; }
+  .azName { font-size: 12px; font-weight: 800; color: #3d3527; margin-bottom: 4px; }
+
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; }
+  @media (max-width: 720px) {
+    .dock { flex-wrap: wrap; row-gap: 8px; }
+    .dockInfo { flex: 1 1 100%; }
+    .dockActions { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; }
+    .boardInner { width: 100%; height: auto; min-height: 0; }
+  }
+  .boardWrap { display: block; padding-top: 4px; }
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; overflow: hidden; }
+  .btTable, .spWrap, .azWrap, .tkWrap { height: 100%; }</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <div class="azWrap">
+        <div class="azFactories" id="azFactories"></div>
+        <div class="azCenter" id="azCenter"></div>
+        <div class="azBoard" id="azBoard"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">拿砖、贴砖、地板扣分都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/azul.js?v=8"></script>
+<script src="games/shell.js?v=7"></script>
+<script>
+(function () {
+  const A = window.AzulEngine;
+  const $ = (id) => document.getElementById(id);
+  let cur = null;
+  let pending = null; // {src, color}
+
+  function mySeat(st) {
+    if (window.GameShell.isLocal()) return st.turn;
+    const i = st.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+  function myTurn(st) {
+    if (!st || st.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return st.players[st.turn].id === window.Net.identity.id;
+  }
+
+  function tile(color, opts) {
+    const t = document.createElement('div');
+    t.className = 'tile' + (opts && opts.sel ? ' sel' : '');
+    t.style.background = A.COLOR_HEX[color];
+    if (opts && opts.title) t.title = opts.title;
+    return t;
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+
+    const fac = $('azFactories');
+    fac.innerHTML = '';
+    st.factories.forEach((f, i) => {
+      const box = document.createElement('div');
+      box.className = 'factory';
+      f.forEach((color) => {
+        const t = tile(color, { sel: pending && pending.src === 'f' + i && pending.color === color });
+        t.addEventListener('click', () => {
+          if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+          pending = { src: 'f' + i, color: color };
+          render(st);
+        });
+        box.appendChild(t);
+      });
+      fac.appendChild(box);
+    });
+
+    const ce = $('azCenter');
+    ce.innerHTML = '';
+    if (st.centerMarker) {
+      const mk = document.createElement('span');
+      mk.style.cssText = 'font-size:11px;font-weight:800;color:#8a5a2b;background:#f6e3bd;border:2px solid #e3c68f;border-radius:999px;padding:2px 8px';
+      mk.textContent = '先手标记';
+      ce.appendChild(mk);
+    }
+    const groups = {};
+    st.center.forEach((c) => { groups[c] = (groups[c] || 0) + 1; });
+    Object.keys(groups).forEach((color) => {
+      const wrap = document.createElement('div');
+      wrap.style.display = 'flex';
+      wrap.style.gap = '3px';
+      wrap.style.alignItems = 'center';
+      for (let k = 0; k < groups[color]; k++) {
+        const t = tile(color, { sel: pending && pending.src === 'center' && pending.color === color });
+        t.addEventListener('click', () => {
+          if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+          pending = { src: 'center', color: color };
+          render(st);
+        });
+        wrap.appendChild(t);
+      }
+      ce.appendChild(wrap);
+    });
+    if (!st.center.length) {
+      const hint = document.createElement('span');
+      hint.style.fontSize = '12px';
+      hint.style.color = '#8d7a5c';
+      hint.textContent = '中间台空着（工厂拿剩的砖会落在这里）';
+      ce.appendChild(hint);
+    }
+
+    const board = $('azBoard');
+    board.innerHTML = '';
+    st.players.forEach((p, idx) => {
+      const box = document.createElement('div');
+      box.className = 'azPlayer' + (idx === mySeat(st) ? ' self' : '');
+      const name = document.createElement('div');
+      name.className = 'azName';
+      name.textContent = p.name + ' · ' + p.score + ' 分' + (p.firstMarker ? ' · 先手' : '');
+      box.appendChild(name);
+
+      const lines = document.createElement('div');
+      lines.className = 'lines';
+      p.lines.forEach((line, li) => {
+        const row = document.createElement('div');
+        row.className = 'ln';
+        row.innerHTML = '<span class="cap">' + (li + 1) + '</span>';
+        for (let k = 0; k < li + 1; k++) {
+          const slot = document.createElement('span');
+          slot.className = 'slot' + (line.count > k ? ' fill' : '');
+          if (line.count > k) slot.style.background = A.COLOR_HEX[line.color];
+          row.appendChild(slot);
+        }
+        lines.appendChild(row);
+      });
+      box.appendChild(lines);
+
+      const wall = document.createElement('div');
+      wall.className = 'wall';
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          const wc = A.wallColor(r, c);
+          cell.className = 'cell' + (p.wall[r][c] ? ' done' : '');
+          if (p.wall[r][c]) cell.style.background = A.COLOR_HEX[wc];
+          else cell.style.color = '#b9ac93';
+          cell.textContent = p.wall[r][c] ? '' : '·';
+          wall.appendChild(cell);
+        }
+      }
+      box.appendChild(wall);
+
+      const floor = document.createElement('div');
+      floor.className = 'floorRow';
+      floor.textContent = '地板 ' + p.floor.length;
+      p.floor.slice(0, 7).forEach((c) => {
+        const t = tile(c, {});
+        t.style.width = '14px';
+        t.style.height = '14px';
+        floor.appendChild(t);
+      });
+      box.appendChild(floor);
+
+      board.appendChild(box);
+    });
+
+    renderDock(st);
+  }
+
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    info.innerHTML = '';
+    actions.innerHTML = '';
+    const on = myTurn(st);
+
+    let ttl = '', sub = '';
+    if (st.phase === 'ended') {
+      const w = st.players.find((p) => p.id === st.winner);
+      ttl = w ? w.name + ' 获胜' : '对局结束';
+      sub = st.players.map((p) => p.name + ' ' + p.score + ' 分').join(' · ');
+    } else {
+      ttl = st.players[st.turn].name + ' 选砖';
+      sub = pending
+        ? '已选 ' + A.COLOR_NAME[pending.color] + '：点下面第几行就放第几行'
+        : '点工厂/中间台里的砖，再选放到第几行';
+    }
+    info.innerHTML = '<div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div>';
+
+    if (st.phase !== 'playing') return;
+
+    for (let i = 0; i < 5; i++) {
+      const b = document.createElement('button');
+      b.className = 'btn ' + (i === 0 ? 'primary' : 'ghost');
+      b.type = 'button';
+      b.textContent = '第' + (i + 1) + '行';
+      b.disabled = !on || !pending;
+      b.addEventListener('click', () => {
+        const src = pending.src, color = pending.color;
+        const ok = window.GameShell.send({ type: 'take', src: src, color: color, line: i });
+        if (ok) pending = null;
+        render(cur);
+      });
+      actions.appendChild(b);
+    }
+  }
+
+  window.GameShell.boot({
+    game: 'azul',
+    title: '花砖物语',
+    blurb: '官方规则：第一个从中间台拿砖的人收下先手标记并立刻 -1 分，下轮由他先拿。每次一色全拿进同色图案行，放不下的掉地板（按 1/1/2/2/2/3/3 扣分，超出 7 块直接移出）。轮末把满行的一块贴上花砖墙，按行列连片计分。有人补满一整行后打完这轮结算，终局再加每满行 +2、每满列 +7、每种五块齐全 +10。',
+    min: 2,
+    max: 4,
+    engine: A,
+    seatTag: (p) => p.score + ' 分',
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      return '第 ' + st.round + ' 轮 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+    },
+    winnerTitle: (st) => {
+      const w = st.players.find((p) => p.id === st.winner);
+      return w ? w.name + ' 贴满花砖墙' : '对局结束';
+    },
+    winnerSub: (st) => st.players.map((p) => p.name + '：' + p.score + ' 分').join(' · '),
+    onState: (st) => render(st),
+    onMount: () => {}
+  });
+})();
+</script>
+</body>
+</html>

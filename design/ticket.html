@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>车票之旅 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .tkWrap { flex: 1; min-height: 0; display: flex; gap: 8px; padding: 6px 8px; }
+  .tkMap { flex: 1; min-width: 0; position: relative; }
+  .tkMap svg { width: 100%; height: 100%; display: block; }
+  .tkSide { width: 208px; flex: none; display: flex; flex-direction: column; gap: 7px; overflow-y: auto; }
+  .tkBox { border-radius: 14px; background: #fffdf6; border: 2px solid #e8ddc4; padding: 8px; font-size: 12px; color: #5f5340; }
+  .tkBox h3 { margin: 0 0 6px; font-size: 12px; color: #8a7451; letter-spacing: .5px; }
+  .tkMarket .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .tkCard { height: 46px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 3px 0 rgba(0,0,0,.15); display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 800; cursor: pointer; }
+  .tkCard.loco { color: #4a3a12; }
+  .tkDraw { margin-top: 6px; border-radius: 10px; background: repeating-linear-gradient(135deg,#33415c 0 10px,#3d4c6b 10px 20px); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; cursor: pointer; min-height: 40px; }
+  .tkHand { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tkHand .c { display: inline-flex; align-items: center; gap: 3px; }
+  .tkHand .dot { width: 12px; height: 12px; border-radius: 3px; }
+  .tkTickets { flex: 1; min-height: 90px; overflow-y: auto; }
+  .tkTickets .t { display: flex; justify-content: space-between; gap: 6px; padding: 2px 0; border-bottom: 1px dashed #ece2cd; }
+  .tkTickets .t.done { color: #2f9e63; }
+  .tkPick { display: flex; flex-direction: column; gap: 6px; }
+  .tkPick .opt { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 10px; border: 2px solid #e3d7bf; background: #fff; cursor: pointer; }
+  .tkPick .opt.on { border-color: #e2564a; background: #fff3ee; }
+  .tkPick .opt b { color: #c86a2c; }
+  .tkPick .opt .nm { flex: 1; }
+  .colPick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+  .colPick button { height: 52px; border-radius: 14px; border: 3px solid #fff; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
+  .colPick button:disabled { opacity: .45; }
+
+  .boardInner { width: 100%; height: 100%; aspect-ratio: auto; max-height: none; overflow: hidden; }
+  .boardWrap { display: block; padding-top: 4px; }
+  .btTable, .spWrap, .azWrap, .tkWrap { height: 100%; }
+  @media (max-width: 820px) {
+    .tkWrap { flex-direction: column; overflow-y: auto; }
+    .tkSide { width: auto; }
+    .tkMap { min-height: 46vh; }
+    .dock { flex-wrap: wrap; row-gap: 8px; }
+    .dockInfo { flex: 1 1 100%; }
+    .dockActions { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; }
+    .boardInner { width: 100%; height: auto; min-height: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <div class="tkWrap">
+        <div class="tkMap" id="tkMap"></div>
+        <div class="tkSide">
+          <div class="tkBox tkMarket" id="tkMarket"></div>
+          <div class="tkBox" id="tkHand"></div>
+          <div class="tkBox tkTickets" id="tkTickets"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">拿卡、占线、抽车票都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="colorSheet">
+    <div class="sheetCard">
+      <h2>这条灰线用什么颜色？</h2>
+      <p class="sub" id="colorSub">灰线可以任意单色，彩虹卡能当任何颜色；手上的颜色不够就占不了</p>
+      <div class="resGrid" id="colorGrid" style="grid-template-columns:repeat(2,1fr)"></div>
+      <div class="actions"><button class="btn ghost" id="colorCancel" type="button">取消</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/ticket.js?v=8"></script>
+<script src="games/shell.js?v=7"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const T = window.TicketEngine;
+  const $ = (id) => document.getElementById(id);
+  const SEATS = ['#e2564a', '#3f7fe0', '#2f9e63', '#d9a13b', '#8f5bd9'];
+  let cur = null;
+  let pickColor = null;   // 正在为哪条灰线选颜色
+  let keepSel = [];       // 选票勾选
+
+  function mySeat(st) {
+    if (window.GameShell.isLocal()) return (st.phase === 'setup' && typeof st.setupIdx === 'number') ? st.setupIdx : st.turn;
+    const i = st.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+  function myTurn(st) {
+    if (!st || st.phase !== 'playing') return false;
+    if (window.GameShell.isLocal()) return true;
+    return st.players[st.turn].id === window.Net.identity.id;
+  }
+  function svgEl(tag, attrs) {
+    const n = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach((k) => n.setAttribute(k, attrs[k]));
+    return n;
+  }
+
+  function routeColor(r) {
+    return r.color === 'grey' ? '#8f8574' : T.COLOR_HEX[r.color];
+  }
+
+  function renderMap(st) {
+    const box = $('tkMap');
+    box.innerHTML = '';
+    const svg = svgEl('svg', { viewBox: '-10 -14 1020 552', preserveAspectRatio: 'xMidYMid meet' });
+    box.appendChild(svg);
+    svg.appendChild(svgEl('rect', { x: -10, y: -14, width: 1020, height: 552, fill: '#eef7e6', rx: 18 }));
+
+    st.routes.forEach((r) => {
+      const a = T.city(r.a), b = T.city(r.b);
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const nx = -dy / len, ny = dx / len;
+      const off = r.pair === 'd0' ? -4 : r.pair === 'd1' ? 4 : 0;
+      const ax = a.x + nx * off, ay = a.y + ny * off;
+      const bx = b.x + nx * off, by = b.y + ny * off;
+      const ownerIdx = st.players.findIndex((p) => p.id === r.owner);
+      const col = ownerIdx >= 0 ? SEATS[ownerIdx % SEATS.length] : routeColor(r);
+
+      svg.appendChild(svgEl('line', {
+        x1: ax, y1: ay, x2: bx, y2: by,
+        stroke: ownerIdx >= 0 ? SEATS[ownerIdx % SEATS.length] : '#cfc2ad',
+        'stroke-width': Math.max(7, 6 + r.len * 1.6),
+        'stroke-linecap': 'round', opacity: ownerIdx >= 0 ? 0.3 : 1
+      }));
+      svg.appendChild(svgEl('line', {
+        x1: ax, y1: ay, x2: bx, y2: by,
+        stroke: col,
+        'stroke-width': Math.max(5, 3.4 + r.len * 1.4),
+        'stroke-linecap': 'round',
+        'stroke-dasharray': ownerIdx < 0 && r.color === 'grey' ? '9 5' : '',
+        opacity: 0.95
+      }));
+      if (ownerIdx >= 0) {
+        svg.appendChild(svgEl('circle', {
+          cx: (ax + bx) / 2, cy: (ay + by) / 2, r: 4.5,
+          fill: '#fff', stroke: '#2f2a24', 'stroke-width': 2
+        }));
+      }
+
+      const hit = svgEl('line', {
+        x1: ax, y1: ay, x2: bx, y2: by,
+        stroke: 'transparent', 'stroke-width': 15, style: 'cursor:pointer'
+      });
+      hit.addEventListener('click', () => onRoute(st, r));
+      svg.appendChild(hit);
+    });
+
+    T.CITIES.forEach((c) => {
+      svg.appendChild(svgEl('circle', { cx: c.x, cy: c.y, r: 5.5, fill: '#fff', stroke: '#6b5433', 'stroke-width': 2 }));
+      const label = svgEl('text', {
+        x: c.x, y: c.y - 10, 'font-size': 12.5, 'text-anchor': 'middle',
+        fill: '#3d3527', 'font-weight': 700, 'paint-order': 'stroke',
+        stroke: '#eef7e6', 'stroke-width': 3
+      });
+      label.textContent = c.name;
+      svg.appendChild(label);
+    });
+  }
+
+  function onRoute(st, r) {
+    if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+    if (r.owner) { window.GameShell.toast('这条线已经有主了', true); return; }
+    if (r.color === 'grey') {
+      pickColor = r.id;
+      openColorSheet(st);
+      return;
+    }
+    window.GameShell.send({ type: 'claim', id: r.id, color: r.color });
+  }
+
+  function openColorSheet(st) {
+    const me = st.players[mySeat(st)];
+    const grid = $('colorGrid');
+    grid.className = 'colPick';
+    grid.innerHTML = '';
+    T.COLORS.forEach((c) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.style.background = T.COLOR_HEX[c];
+      b.style.color = (c === 'w' || c === 'y') ? '#5f5340' : '#fff';
+      b.textContent = T.COLOR_NAME[c] + ' · 手牌 ' + (me.hand[c] || 0);
+      b.disabled = !(me.hand[c] || 0);
+      b.addEventListener('click', () => {
+        const id = pickColor;
+        pickColor = null;
+        $('colorSheet').classList.add('hidden');
+        window.GameShell.send({ type: 'claim', id: id, color: c });
+      });
+      grid.appendChild(b);
+    });
+    if (me.hand.loco) {
+      const note = document.createElement('div');
+      note.style.cssText = 'grid-column:1/-1;font-size:12px;color:#8a7451';
+      note.textContent = '彩虹卡 ' + me.hand.loco + ' 张可当任意颜色，选哪色就自动搭配';
+      grid.appendChild(note);
+    }
+    $('colorSheet').classList.remove('hidden');
+  }
+
+  function goClaim(color) {
+    if (!pickColor) return;
+    const id = pickColor;
+    pickColor = null;
+    window.GameShell.send({ type: 'claim', id: id, color: color });
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+    renderMap(st);
+
+    const mk = $('tkMarket');
+    mk.innerHTML = '<h3>明牌 · 5 张</h3>';
+    const row = document.createElement('div');
+    row.className = 'row';
+    st.market.forEach((color, i) => {
+      const d = document.createElement('div');
+      d.className = 'tkCard' + (color === 'loco' ? ' loco' : '');
+      if (color === 'loco') {
+        d.style.background = 'linear-gradient(135deg,#e2564a,#f0a92f 35%,#2f9e63 65%,#3f7fe0)';
+        d.style.color = '#fff';
+      } else {
+        d.style.background = T.COLOR_HEX[color];
+        d.style.color = (color === 'w' || color === 'y') ? '#5f5340' : '#fff';
+      }
+      d.textContent = T.COLOR_NAME[color];
+      d.addEventListener('click', () => {
+        if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+        if (st.drawsLeft <= 0) { window.GameShell.toast('这回合已经摸过牌了', true); return; }
+        window.GameShell.send({ type: 'draw', idx: i });
+      });
+      row.appendChild(d);
+    });
+    mk.appendChild(row);
+    const draw = document.createElement('div');
+    draw.className = 'tkDraw';
+    draw.textContent = '牌堆 · 剩 ' + st.deck.length + ' 张';
+    draw.addEventListener('click', () => {
+      if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+      if (st.drawsLeft <= 0) { window.GameShell.toast('这回合已经摸过牌了', true); return; }
+      window.GameShell.send({ type: 'draw' });
+    });
+    mk.appendChild(draw);
+
+    const me = st.players[mySeat(st)];
+    const hand = $('tkHand');
+    hand.innerHTML = '<h3>我的手牌</h3>';
+    const handRow = document.createElement('div');
+    handRow.className = 'tkHand';
+    if (me) {
+      T.COLORS.concat(['loco']).forEach((c) => {
+        if (!me.hand[c]) return;
+        const d = document.createElement('span');
+        d.className = 'c';
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.style.background = T.COLOR_HEX[c];
+        d.appendChild(dot);
+        const t = document.createElement('span');
+        t.textContent = T.COLOR_NAME[c] + ' ' + me.hand[c];
+        d.appendChild(t);
+        handRow.appendChild(d);
+      });
+      if (!handRow.children.length) handRow.textContent = '手里还没有车厢卡';
+    }
+    hand.appendChild(handRow);
+
+    const tks = $('tkTickets');
+    tks.innerHTML = '';
+    if (me) {
+      const ttl = document.createElement('h3');
+      ttl.textContent = '车票（' + me.tickets.length + '）· 车厢 ' + me.trains + ' 节';
+      tks.appendChild(ttl);
+      me.tickets.forEach((t) => {
+        const done = T.connected(st, me, t.from, t.to);
+        const div = document.createElement('div');
+        div.className = 't' + (done ? ' done' : '');
+        div.innerHTML = '<span>' + (done ? '✓ ' : '• ') + T.city(t.from).name + ' → ' + T.city(t.to).name + '</span><b>' + t.pts + '</b>';
+        tks.appendChild(div);
+      });
+    }
+
+    renderDock(st);
+  }
+
+  function renderPick(st, list, minKeep, mode) {
+    const actions = $('dockActions');
+    const info = $('dockInfo');
+    actions.innerHTML = '';
+    info.innerHTML = '<div class="ttl">' + (mode === 'setup' ? '起手选票' : '抽到的车票') + '</div>' +
+      '<div class="sub">' + (mode === 'setup' ? '从 3 张里至少保留 2 张' : '从 3 张里至少保留 1 张') + '，其余放回票堆</div>';
+    const wrap = document.createElement('div');
+    wrap.className = 'tkPick';
+    list.forEach((t, k) => {
+      const d = document.createElement('div');
+      d.className = 'opt' + (keepSel.indexOf(k) >= 0 ? ' on' : '');
+      const nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = T.city(t.from).name + ' → ' + T.city(t.to).name;
+      const pts = document.createElement('b');
+      pts.textContent = t.pts + ' 分';
+      d.appendChild(nm);
+      d.appendChild(pts);
+      d.addEventListener('click', () => {
+        const at = keepSel.indexOf(k);
+        if (at >= 0) keepSel.splice(at, 1); else keepSel.push(k);
+        renderPick(st, list, minKeep, mode);
+      });
+      wrap.appendChild(d);
+    });
+    actions.appendChild(wrap);
+    const go = document.createElement('button');
+    go.className = 'btn primary';
+    go.type = 'button';
+    go.textContent = '保留 ' + keepSel.length + ' 张';
+    go.disabled = keepSel.length < minKeep;
+    go.addEventListener('click', () => {
+      const keep = keepSel.slice();
+      keepSel = [];
+      window.GameShell.send({ type: 'keepTickets', keep: keep });
+    });
+    actions.appendChild(go);
+  }
+
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    info.innerHTML = '';
+    actions.innerHTML = '';
+    const me = st.players[mySeat(st)];
+    const on = myTurn(st);
+
+    if (st.phase === 'setup') {
+      const who = st.players[st.setupIdx];
+      if (who) {
+        if (window.GameShell.isLocal() || who.id === window.Net.identity.id) {
+          renderPick(st, who.pending, 2, 'setup');
+        } else {
+          info.innerHTML = '<div class="ttl">' + who.name + ' 正在选起手车票</div><div class="sub">每人 3 张里至少留 2 张</div>';
+        }
+      }
+      return;
+    }
+
+    if (st.ticketPick && on) {
+      renderPick(st, st.ticketPick, 1, 'play');
+      return;
+    }
+
+    let ttl = '', sub = '';
+    if (st.phase === 'ended') {
+      const w = st.players.find((p) => p.id === st.winner);
+      ttl = w ? w.name + ' 获胜' : '对局结束';
+      sub = st.players.map((p) => p.name + ' ' + p.points + ' 分').join(' · ');
+    } else {
+      ttl = st.players[st.turn].name + ' 的回合';
+      sub = '还能拿 ' + st.drawsLeft + ' 张卡' + (st.finale ? ' · 最后一轮（' + st.finale + ' 人待走）' : '') +
+        '　点路线占线、点明牌/牌堆拿卡' + (pickColor ? '　先选灰线颜色' : '');
+    }
+    info.innerHTML = '<div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div>';
+
+    if (st.phase !== 'playing') return;
+
+    const t = document.createElement('button');
+    t.className = 'btn primary';
+    t.type = 'button';
+    t.textContent = '抽 3 张车票';
+    t.disabled = !on || st.drawsLeft !== 2;
+    t.addEventListener('click', () => window.GameShell.send({ type: 'tickets' }));
+    actions.appendChild(t);
+  }
+
+  window.GameShell.boot({
+    game: 'ticket',
+    title: '车票之旅',
+    blurb: '美国原版地图 36 城。每回合三选一：抽 2 张车厢卡 / 占一条路线 / 抽 3 张车票并至少留 1 张。彩线要同色、灰线任意单色、彩虹万能；2-3 人局双线只开一条。有人剩 0-2 节车厢后每人再走一回合，然后按车票正负结算，最长连续路线 +10。',
+    min: 2,
+    max: 5,
+    engine: T,
+    seatTag: (p) => p.points + ' 分 / ' + p.trains + ' 节',
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      if (st.phase === 'setup') return '选票中 · ' + (st.players[st.setupIdx] ? st.players[st.setupIdx].name : '');
+      return (st.finale ? '最后一轮 · ' : '行动 · ') + (st.players[st.turn] ? st.players[st.turn].name : '');
+    },
+    winnerTitle: (st) => {
+      const w = st.players.find((p) => p.id === st.winner);
+      return w ? w.name + ' 拿下最多分' : '对局结束';
+    },
+    winnerSub: (st) => st.players.map((p) => p.name + '：' + p.points + ' 分（完成 ' + (p.completed || 0) + ' 张 / 最长 ' + (p.longest || 0) + ' 节）').join(' · '),
+    onState: (st) => { keepSel = keepSel.map((k) => k); render(st); },
+    onMount: () => {
+      $('colorCancel').addEventListener('click', () => {
+        pickColor = null;
+        $('colorSheet').classList.add('hidden');
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fd0ea">
+<title>卡坦岛 · 萌趣街区</title>
+<link rel="stylesheet" href="games/games.css?v=5">
+<style>
+  .ctWrap { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 4px 6px; }
+  .ctMap { flex: 1; min-height: 0; }
+  .ctMap svg { width: 100%; height: 100%; display: block; }
+  .ctRes { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; font-size: 12px; color: #5f5340; padding: 4px 0; }
+  .resPill { display: inline-flex; align-items: center; gap: 4px; background: #fffdf6; border: 2px solid #e8ddc4; border-radius: 999px; padding: 3px 9px; font-weight: 700; }
+  .resPill .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .ctHint { text-align: center; font-size: 12px; color: #6b5433; padding: 2px 0 4px; }
+  .resGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+  .resBtn { border: 2px solid #e8ddc4; background: #fffdf6; border-radius: 14px; padding: 10px; font: inherit; font-size: 13px; font-weight: 800; color: #4a4453; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center; }
+  .resBtn .dot { width: 14px; height: 14px; border-radius: 50%; }
+  .resBtn.on { border-color: #e2564a; background: #fff3ee; }
+  .tradeRow { display: flex; align-items: center; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+  .tradeRow .lab { font-size: 12px; color: #8a7451; font-weight: 800; width: 62px; }
+  .tradeRow .chip { border: 2px solid #e8ddc4; background: #fffdf6; border-radius: 999px; padding: 6px 10px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .tradeRow .chip.on { border-color: #e2564a; background: #fff3ee; }
+  .cnt { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; }
+  .cnt button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #e8ddc4; background: #fff; font-weight: 800; cursor: pointer; }
+  .dock { flex-wrap: wrap; row-gap: 8px; }
+  .dockInfo { flex: 1 1 340px; }
+  .dockActions { flex: 1 1 100%; justify-content: center; flex-wrap: wrap; row-gap: 8px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
+    <div class="pill" id="roomPill">房间：—</div>
+    <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
+  </header>
+
+  <section class="seats" id="seatStrip" aria-label="座位"></section>
+
+  <main class="boardWrap">
+    <div class="boardInner" id="boardInner">
+      <div class="ctWrap">
+        <div class="ctHint" id="ctHint"></div>
+        <div class="ctMap" id="ctMap"></div>
+        <div class="ctRes" id="ctRes"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="dock">
+    <div class="dockInfo" id="dockInfo"></div>
+    <div class="dockActions" id="dockActions"></div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet hidden" id="logSheet">
+    <div class="sheetCard">
+      <h2>本局动态</h2>
+      <p class="sub">掷骰、产资源、建路建城、发展卡与互市都会记在这里</p>
+      <ul class="logList"></ul>
+      <div class="actions"><button class="btn ghost" id="logClose" type="button">收起</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="resSheet">
+    <div class="sheetCard">
+      <h2 id="resTitle">选一种资源</h2>
+      <p class="sub" id="resSub"></p>
+      <div class="resGrid" id="resGrid"></div>
+      <div class="actions"><button class="btn ghost" id="resClose" type="button">取消</button></div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="tradeSheet">
+    <div class="sheetCard">
+      <h2>和玩家互市</h2>
+      <p class="sub" id="tradeSub">选好双方资源与数量，发起后等对方回应</p>
+      <div class="tradeRow" id="tradeGiveRow"><span class="lab">我付出</span></div>
+      <div class="tradeRow" id="tradeGetRow"><span class="lab">我想要</span></div>
+      <div class="tradeRow" id="tradeToRow"><span class="lab">交易对象</span></div>
+      <div class="actions">
+        <button class="btn ghost" id="tradeCancel" type="button">取消</button>
+        <button class="btn primary" id="tradeSend" type="button">发起交易</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="startPanel"></div>
+  <div class="winner hidden" id="winnerLayer"></div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/net.js"></script>
+<script src="../js/games/catan.js?v=8"></script>
+<script src="games/shell.js?v=7"></script>
+<script>
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const C = window.CatanEngine;
+  const $ = (id) => document.getElementById(id);
+  const SX = 66, SY = 44, OX = 500, OY = 330;
+  const SEATS = ['#e2564a', '#3f7fe0', '#2f9e63', '#d9a13b'];
+  const CORNERS = [[0, -2], [1, -1], [1, 1], [0, 2], [-1, 1], [-1, -1]];
+
+  let cur = null;
+  let mode = null;   // {kind:'road'|'settlement'|'city'|'robber'|'knight'|'freeRoad'}
+  let selV = null;
+  let tradeGive = null;
+  let trade = { give: null, get: null, nGive: 1, nGet: 1, to: 'all' };
+  let discardSel = null;
+  let offerMute = null;
+
+  function sx(x) { return OX + x * SX; }
+  function sy(y) { return OY + y * SY; }
+  function vpos(vid) {
+    const p = vid.split(',');
+    return { x: sx(Number(p[0]), 0), y: sy(Number(p[1])) };
+  }
+  function mySeat(st) {
+    if (window.GameShell.isLocal()) return st.turn;
+    const i = st.players.findIndex((p) => p.id === window.Net.identity.id);
+    return i < 0 ? 0 : i;
+  }
+  function myPid() {
+    return window.GameShell.isLocal() ? (cur ? cur.players[mySeat(cur)].id : null) : window.Net.identity.id;
+  }
+  function myTurn(st) {
+    if (!st || st.phase === 'ended') return false;
+    if (window.GameShell.isLocal()) return true;
+    return st.players[st.turn].id === window.Net.identity.id;
+  }
+  function svgEl(tag, attrs) {
+    const n = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach((k) => n.setAttribute(k, attrs[k]));
+    return n;
+  }
+
+  function renderPorts(st, svg) {
+    st.ports.forEach((po) => {
+      const px = sx(po.x), py = sy(po.y);
+      const dx = px - OX, dy = py - OY;
+      const d = Math.sqrt(dx * dx + dy * dy) || 1;
+      const lx = px + dx / d * 46, ly = py + dy / d * 34;
+      const label = po.type === '3:1' ? '3:1 任意' : '2:1 ' + C.RES_NAME[po.res];
+      const g = svgEl('g', {});
+      // 港口图标：小船坞
+      g.appendChild(svgEl('circle', { cx: px, cy: py, r: 7, fill: '#fffdf6', stroke: '#b99a63', 'stroke-width': 2 }));
+      g.appendChild(svgEl('circle', { cx: px, cy: py, r: 3, fill: '#b99a63' }));
+      const w = label.length * 7 + 12;
+      g.appendChild(svgEl('rect', {
+        x: lx - w / 2, y: ly - 10, width: w, height: 20, rx: 10,
+        fill: '#fffdf6', stroke: '#d9c4a0', 'stroke-width': 1.5, opacity: 0.95
+      }));
+      const t = svgEl('text', {
+        x: lx, y: ly + 4, 'font-size': 10.5, 'text-anchor': 'middle', fill: '#6b5433', 'font-weight': 800
+      });
+      t.textContent = label;
+      g.appendChild(t);
+      svg.appendChild(g);
+    });
+  }
+
+  function renderBoard(st) {
+    const box = $('ctMap');
+    box.innerHTML = '';
+    const svg = svgEl('svg', { viewBox: '120 -60 760 780', preserveAspectRatio: 'xMidYMid meet' });
+    box.appendChild(svg);
+
+    svg.appendChild(svgEl('rect', { x: 120, y: -60, width: 760, height: 780, fill: '#9fdcf3', rx: 20 }));
+
+    st.hexes.forEach((h) => {
+      const pts = CORNERS.map((c) => sx(h.x + c[0]) + ',' + sy(h.y + c[1])).join(' ');
+      const poly = svgEl('polygon', {
+        points: pts, fill: C.RES_HEX[h.res] || '#ddd',
+        stroke: '#fffdf6', 'stroke-width': 4, style: 'cursor:pointer'
+      });
+      poly.addEventListener('click', () => {
+        if (!myTurn(st)) return;
+        if (st.robberStage === 'place') {
+          const okRob = window.GameShell.send({ type: 'robber', hex: h.id });
+          if (okRob) render(cur);
+          return;
+        }
+        if (mode && (mode.kind === 'robber' || mode.kind === 'knight')) {
+          const okRob = window.GameShell.send(mode.kind === 'robber'
+            ? { type: 'robber', hex: h.id }
+            : { type: 'playDev', card: 'knight', hex: h.id });
+          if (okRob) mode = null;
+          render(cur);
+        }
+      });
+      svg.appendChild(poly);
+
+      if (h.num) {
+        svg.appendChild(svgEl('circle', { cx: sx(h.x), cy: sy(h.y) - 4, r: 19, fill: '#fffdf6', stroke: '#e0d3b6', 'stroke-width': 2 }));
+        const txt = svgEl('text', {
+          x: sx(h.x), y: sy(h.y) + 2, 'font-size': 17, 'text-anchor': 'middle',
+          fill: h.num === 6 || h.num === 8 ? '#c0392b' : '#3d3527', 'font-weight': 800
+        });
+        txt.textContent = h.num;
+        svg.appendChild(txt);
+      }
+      if (h.robber) {
+        svg.appendChild(svgEl('circle', { cx: sx(h.x), cy: sy(h.y) - 4, r: 22, fill: 'rgba(45,40,35,.78)' }));
+        const t = svgEl('text', { x: sx(h.x), y: sy(h.y) + 4, 'font-size': 17, 'text-anchor': 'middle', fill: '#fff' });
+        t.textContent = '盗';
+        svg.appendChild(t);
+      }
+    });
+
+    renderPorts(st, svg);
+
+    Object.keys(st.edges).forEach((eid) => {
+      const e = st.edges[eid];
+      const p1 = vpos(e.v[0]), p2 = vpos(e.v[1]);
+      const ownerIdx = st.players.findIndex((p) => p.id === e.owner);
+      svg.appendChild(svgEl('line', {
+        x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+        stroke: ownerIdx >= 0 ? SEATS[ownerIdx % 4] : 'rgba(255,255,255,.55)',
+        'stroke-width': ownerIdx >= 0 ? 7 : 3, 'stroke-linecap': 'round'
+      }));
+      const hit = svgEl('line', {
+        x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+        stroke: 'transparent', 'stroke-width': 15,
+        style: 'cursor:' + (mode && (mode.kind === 'road' || mode.kind === 'freeRoad' || (st.phase === 'setup' && selV)) ? 'pointer' : 'default')
+      });
+      hit.addEventListener('click', () => {
+        if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+        if (st.phase === 'setup') {
+          if (!selV) { window.GameShell.toast('先点一个顶点放村落', true); return; }
+          const okPlace = window.GameShell.send({ type: 'place', v: selV, e: eid });
+          if (okPlace) selV = null;
+          return;
+        }
+        if (mode && mode.kind === 'road') {
+          const okRoad = window.GameShell.send({ type: 'build', what: 'road', e: eid });
+          if (okRoad) mode = null;
+          render(cur); return;
+        }
+        if (mode && mode.kind === 'freeRoad') {
+          const okFree = window.GameShell.send({ type: 'playDev', card: 'road', e: eid });
+          if (okFree) mode = null;
+          render(cur); return;
+        }
+        window.GameShell.toast('先点「修路」再点这条边', true);
+      });
+      svg.appendChild(hit);
+    });
+
+    Object.keys(st.verts).forEach((vid) => {
+      const v = st.verts[vid];
+      const p = vpos(vid);
+      if (v.building) {
+        const idx = st.players.findIndex((x) => x.id === v.building.owner);
+        const col = SEATS[idx % 4];
+        if (v.building.type === 'city') {
+          svg.appendChild(svgEl('rect', { x: p.x - 11, y: p.y - 11, width: 22, height: 22, rx: 5, fill: col, stroke: '#fffdf6', 'stroke-width': 3 }));
+        } else {
+          svg.appendChild(svgEl('path', {
+            d: 'M' + (p.x - 9) + ' ' + (p.y + 2) + ' L' + p.x + ' ' + (p.y - 11) + ' L' + (p.x + 9) + ' ' + (p.y + 2) + ' Z',
+            fill: col, stroke: '#fffdf6', 'stroke-width': 3
+          }));
+        }
+      }
+      const dot = svgEl('circle', {
+        cx: p.x, cy: p.y, r: selV === vid ? 10 : 6,
+        fill: selV === vid ? '#f0a92f' : 'rgba(255,255,255,.78)',
+        stroke: '#fffdf6', 'stroke-width': 2, style: 'cursor:pointer'
+      });
+      dot.addEventListener('click', () => {
+        if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
+        if (st.phase === 'setup') {
+          selV = vid; render(st);
+          window.GameShell.toast('再点贴着这个点的一条边放路');
+          return;
+        }
+        if (mode && (mode.kind === 'settlement' || mode.kind === 'city')) {
+          const okBuild = window.GameShell.send({ type: 'build', what: mode.kind, v: vid });
+          if (okBuild) mode = null;
+          render(cur); return;
+        }
+        window.GameShell.toast('先点「建村」或「升城」', true);
+      });
+      svg.appendChild(dot);
+    });
+  }
+
+  function renderRes(st) {
+    const box = $('ctRes');
+    box.innerHTML = '';
+    const me = st.players[mySeat(st)];
+    if (!me) return;
+    C.RES.forEach((r) => {
+      const d = document.createElement('span');
+      d.className = 'resPill';
+      d.innerHTML = '<span class="dot" style="background:' + C.RES_HEX[r] + '"></span><span>' +
+        C.RES_NAME[r] + '</span><b>' + (me.res[r] || 0) + '</b>';
+      box.appendChild(d);
+    });
+    const dev = document.createElement('span');
+    dev.className = 'resPill';
+    dev.innerHTML = '发展卡 <b>' + me.dev.length + '</b> · 待用 <b>' + me.devNew.length + '</b>';
+    box.appendChild(dev);
+  }
+
+  function ratioText(st, me, res) {
+    return C.tradeRatio(st, me, res) + ':1';
+  }
+
+  function hintOf(st) {
+    if (st.phase === 'setup') {
+      return st.setupRound === 1
+        ? '开局：点一个白色顶点放村落，再点贴着它的边放路（第 1 轮）'
+        : '开局第 2 轮：继续放第 2 个村落和路（这一轮会收资源）';
+    }
+    if (st.robberStage === 'discard') {
+      const me = st.players[mySeat(st)];
+      const owed = st.discardOwed[me.id] || 0;
+      return owed ? '你手牌超过 7 张，要弃 ' + owed + ' 张（向下取整的一半）' : '等其他人弃牌';
+    }
+    if (st.robberStage === 'place') return '掷到 7：点一块地形把强盗放上去（不能放回原地）';
+    if (st.robberStage === 'steal') {
+      const me = st.players[mySeat(st)];
+      return st.players[st.turn].id === me.id ? '选一个相邻对手抢 1 张资源' : '等掷骰者选择抢谁';
+    }
+    if (!st.dice) return '掷骰子，看哪块地形产资源';
+    const sum = st.dice[0] + st.dice[1];
+    return '骰子 ' + st.dice[0] + '+' + st.dice[1] + ' = ' + sum + '，可以建东西、互市或结束回合';
+  }
+
+  function render(st) {
+    cur = st;
+    if (!st) return;
+    renderBoard(st);
+    renderRes(st);
+    $('ctHint').textContent = hintOf(st);
+    renderDock(st);
+  }
+
+  function addBtn(actions, label, cls, fn, disabled) {
+    const b = document.createElement('button');
+    b.className = 'btn ' + cls;
+    b.type = 'button';
+    b.textContent = label;
+    b.disabled = !!disabled;
+    b.addEventListener('click', fn);
+    actions.appendChild(b);
+    return b;
+  }
+
+  function renderDock(st) {
+    const info = $('dockInfo');
+    const actions = $('dockActions');
+    info.innerHTML = '';
+    actions.innerHTML = '';
+    const on = myTurn(st);
+    const p = st.players[st.turn];
+    const me = st.players[mySeat(st)];
+
+    let ttl = '', sub = '';
+    if (st.phase === 'ended') {
+      const w = st.players.find((x) => x.id === st.winner);
+      ttl = w ? w.name + ' 拿下 10 分' : '对局结束';
+      sub = st.players.map((x) => x.name + ' ' + x.points + ' 分').join(' · ');
+    } else if (st.phase === 'setup') {
+      ttl = p ? p.name + ' 摆放' : '开局';
+      sub = '点顶点 → 点相邻边，一次放下村落和一条路';
+    } else {
+      ttl = p ? p.name + ' 的回合 · ' + p.points + ' 分' : '回合';
+      sub = me ? ('木' + me.res.wood + ' 砖' + me.res.brick + ' 羊' + me.res.sheep +
+        ' 麦' + me.res.wheat + ' 矿' + me.res.ore + '　骑士 ' + me.knights + ' 张') : '';
+    }
+    info.innerHTML = '<div class="ttl">' + ttl + '</div><div class="sub">' + sub + '</div>';
+    if (st.phase === 'ended') return;
+
+    if (st.phase === 'setup') {
+      addBtn(actions, '取消选择', 'ghost', () => { selV = null; render(cur); }, !selV);
+      return;
+    }
+
+    // 有人等弃牌：热座下逐个座位替他们交
+    const owing = st.players.filter((x) => st.discardOwed[x.id] > 0);
+    if (owing.length) {
+      info.innerHTML = '<div class="ttl">有人手牌超过 7 张</div><div class="sub">本机热座：一次替一位玩家弃掉一半（向下取整）</div>';
+      owing.forEach((x) => {
+        addBtn(actions, x.name + ' 弃 ' + st.discardOwed[x.id] + ' 张', 'primary', () => openDiscard(st, x.id));
+      });
+      return;
+    }
+
+    // 强盗选谁
+    if (st.robberStage === 'steal' && p.id === me.id) {
+      st.stealFrom.forEach((pid) => {
+        const who = st.players.find((x) => x.id === pid);
+        if (!who) return;
+        addBtn(actions, '抢 ' + who.name, 'primary', () => window.GameShell.send({ type: 'steal', from: pid }));
+      });
+      return;
+    }
+    if (st.robberStage === 'place' && on) {
+      addBtn(actions, '四处点地形放强盗', 'primary', () => window.GameShell.toast('点一块地形'), false);
+      return;
+    }
+
+    // 别人发起的交易：公开单谁都能接，指定单只有对方能接
+    const sig = st.tradeOffer ? (st.tradeOffer.from + '|' + st.tradeOffer.give + '|' + st.tradeOffer.get + '|' + (st.tradeOffer.to || 'all')) : null;
+    if (st.tradeOffer && st.tradeOffer.from !== me.id && sig !== offerMute) {
+      const o = st.tradeOffer;
+      const from = st.players.find((x) => x.id === o.from);
+      const to = o.to ? st.players.find((x) => x.id === o.to) : null;
+      const mine = !o.to || o.to === me.id;
+      info.innerHTML = '<div class="ttl">' + (from ? from.name : '对手') + ' 想' + (to && !mine ? '和 ' + to.name : '和你') + '交易</div>' +
+        '<div class="sub">他给 ' + o.nGive + ' 张' + C.RES_NAME[o.give] + '，要 ' + o.nGet + ' 张' + C.RES_NAME[o.get] +
+        (mine ? '' : '（这单指定了别人）') + '</div>';
+      if (mine) {
+        addBtn(actions, '接受', 'primary', () => window.GameShell.send({ type: 'tradeRespond', accept: true }));
+        addBtn(actions, '拒绝', 'ghost', () => window.GameShell.send({ type: 'tradeRespond', accept: false }));
+        addBtn(actions, '稍后再说', 'sm ghost', () => { offerMute = sig; render(cur); });
+      } else {
+        addBtn(actions, '知道了', 'sm ghost', () => { offerMute = sig; render(cur); });
+      }
+      return;
+    }
+
+    addBtn(actions, '掷骰', 'primary', () => window.GameShell.send({ type: 'roll' }), !on || !!st.dice || !!st.robberStage);
+    addBtn(actions, '修路', 'ghost', () => { mode = { kind: 'road' }; render(cur); }, !on || !!st.robberStage);
+    addBtn(actions, '建村', 'ghost', () => { mode = { kind: 'settlement' }; render(cur); }, !on || !!st.robberStage);
+    addBtn(actions, '升城', 'ghost', () => { mode = { kind: 'city' }; render(cur); }, !on || !!st.robberStage);
+    addBtn(actions, '发展卡', 'ghost', () => window.GameShell.send({ type: 'build', what: 'dev' }), !on || !!st.robberStage);
+    addBtn(actions, '银行换', 'ghost', () => { tradeGive = null; openResSheet('trade'); }, !on || !!st.robberStage);
+    addBtn(actions, '互市', 'ghost', () => openTrade(st), !on || !!st.robberStage);
+    if (st.tradeOffer && st.tradeOffer.from === me.id) {
+      addBtn(actions, '撤回提议', 'ghost', () => window.GameShell.send({ type: 'cancelOffer' }));
+    }
+    addBtn(actions, '结束回合', 'ghost', () => window.GameShell.send({ type: 'end' }), !on || !!st.robberStage);
+
+    if (me && me.dev.length) {
+      me.dev.forEach((card) => {
+        const label = card === 'knight' ? '打骑士' : card === 'road' ? '免费路' : card === 'monopoly' ? '垄断' : '丰饶';
+        addBtn(actions, label, 'sm ghost', () => {
+          if (card === 'knight') { mode = { kind: 'knight' }; render(cur); }
+          else if (card === 'road') { mode = { kind: 'freeRoad' }; render(cur); }
+          else openResSheet(card);
+        }, !on || !!st.robberStage || me.devPlayed);
+      });
+    }
+  }
+
+  function openDiscard(st, pid) {
+    const sheet = $('resSheet');
+    const grid = $('resGrid');
+    const me = st.players.find((x) => x.id === pid);
+    const need = st.discardOwed[pid] || 0;
+    discardSel = { need: need, res: {} };
+    const draw = () => {
+      const left = need - C.RES.reduce((s, r) => s + (discardSel.res[r] || 0), 0);
+      $('resTitle').textContent = '弃牌：还要弃 ' + left + ' 张';
+      $('resSub').textContent = '手牌 ' + C.RES.reduce((s, r) => s + me.res[r], 0) + ' 张，超过 7 张要弃一半';
+      grid.innerHTML = '';
+      C.RES.forEach((r) => {
+        const have = me.res[r] || 0;
+        const b = document.createElement('button');
+        b.className = 'resBtn' + ((discardSel.res[r] || 0) > 0 ? ' on' : '');
+        b.type = 'button';
+        b.innerHTML = '<span class="dot" style="background:' + C.RES_HEX[r] + '"></span>' + C.RES_NAME[r] +
+          ' ×' + have + ((discardSel.res[r] || 0) ? ' → 弃 ' + discardSel.res[r] : '');
+        b.disabled = have <= (discardSel.res[r] || 0) || left <= 0;
+        b.addEventListener('click', () => {
+          discardSel.res[r] = (discardSel.res[r] || 0) + 1;
+          draw();
+        });
+        grid.appendChild(b);
+      });
+      if (left === 0) {
+        const okBtn = document.createElement('button');
+        okBtn.className = 'resBtn on';
+        okBtn.type = 'button';
+        okBtn.textContent = '确认弃牌';
+        okBtn.addEventListener('click', () => {
+          window.GameShell.send({ type: 'discard', res: discardSel.res }, pid);
+          discardSel = null;
+          sheet.classList.add('hidden');
+        });
+        grid.appendChild(okBtn);
+      }
+    };
+    draw();
+    sheet.classList.remove('hidden');
+  }
+
+  function openResSheet(kind) {
+    const sheet = $('resSheet');
+    const grid = $('resGrid');
+    $('resTitle').textContent = kind === 'trade' ? (tradeGive ? '换成哪种资源？' : '用哪种资源换？') :
+      (kind === 'monopoly' ? '垄断哪种资源？' : '丰饶之年拿哪种资源？');
+    $('resSub').textContent = kind === 'trade'
+      ? (tradeGive ? '银行/港口兑率：' + C.tradeRatio(cur, cur.players[mySeat(cur)], tradeGive) + ' 张' + C.RES_NAME[tradeGive] + ' 换 1 张'
+        : '先选一种要付出去的资源，再选要换到的资源')
+      : '';
+    grid.innerHTML = '';
+    C.RES.forEach((r) => {
+      const b = document.createElement('button');
+      b.className = 'resBtn';
+      b.type = 'button';
+      b.innerHTML = '<span class="dot" style="background:' + C.RES_HEX[r] + '"></span>' + C.RES_NAME[r];
+      b.addEventListener('click', () => {
+        if (kind === 'trade') {
+          if (!tradeGive) { tradeGive = r; openResSheet('trade'); return; }
+          window.GameShell.send({ type: 'trade', give: tradeGive, get: r });
+          tradeGive = null;
+          sheet.classList.add('hidden');
+          return;
+        }
+        window.GameShell.send({ type: 'playDev', card: kind, res: r });
+        sheet.classList.add('hidden');
+      });
+      grid.appendChild(b);
+    });
+    if (kind === 'trade' && tradeGive) {
+      const me = cur.players[mySeat(cur)];
+      $('resSub').textContent = '用 ' + C.tradeRatio(cur, me, tradeGive) + ' 张' + C.RES_NAME[tradeGive] + ' 换 1 张；（你现有 ' + (me.res[tradeGive] || 0) + ' 张）';
+    }
+    sheet.classList.remove('hidden');
+  }
+
+  function openTrade(st) {
+    const me = st.players[mySeat(st)];
+    trade = { give: trade.give, get: trade.get, nGive: trade.nGive, nGet: trade.nGet, to: trade.to };
+    const sheet = $('tradeSheet');
+
+    const buildRow = (rowId, key, isGive) => {
+      const row = $(rowId);
+      row.innerHTML = '<span class="lab">' + (isGive ? '我付出' : '我想要') + '</span>';
+      C.RES.forEach((r) => {
+        const b = document.createElement('button');
+        b.className = 'chip' + (trade[key] === r ? ' on' : '');
+        b.type = 'button';
+        if (isGive) b.disabled = (me.res[r] || 0) < 1;
+        b.innerHTML = '<span class="dot" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:' + C.RES_HEX[r] + '"></span>' + C.RES_NAME[r] +
+          (isGive ? ' ' + (me.res[r] || 0) : '');
+        b.addEventListener('click', () => { trade[key] = r; openTrade(cur); });
+        row.appendChild(b);
+      });
+      const cnt = document.createElement('span');
+      cnt.className = 'cnt';
+      const which = isGive ? 'nGive' : 'nGet';
+      cnt.innerHTML = '× ' + trade[which] + ' ';
+      const minus = document.createElement('button');
+      minus.type = 'button'; minus.textContent = '−';
+      minus.addEventListener('click', () => { trade[which] = Math.max(1, trade[which] - 1); openTrade(cur); });
+      const plus = document.createElement('button');
+      plus.type = 'button'; plus.textContent = '+';
+      const cap = isGive ? Math.max(1, (trade.give ? (me.res[trade.give] || 0) : 1)) : 5;
+      plus.addEventListener('click', () => { trade[which] = Math.min(cap, trade[which] + 1); openTrade(cur); });
+      cnt.appendChild(minus); cnt.appendChild(plus);
+      row.appendChild(cnt);
+    };
+    buildRow('tradeGiveRow', 'give', true);
+    buildRow('tradeGetRow', 'get', false);
+
+    const toRow = $('tradeToRow');
+    toRow.innerHTML = '<span class="lab">交易对象</span>';
+    const all = document.createElement('button');
+    all.className = 'chip' + (trade.to === 'all' ? ' on' : '');
+    all.type = 'button'; all.textContent = '公开给所有人';
+    all.addEventListener('click', () => { trade.to = 'all'; openTrade(cur); });
+    toRow.appendChild(all);
+    st.players.forEach((x) => {
+      if (x.id === me.id) return;
+      const b = document.createElement('button');
+      b.className = 'chip' + (trade.to === x.id ? ' on' : '');
+      b.type = 'button'; b.textContent = x.name;
+      b.addEventListener('click', () => { trade.to = x.id; openTrade(cur); });
+      toRow.appendChild(b);
+    });
+
+    $('tradeSub').textContent = '你手上：木' + me.res.wood + ' 砖' + me.res.brick + ' 羊' + me.res.sheep +
+      ' 麦' + me.res.wheat + ' 矿' + me.res.ore;
+    sheet.classList.remove('hidden');
+  }
+
+  window.GameShell.boot({
+    game: 'catan',
+    title: '卡坦岛',
+    blurb: '官方基础规则：19 块地形 + 9 个港口（4 个 3:1、5 个 2:1），银行每种资源 19 张。掷 7 时手牌超 7 张要弃一半，强盗由掷骰者选位置与抢夺对象；发展中当回合买不能当回合打，每回合限 1 张；玩家之间可自由互市；最长道路 5 条 +2、最大骑士团 3 个 +2，先到 10 分获胜。',
+    min: 3,
+    max: 4,
+    engine: C,
+    seatTag: (p) => p.points + ' 分',
+    turnPill: (st) => {
+      if (st.phase === 'lobby') return '等待开始';
+      if (st.phase === 'ended') return '已结束';
+      if (st.phase === 'setup') return '开局摆放 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+      if (st.robberStage === 'discard') return '弃牌 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+      return '回合 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+    },
+    winnerTitle: (st) => {
+      const w = st.players.find((p) => p.id === st.winner);
+      return w ? w.name + ' 拿下 10 分' : '对局结束';
+    },
+    winnerSub: (st) => st.players.map((p) => p.name + '：' + p.points + ' 分').join(' · '),
+    onState: (st) => render(st),
+    onMount: () => {
+      $('resClose').addEventListener('click', () => { tradeGive = null; discardSel = null; $('resSheet').classList.add('hidden'); });
+      $('tradeCancel').addEventListener('click', () => $('tradeSheet').classList.add('hidden'));
+      $('tradeSend').addEventListener('click', () => {
+        if (!trade.give || !trade.get || trade.give === trade.get) { window.GameShell.toast('先选好双方资源', true); return; }
+        window.GameShell.send({ type: 'offer', give: trade.give, nGive: trade.nGive, get: trade.get, nGet: trade.nGet, to: trade.to });
+        $('tradeSheet').classList.add('hidden');
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>

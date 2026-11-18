@@ -30,7 +30,12 @@
     connect4: 'design/connect4.html',
     jump: 'design/jump.html',
     uno: 'design/uno.html',
-    cabin: 'design/cabin.html'
+    cabin: 'design/cabin.html',
+    bigtwo: 'design/bigtwo.html',
+    splendor: 'design/splendor.html',
+    azul: 'design/azul.html',
+    ticket: 'design/ticket.html',
+    catan: 'design/catan.html'
   };
 
   function gotoTablePage(code, game) {

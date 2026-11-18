@@ -116,51 +116,56 @@ window.CabinEngine = (function () {
 
   /* ---------------- 闹鬼剧本 ---------------- */
   const SCENARIOS = [
-    {
-      key: 'serpent', name: '巨蛇觉醒',
-      story: '地下传来鳞片摩擦的声音，房子开始收紧。',
-      heroGoalText: '击败叛徒（叛徒力量 +2）',
-      traitorGoalText: '消灭所有英雄',
-      traitorBuff: { might: 2 },
-      heroGoal: { type: 'killTraitor' }
-    },
-    {
-      key: 'ritual', name: '亡者仪式',
-      story: '礼拜堂的蜡烛自己点着了，墙上的影子多了一个。',
-      heroGoalText: '在礼拜堂完成 3 次知识判定（难度 4）',
-      traitorGoalText: '消灭所有英雄',
-      heroGoal: { type: 'ritual', room: '礼拜堂', trait: 'known', diff: 4, need: 3 }
-    },
-    {
-      key: 'escape', name: '赶在天亮前逃出',
-      story: '天快亮了，门却怎么也打不开，除非你手里有东西。',
-      heroGoalText: '任意英雄集齐 3 件物品并回到前厅',
-      traitorGoalText: '消灭所有英雄',
-      heroGoal: { type: 'escape', need: 3 }
-    },
-    {
-      key: 'burn', name: '烧掉这栋房子',
-      story: '只有把整栋房子点着，那个东西才会停止呼吸。',
-      heroGoalText: '在锅炉房完成 2 次力量判定（难度 5）',
-      traitorGoalText: '消灭所有英雄',
-      heroGoal: { type: 'ritual', room: '锅炉房', trait: 'might', diff: 5, need: 2 }
-    },
-    {
-      key: 'wolves', name: '群狼围屋',
-      story: '窗外全是绿莹莹的眼睛，它们听从一个声音的指挥。',
-      heroGoalText: '击退 3 波狼群：任意房间力量判定（难度 4）',
-      traitorGoalText: '消灭所有英雄',
-      heroGoal: { type: 'wolves', trait: 'might', diff: 4, need: 3 },
-      traitorBuff: { might: 1 }
-    },
-    {
-      key: 'whisper', name: '幽灵低语',
-      story: '每个角落都在低声说同一句话：留下来。',
-      heroGoalText: '完成 4 次神智判定（难度 3），任意房间',
-      traitorGoalText: '消灭所有英雄',
-      heroGoal: { type: 'wolves', trait: 'sanity', diff: 3, need: 4 },
-      traitorBuff: { might: 1 }
-    }
+    { key: 'serpent', name: '巨蛇觉醒', story: '地下传来鳞片摩擦的声音，房子开始收紧。', heroGoalText: '击败叛徒（叛徒力量 +2）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 2 }, heroGoal: { type: 'killTraitor' } },
+    { key: 'ritual', name: '亡者仪式', story: '礼拜堂的蜡烛自己点着了，墙上的影子多了一个。', heroGoalText: '在礼拜堂完成 3 次知识判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '礼拜堂', trait: 'known', diff: 4, need: 3 } },
+    { key: 'escape', name: '赶在天亮前逃出', story: '天快亮了，门却怎么也打不开，除非你手里有东西。', heroGoalText: '任意英雄集齐 3 件物品并回到前厅', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '前厅', need: 3 } },
+    { key: 'burn', name: '烧掉这栋房子', story: '只有把整栋房子点着，那个东西才会停止呼吸。', heroGoalText: '在锅炉房完成 2 次力量判定（难度 5）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '锅炉房', trait: 'might', diff: 5, need: 2 } },
+    { key: 'wolves', name: '群狼围屋', story: '窗外全是绿莹莹的眼睛，它们听从一个声音的指挥。', heroGoalText: '击退 3 波狼群：任意房间力量判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'might', diff: 4, need: 3 }, traitorBuff: { might: 1 } },
+    { key: 'whisper', name: '幽灵低语', story: '每个角落都在低声说同一句话：留下来。', heroGoalText: '完成 4 次神智判定（难度 3），任意房间', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'sanity', diff: 3, need: 4 }, traitorBuff: { might: 1 } },
+    { key: 'grave', name: '墓园的召唤', story: '墓碑上的名字一个一个变成你们的名字。', heroGoalText: '在墓园完成 3 次神智判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '墓园', trait: 'sanity', diff: 4, need: 3 } },
+    { key: 'clock', name: '钟楼停摆', story: '钟声停在十二点，再也没响过。', heroGoalText: '在钟楼完成 2 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 2 }, heroGoal: { type: 'ritual', room: '钟楼', trait: 'known', diff: 5, need: 2 } },
+    { key: 'lake', name: '地下湖的水鬼', story: '水面下有一张脸，一直跟着你走。', heroGoalText: '在地下湖完成 3 次力量判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '地下湖', trait: 'might', diff: 4, need: 3 } },
+    { key: 'gallery', name: '画廊的画像', story: '画里的人不见了，画框里剩下你的背影。', heroGoalText: '完成 3 次神智判定（难度 4），任意房间', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'sanity', diff: 4, need: 3 }, traitorBuff: { might: 1 } },
+    { key: 'attic', name: '阁楼上的孩子', story: '阁楼传来跳房子的声音，一步，两步。', heroGoalText: '击败叛徒（叛徒速度 +2）', traitorGoalText: '消灭所有英雄', traitorBuff: { speed: 2 }, heroGoal: { type: 'killTraitor' } },
+    { key: 'ballroom', name: '舞厅的舞伴', story: '留声机自己转起来，所有人被请了一支舞。', heroGoalText: '全队撑过 4 轮', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'survive', need: 4 } },
+    { key: 'winecellar', name: '酒窖的封坛', story: '坛子里封着的不是酒，是别的东西。', heroGoalText: '任意英雄带 2 件物品到酒窖', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '酒窖', need: 2 } },
+    { key: 'chapel', name: '礼拜堂的圣像', story: '圣像的眼睛被人挖走了，换成了两颗黑曜石。', heroGoalText: '任意英雄带 2 件物品到礼拜堂', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '礼拜堂', need: 2 } },
+    { key: 'wolfking', name: '狼王的契约', story: '它答应只要一个人留下，其余人都能走。', heroGoalText: '击败叛徒，但他只要撑过 5 轮就赢', traitorGoalText: '撑过 5 轮', heroGoal: { type: 'killTraitor' }, traitorGoal: { type: 'survive', need: 5 }, traitorBuff: { might: 2, sanity: 1 } },
+    { key: 'tunnel', name: '隧道尽头', story: '隧道尽头有光，但那光在倒退。', heroGoalText: '在隧道完成 2 次知识判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '隧道', trait: 'known', diff: 4, need: 2 } },
+    { key: 'altar', name: '祭坛献祭', story: '祭坛上的刀擦得很干净，说明它刚用过。', heroGoalText: '任意英雄带 3 件物品到祭坛', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'escape', room: '祭坛', need: 3 } },
+    { key: 'greenhouse', name: '温室的藤蔓', story: '藤蔓在墙上写出你的名字，然后又擦掉。', heroGoalText: '击退 2 波藤蔓：任意房间力量判定（难度 5）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'might', diff: 5, need: 2 }, traitorBuff: { might: 1 } },
+    { key: 'study', name: '书房的血字', story: '书桌上摊着一本日记，最后一页是你的字迹。', heroGoalText: '在书房完成 2 次神智判定（难度 5）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '书房', trait: 'sanity', diff: 5, need: 2 }, traitorBuff: { might: 1 } },
+    { key: 'watchtower', name: '瞭望塔的守望', story: '从塔顶能看见整片森林，森林里全是同一个影子。', heroGoalText: '全队撑过 5 轮', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'survive', need: 5 } },
+    { key: 'bloodwall', name: '血墙蔓延', story: '客厅的墙开始渗血，血迹自己往上爬。', heroGoalText: '在客厅完成 3 次知识判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '客厅', trait: 'known', diff: 4, need: 3 } },
+    { key: 'hand', name: '墙里的手', story: '墙壁里伸出一只手，抓住谁就不松。', heroGoalText: '完成 3 次神智判定（难度 4），任意房间', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'wolves', trait: 'sanity', diff: 4, need: 3 } },
+    { key: 'spider', name: '蛛网密布', story: '天花板垂下的不是灰，是网。', heroGoalText: '在储藏室完成 3 次力量判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '储藏室', trait: 'might', diff: 4, need: 3 } },
+    { key: 'mirror', name: '镜中替身', story: '镜子里的你先眨了眨眼。', heroGoalText: '在浴室完成 3 次神智判定（难度 4）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'ritual', room: '浴室', trait: 'sanity', diff: 4, need: 3 } },
+    { key: 'doll', name: '玩偶屋', story: '儿童房的玩偶围成一圈，中间躺着一个和你们一样大的。', heroGoalText: '在儿童房完成 3 次知识判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '儿童房', trait: 'known', diff: 4, need: 3 } },
+    { key: 'musicbox', name: '八音盒', story: '八音盒一响，所有人的心跳就跟着节拍。', heroGoalText: '在主卧完成 2 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { sanity: 1 }, heroGoal: { type: 'ritual', room: '主卧', trait: 'known', diff: 5, need: 2 } },
+    { key: 'organ', name: '管风琴的低音', story: '没人弹琴，低音却一直在数拍子。', heroGoalText: '在舞厅完成 2 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '舞厅', trait: 'known', diff: 5, need: 2 } },
+    { key: 'cave', name: '洞穴深处', story: '洞穴的石壁上有抓痕，抓痕比人还高。', heroGoalText: '在洞穴完成 3 次力量判定（难度 4）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'ritual', room: '洞穴', trait: 'might', diff: 4, need: 3 } },
+    { key: 'rats', name: '鼠群', story: '地板下面全是跑动声，像整栋楼在挪窝。', heroGoalText: '击退 4 波鼠群：任意房间力量判定（难度 3）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'might', diff: 3, need: 4 } },
+    { key: 'fog', name: '走廊的雾', story: '雾从走廊两头涌进来，方向感一起被吞掉了。', heroGoalText: '完成 4 次神智判定（难度 3），任意房间', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'sanity', diff: 3, need: 4 } },
+    { key: 'possession', name: '附身', story: '密室里有人用你的声音背出你小时候的事。', heroGoalText: '在密室完成 2 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { sanity: 1, might: 1 }, heroGoal: { type: 'ritual', room: '密室', trait: 'known', diff: 5, need: 2 } },
+    { key: 'puppet', name: '提线木偶', story: '看不见的线从屋顶垂下来，套住了谁的关节。', heroGoalText: '击败叛徒（叛徒速度 +2、神智 +1）', traitorGoalText: '消灭所有英雄', traitorBuff: { speed: 2, sanity: 1 }, heroGoal: { type: 'killTraitor' } },
+    { key: 'cannibal', name: '食客', story: '餐厅的长桌上，主菜还在动。', heroGoalText: '击败叛徒（叛徒力量 +2）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 2 }, heroGoal: { type: 'killTraitor' } },
+    { key: 'hangtree', name: '吊人树', story: '墓园那棵树上的绳子，每次看都多一根。', heroGoalText: '在墓园完成 2 次力量判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'ritual', room: '墓园', trait: 'might', diff: 5, need: 2 } },
+    { key: 'flood', name: '水位上涨', story: '水从地下室往上爬，一格一格地追。', heroGoalText: '全队撑过 4 轮', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'survive', need: 4 } },
+    { key: 'fire', name: '走水', story: '厨房的火自己烧起来，正沿着墙往外跑。', heroGoalText: '任意英雄集齐 2 件物品并回到前厅', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '前厅', need: 2 } },
+    { key: 'nightmare', name: '噩梦循环', story: '你们刚刚做过同样的事，连台词都一样。', heroGoalText: '全队撑过 5 轮', traitorGoalText: '消灭所有英雄', traitorBuff: { sanity: 1 }, heroGoal: { type: 'survive', need: 5 } },
+    { key: 'watcher', name: '注视者', story: '走廊尽头站着一个不动的影子，你回头它也在。', heroGoalText: '完成 3 次神智判定（难度 4），任意房间', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'sanity', diff: 4, need: 3 }, traitorBuff: { sanity: 1 } },
+    { key: 'mask', name: '面具', story: '卧室的墙上挂满面具，每张都朝你转了过来。', heroGoalText: '在卧室完成 2 次神智判定（难度 5）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '卧室', trait: 'sanity', diff: 5, need: 2 } },
+    { key: 'stars', name: '星图错位', story: '天文台的星图和今晚的天空对不上，多了一颗。', heroGoalText: '在天文台完成 2 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { known: 1 }, heroGoal: { type: 'ritual', room: '天文台', trait: 'known', diff: 5, need: 2 } },
+    { key: 'morgue', name: '停尸间名单', story: '停尸间的抽屉全开着，每个格子上都贴了你们的名字。', heroGoalText: '任意英雄带 3 件物品到停尸间', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'escape', room: '停尸间', need: 3 } },
+    { key: 'steam', name: '蒸汽管道', story: '管道里的蒸汽会说话，说完就把走廊封死。', heroGoalText: '在蒸汽管道完成 2 次知识判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '蒸汽管道', trait: 'known', diff: 4, need: 2 } },
+    { key: 'ruins', name: '废墟回声', story: '废墟里每句喊话都会回来，但回来的声音更近。', heroGoalText: '完成 3 次知识判定（难度 4），任意房间', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'wolves', trait: 'known', diff: 4, need: 3 } },
+    { key: 'cradle', name: '阁楼的摇篮', story: '阁楼的摇篮自己在摇，摇的速度越来越快。', heroGoalText: '任意英雄带 2 件物品到阁楼', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '阁楼', need: 2 } },
+    { key: 'kitchen', name: '厨房的刀', story: '厨房的刀一把把立起来，刀刃朝门。', heroGoalText: '在厨房完成 2 次力量判定（难度 4）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1 }, heroGoal: { type: 'ritual', room: '厨房', trait: 'might', diff: 4, need: 2 } },
+    { key: 'banquet', name: '无尽宴会', story: '餐厅的客人一圈圈坐着，谁也没在吃东西。', heroGoalText: '在餐厅完成 3 次神智判定（难度 4）', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'ritual', room: '餐厅', trait: 'sanity', diff: 4, need: 3 } },
+    { key: 'forbidden', name: '禁书', story: '图书馆最里层那本书，书脊上写着你的名字。', heroGoalText: '任意英雄带 3 件物品到图书馆', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '图书馆', need: 3 } },
+    { key: 'vault', name: '保险箱', story: '保险箱里没有钱，只有一张写满人名的名单。', heroGoalText: '击败叛徒（叛徒力量 +1、速度 +1）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1, speed: 1 }, heroGoal: { type: 'killTraitor' } },
+    { key: 'heart', name: '小屋的心脏', story: '所有的墙都在往同一个方向收缩，像一颗心在跳。', heroGoalText: '在前厅完成 3 次知识判定（难度 5）', traitorGoalText: '消灭所有英雄', traitorBuff: { might: 1, sanity: 1 }, heroGoal: { type: 'ritual', room: '前厅', trait: 'known', diff: 5, need: 3 } },
+    { key: 'dawnbreak', name: '最后的天亮', story: '天光只照到塔顶那一小块，别的地方永远是夜。', heroGoalText: '任意英雄带 2 件物品到瞭望塔', traitorGoalText: '消灭所有英雄', heroGoal: { type: 'escape', room: '瞭望塔', need: 2 } }
   ];
 
   /* ---------------- 工具 ---------------- */
@@ -234,34 +239,58 @@ window.CabinEngine = (function () {
   }
 
   /* ---------------- 开局 ---------------- */
-  function createInitial(players, rand) {
-    rand = rand || Math.random;
-    const list = (players || []).slice(0, 6).map((p, i) => {
-      const ch = CHARS[i % CHARS.length];
-      return {
-        id: p.id,
-        name: p.name,
-        char: ch.key,
-        charName: ch.name,
-        role: ch.role,
-        art: ch.art,
-        traits: { might: ch.traits.might, speed: ch.traits.speed, known: ch.traits.known, sanity: ch.traits.sanity },
-        base: ch.traits,
-        items: [],
-        floor: 'ground',
-        x: 2,
-        y: 2,
-        dead: false
-      };
+  function makePlayer(id, name) {
+    return {
+      id: id,
+      name: name,
+      char: null,
+      charName: '未选',
+      role: '',
+      art: '?',
+      traits: { might: 0, speed: 0, known: 0, sanity: 0 },
+      base: null,
+      items: [],
+      floor: 'ground',
+      x: 2,
+      y: 2,
+      dead: false
+    };
+  }
+
+  function assignCharacter(st, i, key) {
+    const ch = CHARS.find((c) => c.key === key);
+    if (!ch) return null;
+    const p = st.players[i];
+    p.char = ch.key;
+    p.charName = ch.name;
+    p.role = ch.role;
+    p.art = ch.art;
+    p.traits = { might: ch.traits.might, speed: ch.traits.speed, known: ch.traits.known, sanity: ch.traits.sanity };
+    p.base = ch.traits;
+    st.charTaken = st.charTaken || {};
+    st.charTaken[ch.key] = i;
+    return ch;
+  }
+
+  function startPlaying(st) {
+    st.phase = 'playing';
+    st.turn = 0;
+    st.rolled = false;
+    st.moves = 0;
+    st.players.forEach((p) => {
+      p.floor = 'ground';
+      p.x = 2;
+      p.y = 2;
     });
+    pushLog(st, '人都选好了，所有人站在前厅，先掷速度骰再探索');
+  }
+
+  function createInitial(players, rand, opts) {
+    rand = rand || Math.random;
+    opts = opts || {};
+    const list = (players || []).slice(0, 6).map((p) => makePlayer(p.id, p.name));
     while (list.length < 2) {
-      const ch = CHARS[list.length % CHARS.length];
-      list.push({
-        id: 'p' + list.length, name: '玩家 ' + (list.length + 1), char: ch.key, charName: ch.name,
-        role: ch.role, art: ch.art,
-        traits: { might: ch.traits.might, speed: ch.traits.speed, known: ch.traits.known, sanity: ch.traits.sanity },
-        base: ch.traits, items: [], floor: 'ground', x: 2, y: 2, dead: false
-      });
+      list.push(makePlayer('p' + list.length, '玩家 ' + (list.length + 1)));
     }
 
     const rooms = [
@@ -274,13 +303,14 @@ window.CabinEngine = (function () {
 
     const st = {
       game: 'cabin',
-      phase: 'playing',
+      phase: 'select',
       hostId: null,
       turn: 0,
       round: 1,
       rolled: false,
       moves: 0,
       players: list,
+      charTaken: {},
       rooms: rooms,
       decks: {
         ground: shuffle(TILES.ground, rand),
@@ -296,8 +326,13 @@ window.CabinEngine = (function () {
       lastCard: null,
       lastRoll: null,
       winner: null,
-      logs: ['开局：所有人站在前厅，先掷速度骰再探索']
+      logs: [opts.skipSelect ? '开局：所有人站在前厅，先掷速度骰再探索' : '开局：先各自挑一个角色']
     };
+
+    if (opts.skipSelect) {
+      list.forEach((p, i) => assignCharacter(st, i, CHARS[i % CHARS.length].key));
+      startPlaying(st);
+    }
     return st;
   }
 
@@ -359,7 +394,7 @@ window.CabinEngine = (function () {
       const hr = roll(6, rand);
       st.lastRoll = { label: '闹鬼检定', faces: hr.faces, total: hr.total };
       pushLog(st, '闹鬼检定：6 颗骰共 ' + hr.total + ' 点，需 ≥ ' + st.omens + ' 点');
-      if (hr.total < st.omens) startHaunt(st, i, rand);
+      if (hr.total < st.omens) startHaunt(st, i, rand, room.name);
       return;
     }
 
@@ -383,8 +418,17 @@ window.CabinEngine = (function () {
       ((TRAITS.find((t) => t.key === card.trait) || {}).label) + ' ' + r.total + '/' + card.diff + ' ' + (ok ? '成功' : '失败'));
   }
 
-  function startHaunt(st, i, rand) {
-    const sc = SCENARIOS[Math.floor(rand() * SCENARIOS.length)];
+  function pickScenario(st, roomName, rand) {
+    const pool = SCENARIOS.filter((s) => s.key !== st.lastScenario);
+    const use = roomName ? pool.filter((s) => s.heroGoal.room === roomName) : [];
+    const list = use.length ? use : pool;
+    const sc = list[Math.floor(rand() * list.length)] || SCENARIOS[0];
+    st.lastScenario = sc.key;
+    return sc;
+  }
+
+  function startHaunt(st, i, rand, roomName) {
+    const sc = pickScenario(st, roomName, rand);
     st.haunt = {
       active: true,
       scenario: sc.key,
@@ -393,6 +437,7 @@ window.CabinEngine = (function () {
       heroGoalText: sc.heroGoalText,
       traitorGoalText: sc.traitorGoalText,
       heroGoal: sc.heroGoal,
+      traitorGoal: sc.traitorGoal || { type: 'killAll' },
       traitor: i,
       progress: 0,
       round: 0
@@ -412,6 +457,7 @@ window.CabinEngine = (function () {
   }
 
   function win(st, side, text) {
+    if (st.phase === 'ended') return;
     st.phase = 'ended';
     st.winner = { side: side, text: text };
     pushLog(st, '对局结束：' + text);
@@ -426,13 +472,26 @@ window.CabinEngine = (function () {
     if (heroes.every((p) => p.dead)) { win(st, 'traitor', '英雄全灭，叛徒获胜'); return; }
 
     const goal = h.heroGoal;
+
     if (goal.type === 'escape') {
-      const hero = heroes.find((p) => !p.dead && p.items && p.items.filter((it) => it.tag !== '预兆').length >= goal.need && p.floor === 'ground' && roomAt(st, 'ground', p.x, p.y) && roomAt(st, 'ground', p.x, p.y).name === '前厅');
-      if (hero) win(st, 'heroes', hero.name + ' 带着东西冲出了小屋');
+      const roomName = goal.room || '前厅';
+      const hero = heroes.find((p) => !p.dead && !p.dead &&
+        (p.items || []).filter((it) => it.tag !== '预兆').length >= goal.need &&
+        roomAt(st, p.floor, p.x, p.y) && roomAt(st, p.floor, p.x, p.y).name === roomName);
+      if (hero) win(st, 'heroes', hero.name + ' 达成了剧本目标');
       return;
     }
+
     if (goal.type === 'ritual' || goal.type === 'wolves') {
       if (h.progress >= goal.need) win(st, 'heroes', '英雄完成了目标，叛徒失败');
+    }
+
+    if (goal.type === 'survive') {
+      if (h.round >= goal.need) win(st, 'heroes', '全队撑过了 ' + goal.need + ' 轮');
+    }
+
+    if (h.traitorGoal && h.traitorGoal.type === 'survive' && h.round >= h.traitorGoal.need) {
+      win(st, 'traitor', '叛徒撑过了 ' + h.traitorGoal.need + ' 轮，契约生效');
     }
   }
 
@@ -449,6 +508,21 @@ window.CabinEngine = (function () {
       const fresh = createInitial(st.players.map((p) => ({ id: p.id, name: p.name })), rand);
       fresh.hostId = st.hostId;
       return { ok: true, state: fresh };
+    }
+
+    if (action.type === 'pick') {
+      if (st.phase !== 'select') return { ok: false, msg: '现在不是选角色阶段' };
+      if (st.players[st.turn].id !== pid) return { ok: false, msg: '轮到别人选角色' };
+      const key = action.char;
+      if (!key) return { ok: false, msg: '先点一个角色' };
+      if (st.charTaken && st.charTaken[key] !== undefined) return { ok: false, msg: '这个角色已经被挑走了' };
+      const ch = assignCharacter(st, i, key);
+      if (!ch) return { ok: false, msg: '没有这个角色' };
+      pushLog(st, me.name + ' 选了 ' + ch.name + '（' + ch.role + '）');
+      const left = st.players.filter((p) => !p.char).length;
+      if (left === 0) startPlaying(st);
+      else st.turn = (st.turn + 1) % st.players.length;
+      return { ok: true, state: st };
     }
 
     if (st.phase !== 'playing') return { ok: false, msg: '这一局已经结束了' };
@@ -583,7 +657,11 @@ window.CabinEngine = (function () {
       case 'end': {
         pushLog(st, me.name + ' 结束回合');
         nextTurn(st, st.turn);
-        if (st.turn === 0) st.round += 1;
+        if (st.turn === 0) {
+          st.round += 1;
+          if (st.haunt && st.haunt.active) st.haunt.round += 1;
+        }
+        checkWin(st);
         return { ok: true, state: st };
       }
 
@@ -605,6 +683,7 @@ window.CabinEngine = (function () {
     TRAITS: TRAITS,
     TILES: TILES,
     SCENARIOS: SCENARIOS,
+    pickScenario: pickScenario,
     FLOORS: FLOORS,
     FLOOR_LABEL: FLOOR_LABEL,
     W: W,
