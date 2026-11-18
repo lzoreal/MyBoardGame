@@ -1518,6 +1518,11 @@ window.CabinEngine = (function () {
       st.haunt.numberTrack = Math.max(0, cur + Number(ops.numberTrack));
       pushLog(st, '数字轨道变为 ' + st.haunt.numberTrack);
     }
+    if (ops.devourRoom) {
+      st.haunt.devouredFloors = st.haunt.devouredFloors || {};
+      st.haunt.devouredFloors[p.floor] = true;
+      pushLog(st, p.name + ' 吞噬了「' + (FLOOR_LABEL[p.floor] || p.floor) + '」');
+    }
     if (ops.token) addToken(st, ops.token, room, ops.count || 1);
     if (ops.gain) gainTrait(st, i, ops.gain.trait, ops.gain.amount, '剧本');
     if (ops.lose) loseTraitDirect(st, i, ops.lose.trait, ops.lose.amount, '剧本');
@@ -1812,6 +1817,17 @@ window.CabinEngine = (function () {
       return (h.destroyedItems || []).some((x) => x === g.item || (x && x.name === g.item));
     }
     if (g.type === 'custom') {
+      if (g.key === 'wake_sleeping_one') {
+        return h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0;
+      }
+      if (g.key === 'enlightenment') {
+        const tr = st.players[h.traitor];
+        const sanity = tr && tr.track && tr.track.sanity;
+        return !!(sanity && sanity.pos >= sanity.list.length - 1);
+      }
+      if (g.key === 'devour_the_house') {
+        return FLOORS.every((f) => !!(h.devouredFloors && h.devouredFloors[f]));
+      }
       return !!(h.custom && h.custom[g.key]);
     }
     return false;
@@ -1965,26 +1981,13 @@ window.CabinEngine = (function () {
     }
     st.rooms.push(room);
     attachSetupPendingTokens(st, room);
-    if (room.special === 'collapsed') room.collapseRolled = true;
     me.x = pt.x; me.y = pt.y; me.floor = pt.floor;
     st.moves = Math.max(0, st.moves - (pt.cost || 1));
     st.pendingTile = null;
     pushLog(st, '「' + room.name + '」接入地图（旋转 ' + rot + '）');
     roomEffect(st, i, room, rand);
-    if (room.special === 'collapsed' && !st.pendingRoll) {
-      st.lastCard = { kind: 'room', title: '坍塌房间', text: '房间正在坍塌：掷速度骰，失败受 1 点物理伤害。' };
-      st.pendingRoll = { kind: 'room', index: i, room: '坍塌房间', trait: 'speed', diff: 4, damage: 1 };
-      pushLog(st, '坍塌房间：需要掷速度判定（4）');
-      st.moveLocked = true; st.moves = 0;
-    }
     resolveRoomSymbol(st, i, room, rand);
-    if (room.special === 'coal') {
-      const landing = roomByName(st, '底层平台');
-      if (landing) {
-        me.floor = landing.floor; me.x = landing.x; me.y = landing.y;
-        pushLog(st, me.name + ' 顺着煤槽滑到底层平台');
-      }
-    }
+    if (room.special === 'elevator') rideElevator(st, i, rand);
     if (!st.pendingRoll && !st.pendingDamage && !st.pendingTile) {
       st.moveLocked = true;
       st.moves = 0;
@@ -2016,6 +2019,25 @@ window.CabinEngine = (function () {
     return { ok: true, state: st };
   }
 
+  function rideElevator(st, i, rand) {
+    const me = st.players[i];
+    const r = roll(2, rand);
+    let floor;
+    if (r.total >= 4) floor = FLOORS[Math.floor(rand() * FLOORS.length)];
+    else if (r.total === 3) floor = 'upper';
+    else if (r.total === 2) floor = 'ground';
+    else floor = 'basement';
+    const candidates = st.rooms.filter((x) => x.floor === floor && x.name !== '神秘电梯');
+    st.lastRoll = { label: '神秘电梯 · 两骰', faces: r.faces, total: r.total };
+    if (!candidates.length) {
+      pushLog(st, me.name + ' 进入神秘电梯，但目标楼层还没有房间');
+      return;
+    }
+    const dest = candidates[Math.floor(rand() * candidates.length)];
+    me.floor = dest.floor; me.x = dest.x; me.y = dest.y;
+    pushLog(st, me.name + ' 乘神秘电梯到「' + dest.name + '」（两骰 ' + r.total + '）');
+  }
+
   function moveToRoom(st, i, dir, rand) {
     const me = st.players[i];
     const from = roomAt(st, me.floor, me.x, me.y);
@@ -2039,11 +2061,8 @@ window.CabinEngine = (function () {
     me.x = nx; me.y = ny;
     const rName = target.name;
     pushLog(st, me.name + ' 进入「' + rName + '」');
-    if (target.special === 'coal') {
-      const landing = roomByName(st, '底层平台');
-      if (landing) { me.floor = landing.floor; me.x = landing.x; me.y = landing.y; }
-    }
     roomEffect(st, i, target, rand);
+    if (target.special === 'elevator') rideElevator(st, i, rand);
     resolveRoomSymbol(st, i, target, rand);
     return { ok: true, state: st };
   }
@@ -2470,8 +2489,14 @@ window.CabinEngine = (function () {
         return { ok: true, state: st };
       }
     }
-    if (here && here.special === 'collapsed' && !here.collapseRolled) {
-      here.collapseRolled = true;
+    if (here && here.special === 'coal') {
+      const landing = roomByName(st, '底层平台');
+      if (landing) {
+        st.players[i].floor = landing.floor; st.players[i].x = landing.x; st.players[i].y = landing.y;
+        pushLog(st, st.players[i].name + ' 在「洗衣滑道」结束回合，滑到底层平台');
+      }
+    }
+    if (here && here.special === 'collapsed') {
       const cr = testRoll(st, i, 'speed', 5, rand);
       st.lastRoll = { label: '坍塌房间 · 速度判定', faces: cr.faces, total: cr.total, diff: 5, ok: cr.ok };
       if (!cr.ok) {
@@ -2799,7 +2824,8 @@ window.CabinEngine = (function () {
       setTrack: setTrack, moveTrack: moveTrack, swapBodies: swapBodies, traitVal: traitVal,
       linkedTargets: linkedTargets, moveToLinkedRoom: moveToLinkedRoom,
       roomEffect: roomEffect, resolveRoomSymbol: resolveRoomSymbol,
-      applyEffect: applyEffect, attachSetupPendingTokens: attachSetupPendingTokens
+      applyEffect: applyEffect, attachSetupPendingTokens: attachSetupPendingTokens,
+      checkWin: checkWin, rideElevator: rideElevator
     }
   };
 })();

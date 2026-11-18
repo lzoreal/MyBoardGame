@@ -1860,6 +1860,35 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "advance_ritual",
+          "name": "推进仪式",
+          "trait": "sanity",
+          "where": "room",
+          "room": "仪式房",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "numberTrack": -1
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "sanity",
+                  "amount": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
       "monster": {
         "key": "cultist",
         "name": "邪教徒",
@@ -6295,6 +6324,29 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "devour_room",
+          "name": "吞噬当前楼层",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "traitor",
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "devourRoom": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ]
+        }
+      ],
       "monster": {
         "key": "construct",
         "name": "构造体",

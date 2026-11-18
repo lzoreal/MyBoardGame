@@ -86,6 +86,49 @@ console.log('=== 楼梯连接 ===');
   ok('主楼梯只连到上层平台，不再门厅/楼梯间错配', r.ok === true && p.floor === upper.floor && p.x === upper.x && p.y === upper.y, r.msg);
 }
 
+console.log('=== 特殊房间 ===');
+{
+  const st = start(8, 3);
+  const p = st.players[st.haunt.revealer];
+  const base = E.ROOMS.find((r) => r.name === '洗衣滑道');
+  st.rooms.push(Object.assign({}, base, { floor: 'ground', x: 2, y: 2, rot: 0, revealed: true, kind: 'normal' }));
+  p.floor = 'ground'; p.x = 2; p.y = 2;
+  E.act(st, { type: 'end' }, p.id, high);
+  ok('洗衣滑道只在结束回合时滑落', p.floor === 'basement' && p.x === 4 && p.y === 6, p.floor + ',' + p.x + ',' + p.y);
+
+  const st2 = start(8, 3);
+  const p2 = st2.players[st2.haunt.revealer];
+  const collapsed = E.ROOMS.find((r) => r.name === '坍塌房间');
+  st2.rooms.push(Object.assign({}, collapsed, { floor: 'ground', x: 2, y: 2, rot: 0, revealed: true, kind: 'normal' }));
+  p2.floor = 'ground'; p2.x = 2; p2.y = 2;
+  E.act(st2, { type: 'end' }, p2.id, high);
+  ok('坍塌房间不在放置时重复判定，只在结束回合判定', st2.pendingRoll === null || st2.pendingRoll === undefined, st2.pendingRoll);
+}
+
+console.log('=== custom 目标不再被 Setup 标志直接满足 ===');
+{
+  const st36 = start(36);
+  E.helpers.checkWin(st36);
+  ok('#36 觉悟不会因 Setup 标志直接获胜', st36.phase !== 'ended', st36.winner && st36.winner.text);
+
+  const st50 = start(50);
+  E.helpers.checkWin(st50);
+  ok('#50 吞噬房子不会因 Setup 标志直接获胜', st50.phase !== 'ended', st50.winner && st50.winner.text);
+  st50.haunt.devouredFloors = { upper: true, ground: true, basement: true };
+  E.helpers.checkWin(st50);
+  ok('#50 三层都被吞噬后才判叛徒胜', st50.phase === 'ended' && st50.winner && st50.winner.side === 'traitor', st50.winner && st50.winner.text);
+
+  const st13 = start(13);
+  const tr13 = st13.players[st13.haunt.traitor];
+  const ritual = E.helpers.roomByName(st13, '仪式房');
+  tr13.floor = ritual.floor; tr13.x = ritual.x; tr13.y = ritual.y;
+  const adv = E.act(st13, { type: 'hauntAction', key: 'advance_ritual' }, tr13.id, high);
+  ok('#13 推进仪式会降低数字轨道', adv.ok === true && st13.haunt.numberTrack === 2, st13.haunt.numberTrack);
+  st13.haunt.numberTrack = 0;
+  E.helpers.checkWin(st13);
+  ok('#13 轨道归零才唤醒沉睡之她', st13.phase === 'ended' && st13.winner && st13.winner.side === 'traitor', st13.winner && st13.winner.text);
+}
+
 console.log('=== 事件 token 效果 ===');
 {
   const st = start(8);

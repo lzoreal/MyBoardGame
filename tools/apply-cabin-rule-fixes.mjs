@@ -63,6 +63,20 @@ s37.actions = (s37.actions || []).filter((a) => a.key !== 'disable_robot' && a.k
   tiers: [{ at: 4, do: { collectDNA: true } }, { at: 0, do: {} }]
 }]);
 
+// #13：叛徒可在仪式房推进仪式，数字轨道归零即唤醒沉睡之她
+const s13 = byNo(13);
+s13.actions = (s13.actions || []).filter((a) => a.key !== 'advance_ritual').concat([{
+  key: 'advance_ritual', name: '推进仪式', trait: 'sanity', where: 'room', room: '仪式房', once: 'turn', side: 'traitor',
+  tiers: [{ at: 4, do: { numberTrack: -1 } }, { at: 0, do: { damage: { type: 'sanity', amount: 1 } } }]
+}]);
+
+// #50：叛徒逐层吞噬房间，三层都吞噬后达成“吞噬整栋房子”
+const s50 = byNo(50);
+s50.actions = (s50.actions || []).filter((a) => a.key !== 'devour_room').concat([{
+  key: 'devour_room', name: '吞噬当前楼层', trait: 'might', where: 'any', once: 'turn', side: 'traitor',
+  tiers: [{ at: 4, do: { devourRoom: true } }, { at: 0, do: {} }]
+}]);
+
 // #46：叛徒把同房间英雄变成毛发怪；全部转化后达成 convertAll
 const s46 = byNo(46);
 s46.actions = (s46.actions || []).filter((a) => a.key !== 'infect_hero').concat([{
