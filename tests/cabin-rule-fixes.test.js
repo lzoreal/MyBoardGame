@@ -192,6 +192,51 @@ console.log('=== #50 Setup 标志与目标键一致 ===');
   ok('#50 叛徒目标读取 devour_the_house', JSON.stringify(st.haunt.traitorGoal).includes('devour_the_house'));
 }
 
+console.log('=== #3 多叛徒 / #5 数量 / #13 属性 / #15 死亡叛徒 ===');
+{
+  const st3 = start(3, 6);
+  ok('#3 六人局有两个叛徒', st3.haunt.traitors && st3.haunt.traitors.length === 2, JSON.stringify(st3.haunt.traitors));
+  ok('#3 六人局两个「1」疾病标记', (st3.haunt.setup.diseaseOneIds || []).length === 2, JSON.stringify(st3.haunt.setup.diseaseOneIds));
+  ok('#3 两名玩家实际是叛徒阵营', st3.players.filter((p) => p.side === 'traitor').length === 2, st3.players.map((p) => p.side).join(','));
+
+  const st3small = start(3, 4);
+  ok('#3 四人局只有一个叛徒', st3small.haunt.traitors.length === 1, JSON.stringify(st3small.haunt.traitors));
+
+  const st5 = start(5, 3);
+  ok('#5 三人局共 6 只小天使', st5.monsters.filter((m) => m.key === 'cherub').length === 6, st5.monsters.length);
+
+  const st13 = start(13, 3);
+  const tr13 = st13.players[st13.haunt.traitor];
+  ok('#13 叛徒力量 +1', tr13.track.might.pos === tr13.track.might.startPos + 1, tr13.track.might.pos);
+  ok('#13 叛徒速度 +1', tr13.track.speed.pos === tr13.track.speed.startPos + 1, tr13.track.speed.pos);
+  ok('#13 叛徒其余属性恢复', tr13.track.known.pos === tr13.track.known.startPos && tr13.track.sanity.pos === tr13.track.sanity.startPos, JSON.stringify(tr13.track));
+
+  const st15 = start(15, 3);
+  ok('#15 叛徒角色已死亡', st15.players[st15.haunt.traitor].dead === true, st15.players.map((p) => p.dead).join(','));
+  ok('#15 怪物控制者已记录', st15.haunt.monsterController === st15.haunt.traitor, st15.haunt.monsterController);
+  st15.turn = 2;
+  st15.haunt.justStarted = false;
+  const r15 = E.act(st15, { type: 'end' }, st15.players[2].id, high);
+  ok('#15 回合结束进入怪物阶段', r15.ok && !!st15.monsterTurn && st15.monsterTurn.actor === st15.players[st15.haunt.traitor].id, st15.monsterTurn && st15.monsterTurn.actor);
+  const st15w = start(15, 3);
+  st15w.players.filter((p) => p.side === 'hero').forEach((p) => { p.dead = true; });
+  E.helpers.checkWin(st15w);
+  ok('#15 英雄全灭时怪物控制者获胜', st15w.phase === 'ended' && st15w.winner && st15w.winner.side === 'traitor', st15w.winner && st15w.winner.text);
+
+  const st6 = start(6, 3);
+  ok('#6 证据标记实际分布到地图', (st6.haunt.setup.evidenceTokens || []).length === 8, JSON.stringify(st6.haunt.setup.evidenceTokens));
+  ok('#6 证据标记覆盖多个区域', new Set((st6.haunt.setup.evidenceTokens || []).map((e) => e.floor)).size >= 2, JSON.stringify(st6.haunt.setup.evidenceTokens));
+
+  const st7 = start(7, 3);
+  ok('#7 镜界状态已建立', !!st7.haunt.mirrorRealm && st7.players[st7.haunt.revealer].trapped === true, JSON.stringify(st7.haunt.mirrorRealm));
+
+  const st17 = start(17, 3);
+  ok('#17 纸条已发到具体英雄', !!st17.haunt.dieNote && !!st17.haunt.dieNote.holder && st17.players.find((p) => p.id === st17.haunt.dieNote.holder).note === 'DIE', JSON.stringify(st17.haunt.dieNote));
+
+  const st18 = start(18, 3);
+  ok('#18 叛徒离场且真身已记录', st18.players[st18.haunt.traitor].outside === true && st18.haunt.trueBody === st18.haunt.traitor, st18.haunt.trueBody);
+}
+
 console.log('---');
 console.log((failed ? 'FAILED ' : 'PASS ') + passed + (failed ? ', FAILED ' + failed : ''));
 if (fails.length) console.log(fails.join('\n'));

@@ -250,7 +250,8 @@ function validateScenario(s, file, seen) {
   if (s.setup.mode === 'scripted') {
     if (!Array.isArray(s.setup.ops)) fail(file, 'scripted setup 缺少 setup.ops');
     const OPS = ['numberTrack', 'assignNumbers', 'assignDisease', 'placeMonster', 'placeMonsterPerHero',
-      'placeToken', 'placeTokenPerHero', 'placeSpecialRoom', 'ensureSymbolTiles', 'ensureTiles',
+      'placeToken', 'placeTokenPerHero', 'placeEvidence', 'placeSpecialRoom',
+      'mirrorRealm', 'assignDieNote', 'ringIllusion', 'ensureSymbolTiles', 'ensureTiles',
       'movePlayers', 'flipRoom', 'grantItem', 'grantTrait', 'healTraitor', 'transferOmens',
       'clearItems', 'leaveItems', 'drawWeapon', 'removeTiles', 'removeBasement', 'removeEvents',
       'assignDNA', 'assignBlood', 'trapHeroes', 'custom'];

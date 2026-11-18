@@ -7,7 +7,7 @@
 
 第三版迁移已经从“只把规则写进 JSON”推进到“规则有运行入口、内容有硬合同、关键路径有自动化测试”。
 
-- 9 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，928 条断言）+ `cabin-rule-fixes.test.js`（32 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，365 条断言）
+- 9 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，924 条断言）+ `cabin-rule-fixes.test.js`（49 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，365 条断言）
 - 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号，room `X2Z2F`）
 - 线上权限复测：身份接管被拒、错误令牌读 secret 被拒、大厅成员不能直写 playing、playing 中非当前行动者被拒
 - 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**，Setup 仍为 manual **0**，剧本缺怪物定义 **0**
@@ -111,7 +111,7 @@
 以下缺口没有在本轮关闭，不能把当前状态称为“第三版完整迁移”：
 
 1. **Setup 已自动执行，语义仍需真人逐剧本确认**
-   50 个剧本现在都是 `scripted`，`runScenarioSetup` 会在闹鬼开始时执行 `setup.ops`，Setup 回归覆盖 3/4/5/6 人局共 928 条断言。
+   50 个剧本现在都是 `scripted`，`runScenarioSetup` 会在闹鬼开始时执行 `setup.ops`，Setup 回归覆盖 3/4/5/6 人局共 924 条断言。
    如果 Setup 指定的板块尚未翻出，标记会进入 `pendingTokens`，并在该板块接入地图时自动补放；仍需真人按官方剧本卡确认“标记放在哪个板块/哪一层”的语义细节。
 
 2. **部分剧本目标仍是声明式**  
@@ -132,6 +132,8 @@
 
 ```powershell
 cd D:\MyBoardGame
+node tools\apply-cabin-translations.mjs
+node tools\apply-cabin-p0-fixes.mjs
 node tools\build-cabin-packs.mjs
 node tools/audit-cabin-content.mjs --summary
 node tests\cabin.test.js
@@ -140,6 +142,9 @@ node tests\cabin-official.test.js
 node tests\cabin-3e-rules.test.js
 node tests\cabin-specials.test.js
 node tests\cabin-security.test.js
+node tests\cabin-setup.test.js
+node tests\cabin-rule-fixes.test.js
+node tests\cabin-all-scenarios.test.js
 node --check js\games\cabin.js
 ```
 

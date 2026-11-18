@@ -1061,10 +1061,12 @@ window.CabinEngine = (function () {
     const sc = scOverride || pickScenario(st, roomName, omenName);
     const traitor = chooseTraitor(st, sc, revealer, rand);
     const tp = traitor >= 0 ? st.players[traitor] : null;
+    const traitors = traitor >= 0 ? [traitor] : [];
     st.players.forEach((p, i) => { p.side = i === traitor ? 'traitor' : 'hero'; });
     st.haunt = {
       active: true, scenario: sc.key, no: sc.no, name: sc.name, story: sc.story,
       traitorRule: sc.traitorRule, traitor: traitor,
+      traitors: traitors, traitorCount: traitors.length, monsterController: null,
       heroGoal: clone(sc.heroGoal), traitorGoal: clone(sc.traitorGoal),
       heroGoalText: sc.heroGoalText, traitorGoalText: sc.traitorGoalText,
       progress: 0, round: 0, startRound: st.round, monsterBanish: 0,
@@ -1223,6 +1225,13 @@ window.CabinEngine = (function () {
       return st.players.filter((p) => p.side === 'hero' && !p.dead)
         .map((p) => roomAt(st, p.floor, p.x, p.y)).filter(Boolean);
     }
+    if (target === 'nonHeroTiles') {
+      const heroRooms = st.players.filter((p) => !p.dead)
+        .map((p) => roomAt(st, p.floor, p.x, p.y)).filter(Boolean);
+      const names = new Set(heroRooms.map((r) => r.name));
+      const list = st.rooms.filter((r) => r.kind !== 'start' && r.kind !== 'landing' && r.kind !== 'grandStair' && !names.has(r.name));
+      return list.length ? list : st.rooms.filter((r) => r.kind !== 'start');
+    }
     if (target === 'allPlayerTiles') {
       return st.players.filter((p) => !p.dead && p.floor !== 'outside')
         .map((p) => roomAt(st, p.floor, p.x, p.y)).filter(Boolean);
@@ -1357,15 +1366,29 @@ window.CabinEngine = (function () {
         }
         pushLog(st, '按人数发放 1–' + order.length + ' 号数字标记，1 号是隐藏叛徒');
       } else if (op.type === 'assignDisease') {
-        playerList().forEach(({ p }) => { p.disease = 3; h.setup.diseaseTokens[p.id] = 3; });
-        h.setup.flags.diseaseOnes = st.players.length >= 6 ? 2 : 1;
-        pushLog(st, '每名玩家拿 3 个疾病标记；本局有 ' + h.setup.flags.diseaseOnes + ' 个「1」');
+        const ones = st.players.length >= 6 ? 2 : 1;
+        playerList().forEach(({ p }) => {
+          p.disease = 3;
+          h.setup.diseaseTokens[p.id] = 3;
+        });
+        const chosen = [];
+        if (h.traitor >= 0) chosen.push(h.traitor);
+        while (chosen.length < ones) {
+          const pool = st.players.map((p, i) => i).filter((i) => chosen.indexOf(i) < 0);
+          if (!pool.length) break;
+          chosen.push(pool[Math.floor(rand() * pool.length)]);
+        }
+        h.setup.diseaseOneIds = chosen.map((i) => st.players[i].id);
+        h.setup.flags.diseaseOnes = ones;
+        applyTraitors(st, chosen);
+        pushLog(st, '每名玩家拿 3 个疾病标记；本局有 ' + ones + ' 个「1」，' +
+          chosen.map((i) => st.players[i].name).join('、') + ' 成为叛徒');
       } else if (op.type === 'placeMonster') {
         const def = monsterDef(op.monster);
         if (!def) return;
         const rooms = setupRoomPool(st, h, op.room || 'random');
         let count = valueByPlayers(op.countByPlayers, op.count === undefined ? (def.counts ? def.counts[String(st.players.length)] : def.count || 1) : op.count);
-        if (op.perHero) count = Math.max(count, st.players.length) + st.players.length;
+        if (op.perHero) count = st.players.length * (op.perHeroCount || 1);
         const pool = rooms.length ? rooms : st.rooms.filter((r) => r.kind !== 'start');
         for (let k = 0; k < Number(count || 0); k++) {
           const room = pool[k % pool.length];
@@ -1382,6 +1405,52 @@ window.CabinEngine = (function () {
       } else if (op.type === 'placeTokenPerHero') {
         const rooms = setupRoomPool(st, h, 'heroTiles');
         addTokenTo(op.token, rooms, op.perHeroCount || 1, 'heroTiles');
+      } else if (op.type === 'placeEvidence') {
+        const count = Number(op.count || 8);
+        const rooms = setupRoomPool(st, h, 'nonHeroTiles');
+        const pool = rooms.length ? rooms : st.rooms.filter((r) => r.kind !== 'start');
+        h.setup.evidenceTokens = [];
+        for (let k = 0; k < count; k++) {
+          const t = TRAITS[k % TRAITS.length];
+          const room = pool[k % pool.length];
+          if (room) {
+            addToken(st, '证据:' + t.label, room, 1);
+            h.setup.evidenceTokens.push({ trait: t.key, room: room.name, floor: room.floor });
+          }
+        }
+        const regions = new Set((h.setup.evidenceTokens || []).map((e) => e.floor));
+        h.setup.flags.evidenceTokens = h.setup.evidenceTokens.length;
+        pushLog(st, '证据标记已分布到 ' + regions.size + ' 个区域');
+      } else if (op.type === 'mirrorRealm') {
+        const t = TRAITS[Math.floor(rand() * TRAITS.length)];
+        const omen = OMENS.length ? OMENS[Math.floor(rand() * OMENS.length)] : { name: '骨戒' };
+        const room = st.rooms[Math.floor(rand() * st.rooms.length)] || st.rooms[0];
+        h.mirrorRealm = {
+          revealer: h.revealer,
+          trait: t.key,
+          omen: omen.name,
+          room: room ? room.name : '',
+          attempts: 0
+        };
+        if (st.players[h.revealer]) {
+          st.players[h.revealer].trapped = true;
+          st.players[h.revealer].mirror = true;
+        }
+        pushLog(st, '揭示者被困镜界：需要猜出属性、预兆和房间');
+      } else if (op.type === 'assignDieNote') {
+        const heroes = st.players.filter((p) => p.side === 'hero' && !p.dead);
+        const holder = heroes.length ? heroes[Math.floor(rand() * heroes.length)] : null;
+        h.dieNote = { holder: holder ? holder.id : null };
+        if (holder) holder.note = 'DIE';
+        h.setup.flags.dieNote = !!holder;
+        pushLog(st, '纸条已发给 ' + (holder ? holder.name : '无人'));
+      } else if (op.type === 'ringIllusion') {
+        h.ringIllusion = true;
+        const traitor = st.players[h.traitor];
+        if (traitor) traitor.outside = true;
+        h.trueBody = h.traitor;
+        h.setup.flags.ringIllusion = true;
+        pushLog(st, '叛徒离开屋子，幻象中只有一个真身');
       } else if (op.type === 'placeSpecialRoom') {
         placeSpecialRoom(st, op.room, op.floor || 'basement', rand);
       } else if (op.type === 'ensureSymbolTiles') {
@@ -1475,6 +1544,12 @@ window.CabinEngine = (function () {
         if (op.key === 'alienWordSupply') {
           h.wordSupply = Number(op.valueByPlayers ? op.valueByPlayers[String(st.players.length)] : op.value) || 1;
           h.wordsPlaced = 1;
+        } else if (op.key === 'traitorBodyDead') {
+          if (h.traitor >= 0) {
+            st.players[h.traitor].dead = true;
+            h.monsterController = h.traitor;
+            h.traitorBodyDead = true;
+          }
         }
         h.setup.flags[op.key] = op.value === undefined ? true : op.value;
       }
@@ -1794,6 +1869,22 @@ window.CabinEngine = (function () {
 
   /* 隐藏模式下别人的 side 不在公开状态里；未知阵营按“英雄侧”处理，
      具体人数仍以服务端聚合的 sideCounts 为准。 */
+  function traitorIndexes(st) {
+    const h = st.haunt || {};
+    const list = Array.isArray(h.traitors) && h.traitors.length ? h.traitors : (h.traitor >= 0 ? [h.traitor] : []);
+    return list.map((i) => Number(i)).filter((i) => i >= 0 && i < st.players.length);
+  }
+
+  function applyTraitors(st, list) {
+    const h = st.haunt;
+    if (!h) return;
+    const clean = Array.from(new Set((list || []).map(Number).filter((i) => i >= 0 && i < st.players.length)));
+    h.traitors = clean;
+    h.traitor = clean.length ? clean[0] : -1;
+    h.traitorCount = clean.length;
+    st.players.forEach((p, i) => { p.side = clean.indexOf(i) >= 0 ? 'traitor' : 'hero'; });
+  }
+
   function sideOf(st, p) {
     if (!p) return '';
     if (p.side) return p.side;
@@ -1806,7 +1897,10 @@ window.CabinEngine = (function () {
 
   function goalDone(st, g, hg, h, heroes) {
     if (!g) return false;
-    if (g.type === 'killAll') return sideAlive(st, 'traitor') === 0 ? false : sideAlive(st, 'hero') === 0;
+    if (g.type === 'killAll') {
+      if (h.monsterController !== null && h.monsterController !== undefined) return sideAlive(st, 'hero') === 0;
+      return sideAlive(st, 'traitor') === 0 ? false : sideAlive(st, 'hero') === 0;
+    }
     if (g.type === 'anyOf' && Array.isArray(g.goals)) return g.goals.some((x) => goalDone(st, x, hg, h, heroes));
     if (g.type === 'allOf' && Array.isArray(g.goals)) return g.goals.every((x) => goalDone(st, x, hg, h, heroes));
     if (g.type === 'possessItem') {
@@ -1837,8 +1931,8 @@ window.CabinEngine = (function () {
       })());
     }
     if (g.type === 'killTraitor') {
-      const tr = st.players[h.traitor];
-      if (tr) return !!tr.dead;
+      const idxs = traitorIndexes(st);
+      if (idxs.length) return idxs.every((i) => st.players[i] && st.players[i].dead);
       return !!(h.sideCounts && Number(h.sideCounts.traitor) === 0);
     }
     if (g.type === 'placeTokens' && g.pairs) {
@@ -1898,6 +1992,7 @@ window.CabinEngine = (function () {
     const heroes = st.players.filter((p) => nonDeadSide(st, p) === 'hero');
     const heroAlive = sideAlive(st, 'hero');
     const traitor = st.players[h.traitor];
+    const traitorAlive = sideAlive(st, 'traitor');
     const hg = h.heroGoal || {};
     const tg = h.traitorGoal || {};
 
@@ -1916,7 +2011,8 @@ window.CabinEngine = (function () {
 
     if (heroAlive === 0) {
       if (traitor && !traitor.dead) win(st, 'traitor', '英雄全灭，叛徒获胜');
-      else if (sideAlive(st, 'traitor') > 0) win(st, 'traitor', '英雄全灭，叛徒获胜');
+      else if (traitorAlive > 0) win(st, 'traitor', '英雄全灭，叛徒获胜');
+      else if (h.monsterController !== null && h.monsterController !== undefined) win(st, 'traitor', '英雄全灭，怪物控制者获胜');
       else win(st, 'none', '叛徒与英雄均已倒下');
       return;
     }
@@ -1927,7 +2023,7 @@ window.CabinEngine = (function () {
     if (tg && goalDone(st, tg, hg, h, heroes)) {
       win(st, 'traitor', tg.text || '叛徒达成剧本目标'); return;
     }
-    if (tg.type === 'survive' && h.round >= tg.need && traitor && !traitor.dead) {
+    if (tg.type === 'survive' && h.round >= tg.need && (traitorAlive > 0 || h.monsterController !== null)) {
       win(st, 'traitor', '叛徒撑过 ' + tg.need + ' 轮'); return;
     }
     if (hg.type === 'survive' && h.round >= hg.need) {
@@ -2294,7 +2390,7 @@ window.CabinEngine = (function () {
   function heroCheck(st, i, rand) {
     const h = st.haunt;
     if (!h || !h.active) return { ok: false, msg: '闹鬼后才能进行剧本判定' };
-    if (i === h.traitor) return { ok: false, msg: '叛徒不能帮英雄完成仪式' };
+    if (st.players[i] && st.players[i].side === 'traitor') return { ok: false, msg: '叛徒不能帮英雄完成仪式' };
     if (st.pendingDamage || st.pendingTile) return { ok: false, msg: pendingGuard(st) };
     const goal = h.heroGoal;
     if (goal.type !== 'ritual') return { ok: false, msg: '这个剧本不需要仪式判定' };
@@ -2576,6 +2672,10 @@ window.CabinEngine = (function () {
     } else if (st.haunt && st.haunt.active && !st.monsterTurn) {
       const soloMode = st.haunt.traitorRule === 'noTraitor' || st.haunt.traitorRule === 'freeForAll';
       const lastAliveInRound = !st.players.some((p, k) => k > i && !p.dead);
+      const controller = st.haunt.monsterController;
+      if (controller !== null && controller !== undefined && lastAliveInRound) {
+        if (beginMonsterTurn(st, controller)) return { ok: true, state: st };
+      }
       if (st.players[i].side === 'traitor' || (soloMode && lastAliveInRound)) {
         if (beginMonsterTurn(st, i)) return { ok: true, state: st };
       }

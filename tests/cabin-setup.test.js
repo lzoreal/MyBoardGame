@@ -29,7 +29,7 @@ function byPlayers(obj, n, fallback) {
   return obj[String(n)] === undefined ? fallback : obj[String(n)];
 }
 function monsterCount(op, n) {
-  if (op.perHero) return Math.max(byPlayers(op.countByPlayers, n, op.count || 1), n) + n;
+  if (op.perHero) return n * (op.perHeroCount || 1);
   return byPlayers(op.countByPlayers, n, op.count === undefined ? 1 : op.count);
 }
 
@@ -99,6 +99,8 @@ for (const n of [3, 4, 5, 6]) {
         ok(tag + ' 恰有一个 1 号', vals.filter((v) => v === 1).length === 1, vals.join(','));
       } else if (op.type === 'assignDisease') {
         ok(tag + ' 每人 3 个疾病标记', st.players.every((p) => p.disease === 3));
+        const ones = n >= 6 ? 2 : 1;
+        ok(tag + ' 疾病 1 号数量 ' + ones, (h.setup.diseaseOneIds || []).length === ones, JSON.stringify(h.setup.diseaseOneIds));
       } else if (op.type === 'assignDNA') {
         ok(tag + ' 每名英雄一份 DNA', st.players.every((p) => !!p.dna));
       } else if (op.type === 'assignBlood') {
@@ -108,6 +110,14 @@ for (const n of [3, 4, 5, 6]) {
       } else if (op.type === 'custom') {
         ok(tag + ' custom ' + op.key, h.setup.flags[op.key] !== undefined);
       }
+    }
+    if (sc.no === 5) {
+      const have = st.monsters.filter((m) => m.key === 'cherub').length;
+      ok(tag + ' 石像小天使总数 ' + (n * 2), have === n * 2, 'have=' + have);
+    }
+    if (sc.no === 37) {
+      const have = st.monsters.filter((m) => m.key === 'security').length;
+      ok(tag + ' 安全机器人总数 ' + (n + 1), have === n + 1, 'have=' + have);
     }
   }
 }

@@ -35,9 +35,9 @@ function forceGoal(st, g) {
     return;
   }
   if (g.type === 'killTraitor') {
-    const tr = st.players[h.traitor];
-    if (tr) tr.dead = true;
-    else h.sideCounts = Object.assign({}, h.sideCounts, { traitor: 0 });
+    const idxs = (h.traitors && h.traitors.length) ? h.traitors : (h.traitor >= 0 ? [h.traitor] : []);
+    idxs.forEach((i) => { if (st.players[i]) st.players[i].dead = true; });
+    if (!idxs.length) h.sideCounts = Object.assign({}, h.sideCounts, { traitor: 0 });
     return;
   }
   if (g.type === 'possessItem') {

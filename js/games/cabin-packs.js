@@ -1165,15 +1165,18 @@ window.CABIN_PACKS = {
         "summary": "每名探险者在自己板块放 1 只石像小天使，再按 3/4/5/6 把额外的放在英雄视线外。",
         "ops": [
           {
+            "type": "placeMonsterPerHero",
+            "monster": "cherub"
+          },
+          {
             "type": "placeMonster",
             "monster": "cherub",
-            "room": "heroTiles",
-            "perHero": true,
+            "room": "nonHeroTiles",
             "countByPlayers": {
-              "3": 4,
-              "4": 5,
-              "5": 6,
-              "6": 7
+              "3": 3,
+              "4": 4,
+              "5": 5,
+              "6": 6
             }
           },
           {
@@ -1298,9 +1301,8 @@ window.CABIN_PACKS = {
             "type": "assignNumbers"
           },
           {
-            "type": "custom",
-            "key": "traitEvidence",
-            "value": true
+            "type": "placeEvidence",
+            "count": 8
           },
           {
             "type": "custom",
@@ -1856,6 +1858,21 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "awakenHer",
             "value": 3
+          },
+          {
+            "type": "healTraitor"
+          },
+          {
+            "type": "grantTrait",
+            "to": "traitor",
+            "trait": "might",
+            "amount": 1
+          },
+          {
+            "type": "grantTrait",
+            "to": "traitor",
+            "trait": "speed",
+            "amount": 1
           }
         ]
       },
@@ -2389,9 +2406,7 @@ window.CABIN_PACKS = {
             }
           },
           {
-            "type": "custom",
-            "key": "dieNote",
-            "value": true
+            "type": "assignDieNote"
           }
         ]
       },
@@ -2497,14 +2512,7 @@ window.CABIN_PACKS = {
             }
           },
           {
-            "type": "custom",
-            "key": "ringIllusion",
-            "value": true
-          },
-          {
-            "type": "custom",
-            "key": "trueBody",
-            "value": 1
+            "type": "ringIllusion"
           }
         ]
       },
@@ -4661,7 +4669,8 @@ window.CABIN_PACKS = {
           {
             "type": "placeMonster",
             "monster": "security",
-            "room": "traitor"
+            "room": "traitor",
+            "count": 1
           },
           {
             "type": "placeMonster",
@@ -6610,7 +6619,7 @@ window.CABIN_PACKS = {
       "traitorRule": "hiddenTraitor",
       "factions": {
         "type": "hidden_traitor",
-        "traitorCount": 1
+        "traitorCount": 2
       },
       "heroGoal": {
         "type": "tokens",
@@ -6742,9 +6751,7 @@ window.CABIN_PACKS = {
             "who": "revealer"
           },
           {
-            "type": "custom",
-            "key": "mirrorRealm",
-            "value": true
+            "type": "mirrorRealm"
           }
         ]
       },

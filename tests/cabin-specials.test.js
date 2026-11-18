@@ -43,12 +43,12 @@ function teleport(p, room) { p.floor = room.floor; p.x = room.x; p.y = room.y; }
 console.log('=== 石中血 #5：小天使不可攻击，捉迷藏成对移除 ===');
 const st5 = fresh(51);
 start(st5, 5);
-ok('7 只石头小天使登场', st5.monsters.filter((m) => m.type === 'cherub').length === 7, st5.monsters.length);
+ok('6 只石头小天使登场', st5.monsters.filter((m) => m.type === 'cherub').length === 6, st5.monsters.length);
 st5.players[0].floor = st5.monsters[0].floor; st5.players[0].x = st5.monsters[0].x; st5.players[0].y = st5.monsters[0].y;
 const noAtk = E.act(st5, { type: 'attack', target: st5.monsters[0].id, trait: 'might' }, 'a', high);
 ok('小天使不可被攻击（同房间也不会掉血）', noAtk.ok === false && /不能|不可/.test(noAtk.msg || ''), noAtk.msg);
 const hide = E.act(st5, { type: 'hauntAction', key: 'hide' }, 'a', high);
-ok('捉迷藏成功驱散 2 只', hide.ok && st5.monsters.filter((m) => m.type === 'cherub').length === 5, st5.monsters.length);
+ok('捉迷藏成功驱散 2 只', hide.ok && st5.monsters.filter((m) => m.type === 'cherub').length === 4, st5.monsters.length);
 ok('驱散计入 hunt 进度', st5.haunt.monsterBanish === 2, st5.haunt.monsterBanish);
 
 console.log('=== 遗产 #6：证据配对 ===');
