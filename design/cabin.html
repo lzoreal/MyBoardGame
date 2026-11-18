@@ -340,6 +340,10 @@
   let cur = null;
   let svg = null;
   let viewFloor = 'ground';
+  /* 状态可能还没初始化（等待开局 / 刚加入房间），统一取安全数组 */
+  function roomsOf(st) { return (st && Array.isArray(st.rooms)) ? st.rooms : []; }
+  function playersOf(st) { return (st && Array.isArray(st.players)) ? st.players : []; }
+  function monstersOf(st) { return (st && Array.isArray(st.monsters)) ? st.monsters : []; }
   /* #34 维度改写：三层同时显示，跨层同格视为同格 */
   function isMerged(st) {
     return !!(st && st.haunt && st.haunt.active && st.haunt.dimension);
@@ -379,11 +383,13 @@
   function myIndex(st) {
     if (!st) return -1;
     if (window.GameShell.isLocal && window.GameShell.isLocal()) return st.turn;
-    return st.players.findIndex((p) => p.id === window.Net.identity.id);
+    const list = playersOf(st);
+    const i = list.findIndex((p) => p.id === window.Net.identity.id);
+    return i >= 0 ? i : (list.length ? 0 : -1);
   }
   function myTurn(st) {
     if (!st) return false;
-    const p = st.players[st.turn];
+    const p = playersOf(st)[st.turn];
     if (!p || p.dead) return false;
     if (st.phase === 'select') return window.GameShell.isLocal() ? true : p.id === window.Net.identity.id;
     if (st.phase !== 'playing') return false;
@@ -392,10 +398,11 @@
   function canControlOwner(st, idx) {
     if (!st || idx < 0) return false;
     if (window.GameShell.isLocal()) return true;
-    return st.players[idx] && st.players[idx].id === window.Net.identity.id;
+    return playersOf(st)[idx] && playersOf(st)[idx].id === window.Net.identity.id;
   }
   function roomAt(st, p) {
-    return st.rooms.find((r) => r.floor === p.floor && r.x === p.x && r.y === p.y);
+    if (!p) return null;
+    return roomsOf(st).find((r) => r.floor === p.floor && r.x === p.x && r.y === p.y);
   }
   function traitLabel(key) {
     const t = C.TRAITS.find((x) => x.key === key);
@@ -412,7 +419,7 @@
     [['N', 0, -1], ['S', 0, 1], ['W', -1, 0], ['E', 1, 0]].forEach((d) => {
       const dir = d[0], nx = me.x + d[1], ny = me.y + d[2];
       if (nx < 0 || ny < 0 || nx >= W || ny >= H || !hasDoor(here.doors, dir)) return;
-      const target = st.rooms.find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
+      const target = roomsOf(st).find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
       if (!target || hasDoor(target.doors, OPP[dir])) n += 1;
     });
     return n;
@@ -531,9 +538,9 @@
       txt(g, x0 + w / 2, y0 + h * 0.6, '起点', { 'font-size': 16, 'font-weight': 800, fill: '#8b6534' });
     }
 
-    const here = st.players.filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
+    const here = playersOf(st).filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
     const monsters = (st.monsters || []).filter((m) => m.floor === room.floor && m.x === room.x && m.y === room.y);
-    const all = here.map((p) => ({ kind: 'player', p: p, i: st.players.indexOf(p) }))
+    const all = here.map((p) => ({ kind: 'player', p: p, i: playersOf(st).indexOf(p) }))
       .concat(monsters.map((m) => ({ kind: 'monster', p: m })));
     const n = Math.min(all.length, 5);
     const R = narrow ? 19 : 16;
@@ -623,8 +630,8 @@
     el('rect', { x: 0, y: 0, width: W * CELL, height: totalH, rx: 24, fill: '#2b2119' }, svg);
     el('rect', { x: 9, y: 9, width: W * CELL - 18, height: totalH - 18, rx: 20, fill: '#3a2c21' }, svg);
 
-    const me = st.players[myIndex(st)];
-    const here = me ? (st.rooms.find((r) => r.floor === me.floor && r.x === me.x && r.y === me.y)) : null;
+    const me = playersOf(st)[myIndex(st)];
+    const here = me ? (roomsOf(st).find((r) => r.floor === me.floor && r.x === me.x && r.y === me.y)) : null;
     const canMove = st.phase === 'playing' && myTurn(st) && me && !me.dead && st.moves > 0 && !st.moveLocked && !st.pendingTile && !st.pendingDamage && !st.pendingRoll;
     const hotEmpty = {};
     const hotRooms = {};
@@ -633,7 +640,7 @@
         const dir = d[0], nx = me.x + d[1], ny = me.y + d[2];
         if (nx < 0 || ny < 0 || nx >= W || ny >= H || !here || !hasDoor(here.doors, dir)) return;
         const key = nx + ',' + ny;
-        const target = st.rooms.find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
+        const target = roomsOf(st).find((r) => r.floor === me.floor && r.x === nx && r.y === ny);
         if (!target) hotEmpty[key] = dir;
         else if (hasDoor(target.doors, OPP[dir])) hotRooms[key] = dir;
       });
@@ -652,18 +659,18 @@
       const gEmpty = el('g', {}, gBand);
       for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
-          if (!st.rooms.some((r) => r.floor === floor && r.x === x && r.y === y)) {
+          if (!roomsOf(st).some((r) => r.floor === floor && r.x === x && r.y === y)) {
             drawEmpty(gEmpty, x, y, (merged || floor === viewFloor) && me && me.floor === floor ? hotEmpty[x + ',' + y] : '');
           }
         }
       }
 
       const gRooms = el('g', {}, gBand);
-      const sorted = st.rooms.filter((r) => r.floor === floor).sort((a, b) => (a.y - b.y) || (a.x - b.x));
+      const sorted = roomsOf(st).filter((r) => r.floor === floor).sort((a, b) => (a.y - b.y) || (a.x - b.x));
       const roomKey = (r) => r.floor + '|' + r.x + '|' + r.y;
       const newKeys = new Set();
-      if (lastRoomKeys) st.rooms.forEach((r) => { if (!lastRoomKeys.has(roomKey(r))) newKeys.add(roomKey(r)); });
-      lastRoomKeys = new Set(st.rooms.map(roomKey));
+      if (lastRoomKeys) roomsOf(st).forEach((r) => { if (!lastRoomKeys.has(roomKey(r))) newKeys.add(roomKey(r)); });
+      lastRoomKeys = new Set(roomsOf(st).map(roomKey));
       sorted.forEach((room) => {
         const isHere = !!(here && me.floor === room.floor && room.x === here.x && room.y === here.y);
         drawRoom(gRooms, room, st, isHere, me && me.floor === floor ? hotRooms[room.x + ',' + room.y] : '');
@@ -688,7 +695,7 @@
 
   function keepPlayerInView(st) {
     if (!narrow || !board) return;
-    const me = st.players[myIndex(st)];
+    const me = playersOf(st)[myIndex(st)];
     if (!me) return;
     const merged = isMerged(st);
     if (!merged && me.floor !== viewFloor) return;
@@ -727,7 +734,7 @@
       const b = document.createElement('button');
       b.className = 'floorTab';
       b.type = 'button';
-      b.textContent = C.FLOOR_LABEL[f] + ' ' + st.rooms.filter((r) => r.floor === f).length;
+      b.textContent = C.FLOOR_LABEL[f] + ' ' + roomsOf(st).filter((r) => r.floor === f).length;
       b.setAttribute('aria-pressed', f === viewFloor ? 'true' : 'false');
       b.addEventListener('click', () => { viewFloor = f; lastAutoView = ''; renderBoard(cur); renderFloorTabs(cur); });
       bar.appendChild(b);
@@ -739,7 +746,7 @@
     if (!st.haunt || !st.haunt.active) { bar.classList.remove('show'); bar.innerHTML = ''; bar.onclick = null; bar.style.cursor = ''; return; }
     const h = st.haunt;
     bar.classList.add('show');
-    const traitor = st.players[h.traitor];
+    const traitor = playersOf(st)[h.traitor];
     const prog = h.heroGoal.type === 'hunt' ? (h.monsterBanish || 0) : (h.progress || 0);
     bar.innerHTML = '<b>' + esc(h.name) + '</b> · 叛徒 ' + esc(traitor ? traitor.name : '?') +
       ' · 英雄：' + esc(h.heroGoalText) + '（' + prog + '/' + (h.heroGoal.need || 0) + '）' +
@@ -752,7 +759,7 @@
   function openScenarioCard(st) {
     const h = st.haunt;
     if (!h || !h.active) return;
-    const traitor = st.players[h.traitor];
+    const traitor = playersOf(st)[h.traitor];
     const traitorName = h.hidden ? '（隐藏叛徒，身份未知）' : (traitor ? traitor.name : '?');
     const prog = h.heroGoal && (h.heroGoal.type === 'hunt') ? (h.monsterBanish || 0)
       : h.heroGoal && h.heroGoal.type === 'evidence' ? (h.evidence || 0)
@@ -857,9 +864,9 @@
     if (!room) return;
     const key = room.floor + '|' + room.x + '|' + room.y;
     const pile = (st.itemPiles && st.itemPiles[key]) || [];
-    const here = st.players.filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
+    const here = playersOf(st).filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
     const monsters = (st.monsters || []).filter((m) => m.floor === room.floor && m.x === room.x && m.y === room.y);
-    const me = st.players[myIndex(st)];
+    const me = playersOf(st)[myIndex(st)];
     let effect = '';
     if (room.effect) {
       if (room.effect.type === 'gain') effect = traitLabel(room.effect.trait) + ' +' + room.effect.amount;
@@ -919,7 +926,7 @@
     if (!st || st.phase === 'lobby') return;
     if (st.phase === 'ended') return;
     if (st.phase === 'select') {
-      const p = st.players[st.turn];
+      const p = playersOf(st)[st.turn];
       const key = 'select|' + st.turn + '|' + p.name;
       if (key !== lastTurnKey) lastTurnKey = key;
       const b = $('turnBanner');
@@ -927,7 +934,7 @@
       lastHauntActive = false;
       return;
     }
-    const p = st.players[st.turn];
+    const p = playersOf(st)[st.turn];
     const turnKey = 'play|' + st.turn + '|' + st.round;
     if (turnKey !== lastTurnKey) {
       lastTurnKey = turnKey;
@@ -943,7 +950,7 @@
     }
     if (st.haunt && st.haunt.active && !lastHauntActive) {
       lastHauntActive = true;
-      const traitor = st.players[st.haunt.traitor];
+      const traitor = playersOf(st)[st.haunt.traitor];
       showBanner('闹鬼开始', '叛徒是 ' + (traitor ? traitor.name : '?') + ' · ' + (st.haunt.name || ''), 'haunt');
       haptic([30, 40, 30]);
     }
@@ -952,7 +959,7 @@
       const key = 'roll|' + (pr.card || pr.room) + '|' + pr.diff + '|' + pr.index;
       if (key !== lastPromptKey) {
         lastPromptKey = key;
-        showBanner('需要掷骰', (st.players[pr.index] || {}).name + ' · ' + traitLabel(pr.trait) + '判定 · 难度 ' + pr.diff);
+        showBanner('需要掷骰', (playersOf(st)[pr.index] || {}).name + ' · ' + traitLabel(pr.trait) + '判定 · 难度 ' + pr.diff);
       }
     } else lastPromptKey = '';
     if (!st.haunt || !st.haunt.active) lastHauntActive = false;
@@ -969,13 +976,13 @@
     let text = '';
     let action = '';
     if (st.phase === 'select') {
-      text = '选角色阶段 · 轮到 ' + (st.players[st.turn] || {}).name;
+      text = '选角色阶段 · 轮到 ' + (playersOf(st)[st.turn] || {}).name;
       action = '点角色卡选人';
     } else if (st.phase === 'ended') {
       text = '本局已结束';
     } else if (st.pendingDamage) {
       cls = 'warn';
-      text = (st.players[st.pendingDamage.index] || {}).name + ' 受到伤害，需要分配';
+      text = (playersOf(st)[st.pendingDamage.index] || {}).name + ' 受到伤害，需要分配';
       action = '在弹窗里确认';
     } else if (st.pendingTile) {
       cls = 'hot';
@@ -983,7 +990,7 @@
       action = '选择方向放置';
     } else if (st.pendingRoll) {
       cls = 'hot';
-      text = (st.players[st.pendingRoll.index] || {}).name + ' 需要 ' + traitLabel(st.pendingRoll.trait) + '判定';
+      text = (playersOf(st)[st.pendingRoll.index] || {}).name + ' 需要 ' + traitLabel(st.pendingRoll.trait) + '判定';
       action = myTurn(st) ? '点掷骰' : '等待对方';
     } else if (st.tradeOffer) {
       cls = 'hot';
@@ -991,11 +998,11 @@
       action = '等待对方确认';
     } else if (st.monsterTurn) {
       cls = 'warn';
-      text = '怪物阶段 · ' + (st.players.find((p) => p.id === st.monsterTurn.actor) || {}).name + ' 指挥怪物';
+      text = '怪物阶段 · ' + (playersOf(st).find((p) => p.id === st.monsterTurn.actor) || {}).name + ' 指挥怪物';
       action = myTurn(st) ? '选择怪物行动' : '等待叛徒';
     } else if (!myTurn(st)) {
       cls = 'cool';
-      text = '等待 ' + (st.players[st.turn] || {}).name + ' 行动';
+      text = '等待 ' + (playersOf(st)[st.turn] || {}).name + ' 行动';
     } else if (st.moveLocked) {
       cls = 'cool';
       text = '本回合已经翻房 / 抽卡，移动结束';
@@ -1009,7 +1016,7 @@
       text = '闹鬼中 · 英雄目标：' + (st.haunt.heroGoalText || '完成剧本目标');
       action = '移动 ' + st.moves + ' 步';
     } else {
-      const me = st.players[myIndex(st)];
+      const me = playersOf(st)[myIndex(st)];
       const here = me ? roomAt(st, me) : null;
       if (!me || !openExits(st, me)) {
         cls = 'cool';
@@ -1032,8 +1039,8 @@
     const panel = $('pickPanel');
     if (!st || st.phase !== 'select') { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
     panel.classList.remove('hidden');
-    const current = st.players[st.turn];
-    const left = st.players.filter((p) => !p.char).length;
+    const current = playersOf(st)[st.turn];
+    const left = playersOf(st).filter((p) => !p.char).length;
     const mine = myTurn(st);
 
     panel.innerHTML = '';
@@ -1049,7 +1056,7 @@
 
     C.CHARS.forEach((ch, idx) => {
       const ownerIdx = st.charTaken && st.charTaken[ch.key] !== undefined ? st.charTaken[ch.key] : -1;
-      const owner = ownerIdx >= 0 ? st.players[ownerIdx] : null;
+      const owner = ownerIdx >= 0 ? playersOf(st)[ownerIdx] : null;
       const b = document.createElement('button');
       b.className = 'pickCard';
       b.type = 'button';
@@ -1111,7 +1118,7 @@
         '<div class="mini">' + miniRoomSvg(tile, r) + '</div><span>' + rotName[r] + '</span></button>';
     }
     html += '</div>';
-    if (!mine) html += '<p style="margin-top:12px">等待 ' + esc(st.players[st.turn].name) + ' 选择。</p>';
+    if (!mine) html += '<p style="margin-top:12px">等待 ' + esc(playersOf(st)[st.turn].name) + ' 选择。</p>';
     openModal(html, 'tile');
     $('cModalCard').querySelectorAll('.rotOpt').forEach((b) => {
       b.addEventListener('click', () => {
@@ -1129,7 +1136,7 @@
       if (modalMode === 'damage') closeModal();
       return;
     }
-    const owner = st.players[pd.index];
+    const owner = playersOf(st)[pd.index];
     const can = canControlOwner(st, pd.index);
     const pair = pd.kind === 'physical' ? ['might', 'speed'] : ['known', 'sanity'];
     const a = pair[0], b = pair[1];
@@ -1191,7 +1198,7 @@
   }
 
   function renderInventory(st, mi) {
-    const me = st.players[mi];
+    const me = playersOf(st)[mi];
     const items = me.items || [];
     let html = '<h2>' + esc(me.name) + ' 的物品</h2><p>物品不占携带上限。每件物品每回合只能执行「使用 / 交易 / 丢弃 / 偷窃 / 拾取」其中一项；卡面写明不能交易或丢弃的除外。</p>';
     if (!items.length) {
@@ -1207,7 +1214,7 @@
           html += '<button class="btn ghost" type="button" data-use="' + idx + '"' + (acted ? ' disabled' : '') + '>使用</button>';
         }
         if (!it.noDrop) html += '<button class="btn ghost" type="button" data-drop="' + idx + '"' + (acted ? ' disabled' : '') + '>丢弃</button>';
-        const others = st.players.filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
+        const others = playersOf(st).filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
         if (!it.noTrade && others.length) {
           html += '<button class="btn ghost" type="button" data-trade="' + idx + '"' + (acted || st.traded ? ' disabled' : '') + '>交易</button>';
         }
@@ -1229,7 +1236,7 @@
     }));
     $('cModalCard').querySelectorAll('[data-trade]').forEach((b) => b.addEventListener('click', () => {
       const idx = Number(b.dataset.trade);
-      const others = st.players.filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
+      const others = playersOf(st).filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
       if (others.length === 1) {
         beginTradeOffer(st, me, mi, others[0], idx);
         return;
@@ -1259,7 +1266,7 @@
   }
 
   function renderPlayerInfo(st, idx) {
-    const p = st.players[idx];
+    const p = playersOf(st)[idx];
     if (!p) { closeModal(); return; }
     playerModalIndex = idx;
     const mine = myIndex(st) === idx;
@@ -1322,7 +1329,7 @@
   }
 
   function openPlayerInfo(st, idx) {
-    if (!st || !st.players[idx]) return;
+    if (!st || !playersOf(st)[idx]) return;
     renderPlayerInfo(st, idx);
   }
 
@@ -1345,8 +1352,8 @@
     const box = $('cabinCard');
     const label = traitLabel(pr.trait);
     const canRoll = myTurn(st) && pr.index === myIndex(st);
-    const who = (st.players[pr.index] || {}).name || '玩家';
-    const owner = st.players[pr.index] || {};
+    const who = (playersOf(st)[pr.index] || {}).name || '玩家';
+    const owner = playersOf(st)[pr.index] || {};
     const diceN = Math.max(1, (Number(owner.traits && owner.traits[pr.trait]) || 0) + (C.helpers.itemTestBonus ? C.helpers.itemTestBonus(st, pr.index, pr.trait) : 0));
     const diceFaces = Array(diceN).fill('?').map((x) => '<i>' + x + '</i>').join('');
     const winText = effectSummary(pr.win);
@@ -1465,8 +1472,8 @@
   function renderTradePrompt(st, me, actions) {
     const o = st.tradeOffer;
     if (!o) return false;
-    const from = st.players.find((p) => p.id === o.from);
-    const to = st.players.find((p) => p.id === o.to);
+    const from = playersOf(st).find((p) => p.id === o.from);
+    const to = playersOf(st).find((p) => p.id === o.to);
     const local = window.GameShell.isLocal && window.GameShell.isLocal();
     const isTo = me && me.id === o.to;
     actions.innerHTML = '';
@@ -1509,12 +1516,12 @@
   function renderMonsterTurn(st) {
     const mt = st.monsterTurn;
     if (!mt) return;
-    const actor = st.players.find((p) => p.id === mt.actor);
-    const heroes = st.players.filter((p) => !p.dead && p.side === 'hero');
+    const actor = playersOf(st).find((p) => p.id === mt.actor);
+    const heroes = playersOf(st).filter((p) => !p.dead && p.side === 'hero');
     let html = '<h2>怪物阶段</h2><p>叛徒 <b>' + esc(actor ? actor.name : '?') + '</b> 指挥怪物行动，剩余 ' + mt.queue.length + ' 只。</p>' +
       '<div class="infoStory">每只怪物可以追向一名英雄：移动最多等于速度，抵达后攻击；也可以跳过。线下怪物卡和目标由叛徒决定。</div>';
     mt.queue.forEach((id) => {
-      const m = st.monsters.find((x) => x.id === id);
+      const m = monstersOf(st).find((x) => x.id === id);
       if (!m) return;
       const room = C.helpers.roomAt(st, m.floor, m.x, m.y);
       html += '<div class="monsterRow"><div class="mh"><b>' + esc(m.name) + '</b><span>' +
@@ -1557,14 +1564,19 @@
     const actions = $('dockActions');
     if (!info || !actions) return;
     const mi = myIndex(st);
-    const me = st.players[mi];
+    const me = playersOf(st)[mi];
     info.innerHTML = '';
     actions.innerHTML = '';
     if (!me) return;
+    /* 等待开局时还没分配角色，底栏只显示一句提示，不去读属性 */
+    if (st.phase === 'lobby' || !me.traits) {
+      info.innerHTML = '<div class="ttl">等待开始</div><div class="sub">人齐后由房主点「开始游戏」，届时自动分配角色。</div>';
+      return;
+    }
 
     if (st.phase === 'select') {
-      const who = st.players[st.turn];
-      info.innerHTML = '<div class="ttl">选角色阶段</div><div class="sub">轮到 ' + esc(who.name) + ' · 还剩 ' + st.players.filter((p) => !p.char).length + ' 人</div>';
+      const who = playersOf(st)[st.turn];
+      info.innerHTML = '<div class="ttl">选角色阶段</div><div class="sub">轮到 ' + esc(who.name) + ' · 还剩 ' + playersOf(st).filter((p) => !p.char).length + ' 人</div>';
       const hint = document.createElement('span');
       hint.className = 'btn ghost';
       hint.style.cssText = 'display:grid;place-items:center';
@@ -1634,7 +1646,7 @@
     if (st.monsterTurn) {
       actions.innerHTML = '';
       const mt = st.monsterTurn;
-      const actor = st.players.find((p) => p.id === mt.actor);
+      const actor = playersOf(st).find((p) => p.id === mt.actor);
       if (!isMine) {
         const span = document.createElement('span');
         span.className = 'btn ghost';
@@ -1660,7 +1672,7 @@
       const span = document.createElement('span');
       span.className = 'btn ghost';
       span.style.cssText = 'display:grid;place-items:center';
-      span.textContent = '等待 ' + st.players[st.turn].name + ' 行动';
+      span.textContent = '等待 ' + playersOf(st)[st.turn].name + ' 行动';
       actions.appendChild(span);
       return;
     }
@@ -1712,7 +1724,7 @@
         if (stealFoes.length) {
           addBtn('偷窃', 'ghost', () => {
             chooseTarget('从谁身上偷物品？', stealFoes, (f) => {
-              const victim = st.players.find((p) => p.id === f.id);
+              const victim = playersOf(st).find((p) => p.id === f.id);
               const loot = victim ? (victim.items || []).filter((it) => !it.noSteal && !it.noTrade) : [];
               if (!loot.length) {
                 window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true });
@@ -1789,7 +1801,7 @@
     if (st.pendingTile || st.pendingDamage || st.pendingRoll) return;
     if (st.moveLocked) { window.GameShell.toast('本回合已经翻过房间', true); return; }
     if (st.moves <= 0) { window.GameShell.toast('移动点用完了', true); return; }
-    const me = st.players[st.turn];
+    const me = playersOf(st)[st.turn];
     if (me.floor !== viewFloor && !isMerged(st)) { window.GameShell.toast('先切到 ' + C.FLOOR_LABEL[me.floor], true); return; }
 
     const rect = svg.getBoundingClientRect();
@@ -1826,14 +1838,20 @@
     if (!st) return;
     narrow = window.innerWidth <= 720;
     const selecting = st.phase === 'select';
-    $('floorTabs').style.display = selecting ? 'none' : '';
+    const hasBoard = Array.isArray(st.rooms) && st.rooms.length > 0;
+    $('floorTabs').style.display = (selecting || !hasBoard) ? 'none' : '';
     renderPick(st);
     if (!selecting) {
-      const me = st.players[myIndex(st)];
+      const me = playersOf(st)[myIndex(st)];
       if (me && !me.dead && me.floor !== viewFloor && st.phase === 'playing') viewFloor = me.floor;
     }
-    renderFloorTabs(st);
-    renderBoard(st);
+    if (hasBoard) {
+      renderFloorTabs(st);
+      renderBoard(st);
+    } else if (svg) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      lastRoomKeys = null;
+    }
     renderScenario(st);
     renderSituation(st);
     announceSituation(st);
@@ -1902,9 +1920,9 @@
     turnPill: (st) => {
       if (!st) return '等待开始';
       if (st.phase === 'lobby') return '等待开始';
-      if (st.phase === 'select') return '选角色 · ' + (st.players[st.turn] ? st.players[st.turn].name : '');
+      if (st.phase === 'select') return '选角色 · ' + (playersOf(st)[st.turn] ? playersOf(st)[st.turn].name : '');
       if (st.phase === 'ended') return '已结束';
-      const p = st.players[st.turn];
+      const p = playersOf(st)[st.turn];
       if (st.pendingRoll) return '等待掷骰 · ' + (p ? p.name : '');
       return (st.haunt && st.haunt.active ? '闹鬼 · ' : '探索 · ') + (p ? p.name : '') + ' · 移动 ' + st.moves;
     },
