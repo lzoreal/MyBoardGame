@@ -926,10 +926,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "YoumayrevealyourNumbertokenjustbeforesomeonesuccessfully 1.FindtheNumbertokenslabeled1through{3/4/5/63andshufflethem,face-down.Giveonetoeachplayer DestroystheRing!Ifyoudo，rturnallheroestoanyLandingtilesof IFTHETRAITORWINS 2.Eachplayerthenlooksattheirtokenwithoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is yourchoice.TheherotryingtoDestroytheRing!canfailasaresult. Youdiscoveredtatyoucouldcontrol thetraitor Whenyourevealyourselfasthetraitor,healallofyourtraitsandgain timewiththering.Luckilyyour 3.SettheNumberTrackto{6/5/4/3} 1Might. annoying“friends”didn'tcatchon 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. thatyou'retheonewhocreatedthe Ifyouhaverevealedyourself，ounottakedamageifyoudonot timeloop.Theydidn'tknowthatthis returntoaLandingtileattheendofthehauntrevealer'sturn wasn'tthefirsttimeyou²dmurdered HIDDENTRAITOR them...andnowtheyneverwill.",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "发 1–N 号数字标记，1 号是隐藏叛徒；数字轨道 6/5/4/3。",
+        "heroText": "布置：按人数发 1–3/4/5/6 号数字标记，1 号是叛徒；数字轨道设为 6/5/4/3；叛徒左手先行动。目标：摧毁戒指，或杀死叛徒。胜利：杀死叛徒，或持戒指做速度/知识判定 7+ 摧毁它；失败则受 6 点通用伤害并被放到任一平台。",
+        "traitorText": "布置：你是隐藏叛徒，身份只有自己知道。目标：杀光英雄，或把数字轨道降到 0。暴露时治疗全部属性并 +1 力量。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "按人数发 1–3/4/5/6 号数字标记，1 号是叛徒；数字轨道设为 6/5/4/3；叛徒左手先行动。",
         "numberTrackByPlayers": {
           "3": 6,
           "4": 5,
@@ -1046,10 +1046,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "Armory-Basement/GroundFloor WhileonthesametileastheDemonRealtormakeaSanityroll.Add Graveyard-GroundFloor 1.PlacetheDemontokenontheEntranceHalltile.ThisistheDemonRealtor 1totheresultofyourrollforeachFiretokenonatileinyourregion 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheDemonRealtorwilltakeitsturnafterthatplayer IfyourexplorerisontheRitualRoomtile,lsoadd1totheresult.If 3.Find6Firetokens.Place{3/2/1/0}ofthemontileswithheroes.ThesemarkCleansedRooms,whichwillhelp",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "恶魔中介放门厅；火焰标记按 3/2/1/0 放在英雄板块。",
+        "heroText": "布置：恶魔中介放门厅，6 个火焰标记按 3/2/1/0 放在有英雄的板块，揭示者左手先行动。目标：在仪式房做神智判定，累计 3 次成功解救她。胜利：13+ 成功；9–12 结束回合；0–8 每名英雄失去 1 神智。",
+        "traitorText": "本剧本没有叛徒，全员合作。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "恶魔中介放门厅，6 个火焰标记按 3/2/1/0 放在有英雄的板块，揭示者左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -1159,10 +1159,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "ties)butimmediatelystopassoonastheyenteranyhero'sline petrifiedhands.Youarenowapartof ofsight. 1.EachexplorerplacesaSmallMonstertokenontheirtile.TheseareStoneCherubs. thehouse.justanotherstatuelost tohistory 2.Find{3/4/5/6]additionalStoneCherubs.Ifpossible,placethemontilesthatarenotinheroes'linesofsight Cherubsthatstarttheirturninahero'slineofsightwillnotmove Ifyoucannot,placetherestaroundthehousehoweveryoulike duringthatturn. PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer 3. ATTHEENDOFTHEMONSTERTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. EachherotakesonedieofGeneraldamageforeachCherubintheir lineofsight COOPERATIVEHAUNT",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "每名英雄所在板块放 1 只石像小天使，再按 3/4/5/6 额外放到视线外。",
+        "heroText": "布置：每名探险者在自己板块放 1 只石像小天使，再按 3/4/5/6 把额外的放在英雄视线外。目标：用「捉迷藏」成对移除 4 对。胜利：与一只小天使同格、另一只在其视线内时做知识判定，4+ 移除两只；0–3 受两骰通用伤害。",
+        "traitorText": "本剧本没有叛徒，全员合作。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "每名探险者在自己板块放 1 只石像小天使，再按 3/4/5/6 把额外的放在英雄视线外。",
         "ops": [
           {
             "type": "placeMonster",
@@ -1289,10 +1289,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "IFYOUDIE Withtherestofthe'familyburied TurnyourNumbertokenface-up 1.ThehauntrevealerplaceseachTraittokenface-uponadifferenttile,inadifferentregionfromitsmatchingTrait yougoaboutsearchingfortheold token.(Example:IftheMighttokenisontheUpperFloor,theotherMighttokenmustbeplacedontheGround man'sdocuments.Withanedithere ATTHEENDOFYOURTURN FloororBasement.）ThesetokensrepresentEvidence. andaforgedsignaturethere,the fyoudidnotattack,taketwodiceofMentaldamage.Yourgreat-uncle' 2.ShuffletheNumbertokenslabeled1through{3/4/5/6y,face-down.Giveoneofthesetokenstoeachplayer houseandallthewealthandstatus ghostdemandsvengeance.Itdoesn'tcarewho'sonthereceivingend thatcomeswithit、isnowyours 3.Eachplayerthenlooksattheirtoken,withoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is thetraitor. IFYOUARETHETRAITOR 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. Youmayrevealyourselfatan",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "8 个属性标记分区域放好；发 1–N 号数字标记，1 号是隐藏叛徒。",
+        "heroText": "布置：揭示者把 8 个属性标记分开放到不同区域，按人数发 1–3/4/5/6 号数字标记，1 号是叛徒。目标：在图库或图书室配对证据，配齐 3 组。",
+        "traitorText": "布置：隐藏叛徒。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "揭示者把 8 个属性标记分开放到不同区域，按人数发 1–3/4/5/6 号数字标记，1 号是叛徒。",
         "ops": [
           {
             "type": "assignNumbers"
@@ -1390,10 +1390,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "HousekeepersattackwithMightandmovetoward vanishwithoutatraceaghostly “thankyou”echoesinyourears theclosesthero.Ifthereisatie,theHousekeeprs 1.Ifthehousecontainsfewerthan{3/4/5/63tileswithEventsymbols,drawandplacetilesfromthetilestack Finally，thehouseisclean. until{3/4/5/63tileswithEventsymbolshavebeenplaced.Whenplacingthesetiles,donotresolvetheir willmovetowardtheeldesthero. effects. IFYOULOSE ATTHEENDOFTHEMONSTERTURN 2.Place{3/4/5/6}SmallMonstertokensonseparatetileswithEventsymbols,distributedasevenlyaspossible Deal1GeneraldamagetoeachexplorerChoking Youturntodustintheshapesofyour betweenregions.TheseareHousekeepers. witheringdust. formerselves.Slowlyyoucrumble 3.Setthe5Runetokensofftotheside yourremainsdriftingthroughthe 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. houseasspecksintheair.Youdon't evercompletelysettlebecausenow you'reapartofthishouse-andthe COOPE",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "事件板块补到 3/4/5/6 块；每块放 1 个家政工；5 个符文标记。",
+        "heroText": "布置：把事件符号板块补足到 3/4/5/6 块，在每块放 1 个家政工；5 个符文标记放一边。目标：清洁血房、焦房、坍塌房、杂物房和地下墓穴，放满 5 个符文。胜利：在可清洁板块做速度或神智判定 5+ 放符文。",
+        "traitorText": "本剧本没有叛徒，全员合作。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "把事件符号板块补足到 3/4/5/6 块，在每块放 1 个家政工；5 个符文标记放一边。",
         "ops": [
           {
             "type": "ensureSymbolTiles",
@@ -1516,10 +1516,10 @@ window.CABIN_PACKS = {
       },
       "setup": {
         "mode": "scripted",
-        "heroText": "",
-        "traitorText": "1.S SettheNumberTrackto1 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道设为 1；全员互为敌人。",
+        "heroText": "布置：数字轨道设为 1，揭示者左手先行动；全员互为敌人。目标：成为最后活着的探险者。",
+        "traitorText": "自由混战：所有人都是对手，最后活着的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道设为 1，揭示者左手先行动；全员互为敌人。",
         "numberTrack": 1,
         "ops": [
           {
@@ -1588,10 +1588,10 @@ window.CABIN_PACKS = {
       },
       "setup": {
         "mode": "scripted",
-        "heroText": "",
-        "traitorText": "1.IftheVaultisnotinthehouse,thehauntrevealersearchesthetilestackforitandplacesitontheGroundFloor asfaraspossiblefromtheEntranceHall 2.AssembletwosetsofNumberTokensnumberedbetween1and{2/3/4/53（Example:ina4-playergame,take tw1s.two2s.andtwo3s.)TheseareTreasures Placeoneofthehighest-numberedTreasuretokensontheVaulttile.Shuffletherestface-downandplacethem 3 randomlyontilesthathaveOmensymbols,distributedasevenlyaspossiblebetweenregions SettheNumberTrackto4 4S 5.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "金库放底层远端；宝藏按人数 1–2/3/4/5 组；数字轨道 4。",
+        "heroText": "布置：金库不在场就找出来放在底层远离门厅；按人数准备 1–2/3/4/5 组宝藏数字标记，最高值放金库，其余放预兆板块；轨道设 4。目标：出价抢到 3 份宝藏。",
+        "traitorText": "自由混战：出价抢宝藏，最后活着或抢够宝藏的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "金库不在场就找出来放在底层远离门厅；按人数准备 1–2/3/4/5 组宝藏数字标记，最高值放金库，其余放预兆板块；轨道设 4。",
         "numberTrack": 4,
         "ops": [
           {
@@ -1696,10 +1696,10 @@ window.CABIN_PACKS = {
       },
       "setup": {
         "mode": "scripted",
-        "heroText": "",
-        "traitorText": "1.Setaside{2/3/4/5}Foodtokens.Leaetherestinthebox. 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheWitcheswilleatexplorersattheendofthatplayer'sturn 3.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "食物标记按 2/3/4/5 放好；女巫在回合结束吃人。",
+        "heroText": "布置：食物标记按 2/3/4/5 放好，女巫会在回合结束时吃掉探险者。目标：找到 3 份食物献祭，并活到最后。",
+        "traitorText": "自由混战：女巫与所有人敌对，最后活着的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "食物标记按 2/3/4/5 放好，女巫会在回合结束时吃掉探险者。",
         "ops": [
           {
             "type": "placeToken",
@@ -1830,10 +1830,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.SettheNumberTrackto3.ThisrepresentsyourRitualProgress. IftheRitualRoomandChasmtileshavenotbeendiscoveredindtheminthetilestackandplacetheminthe 4 Basement,followingnormaltile-placementrules. Place{3/4/5/6}SmallMonstertokensintheRitualRoom.TheseareCultists. 5. 6.Healallofyourtraits.Gain1Mightand1Speed HeavyBurden",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "仪式轨道 3；仪式房与裂隙放底层；邪教徒按 3/4/5/6 放仪式房。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：在仪式房做神智判定，累计 3 次成功（4+）打断仪式。",
+        "traitorText": "布置：轨道设 3 代表仪式进度；找出仪式房和裂隙放到底层；邪教徒按 3/4/5/6 放进仪式房；治疗全部属性并 +1 力量、+1 速度。目标：唤醒沉睡之她，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "numberTrack": 3,
         "ops": [
           {
@@ -1979,10 +1979,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "SettheNumberTrackto{4/4/5/5} 1.S 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Find{1/2/3/4}SmallMonstertokens.TheserepresentAnimatedFurniture.PlaceoneAnimatedFurniture tokenneachtilewithahero.Ifatilehasmorethanoneheroplaceatokenforeachheroonthattile.Donot placeatokenfortheherowhohastheBook Whenyoudie",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 4/4/5/5；家具按 1/2/3/4 放英雄板块。",
+        "heroText": "布置：数字轨道设为 4/4/5/5；家具按 1/2/3/4 放在有英雄的板块；揭示者左手先行动。目标：推进咒语 4 次，把轨道降到 0。",
+        "traitorText": "布置：你是叛徒，家具按 1/2/3/4 放在有英雄的板块。目标：毁掉魔法书，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道设为 4/4/5/5；家具按 1/2/3/4 放在有英雄的板块；揭示者左手先行动。",
         "numberTrackByPlayers": {
           "3": 4,
           "4": 4,
@@ -2110,10 +2110,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
-        "traitorText": "1.Yourexplorerhasdied.Younowcontrolthemonsters.GhostsandWerewolvesandVampires,ohmy 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours. 3.FindtheLargeMonstertokensfortheGhost,VampireandWerewolfSelect{1/2//fthosetokensat randomandplacethemonthetilewhereyourexplorerdied.Returnany unselectedtokenstothegamebox Insteadofyourturn,takeaturnwitheachmonster",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "叛徒本体死亡，控制幽灵、狼人、吸血鬼；大怪物放死亡板块。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：驱散全部 3 只怪物。",
+        "traitorText": "布置：你的探险者已死亡，改为控制幽灵、狼人和吸血鬼；随机把 1/2 只大怪物放在死亡板块。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -2256,10 +2256,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.IftheGraveyardtilehasnotalreadybeenplaced,searchthetilestackforitandplaceitusingnormal tile-placementrules 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup REMAINS",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.FindoneofeachNumberTokenlabeled1through{4/5/6/7.TheseareHumanRemains.Thetokenlabeled “1”representstheCaretaker'sRemains 5.PlacetheRemainstokensface-downthroughoutthehouse,keepingtheirnumberssecretfromtheheroes.(You maylookatthem.)YoumustplaceatleastoneRemainstokenineachregionofthehouse.Donotplacemore thanonetokenpertile Place2SmallMonstertokensonanytilewithoutahero.TheseareAngryGhosts.Setaside{2/3/5more 6. AngryGhosttokens Onceduringyourturnoumay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "墓地放好；遗骸按 1–4/5/6/7 发英雄；2 只小怪物。",
+        "heroText": "布置：墓地未放就找出来放好，叛徒左手先行动。目标：收集遗骸，在墓园做神智判定 5+ 安葬看门人。",
+        "traitorText": "布置：遗骸标记按 1–4/5/6/7 发给英雄并藏好；2 只小怪物。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "墓地未放就找出来放好，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeSpecialRoom",
@@ -2366,10 +2366,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. GREMLINMAGIC",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4Place3SmallMonstertokensonyourtile.ThesearetheGrmlins 5.Take{6/5/4/3}scrapsofpaperandwritean“X”oneverypieceexceptone.Thefinalpieceshouldsay“DIE.” Foldthesescraps,shufflethemandplacetheminthetopofthegamebox.Thesewillrepresenttheemails receivedbytheheroes Attheendofeachhero'sturn",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "3 只小妖精在叛徒板块；纸条按 6/5/4/3 准备，其中一张 DIE。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：消灭带符文的 3 只小妖精，并杀死叛徒。",
+        "traitorText": "布置：3 只小妖精放自己板块；纸条按 6/5/4/3 准备，其中一张写「DIE」。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -2470,10 +2470,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THERINGOFILLUSIONS",
-        "traitorText": "1.Removeyourexplorerfromthehouse.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Anymonstersinthehousewilltaketheirturninplaceofyours 3.Healallofyourtraits 4FindoneofeachNumberTokenlabeled1through{3/4/5/6y.Theseareyourlllusions.The“1”tokenisthe realyou 5.Shufflethelllusionsface-down(youmaylookatthematanytime)andplaceoneonyourtile.Thenplacethe restofthelllusionsaroundthehouseontilesfartherawaythanthevalueofyourSpeedtrait.Ifpossible youmustplaceeachIllusiononadifferenttile.Removeyourexplorerfromthehouse,youarenowHidden Amonglllusions TheRingofIllusions",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "叛徒棋子移出屋子；幻象按 1–N 放置，1 号是真身。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：揭穿幻象，杀死叛徒真身。",
+        "traitorText": "布置：把自己的棋子移出屋子；幻象按 1–3/4/5/6 放置，1 号是真身。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -2630,10 +2630,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonstertakesitsturnafteryours 3.Gain1Sanity 4.SettheNumberTrackto{6/4/3/2} Place5Videotapetokensonfivedifferenttiles,asfarfromtheheroesaspossible 5. 6.PlacetheGhosttokenonanytilewithaVideotapetoken.ThisistheVengefulSpirit WhenYouAttack",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 6/4/3/2；5 卷录像带分散；复仇幽灵在录像带板块。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：摧毁 5 卷录像带后从入口大厅逃出。",
+        "traitorText": "布置：数字轨道 6/4/3/2；5 卷录像带分散放好；复仇幽灵放在任一卷录像带板块。目标：杀光英雄，或把轨道降到 0。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "numberTrackByPlayers": {
           "3": 6,
           "4": 4,
@@ -2756,10 +2756,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Iftherearefewerthanfivenon-Landingtilesinthehouse,drawtilesfromthetilestackandplacetheminthe houseuntiltherearefive 2.Setaside{2/3//53Runetokens.ThesearetheSyllablesoftheFacelessMan'sName. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Choose{2/3/4/5}roomsinthehouseetwitetheirnamesonasheetofpapertandnumberthem 4 ThesetilesholdtheSyllablesoftheFacelessMan'sName.Theseroomsmaybelocatedinanyorallregionsofthe house.(Example:ina4-playergame,writedownthenamesofthreetilesandnumberthem12d.) 5.PlacetheFacelessMantokenonyourtile GuessingtheFacelessMan'sName",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "补足至少 5 块非平台板块；音节符文按 2/3/5 放好；无名者在叛徒板块。",
+        "heroText": "布置：补足至少 5 块非平台板块；音节符文按 2/3/5 放好。目标：集齐音节后击败无名者。",
+        "traitorText": "布置：选 2/3/4/5 个房间写下名字并编号，作为无名者的音节；无名者放自己板块。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "补足至少 5 块非平台板块；音节符文按 2/3/5 放好。",
         "ops": [
           {
             "type": "ensureTiles",
@@ -2841,7 +2841,7 @@ window.CABIN_PACKS = {
       "no": 21,
       "key": "official_3e_21",
       "name": "恐怖大师麦克马斯特为您呈现",
-      "story": "恐怖小说家 Spooky 这次没从废弃屋出来，手稿里写着：烧掉那本书。",
+      "story": "恐怖小说家 斯普基 这次没从废弃屋出来，手稿里写着：烧掉那本书。",
       "trigger": {
         "room": "*",
         "omen": "旧书",
@@ -2863,10 +2863,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.IftheLibrarytileisnotinthehousefinditinthetilestackandplaceitinaregionotherthantheonecurrently occupiedbythetraitor 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEBOOK",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlacetheDemontokenintheLibrary.ThisisSpookyMcMasters 4GiveSpookyMcMasterstheBookOmencard.PlaceitnexttotheMonsterCard 5.PlaceaSmallMonstertokenonyourtile.ThisisaHorror Healallofyourtraits. 6 Gain{1/1/2/3}MightandSpeed. TheBook",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "图书室放叛徒区域外；Spooky 在图书室持书；叛徒放恐惧标记。",
+        "heroText": "布置：图书室不在场就找出来放在叛徒所在区域以外，叛徒左手先行动。目标：烧掉书，摆脱控制。",
+        "traitorText": "布置：斯普基·麦克马斯特 放图书室并持有书；自己板块放 1 个恐惧标记；按 1/1/2/3 获得力量与速度。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "图书室不在场就找出来放在叛徒所在区域以外，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeSpecialRoom",
@@ -2973,10 +2973,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.ShufflealloftheBasementtiles(otherthantheBasementLandingtile)backintothetilestack. 2.EachheroplacestheirfigureontheBasementLandingtile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours IftheLaboratorytilehasnotbeendiscoveredsarchthetilestackforitandplaceitontheGroundFloor 3. Placeyourexploreronthattile MissionFirst",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "除底层平台外地下室洗回牌堆；英雄放底层平台；实验室放底层，僵尸 3 只。",
+        "heroText": "布置：除底层平台外的所有地下室板块洗回牌堆；每名英雄放在底层平台。目标：从入口大厅逃出屋子。",
+        "traitorText": "布置：实验室找出来放到底层，自己放在那里；冷战僵尸 3 只。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "除底层平台外的所有地下室板块洗回牌堆；每名英雄放在底层平台。",
         "ops": [
           {
             "type": "removeBasement"
@@ -3080,10 +3080,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "SettheNumberTrackto{2/3/4/5} 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours. 3.Healallofyourtraits 4Place{2/3/4/5}ONtokensanywhereinthehousedistributedasevenlyaspossiblebetweenregions. 5.PlaceaSmallMonstertokenoneachtilewithanONtoken.TheseareyourRobotAssistants WreckedRooms",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 2/3/4/5；ON 标记按人数分布，每个 ON 板块 1 台机器人。",
+        "heroText": "布置：数字轨道设为 2/3/4/5。目标：关闭 3 台机器，并破坏足够多的板块。",
+        "traitorText": "布置：ON 标记按 2/3/4/5 分布；每个 ON 板块放 1 个机器人助手。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道设为 2/3/4/5。",
         "numberTrackByPlayers": {
           "3": 2,
           "4": 3,
@@ -3202,10 +3202,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Find{2/3/4/5}Firetokens-theseareSeelieFlames.Placeoneofthesetokensoneachofthefollowing rooms(iftheyhavebeendiscovered):Tower,StatuaryCorridor,sevtoryaardUgodCavern， andUndergroundLake 2.SetanyremainingSeelieFlamestotheside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SEELIEFLAME",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor. 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBallroomand/orChapeltileshavenotbeendiscovered,findtheminthetilestackandplacethemonthe GroundFloor,followingnormaltile-placementrules 5.PlaceyourexplorerintheBallroom，alongwith{1/2/3/4}SmallMonstertokens.TheseareFaeDancers 6.SettheDarkQueentokenaside.Shemaycomeintoplaylater CometotheDance",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "舞厅与礼拜堂放底层；妖精舞者 1/2/3/4 放舞厅；精灵之火在五个地点。",
+        "heroText": "布置：精灵之火按 2/3/4/5 放在塔、雕像走廊、温室、地下洞穴和地下湖（已发现的）。目标：把 4 盏精灵之火带到礼拜堂。",
+        "traitorText": "布置：舞厅和礼拜堂找出放到底层；自己与妖精舞者 1/2/3/4 放舞厅；暗女王先放一边。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "精灵之火按 2/3/4/5 放在塔、雕像走廊、温室、地下洞穴和地下湖（已发现的）。",
         "ops": [
           {
             "type": "placeSpecialRoom",
@@ -3377,10 +3377,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.SetasideaMight,Speed,Knowledge,andSitytoe.TheseareSpellIngredients 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits WhenyouwinaMightattackagainstahero",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "四项属性各留 1 个标记作法术材料。",
+        "heroText": "布置：力量、速度、知识、神智各留 1 个标记作为法术材料；叛徒左手先行动。目标：在军械库做 2 次神智判定 5+，破除咒语。",
+        "traitorText": "布置：你是叛徒，治疗全部属性。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "力量、速度、知识、神智各留 1 个标记作为法术材料；叛徒左手先行动。",
         "ops": [
           {
             "type": "custom",
@@ -3482,10 +3482,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.PlacetheAltartokenonanyGroundFloortile 2.IftheRitualRoomhasnotbeendiscovered,earchthetilestackforitandplaceitintheBasement,usingnorma tile-placementrules. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 Place{2/3/4/5}SmallMonstertokensondifferenttileswithOmensymbols.TheseareyourRelatives.Ifthere arenotenoughtileswithOmensymbols,placetheremainingRelativesontheEntranceHall. SettheDarkQueentokenaside.ThisisTheElderItwillcomeintoplaylater 5.S Onceduringyourturn，ouma",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "祭坛在底层；仪式房放底层；亲属按 2/3/4/5 放预兆板块。",
+        "heroText": "布置：祭坛放任一底层板块；仪式房找出来放到底层；叛徒左手先行动。目标：在仪式房做神智判定，累计 3 次 4+，毁掉祭品仪式。",
+        "traitorText": "布置：亲属按 2/3/4/5 放在有预兆符号的板块；暗女王作为长老稍后入场。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "祭坛放任一底层板块；仪式房找出来放到底层；叛徒左手先行动。",
         "ops": [
           {
             "type": "placeToken",
@@ -3600,10 +3600,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. 3.Find{3/4/4/5}Runetokensandsetthemasidefortheheroes.TheseareAlienWords ALIENWORDS",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{5/4/4/3}Runetokensandsetthemtothesideinfrontofyou.TheseareAlienWords PlaceanAlienWordonyourtile 4、 AlienWords",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "英雄拿 3/4/4/5 个外星文字；叛徒拿 5/4/4/3 并在自己板块放 1 个。",
+        "heroText": "布置：英雄没有额外布置；给英雄 3/4/4/5 个外星文字符文。目标：杀死叛徒。",
+        "traitorText": "布置：给自己 5/4/4/3 个外星文字符文，并在自己板块放 1 个。目标：把所有外星文字铺进屋里，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置；给英雄 3/4/4/5 个外星文字符文。",
         "ops": [
           {
             "type": "placeToken",
@@ -3711,10 +3711,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup FLIPPEDTILES",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "大白幽灵鲨入场；用炸药或撑到它被消灭。",
+        "heroText": "布置：翻开板块时按剧本处理；大白幽灵鲨出现。目标：用炸药炸掉大白幽灵鲨，或撑到它被消灭。",
+        "traitorText": "自由混战式剧本：鲨鱼与所有人敌对，最后活着的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "翻开板块时按剧本处理；大白幽灵鲨出现。",
         "ops": [
           {
             "type": "placeMonster",
@@ -3807,10 +3807,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "Theheroeshavenoadditionalsetupsteps. 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Place{1/2/3/3}SmallMonstertokensonthetilewithyou.ThesearetheFae WhenyouAttackaHero",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "妖精按 1/2/3/3 放在叛徒板块。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：在仪式房做知识判定，累计 3 次 5+，束缚妖精。",
+        "traitorText": "布置：妖精按 1/2/3/3 放在自己板块。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -3907,10 +3907,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.IftheSecretStairstilehasnotbeendiscovered,searchthetilestackforthattileandplaceitinthehouse,using normaltile-placementrules 2.Setasidethetop{4/6/9/12}tilesfromthetilestackandreturntheremainingtilestothegamebox.Ifthere arefewertilesthanthisinthestack，kipthisstep 3.TakeanyOmensheldbythetraitorandgivethemtothehauntrevealer 4.ThetraitoristryingtofindtheRing.Whentheteamsseparate,theheroesmayfreelytradeOmens,usingthe normaltradingrules.EachheromustplacetheirOmensface-downonthetableinfrontofthem 5.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. OMENS",
-        "traitorText": "1.Youhavebeenpossessedbyaspirit!Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 PlaceyourexplorerontheEntranceHall. Place{1/2/3/4}SmallMonstertokensondifferenttileswithOmensymbols.ThesearetheWeddingParty 5. IftherearenotenoughtileswithOmensymbols,placetheremainingmembersoftheWeddingPartyonthe GroundFloorStaircase. Whenyouattackahero",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "秘密楼梯放好；从板块堆移除 4/6/9/12 块；叛徒预兆交给揭示者。",
+        "heroText": "布置：秘密楼梯找出来放好；从牌堆顶拿走 4/6/9/12 块板块，其余放回盒子；叛徒身上的预兆交给揭示者。目标：拿到戒指，把灵魂引到祭坛完成仪式。",
+        "traitorText": "布置：你被幽灵附身；自己放门厅；婚礼队伍按 1/2/3/4 放在有预兆的板块。目标：抢到戒指。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "秘密楼梯找出来放好；从牌堆顶拿走 4/6/9/12 块板块，其余放回盒子；叛徒身上的预兆交给揭示者。",
         "ops": [
           {
             "type": "removeTiles",
@@ -4028,10 +4028,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKACURSEDITEMONYOURTILE",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. 4TakeallltemsandOmensfromeveryplayerStartingwiththeHolySymbol,set{4/5/7/9}ofthosecards asideface-up.Iftherearefewercardsthanthis,ettemllaside BuryanyremainingltemsandOmens. 5.B PlaceonesetofNumbertokensontheset-asideltemandOmens,thenplaceamatchingNumberTokeninthe 6. house.ThesetokensrepresentCursedItems.EachCursedItemmustbeplacedonadifferentItemorOmentile IfanyCursedItemsremainplacethemontheEntranceHall Onceduringyourturnyoumay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "收走所有物品与预兆，只留 4/5/7/9 张；2 只被诅咒的物品。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：带 4 件物品从入口大厅逃出。",
+        "traitorText": "布置：收走所有玩家的物品和预兆，留下 4/5/7/9 张；被诅咒的物品 2 只。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "clearItems"
@@ -4144,10 +4144,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUENTERATILEWITHAFIRETOKEN",
-        "traitorText": "Catsswarmyou.Yourexplorerhasdied.BuryyourltemsandOmensandremoveyourfigurefromthehouse 1 PlacetheBakenekotokenonyourtile.YounowcommandtheBakenekoandtheUndeadCats. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Findandsetaside{6/5/4/3}Firetokens.Puttherestbackinthebox. 4.Place{3/4/5/7}SmallMonstertokensinyourregion.TheseareyourUndeadCats Insteadofyourturn,takeaturnwiththeBakeneko",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "叛徒本体死亡；猫又 3/4/5/7、亡灵猫 3/4/5/7；火焰 6/5/4/3。",
+        "heroText": "布置：英雄没有额外布置。目标：驱逐猫又。进入带火焰标记的板块会受伤。",
+        "traitorText": "布置：你的探险者已死亡，改为控制猫又与亡灵猫；火焰 6/5/4/3，亡灵猫 3/4/5/7。目标：烧毁房子，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置。",
         "ops": [
           {
             "type": "placeMonster",
@@ -4308,10 +4308,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.SetasideaSmallMonstertoken.Thisisyourfriendhristina 2.ReturnthedeckofEventcardstothegamebox 3.SettheNumberTrackto{6/3/1/0} 4.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 6/3/1/0；事件牌堆移出；留 1 个小怪物标记作朋友。",
+        "heroText": "布置：数字轨道 6/3/1/0；事件牌堆移出游戏；留 1 个小怪物标记作为朋友。目标：在维度改写生效时抵达入口大厅。",
+        "traitorText": "自由混战：所有人在维度改写中争夺出口，最后活着的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道 6/3/1/0；事件牌堆移出游戏；留 1 个小怪物标记作为朋友。",
         "numberTrackByPlayers": {
           "3": 6,
           "4": 3,
@@ -4397,10 +4397,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SALT FOOD",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaNesttokenonanyBasementtile.PlaceasecondNesttokenonanyUpperFloortile 4Place{2/3/5}SmallMonstertokensonyourtile.TheseareSlugs NEST Nesttoken",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "两个虫巢分别放底层和上层；鼻涕虫 2/3/5 在叛徒板块。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：用盐摧毁 2 个虫巢。",
+        "traitorText": "布置：两个虫巢分别放底层和上层；鼻涕虫按 2/3/5 放在自己板块。目标：精神控制所有英雄，或杀光他们。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeToken",
@@ -4518,10 +4518,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1 Yourexplorerisstillinthegame.Youarethetraitor 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaSmallMonstertokenoneachtilethathasanEventsymbol.TheseareGhosts Onceduringyourturn，youmay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "每个事件板块放 1 只幽灵；神智满值或杀光英雄。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：让 4 个幽灵得到安宁。胜利：在带事件符号的板块做神智判定 5+，移除幽灵。",
+        "traitorText": "布置：每个带事件符号的板块放 1 个幽灵。目标：获得觉悟（神智达到最大值），或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -4644,10 +4644,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.GiveeachherotheircorrespondingHerotokentoplaceontheirrespectivecharacterboards.ThisistheirDNA 2.SettheNumberTrackto{2/3/4/5} 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. BODYSWAPS",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.BurytheArmorandsetallofyourtraitstotheirstartingvalues 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4PlaceyourfigureontheEntranceHallalongwith/1/1/2SmallMonstertokens.Theseareyour SecurityRobots. 5.EachheroplacesaSecurityRobotontheirtile DNA",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "每名英雄拿自己的 DNA；数字轨道 2/3/4/5；机器人 1/1/2 并给每名英雄 1 台。",
+        "heroText": "布置：每名英雄拿自己的 DNA 标记；数字轨道 2/3/4/5。目标：关闭 3 台机器人，并留下 3 个 DNA 标记。",
+        "traitorText": "布置：自己是叛徒，安全机器人按 1/1/2 放在门厅和自己的板块，并给每名英雄放 1 台。目标：收集每名英雄的一份 DNA。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "每名英雄拿自己的 DNA 标记；数字轨道 2/3/4/5。",
         "numberTrackByPlayers": {
           "3": 2,
           "4": 3,
@@ -4826,10 +4826,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "Theheroeshavenoadditionalsetupsteps 1. 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. THERINGOFFEASTS",
-        "traitorText": "1.IftheKitchentilehasnotbeendiscoveredtetilestackforitandplaceitontheGroundFloorasfaras possiblefromtheEntranceHall 2.Healallofyourtraits. 3.SettheNumberTrackto{2/3/4/4} Place{3/4/5/6]SmallMonstertokensaroundthehouse,oneoneachtilewithanEventsymbol.These 4. areNeighbors.lfyoumustplacemoreNeighborsthantherearetileswithEventsymbols,placetherestof thoseNeighborsintheEntranceHall. 5.PlacetheMonsterCardonyourleft.Themonsterswilltaketheirturnaferyours Whenyoudie",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "厨房放底层；轨道 2/3/4/4；邻居 3/4/5/6 放事件板块。",
+        "heroText": "布置：英雄没有额外布置，揭示者左手先行动。目标：杀死所有邻居。",
+        "traitorText": "布置：厨房找出放到底层；轨道 2/3/4/4；邻居按 3/4/5/6 放在事件板块。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，揭示者左手先行动。",
         "numberTrackByPlayers": {
           "3": 2,
           "4": 3,
@@ -4945,10 +4945,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.SettheNumberTrackto{5/4/4/3} 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup NEST WASPEGGS",
-        "traitorText": "1.Youcompleteyourmetamorphosis.RemoveyourexplorerfromthehouseandreplaceitwiththeGiantWasp BuryallofyourltemsandOmens. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Distribute5NesttokensacrossdifferentGroundand/orUpperFloortiles.ThesearetheWaspEggsthatthe heroesaretryingtodestroy Place{o/2/3mllMonstertokensonyourtile.TheseareyourWorkerWasps 4.F Insteadofyourturn,takeaturnwitheach",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "叛徒变蜂后；虫巢 5 个；工蜂 0/2/3 在自己板块。",
+        "heroText": "布置：数字轨道 5/4/4/3。目标：杀死大蜂后。",
+        "traitorText": "布置：自己变成大蜂后，物品和预兆埋掉；虫巢 5 个；工蜂 0/2/3 放在自己板块。目标：时间耗尽，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道 5/4/4/3。",
         "numberTrackByPlayers": {
           "3": 5,
           "4": 4,
@@ -5089,10 +5089,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.Place{2/3/4/5}SmallMonstertokensontoyourtile.Thesearetheheroes'EvilTwins Findeachhero'smatchingHerotoken.ThesearetheTwins'ldentities.PlaceoneunderneatheachEvilTwin. 5. Onceduringyourturnyoumay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "邪恶双胞胎 2/3/4/5 放叛徒板块，每个下面放对应英雄身份。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：杀死所有邪恶双胞胎。",
+        "traitorText": "布置：邪恶双胞胎按 2/3/4/5 放在自己板块，每个下面放一张对应的英雄身份。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",
@@ -5200,10 +5200,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.SettheNumberTrackto0. 2.Place5SearchedtokensneartheNumberTrack. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup TRIGGERINGATRAP",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaTraptokenonyourtile.SettheremainingTraptokensaside 4.Take{3/3/4/5}ON/OFFtokensandreturntheresttothebox.TheseareGenerators.Placeoneonyourtile andthenoneoneachtileofyourchoicethathasanItemorOmensymbol.Ifanytokensremainpacetheseon Landingtiles Onceduringyourturnyoumay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 0；5 个搜查标记；陷阱在自己板块；发电机 3/3/4/5；房子作为怪物。",
+        "heroText": "布置：数字轨道设为 0；5 个搜查标记放轨道旁。目标：让 3 台发电机全部过载。",
+        "traitorText": "布置：自己板块放陷阱；发电机按 3/3/4/5 放在自己板块和带物品/预兆符号的板块；房子作为怪物。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道设为 0；5 个搜查标记放轨道旁。",
         "numberTrack": 0,
         "ops": [
           {
@@ -5352,10 +5352,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.IftheLardertilehasnotbeendiscoveredfinditinthetilestackandplaceitintheBasement 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturnafteryours 4.BurytheDogPlacetheDemonDogtokenonyourtile. 5.Place{0/1/1/2}FoodtokensontheMonsterCard.Settheresttotheside. Onceduringyourturn，youmay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "储藏室放底层；恶魔犬在叛徒板块；食物按 0/1/1/2。",
+        "heroText": "布置：储藏室找出来放到底层，叛徒左手先行动。目标：让 3 个幽灵安息。",
+        "traitorText": "布置：恶魔犬放自己板块；食物按 0/1/1/2 放在怪物卡上。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "储藏室找出来放到底层，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeToken",
@@ -5481,10 +5481,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.SettheNumberTrackto{6/7/8/9} 2.BurytheDog PlacetheWerewolftokenonthehauntrevealer'stile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2 PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours HiddenHeroes HIDDEN",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "数字轨道 6/7/8/9；狼人放揭示者板块；撑过 6 轮。",
+        "heroText": "布置：数字轨道 6/7/8/9；狼人放在揭示者板块。目标：撑过 6 轮，等到天亮。",
+        "traitorText": "布置：狼人放揭示者板块。目标：杀死所有英雄；英雄躲藏时狼人不能攻击。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "数字轨道 6/7/8/9；狼人放在揭示者板块。",
         "numberTrackByPlayers": {
           "3": 6,
           "4": 7,
@@ -5581,10 +5581,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Thehauntrevealermustturntheirtileface-downandplacetheirfigurinebackonthattile.Thattileisnow Burning.Ifthereareonlythreeplayers,fliptheotherhero'stileaswell(unlesstheyareonaLandingtile) 2.Find5Firetokensandsetthemaside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEHOUSEISONFIRE",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.Place{1/2/3/4}SmallMonstertokensonLandingtiles.TheseareyourMannequins. Thehouseisonfire",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "揭示者板块翻面着火；3 人局再翻一名英雄；5 个火焰标记；人体模型 1/2/3/4。",
+        "heroText": "布置：揭示者的板块翻面并放回棋子，视为着火；3 人局再翻另一名英雄的板块；5 个火焰标记。目标：让 5 间房烧起来。",
+        "traitorText": "布置：人体模型按 1/2/3/4 放在平台板块。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "揭示者的板块翻面并放回棋子，视为着火；3 人局再翻另一名英雄的板块；5 个火焰标记。",
         "ops": [
           {
             "type": "flipRoom",
@@ -5714,10 +5714,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.IftheArmorytilehasnotbeendiscoveredsearchthetilestackforitandplaceitontheGroundFloorof thehouse. 4 Drawcardsfromtheltemdeckuntilyouhave2weaponsTakethose2weaponsandplacetherestofthedrawn cardsonthebottomoftheltemdeck.Ifnoweaponsremainintheltemdeck,skipthisstep. 5.SettheNumberTrackto{2/3/4/5} Whenyoudie",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "军械库放底层；叛徒抽 2 件武器；数字轨道 2/3/4/5。",
+        "heroText": "布置：英雄没有额外布置。目标：杀死叛徒并改写剧本。",
+        "traitorText": "布置：军械库找出放到底层；从物品牌抽 2 件武器；轨道 2/3/4/5。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置。",
         "numberTrackByPlayers": {
           "3": 2,
           "4": 3,
@@ -5834,10 +5834,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANTIDOTES 1",
-        "traitorText": "YouhavebeenconsumedbyhairReplaceyourfigurewiththeGiantHairMonstertoken.Buryallofyourltems 1. andOmens. 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours FindoneofeachNumberTokenlabeled1through{4/6/8/10}.TheseareAntidotes.Shufflethemandplace 3 themface-downaroundthehousearrangedhoweveyoulike Place1SmallMonstertokenontheEntranceHall.ThisisaSmallHairMonster 4、 Findandsetaside{1/2/3/4additionalSmallHairMonsters 5. Whenaherodies",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "叛徒变巨型毛发怪；门厅放 1 只；解药按人数藏好。",
+        "heroText": "布置：英雄没有额外布置。目标：持真解药击败巨型毛发怪。",
+        "traitorText": "布置：自己变成巨型毛发怪；解药按 1–4/6/8/10 藏好；门厅放 1 个毛发怪。目标：把所有英雄都变成毛发怪。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置。",
         "ops": [
           {
             "type": "placeMonster",
@@ -5967,10 +5967,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{2/3/4/5}Portaltokens.ThenforeachheroplaceaPortaltokeninthathero'sregiononthetile farthestfromthathero GiveeachherotheirHeromatchingtoken.AherowhohastheirHerotokenisTrapped 4 AnotherDimension",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "传送门 2/3/4/5 放好；每名英雄拿被困标记。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：关闭 3 道传送门；关闭时自己摆脱被困。",
+        "traitorText": "布置：传送门按 2/3/4/5 放好，给每名英雄发英雄标记使其被困。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeToken",
@@ -6090,10 +6090,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKTHEHEADOFTHEHOUSE",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits.Gain1Might 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBloodyRoomtilehasnotbeendiscoveredchthetilestackforitandplaceitontheGroundFloor PlacetheHeadoftheHousetokenontheBloodyRoom 5. PlacetheSkullundertheMonsterCard.TheHeadoftheHouseiscarryingit 6 Onceduringyourturn，youmay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "血房放底层；房主持头骨在血房；叛徒力量 +1。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：把头骨带到恐慌室。",
+        "traitorText": "布置：血房找出放到底层；房主放血房并持有头骨；自身 +1 力量。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeToken",
@@ -6210,10 +6210,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.EachherotakesaBloodtokenandplacesitontheircharacterboard 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. THECONTRACT",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltaketheirturnafteryours 4Gain/1/2/2MightandSpeed. 5.PlacetheDemontokenontheBasementtilefarthestfromtheBasementLanding PlacetheContracttokenontheDemon.ItisholdingtheContract. 6. WhenyouattackaHero",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "恶魔放底层远离平台；契约在恶魔身上；每名英雄 1 个血标记；叛徒 1/1/2/2 力量与速度。",
+        "heroText": "布置：每名英雄拿 1 个血标记。目标：击败恶魔，烧掉契约。",
+        "traitorText": "布置：恶魔放底层远离底层平台处，契约放恶魔身上；按 1/1/2/2 获得力量与速度。目标：带来血之人的血，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "每名英雄拿 1 个血标记。",
         "ops": [
           {
             "type": "placeMonster",
@@ -6386,10 +6386,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Setaside(3/4/4/5)Traptokens.TheseareExplosives 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
-        "traitorText": "1.Youhavebeenconsumed.BuryallofyourltemsandOmens.Removeyourexplorerfromthehouseandreplace itwiththeConstructtoken 2.Turnthetileyouareonface-down.ThattilehasbeenConsumed. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturninplaceofyours 4.SettheNumberTrackto{2/3/3/4.ThisisyourSpeed. ConsumedRooms",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "炸药 3/4/4/5；叛徒变构造体并翻面；数字轨道 2/3/3/4。",
+        "heroText": "布置：炸药标记按 3/4/4/5 放好。目标：在每层至少放 1 个炸药，共 3 个。",
+        "traitorText": "布置：自己变成构造体，所在板块翻面；数字轨道 2/3/3/4 代表速度。目标：吞噬整栋房子，或杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "炸药标记按 3/4/4/5 放好。",
         "numberTrackByPlayers": {
           "3": 2,
           "4": 3,
@@ -6526,10 +6526,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "seems,wasoutafterdark... Ifyoursidehasanyspecificsetupsteps,thisiswheretheywillbelisted Bothsideswillhavedifferentsetuprequirements.Allsetuphappensbefore SETUP thefirstturnofthehaunt,anditmaysignificantlychangewhatthehouse 1.Theheroeshavenoadditionalsetupsteps lookslike 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay SPECIALACTIONS",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "杰克之灵放图书室；英雄在图书室进行驱魔。",
+        "heroText": "布置：英雄没有额外布置步骤，叛徒左手边的玩家先行动。目标：在图书室做知识判定，把「杰克的知识」交给还没有该标记的英雄，并杀死叛徒以释放杰克之灵。胜利：与杰克之灵同格做神智判定，本区域内每个驱魔圈 +1，7+ 成功；0–6 每名英雄受 1 点物理伤害。",
+        "traitorText": "布置：你是揭示者，把杰克之灵放到图书室。目标：阻止英雄完成驱魔，杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置步骤，叛徒左手边的玩家先行动。",
         "ops": [
           {
             "type": "placeSpecialRoom",
@@ -6626,10 +6626,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "Whileonatilewithanotherexploreryoumaytradeoneofyour Thefeverishrushoutofthehouse 1.FindthreeNumbertokensforeachplayerTheserepresenttheSickness.Ingameswith3-5players,thereshould Sicknesstokensatrandomwiththatexplorer.Thatexplorermust towreakhavocuponthetown.Dust beone“1”token.Ina6-playergame,thereshouldbetwo“1”tokens agreetothetrade.Thedustwantstospread todust. 2.ShuffletheSicknesstokensface-down,andgivethreetoeachplayer 3.PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer ATTHEENDOFYOURTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup Ifyouareonatilewithanotherexplorer,swaponeofyourSickness tokensatrandomwiththem.Ifmultipleexplorersareonyourtile swaptokenswitheachofthemoneatatime.Anexplorerwho HIDDENTRAITOR",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "每人 3 个疾病标记；6 人局有 2 个「1」；热病者入场。",
+        "heroText": "布置：每人 3 个疾病标记；3–5 人局只有 1 个「1」，6 人局有 2 个「1」；怪物卡放揭示者左侧，揭示者左手先行动。目标：放满 8 个研究符文治愈尘埃。",
+        "traitorText": "布置：隐藏叛徒，带「1」疾病标记的人永久成为叛徒。目标：让所有英雄变成叛徒或死亡。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "每人 3 个疾病标记；3–5 人局只有 1 个「1」，6 人局有 2 个「1」；怪物卡放揭示者左侧，揭示者左手先行动。",
         "ops": [
           {
             "type": "assignDisease"
@@ -6721,10 +6721,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "theMirrorBeingmoves.IfaMirrorBeingendsitsturnonaspace Thecreaturesfinalassaultdrawsyou 1.Thehauntrevealertipstheirfigureover.Theyarestillinthegame,butdeadtheirsoulistrappedinthe withanexplorer,itattacksthatexplorerusingSanity intotheMirrorRealm，whereyouand MirrorRealm. yourfriendsaretrappedforevermore 2.ThehauntrevealerselectsaTrait，Omen,andRoomatrandom(seebelow),notingtheirnamesonasheetof paper.Thisinformationshouldnotbesharedwithanyotherplayers. Onceduringyourturn，youmay ShuffletheTraittokensface-down，andselectoneatrandomMakeanoteofwhichtokewaschosen a. BreaktheSpell 福 b. ShuffleNumbertokensnumbered1-9face-down,andselectoneatrandom Whileonanytileheaitandrollit.Tellthehauntrevealerthe MakeanoteofwhichOmenthattokenrepresents: nameofoneofyourOmens. 2:Dog 4:Dagger 3:ldol 5:Armor 1:Mask 6:Ring IfyouhavethecorrectcombinationofTrait，Omen,andRoom， 7:Book 8:HolySymbol 5+ 9:Skull thehauntreveale",
-        "traitorText": "",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "揭示者翻倒并困在镜界；镜像体按 2/3/4/5 放在门厅。",
+        "heroText": "布置：揭示者把棋子翻倒，仍算存活但困在镜界；随机记下一个属性、预兆和房间；镜像体按 2/3/4/5 放在门厅。目标：掷出正确的属性 + 预兆 + 房间组合 3 次破咒。",
+        "traitorText": "本剧本没有叛徒，全员合作；揭示者被困镜界，只能用事件牌间接交流。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "揭示者把棋子翻倒，仍算存活但困在镜界；随机记下一个属性、预兆和房间；镜像体按 2/3/4/5 放在门厅。",
         "ops": [
           {
             "type": "placeMonster",
@@ -6829,10 +6829,10 @@ window.CABIN_PACKS = {
       },
       "setup": {
         "mode": "scripted",
-        "heroText": "",
-        "traitorText": "1.IfnoonehastheStrangeAmuletltemcard,finditintheltemdeckandgiveittothehauntrevealer 2.PlacetheMonsterCardtotheleftofthehauntrevealerThemonsterswilltaketheirturnafterthehauntrevealer 3.PlaceoneTrollHandtokenontheEntranceHallandanotherontheBasementLanding 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
-        "note": "两只巨魔之手分别放在入口大厅与底层平台",
-        "summary": "奇怪护符交揭示者；两只巨魔之手放门厅与底层平台。",
+        "heroText": "布置：奇怪护符交给揭示者；两个巨魔之手分别放门厅和底层平台。目标：最后活着的人获胜。",
+        "traitorText": "自由混战：巨魔之手会攻击所有人，最后活着的人获胜。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "奇怪护符交给揭示者；两个巨魔之手分别放门厅和底层平台。",
         "ops": [
           {
             "type": "grantItem",
@@ -6933,10 +6933,10 @@ window.CABIN_PACKS = {
       "ffaGoal": null,
       "setup": {
         "mode": "scripted",
-        "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
-        "traitorText": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Place{2/3/4/5}SmallMonstertokensonanynon-Landingtileistributedasevenlyaspossibleamongregions.Theseare PhantomPhotographers 3.IftheMagicCamerahasnotbeendiscoveredachtheltemdeckfortheMagicCameraandplaceitface-upinfrontofyou GiveeachherotheirmatchingHerotoken.ThisistheirEssence 4 Onceduringyourturnyoumay",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成",
-        "summary": "幽灵摄影师 2/3/4/5 放非平台板块；魔法相机给叛徒；英雄拿精华标记。",
+        "heroText": "布置：英雄没有额外布置，叛徒左手先行动。目标：杀死所有幽灵摄影师，并砸毁魔法相机。",
+        "traitorText": "布置：幽灵摄影师按 2/3/4/5 放在非平台板块；魔法相机找出放在自己面前；给每名英雄发英雄精华标记。目标：杀光英雄。",
+        "note": "官方 Setup 中文译本（布置 / 目标 / 胜利）",
+        "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
             "type": "placeMonster",

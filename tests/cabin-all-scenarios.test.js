@@ -130,6 +130,7 @@ for (const sc of E.SCENARIOS) {
     continue;
   }
   ok(tag + ' 进入闹鬼', !!(st.haunt && st.haunt.active), st.phase);
+  ok(tag + ' Setup 使用中文译本', !/[A-Za-z]{4,}/.test((sc.setup.heroText || '') + (sc.setup.traitorText || '')) && !!sc.setup.summary, sc.setup.summary);
   ok(tag + ' Setup 已执行', !!(st.haunt.setup && st.haunt.setup.summary), st.haunt.setup && st.haunt.summary);
   ok(tag + ' 有玩家行动入口', st.players.length === 3 && st.phase === 'playing', st.phase);
 
