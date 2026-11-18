@@ -53,6 +53,12 @@ jobs:
       - name: Run cabin scenario special tests
         run: node tests/cabin-specials.test.js
 
+      - name: Run cabin scenario setup tests
+        run: node tests/cabin-setup.test.js
+
+      - name: Run cabin scenario rule-fix tests
+        run: node tests/cabin-rule-fixes.test.js
+
       - name: Run cabin private-state security tests
         run: node tests/cabin-security.test.js
 

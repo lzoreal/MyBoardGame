@@ -572,7 +572,6 @@ window.CabinEngine = (function () {
     rand = rand || Math.random;
     opts = opts || {};
     const list = (players || []).slice(0, 6).map((p) => makePlayer(p.id, p.name));
-    while (list.length < 3) list.push(makePlayer('p' + list.length, '玩家 ' + (list.length + 1)));
 
     const rooms = [
       { floor: 'ground', x: 4, y: 5, name: '入口大厅', doors: 'NEW', symbol: null, kind: 'start' },
@@ -646,10 +645,12 @@ window.CabinEngine = (function () {
 
   function applyEffect(st, i, eff, rand) {
     if (!eff) return;
+    const effectRoom = roomAt(st, st.players[i].floor, st.players[i].x, st.players[i].y);
     if (Array.isArray(eff.ops)) {
       eff.ops.forEach((one) => applyEffect(st, i, one, rand));
-      if (!eff.gain && !eff.lose && !eff.damage && !eff.heal && !eff.draw) return;
+      if (!eff.gain && !eff.lose && !eff.damage && !eff.heal && !eff.draw && !eff.token) return;
     }
+    if (eff.token && effectRoom) addToken(st, eff.token, effectRoom, eff.count || 1);
     if (eff.gain) gainTrait(st, i, eff.gain.trait, eff.gain.amount, '卡牌');
     if (eff.gainAny) {
       const p = st.players[i];
@@ -818,7 +819,7 @@ window.CabinEngine = (function () {
       return true;
     });
     if (!tile) return false;
-    const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : 6);
+    const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : (floor === 'basement' ? 6 : 5));
     const spot = anchor ? findFreeCell(st, floor, anchor.x, anchor.y) : null;
     if (!spot) { st.roomDeck.push(tile); return false; }
     st.rooms.push({
@@ -1074,10 +1075,11 @@ window.CabinEngine = (function () {
       ffaGoal: clone(sc.ffaGoal || (sc.traitorRule === 'freeForAll' ? sc.heroGoal : null)),
       hidden: sc.traitorRule === 'hiddenTraitor',
       dimension: !!sc.dimension, evidence: 0, treasure: 0,
-      numberTrack: (sc.setup && Number.isFinite(Number(sc.setup.numberTrack))) ? Number(sc.setup.numberTrack) : null,
+      numberTrack: null,
       destroyedItems: [], custom: {}
     };
-    spawnMonsters(st, sc, rand);
+    runScenarioSetup(st, sc, rand);
+    if (!sc.setup || sc.setup.mode !== 'scripted') spawnMonsters(st, sc, rand);
     if (tp && st.haunt.hidden) {
       pushLog(st, '★ 闹鬼：「' + sc.name + '」—— 有一个人已经不是原来的他');
       st.lastCard = { kind: 'haunt', title: '★ 闹鬼：' + sc.name, text: sc.story + '\n叛徒身份暂时未知（隐藏叛徒）\n英雄目标：' + sc.heroGoalText, tone: 'bad' };
@@ -1136,7 +1138,8 @@ window.CabinEngine = (function () {
     if (filter && filter.floor) list = list.filter((t) => t.floor === filter.floor);
     if (filter && filter.room) list = list.filter((t) => {
       const r = roomAt(st, t.floor, t.x, t.y);
-      return r && r.name === filter.room;
+      const want = typeof filter.room === 'string' ? filter.room : filter.room.name;
+      return r && r.name === want;
     });
     return list.reduce((s, t) => s + (t.count || 1), 0);
   }
@@ -1145,6 +1148,31 @@ window.CabinEngine = (function () {
     const out = {};
     FLOORS.forEach((f) => { out[f] = countTokens(st, type, { floor: f }); });
     return out;
+  }
+
+  function setupPendingMatches(room, target) {
+    if (!target || target === 'random' || target === 'nonLanding') {
+      return room.kind !== 'start' && room.kind !== 'landing' && room.kind !== 'grandStair';
+    }
+    if (target === 'ground' || target === 'upper' || target === 'basement') return room.floor === target;
+    if (target === 'farBasement') return room.floor === 'basement';
+    if (target === 'eventTiles') return room.symbol === 'event';
+    if (target === 'omenTiles') return room.symbol === 'omen';
+    if (target === 'itemTiles') return room.symbol === 'item';
+    return room.name === target;
+  }
+
+  // 闹鬼 Setup 时还没翻出的板块，等它接入地图后把待放标记补到该房间
+  function attachSetupPendingTokens(st, room) {
+    const setup = st.haunt && st.haunt.active && st.haunt.setup;
+    if (!setup || !setup.pendingTokens) return;
+    Object.keys(setup.pendingTokens).forEach((token) => {
+      const target = (setup.pendingTokenTargets && setup.pendingTokenTargets[token]) || 'nonLanding';
+      if (!setupPendingMatches(room, target)) return;
+      addToken(st, token, room, 1);
+      setup.pendingTokens[token] -= 1;
+      if (setup.pendingTokens[token] <= 0) delete setup.pendingTokens[token];
+    });
   }
 
   function flipRoom(st, room) {
@@ -1172,6 +1200,281 @@ window.CabinEngine = (function () {
     });
     st.monsters.push(mm);
     return mm;
+  }
+
+  function setupPlayerRoom(st, index) {
+    const p = st.players[index];
+    if (!p) return null;
+    return roomAt(st, p.floor, p.x, p.y);
+  }
+
+  function setupRoomPool(st, h, target) {
+    const actual = roomByName(st, target);
+    if (actual) return [actual];
+    if (target === 'traitor') {
+      const room = setupPlayerRoom(st, h.traitor);
+      return room ? [room] : [];
+    }
+    if (target === 'revealer') {
+      const room = setupPlayerRoom(st, h.revealer);
+      return room ? [room] : [];
+    }
+    if (target === 'heroTiles') {
+      return st.players.filter((p) => p.side === 'hero' && !p.dead)
+        .map((p) => roomAt(st, p.floor, p.x, p.y)).filter(Boolean);
+    }
+    if (target === 'allPlayerTiles') {
+      return st.players.filter((p) => !p.dead && p.floor !== 'outside')
+        .map((p) => roomAt(st, p.floor, p.x, p.y)).filter(Boolean);
+    }
+    if (target === 'eventTiles') return st.rooms.filter((r) => r.symbol === 'event').slice();
+    if (target === 'omenTiles') return st.rooms.filter((r) => r.symbol === 'omen').slice();
+    if (target === 'itemTiles') return st.rooms.filter((r) => r.symbol === 'item').slice();
+    if (target === 'symbolTiles') return st.rooms.filter((r) => !!r.symbol).slice();
+    if (target === 'landingTiles') return st.rooms.filter((r) => r.kind === 'landing').slice();
+    if (target === 'nonLanding') return st.rooms.filter((r) => r.kind !== 'landing' && r.kind !== 'start' && r.kind !== 'grandStair').slice();
+    if (target === 'basement') return st.rooms.filter((r) => r.floor === 'basement' && r.kind !== 'landing' && r.kind !== 'start').slice();
+    if (target === 'upper') return st.rooms.filter((r) => r.floor === 'upper' && r.kind !== 'landing' && r.kind !== 'start').slice();
+    if (target === 'ground') return st.rooms.filter((r) => r.floor === 'ground' && r.kind !== 'start' && r.kind !== 'grandStair').slice();
+    if (target === 'farBasement') {
+      const list = st.rooms.filter((r) => r.floor === 'basement' && r.kind !== 'landing').slice();
+      if (!list.length) return [];
+      const start = roomByName(st, '底层平台');
+      const ox = start ? start.x : 4, oy = start ? start.y : 6;
+      return list.sort((a, b) => Math.abs(b.x - ox) + Math.abs(b.y - oy) - (Math.abs(a.x - ox) + Math.abs(a.y - oy)));
+    }
+    return [st.rooms.find((r) => r.name === target)].filter(Boolean);
+  }
+
+  function setupPlaceTile(st, tile, floor, rand) {
+    const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : (floor === 'basement' ? 6 : 5));
+    const spot = anchor ? findFreeCell(st, floor, anchor.x, anchor.y) : null;
+    if (!spot) return false;
+    st.rooms.push({
+      floor: floor, x: spot.x, y: spot.y, name: tile.name,
+      doors: tile.doors || 'NSEW', symbol: tile.symbol || null,
+      effect: tile.effect || null, special: tile.special || null,
+      link: tile.link || null, kind: 'normal', rot: 0, revealed: true, resolved: false
+    });
+    return true;
+  }
+
+  function setupEnsureSymbolTiles(st, h, symbol, target, rand, noEffect) {
+    const want = symbol === 'none' ? null : symbol;
+    const count = () => st.rooms.filter((r) => (r.symbol || null) === want &&
+      r.kind !== 'start' && r.kind !== 'landing' && r.kind !== 'grandStair').length;
+    let guard = 0;
+    while (count() < target) {
+      const idx = st.roomDeck.findIndex((t) => (t.symbol || null) === want);
+      if (idx < 0) break;
+      const tile = st.roomDeck.splice(idx, 1)[0];
+      const floors = ['ground', 'upper', 'basement'];
+      let placed = false;
+      for (let k = 0; k < floors.length && !placed; k++) {
+        placed = setupPlaceTile(st, tile, floors[(guard + k) % 3], rand);
+      }
+      if (!placed) { st.roomDeck.push(tile); break; }
+      if (noEffect !== false) {
+        const room = roomByName(st, tile.name);
+        if (room) room.resolved = true;
+      }
+      guard += 1;
+      if (guard > 12) break;
+    }
+  }
+
+  function setupFindItem(st, ref) {
+    if (!ref) return null;
+    for (const kind of ['items', 'omens']) {
+      let at = (st.decks[kind] || []).findIndex((it) => it.key === ref || it.name === ref);
+      if (at >= 0) return st.decks[kind].splice(at, 1)[0] || null;
+    }
+    for (const p of st.players) {
+      const at = (p.items || []).findIndex((it) => it.key === ref || it.name === ref);
+      if (at >= 0) return p.items.splice(at, 1)[0];
+    }
+    return null;
+  }
+
+  function runScenarioSetup(st, sc, rand) {
+    const setup = sc.setup || {};
+    const h = st.haunt;
+    if (!h) return;
+    if (setup.mode !== 'scripted') {
+      pushLog(st, '剧本 Setup 未配置执行器，按旧逻辑摆放');
+      return;
+    }
+    h.setup = {
+      mode: 'scripted', summary: setup.summary || '', numberTokens: {},
+      diseaseTokens: {}, dna: {}, flags: {}, pendingTokens: {}, pendingTokenTargets: {}
+    };
+    if (setup.numberTrackByPlayers) {
+      h.numberTrack = Number(setup.numberTrackByPlayers[String(st.players.length)]);
+    } else if (setup.numberTrack !== undefined) {
+      h.numberTrack = Number(setup.numberTrack);
+    }
+
+    const monsters = (sc.monsters || []).slice();
+    if (sc.monster) monsters.push(sc.monster);
+    const monsterDef = (ref) => {
+      if (!ref) return null;
+      if (typeof ref === 'object') return ref;
+      return monsters.find((m) => m.key === ref || m.name === ref) || sc.monster || null;
+    };
+    const playerList = () => st.players.map((p, i) => ({ p, i }));
+    const valueByPlayers = (obj, fallback) => {
+      if (obj === undefined || obj === null) return fallback;
+      if (typeof obj === 'number') return obj;
+      const v = obj[String(st.players.length)];
+      return v === undefined ? fallback : v;
+    };
+    const addTokenTo = (token, rooms, count, tokenRoomTarget) => {
+      if (!count) return;
+      if (!rooms || !rooms.length) {
+        h.setup.pendingTokens[token] = (h.setup.pendingTokens[token] || 0) + Number(count || 0);
+        h.setup.pendingTokenTargets[token] = tokenRoomTarget;
+        pushLog(st, '标记「' + token + '」等待放到之后发现的板块 ×' + count);
+        return;
+      }
+      for (let k = 0; k < count; k++) addToken(st, token, rooms[k % rooms.length], 1);
+    };
+
+    (setup.ops || []).forEach((op) => {
+      if (!op || !op.type) return;
+      if (op.type === 'numberTrack') h.numberTrack = valueByPlayers(op.byPlayers, op.value);
+      else if (op.type === 'assignNumbers') {
+        const order = playerList().map((x) => x.i);
+        for (let k = order.length - 1; k > 0; k--) {
+          const j = Math.floor(rand() * (k + 1));
+          const tmp = order[k]; order[k] = order[j]; order[j] = tmp;
+        }
+        order.forEach((idx, k) => { h.setup.numberTokens[st.players[idx].id] = k + 1; });
+        if (h.traitor >= 0 && h.setup.numberTokens[st.players[h.traitor].id] !== undefined) {
+          const old = h.setup.numberTokens[st.players[h.traitor].id];
+          const one = Object.keys(h.setup.numberTokens).find((pid) => h.setup.numberTokens[pid] === 1);
+          if (one) h.setup.numberTokens[one] = old;
+          h.setup.numberTokens[st.players[h.traitor].id] = 1;
+        }
+        pushLog(st, '按人数发放 1–' + order.length + ' 号数字标记，1 号是隐藏叛徒');
+      } else if (op.type === 'assignDisease') {
+        playerList().forEach(({ p }) => { p.disease = 3; h.setup.diseaseTokens[p.id] = 3; });
+        h.setup.flags.diseaseOnes = st.players.length >= 6 ? 2 : 1;
+        pushLog(st, '每名玩家拿 3 个疾病标记；本局有 ' + h.setup.flags.diseaseOnes + ' 个「1」');
+      } else if (op.type === 'placeMonster') {
+        const def = monsterDef(op.monster);
+        if (!def) return;
+        const rooms = setupRoomPool(st, h, op.room || 'random');
+        let count = valueByPlayers(op.countByPlayers, op.count === undefined ? (def.counts ? def.counts[String(st.players.length)] : def.count || 1) : op.count);
+        if (op.perHero) count = Math.max(count, st.players.length) + st.players.length;
+        const pool = rooms.length ? rooms : st.rooms.filter((r) => r.kind !== 'start');
+        for (let k = 0; k < Number(count || 0); k++) {
+          const room = pool[k % pool.length];
+          spawnOneMonster(st, def, rand, room && room.name);
+        }
+      } else if (op.type === 'placeMonsterPerHero') {
+        const def = monsterDef(op.monster);
+        if (!def) return;
+        setupRoomPool(st, h, 'heroTiles').forEach((room) => spawnOneMonster(st, def, rand, room.name));
+      } else if (op.type === 'placeToken') {
+        const rooms = setupRoomPool(st, h, op.room || 'random');
+        const count = valueByPlayers(op.countByPlayers, op.count || 1);
+        addTokenTo(op.token, rooms, count, op.room || 'random');
+      } else if (op.type === 'placeTokenPerHero') {
+        const rooms = setupRoomPool(st, h, 'heroTiles');
+        addTokenTo(op.token, rooms, op.perHeroCount || 1, 'heroTiles');
+      } else if (op.type === 'placeSpecialRoom') {
+        placeSpecialRoom(st, op.room, op.floor || 'basement', rand);
+      } else if (op.type === 'ensureSymbolTiles') {
+        setupEnsureSymbolTiles(st, h, op.symbol || 'event', valueByPlayers(op.countByPlayers, op.count || 3), rand, op.noEffect);
+      } else if (op.type === 'ensureTiles') {
+        setupEnsureSymbolTiles(st, h, 'none', valueByPlayers(op.countByPlayers, op.count || 3), rand, true);
+      } else if (op.type === 'movePlayers') {
+        const room = roomByName(st, op.room);
+        if (!room) return;
+        const list = (op.who === 'traitor') ? [h.traitor] : (op.who === 'revealer' ? [h.revealer] : st.players.map((p, i) => i));
+        list.forEach((i) => {
+          const p = st.players[i];
+          if (!p || p.dead) return;
+          p.floor = room.floor; p.x = room.x; p.y = room.y;
+        });
+      } else if (op.type === 'flipRoom') {
+        const who = op.who || 'revealer';
+        const idx = who === 'traitor' ? h.traitor : h.revealer;
+        const room = setupPlayerRoom(st, idx);
+        if (room) {
+          room.flipped = true;
+          room.doors = 'NSEW';
+          room.symbol = null;
+          room.symbolHidden = true;
+        }
+        if (op.extraHeroIfThree && st.players.length === 3) {
+          const other = st.players.findIndex((p, i) => i !== idx && p.side === 'hero' && !p.dead);
+          const r2 = other >= 0 ? setupPlayerRoom(st, other) : null;
+          if (r2) {
+            r2.flipped = true;
+            r2.doors = 'NSEW';
+            r2.symbol = null;
+            r2.symbolHidden = true;
+          }
+        }
+      } else if (op.type === 'grantItem') {
+        const item = setupFindItem(st, op.item);
+        const idx = op.to === 'traitor' ? h.traitor : (op.to === 'revealer' ? h.revealer : 0);
+        if (item && idx >= 0) grantItem(st, idx, item);
+      } else if (op.type === 'grantTrait') {
+        const idx = op.to === 'traitor' ? h.traitor : h.revealer;
+        if (idx >= 0) gainTrait(st, idx, op.trait, valueByPlayers(op.amountByPlayers, op.amount || 1), '剧本 Setup');
+      } else if (op.type === 'healTraitor') {
+        if (h.traitor >= 0) TRAITS.forEach((t) => healTrait(st, h.traitor, t.key, 99));
+      } else if (op.type === 'transferOmens') {
+        if (h.traitor < 0 || h.revealer < 0) return;
+        const omens = (st.players[h.traitor].items || []).filter((it) => it.omen);
+        st.players[h.traitor].items = (st.players[h.traitor].items || []).filter((it) => !it.omen);
+        st.players[h.revealer].items = (st.players[h.revealer].items || []).concat(omens);
+      } else if (op.type === 'clearItems') {
+        st.players.forEach((p) => { p.items = []; });
+      } else if (op.type === 'leaveItems') {
+        const keep = valueByPlayers(op.countByPlayers, op.count || 0);
+        const all = (st.decks.items || []).concat(st.decks.omens || []);
+        st.players.forEach((p) => { p.items = []; });
+        for (let k = 0; k < keep && all.length; k++) {
+          const it = all.shift();
+          st.players[k % st.players.length].items.push(it);
+        }
+        st.decks.items = all.filter((it) => !it.omen);
+        st.decks.omens = all.filter((it) => it.omen);
+      } else if (op.type === 'drawWeapon') {
+        const idx = op.to === 'traitor' ? h.traitor : h.revealer;
+        let found = null;
+        for (let k = 0; k < 10; k++) {
+          const it = drawCard(st, 'items', rand);
+          if (it && it.weapon) { found = it; break; }
+        }
+        if (found && idx >= 0) grantItem(st, idx, found);
+      } else if (op.type === 'removeTiles') {
+        const count = valueByPlayers(op.countByPlayers, op.count || 0);
+        for (let k = 0; k < count; k++) st.roomDeck.shift();
+        pushLog(st, '按剧本从板块堆移走 ' + count + ' 块板块');
+      } else if (op.type === 'removeBasement') {
+        const removed = st.rooms.filter((r) => r.floor === 'basement' && r.kind !== 'landing' && r.kind !== 'start');
+        st.rooms = st.rooms.filter((r) => removed.indexOf(r) < 0);
+        removed.forEach((r) => st.roomDeck.push({ name: r.name, doors: r.doors, symbol: r.symbol, effect: r.effect, special: r.special, link: r.link }));
+        pushLog(st, '除底层平台外的地下室板块已洗回牌堆');
+      } else if (op.type === 'removeEvents') {
+        st.decks.events = [];
+        h.setup.flags.noEvents = true;
+      } else if (op.type === 'assignDNA') {
+        st.players.forEach((p) => { p.dna = true; h.setup.dna[p.id] = 1; });
+      } else if (op.type === 'assignBlood') {
+        st.players.filter((p) => p.side === 'hero').forEach((p) => { p.blood = 1; });
+      } else if (op.type === 'trapHeroes') {
+        st.players.filter((p) => p.side === 'hero' && !p.dead).forEach((p) => { p.trapped = true; });
+      } else if (op.type === 'custom') {
+        h.setup.flags[op.key] = op.value === undefined ? true : op.value;
+      }
+    });
+    if (h.numberTrack !== undefined && h.numberTrack !== null) pushLog(st, '数字轨道设为 ' + h.numberTrack);
+    pushLog(st, '剧本 Setup 已执行：' + (setup.summary || sc.name));
   }
 
   function swapBodies(st, a, b) {
@@ -1210,6 +1513,11 @@ window.CabinEngine = (function () {
     const h = st.haunt || {};
     const p = st.players[i];
     if (ops.progress && st.haunt) st.haunt.progress += ops.progress;
+    if (ops.numberTrack) {
+      const cur = Number(st.haunt.numberTrack || 0);
+      st.haunt.numberTrack = Math.max(0, cur + Number(ops.numberTrack));
+      pushLog(st, '数字轨道变为 ' + st.haunt.numberTrack);
+    }
     if (ops.token) addToken(st, ops.token, room, ops.count || 1);
     if (ops.gain) gainTrait(st, i, ops.gain.trait, ops.gain.amount, '剧本');
     if (ops.lose) loseTraitDirect(st, i, ops.lose.trait, ops.lose.amount, '剧本');
@@ -1328,6 +1636,48 @@ window.CabinEngine = (function () {
       }
       pushLog(st, '驱散了 ' + count + ' 个威胁（累计 ' + (st.haunt.monsterBanish || 0) + '）');
     }
+    if (ops.destroyItem) {
+      const all = (p.items || []).slice();
+      const at = all.findIndex((it) => it.name === ops.destroyItem || it.key === ops.destroyItem);
+      if (at >= 0) {
+        const item = all[at];
+        p.items.splice(at, 1);
+        st.haunt.destroyedItems = st.haunt.destroyedItems || [];
+        st.haunt.destroyedItems.push(item.name || item.key);
+        pushLog(st, p.name + ' 摧毁了「' + (item.name || item.key) + '」');
+      } else {
+        pushLog(st, p.name + ' 没有可摧毁的「' + ops.destroyItem + '」');
+      }
+    }
+    if (ops.teleportLanding) {
+      const landing = st.rooms.find((r) => r.kind === 'landing');
+      if (landing) {
+        p.floor = landing.floor; p.x = landing.x; p.y = landing.y;
+        pushLog(st, p.name + ' 被送回「' + landing.name + '」');
+      }
+    }
+    if (ops.collectDNA) {
+      const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.floor === p.floor && q.x === p.x && q.y === p.y);
+      if (hero) {
+        st.haunt.dnaCollected = st.haunt.dnaCollected || {};
+        st.haunt.dnaCollected[hero.id] = true;
+        hero.dna = false;
+        addToken(st, 'DNA', room, 1);
+        pushLog(st, p.name + ' 从 ' + hero.name + ' 身上采集了 DNA');
+      } else {
+        pushLog(st, '同房间没有可采集 DNA 的英雄');
+      }
+    }
+    if (ops.convertHero) {
+      const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.floor === p.floor && q.x === p.x && q.y === p.y);
+      if (hero) {
+        hero.side = 'traitor';
+        hero.hairMonster = true;
+        pushLog(st, hero.name + ' 被毛发怪吞掉，变成毛发怪');
+      } else {
+        pushLog(st, '同房间没有可转化的英雄');
+      }
+    }
     if (ops.win) win(st, ops.win, ops.winText || (ops.win === 'heroes' ? '剧本目标达成，英雄获胜' : '叛徒达成目标'));
   }
 
@@ -1358,6 +1708,12 @@ window.CabinEngine = (function () {
     }
     if (def.where === 'floors' && def.floors && def.floors.indexOf(p.floor) < 0) {
       return { ok: false, msg: '这个楼层不能做' };
+    }
+    if (def.requireToken && (!room || countTokens(st, def.requireToken, { room }) < 1)) {
+      return { ok: false, msg: '这个房间没有「' + def.requireToken + '」' };
+    }
+    if (def.requireItem && !(p.items || []).some((it) => it.name === def.requireItem || it.key === def.requireItem)) {
+      return { ok: false, msg: '你必须持有「' + def.requireItem + '」' };
     }
     const r = testRoll(st, i, def.trait || 'known', 0, rand);
     st.lastRoll = { label: '剧本行动 · ' + def.name, faces: r.faces, total: r.total };
@@ -1411,6 +1767,9 @@ window.CabinEngine = (function () {
       return st.players.filter((p) => !p.dead).every((p) => p.side === 'traitor');
     }
     if (g.type === 'tokens') {
+      if (g.perHero && g.token === 'DNA') {
+        return heroes.every((p) => !!(h.dnaCollected && h.dnaCollected[p.id]));
+      }
       const need = g.perHero ? sideAlive(st, 'hero') : (g.need || 1);
       return countTokens(st, g.token, g) >= need;
     }
@@ -1605,6 +1964,7 @@ window.CabinEngine = (function () {
       }
     }
     st.rooms.push(room);
+    attachSetupPendingTokens(st, room);
     if (room.special === 'collapsed') room.collapseRolled = true;
     me.x = pt.x; me.y = pt.y; me.floor = pt.floor;
     st.moves = Math.max(0, st.moves - (pt.cost || 1));
@@ -1689,7 +2049,11 @@ window.CabinEngine = (function () {
   }
 
   function linkedTargets(st, room) {
-    if (!room || !room.link) return [];
+    if (!room) return [];
+    if (countTokens(st, '密道', { room }) > 0) {
+      return st.rooms.filter((r) => r !== room && countTokens(st, '密道', { room: r }) > 0);
+    }
+    if (!room.link) return [];
     return st.rooms.filter((r) => r.name === room.link);
   }
 
@@ -1709,20 +2073,24 @@ window.CabinEngine = (function () {
     return { ok: true, state: st };
   }
 
+  function stairNeighbors(st, name, special) {
+    const links = [];
+    if (name === '主楼梯') links.push('上层平台');
+    else if (name === '上层平台') links.push('主楼梯');
+    else if (name === '底层平台') links.push('门厅');
+    else if (name === '门厅') links.push('底层平台', '主楼梯');
+    if (special === 'basementStairs') links.push('门厅');
+    return links.map((n) => roomByName(st, n)).filter(Boolean);
+  }
+
   function stairMove(st, i) {
     const me = st.players[i];
     const here = roomAt(st, me.floor, me.x, me.y);
     if (!here) return { ok: false, msg: '不在这里' };
     if (me.trapped) return { ok: false, msg: '带着「被困」标记，先摆脱它才能移动' };
     if (st.moves <= 0 || st.moveLocked) return { ok: false, msg: '没有移动点' };
-    let targetName = '';
-    if (here.name === '主楼梯') targetName = '上层平台';
-    else if (here.name === '上层平台') targetName = '主楼梯';
-    else if (here.special === 'basementStairs') targetName = '门厅';
-    else if (here.name === '门厅') targetName = '楼梯间';
-    if (!targetName) return { ok: false, msg: '这里没有楼梯' };
-    const target = roomByName(st, targetName);
-    if (!target) return { ok: false, msg: '楼梯另一端还没出现' };
+    const target = stairNeighbors(st, here.name, here.special)[0];
+    if (!target) return { ok: false, msg: '这里没有楼梯' };
     me.floor = target.floor; me.x = target.x; me.y = target.y;
     st.moves = Math.max(0, st.moves - 1);
     pushLog(st, me.name + ' 沿楼梯到「' + target.name + '」');
@@ -1893,8 +2261,6 @@ window.CabinEngine = (function () {
     return null;
   }
 
-  const CABIN_LANDINGS = ['底层平台', '上层平台', '主楼梯'];
-
   function findMonsterPath(st, m, target) {
     const start = roomAt(st, m.floor, m.x, m.y);
     const goal = roomAt(st, target.floor, target.x, target.y);
@@ -1918,10 +2284,8 @@ window.CabinEngine = (function () {
         if (nr.floor === goal.floor && nx === goal.x && ny === goal.y) return path;
         q.push({ r: nr, path: path });
       }
-      if (CABIN_LANDINGS.indexOf(cur.r.name) >= 0) {
-        for (const name of CABIN_LANDINGS) {
-          const land = roomByName(st, name);
-          if (!land || land === cur.r) continue;
+      if (stairNeighbors(st, cur.r.name, cur.r.special).length) {
+        for (const land of stairNeighbors(st, cur.r.name, cur.r.special)) {
           const key = land.floor + '|' + land.x + ',' + land.y;
           if (seen[key]) continue;
           seen[key] = true;
@@ -2434,7 +2798,8 @@ window.CabinEngine = (function () {
       healTrait: healTrait, firstByBirthday: firstByBirthday, chooseTraitor: chooseTraitor,
       setTrack: setTrack, moveTrack: moveTrack, swapBodies: swapBodies, traitVal: traitVal,
       linkedTargets: linkedTargets, moveToLinkedRoom: moveToLinkedRoom,
-      roomEffect: roomEffect, resolveRoomSymbol: resolveRoomSymbol
+      roomEffect: roomEffect, resolveRoomSymbol: resolveRoomSymbol,
+      applyEffect: applyEffect, attachSetupPendingTokens: attachSetupPendingTokens
     }
   };
 })();

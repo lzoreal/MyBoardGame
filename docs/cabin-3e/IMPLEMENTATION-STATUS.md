@@ -7,10 +7,10 @@
 
 第三版迁移已经从“只把规则写进 JSON”推进到“规则有运行入口、内容有硬合同、关键路径有自动化测试”。
 
-- 6 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）
+- 8 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，928 条断言）+ `cabin-rule-fixes.test.js`（15 项）
 - 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号，room `X2Z2F`）
 - 线上权限复测：身份接管被拒、错误令牌读 secret 被拒、大厅成员不能直写 playing、playing 中非当前行动者被拒
-- 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**
+- 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**，Setup 仍为 manual **0**，剧本缺怪物定义 **0**
 
 ### 本轮 P0 私有联机修复
 
@@ -23,6 +23,10 @@
 - 隐藏状态公开 `haunt.sideCounts`（只给聚合人数，不给具体玩家阵营），`checkWin` / `killAll` 使用服务端聚合人数
 - `#12 援手` 自由混战改为“持有奇怪护符的最后一人获胜”，全员倒下不再误判英雄胜
 - 剧本 12 两只巨魔之手分别摆到入口大厅与底层平台，不再是 manual 随机集中
+- 50 个剧本全部改为 `setup.mode = "scripted"`，由 `runScenarioSetup` 实际执行数字轨道、数字/疾病/DNA/血标记、怪物摆放、特殊房间、板块补足/移除、玩家位置、翻面、物品与剧本标志
+- `#2` 目标改为“摧毁骨戒或杀死叛徒”，并新增 `destroy_ring` 行动；`#14` 改为数字轨道归零并新增 `cast_spell`；`#19` 增加摧毁录像带与入口大厅逃生；`#37` 增加关闭机器人、逐英雄采集 DNA；`#46` 增加把同房间英雄变成毛发怪
+- 事件效果现在执行 `token` / `ops.token`，祝福、密道、障碍标记会真正落盘；密道标记参与房间连通
+- 2 人局不再被 `createInitial` 自动补第三名虚拟玩家；桌面棋盘按 `100cqh - 44px` 计算，6 人局底栏不再遮挡最底排房间
 
 ### 仍然存在的联机安全边界
 
@@ -39,8 +43,8 @@
 - 删除构建器与运行时“缺 traitorGoal 就默认杀光英雄”的兜底
 - 50 个剧本全部写入 `factions`
 - 42 个有叛徒/隐藏叛徒的剧本写入显式 `traitorGoal`；8 个无叛徒/自由混战为 `null`
-- 50 个剧本全部写入 `setup` 合同（除 #12 为 `scripted` 外，其余 49 个为 `manual` + 官方 OCR Setup 原文）
-- 构建器拒绝缺 `setup`、缺 factions、非法 goal 的剧本
+- 50 个剧本全部写入 `setup` 合同，且全部为 `scripted` + 可执行 `setup.ops`；官方 Setup 原文保留用于展示，执行以 ops 为准
+- 构建器拒绝缺 `setup`、缺 factions、非法 goal，以及 scripted 缺 `ops` / op 类型或必填字段非法的剧本
 
 ### 2. 属性轨道
 
@@ -103,9 +107,9 @@
 
 以下缺口没有在本轮关闭，不能把当前状态称为“第三版完整迁移”：
 
-1. **剧本 Setup 仍是手动模式**  
-   50 个剧本都有 `setup` 合同和官方原文，但 49 个的 `mode` 仍是 `manual`，怪物只先集中在闹鬼房间，没有按每个剧本的官方坐标自动摆放。
-   下一步需要逐条核实 50 份 Setup，写入 `placements`，再把 `mode` 改为 `scripted`。
+1. **Setup 已自动执行，语义仍需真人逐剧本确认**
+   50 个剧本现在都是 `scripted`，`runScenarioSetup` 会在闹鬼开始时执行 `setup.ops`，Setup 回归覆盖 3/4/5/6 人局共 928 条断言。
+   如果 Setup 指定的板块尚未翻出，标记会进入 `pendingTokens`，并在该板块接入地图时自动补放；仍需真人按官方剧本卡确认“标记放在哪个板块/哪一层”的语义细节。
 
 2. **部分剧本目标仍是声明式**  
    `goalDone` 已支持 `killAll / anyOf / allOf / possessItem / convertAll / destroyItem / trackZero / numberTrack / tokens perHero`；`custom` 仍只有 `haunt.custom[key]` 状态入口，没有完整剧本语义。

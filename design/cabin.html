@@ -20,7 +20,7 @@
   #roomPill, #turnPill { background: #f3e7d0 !important; color: #2a1e14 !important; font-weight: 800; }
   .topbar .pill.round { background: #f3e7d0; color: #2a1e14; }
   .topbar .icon-btn { background: #f3e7d0; color: #2a1e14; border: 1px solid #d8c3a1; }
-  .cabinBoard { aspect-ratio: 9 / 7; width: min(100%, calc((100vh - 300px) * 9 / 7)); }
+  .cabinBoard { aspect-ratio: 9 / 7; width: min(100%, calc((100dvh - 350px) * 9 / 7)); }
   .cabinBoard svg { filter: drop-shadow(0 18px 32px rgba(0,0,0,.55)); }
   .cabinSeats .seat { background: rgba(243,231,208,.94); border-color: #f8eeda; }
   .cabinSeats .seat .tag { background: #4b6a52; }
@@ -357,8 +357,8 @@
 <script src="../js/config.js?v=12"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js?v=19"></script>
-<script src="../js/games/cabin-packs.js?v=20261119b"></script>
-<script src="../js/games/cabin.js?v=20261119b"></script>
+<script src="../js/games/cabin-packs.js?v=20261119d"></script>
+<script src="../js/games/cabin.js?v=20261119d"></script>
 <script src="games/shell.js?v=19"></script>
 <script>
 (function () {
@@ -687,7 +687,7 @@
     svg.setAttribute('height', '100%');
     if (board) {
       board.style.aspectRatio = (W * CELL) + ' / ' + totalH;
-      board.style.width = 'min(100%, calc(100cqh * ' + ((W * CELL) / totalH) + '))';
+      board.style.width = 'min(100%, calc((100cqh - 44px) * ' + ((W * CELL) / totalH) + '))';
     }
 
     el('rect', { x: 0, y: 0, width: W * CELL, height: totalH, rx: 24, fill: '#2b2119' }, svg);
@@ -813,6 +813,7 @@
     const prog = h.heroGoal.type === 'hunt' ? (h.monsterBanish || 0) : (h.progress || 0);
     bar.innerHTML = '<b>' + esc(h.name) + '</b> · 叛徒 ' + esc(traitor ? traitor.name : '?') +
       ' · 英雄：' + esc(h.heroGoalText) + '（' + prog + '/' + (h.heroGoal.need || 0) + '）' +
+      (h.numberTrack !== null && h.numberTrack !== undefined ? ' · 轨道 ' + h.numberTrack : '') +
       ' · 第 ' + (h.round || 0) + ' 轮 · 点开看双方目标';
     bar.title = '查看剧本卡、故事与双方目标';
     bar.style.cursor = 'pointer';
@@ -858,6 +859,13 @@
       esc(h.card ? '剧本卡「' + h.card + '」 + ' : '') +
       esc(h.omen ? '预兆「' + h.omen + '」' : '事件直接触发') +
       (h.room ? ' · 房间「' + esc(h.room) + '」' : '') + '</span></div>';
+    if (h.setup && h.setup.mode === 'scripted') {
+      const pending = Object.keys(h.setup.pendingTokens || {})
+        .filter((k) => h.setup.pendingTokens[k]).map((k) => k + '×' + h.setup.pendingTokens[k]).join('、');
+      html += '<div class="goalBox"><b>开局设置已执行</b><br>' + esc(h.setup.summary || '按剧本初始化') +
+        (h.numberTrack !== null && h.numberTrack !== undefined ? '<br>数字轨道：<b>' + h.numberTrack + '</b>' : '') +
+        (pending ? '<br>待放到新板块的标记：' + esc(pending) : '') + '</div>';
+    }
     if (h.monster) {
       const tags = [];
       if (h.monster.noAttack) tags.push('不可被攻击');

@@ -109,7 +109,7 @@ function validateGoal(goal, label, file) {
   }
   if (goal.type === 'escape') {
     requireString(goal.room, label + '.room', file);
-    integer(goal.need, label + '.need', file, 1, 20);
+    integer(goal.need, label + '.need', file, 0, 20);
   }
   if (goal.type === 'tokens') {
     requireString(goal.token, label + '.token', file, 20);
@@ -247,6 +247,21 @@ function validateScenario(s, file, seen) {
   if (!s.setup || typeof s.setup !== 'object') fail(file, '剧本缺少 setup 合同');
   if (s.setup.mode !== 'manual' && s.setup.mode !== 'scripted') fail(file, 'setup.mode 必须是 manual 或 scripted');
   if (s.setup.mode === 'manual' && !s.setup.heroText && !s.setup.traitorText) fail(file, '手动 setup 缺少官方步骤文本');
+  if (s.setup.mode === 'scripted') {
+    if (!Array.isArray(s.setup.ops)) fail(file, 'scripted setup 缺少 setup.ops');
+    const OPS = ['numberTrack', 'assignNumbers', 'assignDisease', 'placeMonster', 'placeMonsterPerHero',
+      'placeToken', 'placeTokenPerHero', 'placeSpecialRoom', 'ensureSymbolTiles', 'ensureTiles',
+      'movePlayers', 'flipRoom', 'grantItem', 'grantTrait', 'healTraitor', 'transferOmens',
+      'clearItems', 'leaveItems', 'drawWeapon', 'removeTiles', 'removeBasement', 'removeEvents',
+      'assignDNA', 'assignBlood', 'trapHeroes', 'custom'];
+    s.setup.ops.forEach((op, i) => {
+      if (!op || typeof op !== 'object') fail(file, 'setup.ops[' + i + '] 必须是对象');
+      if (OPS.indexOf(op.type) < 0) fail(file, 'setup.ops[' + i + '] 类型不支持：' + op.type);
+      if (op.type === 'placeMonster' && !op.monster) fail(file, 'setup.ops[' + i + '] 缺少 monster');
+      if (op.type === 'placeToken' && !op.token) fail(file, 'setup.ops[' + i + '] 缺少 token');
+      if (op.type === 'placeSpecialRoom' && !op.room) fail(file, 'setup.ops[' + i + '] 缺少 room');
+    });
+  }
   if (s.setup.placements !== undefined) {
     if (!Array.isArray(s.setup.placements)) fail(file, 'setup.placements 必须是数组');
     s.setup.placements.forEach((p, i) => {
