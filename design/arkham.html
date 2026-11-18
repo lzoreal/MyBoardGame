@@ -47,7 +47,8 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .track{flex:1;min-width:200px;background:rgba(23,20,17,.92);border:1px solid var(--line);
   border-radius:12px;padding:9px 12px}
 .track .lbl{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.12em;color:var(--dim)}
-.track .lbl b{color:var(--gold2);letter-spacing:0}
+.track .lbl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track .lbl b{color:var(--gold2);letter-spacing:0;white-space:nowrap;margin-left:6px}
 .bar{height:7px;border-radius:6px;background:#2a241d;margin-top:7px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:6px;transition:width .35s ease}
 .bar.gold i{background:linear-gradient(90deg,#8a6a33,var(--gold2))}
@@ -176,7 +177,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
 
 /* 开局 / 结算 */
 .pickGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-@media(max-width:520px){.pickGrid{grid-template-columns:1fr}}
+.chapterPick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px}
+.chap{border:1px solid rgba(42,33,24,.25);border-radius:12px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.28);transition:background .18s ease,border-color .18s ease}
+.chap .cn{display:block;font-family:Georgia,"Songti SC",serif;font-size:14px;color:#2a2118}
+.chap .cs{display:block;margin-top:3px;font-size:11px;color:#8b7960}
+.chap.sel{border-color:#7a2f27;background:rgba(255,255,255,.6);box-shadow:0 0 0 2px rgba(122,47,39,.18)}
+.chap:hover{background:rgba(255,255,255,.5)}
+@media(max-width:520px){.pickGrid{grid-template-columns:1fr}.chapterPick{grid-template-columns:1fr}}
 .pick{border:1px solid rgba(42,33,24,.28);border-radius:12px;padding:11px;text-align:left;background:rgba(255,255,255,.32)}
 .pick:hover{border-color:#7a5f36;background:rgba(255,255,255,.5)}
 .pick.sel{border-color:#7a2f27;box-shadow:0 0 0 2px rgba(122,47,39,.22);background:rgba(255,255,255,.55)}
@@ -184,7 +191,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .pick .pr{font-size:10.5px;color:#6a5740;letter-spacing:.12em}
 .pick .ps{font-size:11px;color:#4a3d2b;margin-top:5px;line-height:1.55}
 .endBig{font-family:Georgia,"Songti SC",serif;font-size:30px;letter-spacing:.16em;text-align:center;margin:6px 0 2px}
-.endBig.win{color:#2f6b4f}.endBig.lose{color:#8e2e25}
+.endBig.win{color:#2f6b4f}.endBig.lose{color:#8e2e25}.endBig.resign{color:#9a6a1f}
 .endText{text-align:center;font-size:13px;line-height:1.9;color:#4a3d2b}
 .campaign{margin-top:12px;padding:10px;border-radius:10px;border:1px dashed rgba(42,33,24,.3);font-size:11.5px;color:#5b4a34}
 
@@ -212,7 +219,9 @@ button:disabled{cursor:not-allowed;opacity:.42}
   .loc .meta{font-size:9.5px}
   .mapTop{inset:8px 8px auto;gap:6px}
   .track{padding:7px 9px;min-width:0}
-  .track .lbl{font-size:10px}
+  .track .lbl{flex-direction:column;align-items:flex-start;gap:2px;letter-spacing:.06em;font-size:10px}
+  .track .lbl span{white-space:normal;overflow:visible;text-overflow:clip}
+  .track .lbl b{margin-left:0;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -220,9 +229,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
 <body>
 <header class="topbar">
   <button class="iconBtn" id="btnBack" title="返回大厅">←</button>
-  <div class="titleWrap"><h1>诡镇奇谈</h1><p>第一章 · 集结号</p></div>
+  <div class="titleWrap"><h1>诡镇奇谈</h1><p id="gSub">第一章 · 集结号</p></div>
   <span class="chip" id="chipRound">第 <b>1</b> 回合</span>
-  <button class="iconBtn" id="btnRestart" title="重开本章">↻</button>`n  <button class="iconBtn" id="btnRules" title="规则">?</button>
+  <button class="iconBtn" id="btnRestart" title="重开本章">↻</button>
+  <button class="iconBtn" id="btnRules" title="规则">?</button>
   <button class="iconBtn" id="btnLog" title="日志">≡</button>
 </header>
 
@@ -252,6 +262,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <button class="actBtn" id="btnResource">拿资源</button>
         <button class="actBtn" id="btnSkill">查看检定</button>
         <button class="actBtn end" id="btnEnd">结束回合 · 进入敌影</button>
+        <button class="actBtn" id="btnResign" style="display:none;grid-column:1/-1">撤退 · 结束本章</button>
       </div>
       <div class="logBox" id="logBox"></div>
     </section>
@@ -270,6 +281,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
   const STORE = 'arkham:campaign';
   let state = null;
   let picked = 'detective';
+  let pickedChapter = 'gathering';
   let sug = null;
   let seenTest = '';
   let seenEnc = '';
@@ -277,7 +289,6 @@ button:disabled{cursor:not-allowed;opacity:.42}
   let started = false;
 
   const STAT_LABEL = { will: '意志', int: '智力', combat: '战力', agi: '敏捷' };
-  const ACT_NAME = ['', '第一幕 · 屋子里的低语', '第二幕 · 地下室的门', '第三幕 · 黎明之前'];
 
   function toast(msg){
     const t = $('#toast'); t.textContent = msg; t.classList.add('on');
@@ -299,14 +310,33 @@ button:disabled{cursor:not-allowed;opacity:.42}
   /* ---------------- 开局 ---------------- */
   function showStart(){
     const invs = E.INVESTIGATORS;
+    const sc = E.SCENARIOS[pickedChapter] || E.SCENARIOS.gathering;
+    let camp = null;
+    try { camp = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { camp = null; }
+    if (!camp) camp = { xp: 0, trauma: 0, chapters: [] };
+    const done = (camp.chapters || []).indexOf(sc.id) >= 0;
+    const how = sc.id === 'midnight'
+      ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。五名邪教徒分散在城区，解决其中 3 名就会逼出仪式主持者；在南教堂击败他，才能赶在午夜前结束仪式。撑不住时可以撤退，但仪式会继续。'
+      : '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。';
     openSheet(`
       <div class="sheetHead">
-        <div><h2>集结号</h2><p>第一章 · 单人调查</p></div>
+        <div><h2>${esc(sc.name)}</h2><p>${esc(sc.chapter)} · 单人调查</p></div>
         <button class="x" data-close="1">✕</button>
       </div>
       <div class="sheetBody">
-        <p>雨夜，你站在失踪屋主的房门前。书房里的笔记只写了半句话：<b>“他们在地下室喂养它。”</b></p>
-        <p>选择一名调查员，进入这栋房子。你只有一晚上的时间。</p>
+        <div class="chapterPick">
+          ${Object.keys(E.SCENARIOS).map((id) => {
+            const s = E.SCENARIOS[id];
+            const ok = (camp.chapters || []).indexOf(id) >= 0;
+            const firstDone = (camp.chapters || []).indexOf('gathering') >= 0;
+            return `<button class="chap ${id === pickedChapter ? 'sel' : ''}" data-ch="${id}">
+              <span class="cn">${esc(s.chapter)} · ${esc(s.name)}</span>
+              <span class="cs">${ok ? '已完成' : (id === 'gathering' ? '从这里开始' : (firstDone ? '可继续' : '推荐先玩第一章'))}</span>
+            </button>`;
+          }).join('')}
+        </div>
+        <p>${esc(sc.intro)}</p>
+        <p style="color:#7a6a52;font-size:12.5px">战役记录：经验 <b>${camp.xp}</b> · 创伤 <b>${camp.trauma}</b> · 已完成 <b>${(camp.chapters || []).length}</b> 章${done ? ' · 本章已通关，可再挑战' : ''}</p>
         <h3>选择调查员</h3>
         <div class="pickGrid">
           ${invs.map((x) => `
@@ -317,9 +347,12 @@ button:disabled{cursor:not-allowed;opacity:.42}
             </button>`).join('')}
         </div>
         <h3>这一章怎么玩</h3>
-        <p style="font-size:12.5px;color:#5b4a34">每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。</p>
-        <button class="sheetBtn" id="btnStart">进入屋子</button>
+        <p style="font-size:12.5px;color:#5b4a34">${esc(how)}</p>
+        <button class="sheetBtn" id="btnStart">${sc.id === 'midnight' ? '走上午夜街头' : '进入屋子'}</button>
       </div>`);
+    $('#sheet').querySelectorAll('[data-ch]').forEach((b) => {
+      b.onclick = () => { pickedChapter = b.dataset.ch; showStart(); };
+    });
     $('#sheet').querySelectorAll('[data-pick]').forEach((b) => {
       b.onclick = () => { picked = b.dataset.pick; showStart(); };
     });
@@ -327,10 +360,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
     $('#btnStart').onclick = () => {
       started = true;
       closeSheet();
-      state = E.createInitial([], Math.random, { investigator: picked });
+      state = E.createInitial([], Math.random, { investigator: picked, scenario: pickedChapter });
       seenTest = ''; seenEnc = ''; endShown = false;
       render();
-      toast('调查开始：' + state.inv.name + ' 进入了书房');
+      toast('调查开始：' + state.inv.name + ' 进入了' + state.locations[state.inv.location].name);
     };
   }
 
@@ -341,24 +374,34 @@ button:disabled{cursor:not-allowed;opacity:.42}
     if (!state) return;
     const inv = state.inv;
     $('#chipRound').innerHTML = '第 <b>' + state.round + '</b> 回合';
-    $('#actLabel').textContent = ACT_NAME[state.act.stage] || '密谋';
-    $('#agendaLabel').textContent = state.agenda.stage === 1 ? '议程 · 黑暗逼近' : '议程 · 房子醒了';
-    $('#actProg').textContent = inv.clues + ' / ' + state.act.clues;
-    $('#actBar').style.width = pct(inv.clues, state.act.clues) + '%';
-    const boss = state.enemies.find((e) => e.boss && e.health > 0);
+    $('#gSub').textContent = state.subtitle || '第一章 · 集结号';
+    const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
+    $('#actLabel').textContent = state.act.label || sc.act[0].label;
+    const ag = (state.agenda.stages || [])[state.agenda.stage - 1];
+    $('#agendaLabel').textContent = (ag && ag.label) || '议程';
+    const isMidnight = state.scenario === 'midnight';
     if (state.act.stage >= 2) {
-      $('#actLabel').textContent = ACT_NAME[2] || '密谋';
-      $('#actProg').textContent = boss ? '祭司 ' + Math.max(0, boss.health) + ' / ' + boss.maxHealth : '祭司已倒下';
+      const boss = state.enemies.find((e) => e.boss && e.health > 0);
+      $('#actProg').textContent = boss ? boss.name + ' ' + Math.max(0, boss.health) + ' / ' + boss.maxHealth : '主持者已倒下';
       $('#actBar').style.width = boss ? pct(boss.maxHealth - boss.health, boss.maxHealth) + '%' : '100%';
+    } else if (isMidnight) {
+      const need = state.act.cultists || 3;
+      const found = state.cultistsFound || 0;
+      $('#actProg').textContent = '邪教徒 ' + found + ' / ' + need;
+      $('#actBar').style.width = pct(found, need) + '%';
+    } else {
+      $('#actProg').textContent = inv.clues + ' / ' + state.act.clues;
+      $('#actBar').style.width = pct(inv.clues, state.act.clues) + '%';
     }
     $('#agendaProg').textContent = state.agenda.doom + ' / ' + state.agenda.max;
     $('#agendaBar').style.width = pct(state.agenda.doom, state.agenda.max) + '%';
     const btnAdv = $('#btnAdvance');
-    btnAdv.style.display = state.act.stage === 1 ? 'block' : 'none';
-    btnAdv.disabled = inv.clues < state.act.clues;
-    btnAdv.textContent = state.act.stage === 1
-      ? (inv.clues >= state.act.clues ? '线索够了，推进密谋' : '还需要 ' + (state.act.clues - inv.clues) + ' 个线索')
-      : '';
+    btnAdv.style.display = (state.act.stage === 1 && !isMidnight) ? 'block' : 'none';
+    if (!isMidnight) {
+      btnAdv.disabled = inv.clues < state.act.clues;
+      btnAdv.textContent = inv.clues >= state.act.clues ? '线索够了，推进密谋' : '还需要 ' + (state.act.clues - inv.clues) + ' 个线索';
+    }
+    $('#btnResign').style.display = (isMidnight && state.phase === 'investigation') ? 'block' : 'none';
 
     // 地图
     const map = $('#map');
@@ -500,27 +543,44 @@ button:disabled{cursor:not-allowed;opacity:.42}
     if (endShown) return;
     endShown = true;
     const r = state.resolution;
+    const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
     let camp = null;
     try { camp = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { camp = null; }
     if (!camp) camp = { xp: 0, trauma: 0, chapters: [] };
-    if (r.result === 'win' && camp.chapters.indexOf('gathering') < 0) {
-      camp.xp += 2;
-      camp.chapters.push('gathering');
-      localStorage.setItem(STORE, JSON.stringify(camp));
+    if (!camp.chapters) camp.chapters = [];
+    let gain = 0;
+    if (r.result === 'win') {
+      gain = sc.id === 'midnight' ? 3 : 2;
+      camp.xp += gain;
+      if (camp.chapters.indexOf(sc.id) < 0) camp.chapters.push(sc.id);
+    } else if (r.result === 'resign') {
+      gain = 1 + Math.min(2, state.cultistsFound || 0);
+      camp.xp += gain;
+    } else {
+      camp.trauma += 1;
     }
+    localStorage.setItem(STORE, JSON.stringify(camp));
+    const canNext = sc.id === 'gathering' && r.result === 'win';
+    const title = r.result === 'win' ? sc.chapter + '完成' : (r.result === 'resign' ? '撤出阿卡姆' : '调查终止');
+    const big = r.result === 'win' ? '天亮之前' : (r.result === 'resign' ? '午夜撤退' : '黑暗吞没');
     openSheet(`
-      <div class="sheetHead"><div><h2>${r.result === 'win' ? '第一章完成' : '调查终止'}</h2><p>集结号 · 结局</p></div></div>
+      <div class="sheetHead"><div><h2>${esc(title)}</h2><p>${esc(sc.name)} · 结局</p></div></div>
       <div class="sheetBody">
-        <div class="endBig ${r.result}">${r.result === 'win' ? '天亮之前' : '黑暗吞没'}</div>
+        <div class="endBig ${r.result}">${big}</div>
         <p class="endText">${esc(r.text)}</p>
         <div class="campaign">
           战役记录：经验 <b>${camp.xp}</b> · 创伤 <b>${camp.trauma}</b> · 已完成章节 <b>${camp.chapters.length}</b><br>
-          ${r.result === 'win' ? '下一章「午夜狂欢」将沿用它继续；本章奖励 2 点经验。' : '本局不计入战役进度，可以重开一次。'}
+          ${r.result === 'win' ? '本章获得 ' + gain + ' 点经验。' : (r.result === 'resign' ? '带着 ' + (state.cultistsFound || 0) + ' 名邪教徒的战果撤退，获得 ' + gain + ' 点经验；本章未计入完成。' : '本次失败，创伤 +1；可以重开这一章。')}
         </div>
-        <button class="sheetBtn" id="btnAgain">再调查一次</button>
+        <button class="sheetBtn" id="btnAgain">${canNext ? '进入第二章 · 午夜狂欢' : '再调查一次'}</button>
         <button class="sheetBtn" id="btnHome" style="margin-top:8px;background:transparent;color:#5b4a34">返回大厅</button>
       </div>`);
-    $('#btnAgain').onclick = () => { state = E.createInitial([], Math.random, { investigator: state.inv.id }); seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render(); };
+    $('#btnAgain').onclick = () => {
+      const next = canNext ? 'midnight' : state.scenario;
+      pickedChapter = next;
+      state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: next });
+      seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render();
+    };
     $('#btnHome').onclick = () => { location.href = '../index.html'; };
   }
 
@@ -558,17 +618,20 @@ button:disabled{cursor:not-allowed;opacity:.42}
     else toast('还没有进行过检定');
   };
   $('#btnEnd').onclick = () => doAct({ type: 'endTurn' });
+  $('#btnResign').onclick = () => doAct({ type: 'resign' });
   $('#btnAdvance').onclick = () => doAct({ type: 'advanceAct' });
   $('#btnBack').onclick = () => { location.href = '../index.html'; };
   $('#btnRestart').onclick = () => {
     if (!state) return;
-    state = E.createInitial([], Math.random, { investigator: state.inv.id });
+    state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: state.scenario });
     seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render(); toast('本章已重新开始');
   };
 
   $('#btnRules').onclick = () => {
+    const sc = (state && E.SCENARIOS[state.scenario]) || E.SCENARIOS.gathering;
+    const isMid = sc.id === 'midnight';
     openSheet(`
-      <div class="sheetHead"><div><h2>规则速查</h2><p>诡镇奇谈 · 第一章</p></div><button class="x" data-close="1">✕</button></div>
+      <div class="sheetHead"><div><h2>规则速查</h2><p>诡镇奇谈 · ${esc(sc.chapter)}</p></div><button class="x" data-close="1">✕</button></div>
       <div class="sheetBody">
         <h3>回合结构</h3>
         <ul><li><b>调查阶段</b>：3 个行动，可移动 / 调查 / 战斗 / 闪避 / 出牌 / 抽牌 / 拿资源。</li>
@@ -576,15 +639,20 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <li><b>维持阶段</b>：抽 1 张牌、拿 1 资源、敌人恢复、行动点重置。</li>
         <li><b>神秘阶段</b>：抽 1 张遭遇牌并结算，议程 +1 doom；doom 满则议程推进。</li></ul>
         <h3>检定与混沌袋</h3>
-        <p>属性 + 混沌标记修正 ≥ 难度即成功。骷髅按场上食尸鬼数量加重，石碑 −3，自动失败直接失败，古神印记 +1。</p>
+        <p>属性 + 混沌标记修正 ≥ 难度即成功。骷髅按场上首领数量加重，石碑 −3，自动失败直接失败，古神印记 +1。</p>
+        ${isMid ? `
+        <h3>猎杀邪教徒</h3>
+        <p>五名邪教徒分散在大学、市中心、东城、码头、河岸，各自有战力/闪避/生命与伤害。解决其中 3 名后，密谋推进到第二幕，仪式主持者在南教堂现身。</p>
+        <h3>撤退</h3>
+        <p>随时可以撤退结束本章：按已解决的邪教徒数量结算经验，但本章不计入完成，也不能进入下一章。</p>` : `
         <h3>线索与密谋</h3>
-        <p>调查成功在所在地点获得 1 个线索。集齐 3 个线索后推进密谋，第二幕会打开地下室并放出「食尸鬼祭司」。</p>
+        <p>调查成功在所在地点获得 1 个线索。集齐 3 个线索后推进密谋，第二幕会打开地下室并放出「食尸鬼祭司」。</p>`}
         <h3>战斗与闪避</h3>
         <p>战斗成功造成 1 + 武器加值伤害；闪避成功让敌人疲惫并解除交战，但它下个敌影阶段仍会恢复。</p>
         <h3>失败条件</h3>
-        <p>生命或理智归零、议程第二幕 doom 满，都会结束本章。击败祭司则完成第一章。</p>
+        <p>生命或理智归零、议程第二幕 doom 满，都会结束本章。${isMid ? '击败仪式主持者则完成第二章。' : '击败祭司则完成第一章。'}</p>
         <h3>战役</h3>
-        <p>胜利获得 2 点经验，记录在本地战役档；后续章节会沿用经验与创伤。</p>
+        <p>第一章胜利 +2 经验，第二章胜利 +3 经验；失败创伤 +1。记录在本地战役档。</p>
       </div>`);
     bindClose();
   };

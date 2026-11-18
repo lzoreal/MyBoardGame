@@ -68,7 +68,8 @@ window.ArkhamEngine = (function () {
     rats: { name: '鼠群', fight: 1, evade: 2, health: 1, damage: 1, horror: 0 },
     ghoul: { name: '食尸鬼', fight: 3, evade: 2, health: 2, damage: 1, horror: 1 },
     ghost: { name: '游魂', fight: 4, evade: 3, health: 3, damage: 1, horror: 2 },
-    priest: { name: '食尸鬼祭司', fight: 3, evade: 3, health: 4, damage: 1, horror: 1, boss: true }
+    priest: { name: '食尸鬼祭司', fight: 3, evade: 3, health: 4, damage: 1, horror: 1, boss: true },
+    masked: { name: '蒙面主持者', fight: 4, evade: 3, health: 6, damage: 2, horror: 2, boss: true }
   };
 
   const ENCOUNTERS = [
@@ -82,6 +83,70 @@ window.ArkhamEngine = (function () {
     { key: 'collapse', name: '地板坍塌', text: '敏捷检定（4）：失败受到 2 点伤害。' },
     { key: 'ritual', name: '黑暗仪式', text: '议程 +1 doom。' },
     { key: 'ghost', name: '游魂', text: '一个模糊的身影穿过墙壁。' }
+  ];
+
+  /* ---------- 第二章：午夜狂欢 ---------- */
+  const CITY_LOCATIONS = {
+    northside: { name: '北区', shroud: 2, clues: 1, x: 18, y: 32, links: ['university', 'downtown'], text: '湿漉漉的街道，煤气灯在雾里发黄。' },
+    university: { name: '大学', shroud: 2, clues: 1, x: 40, y: 16, links: ['northside', 'downtown'], text: '图书馆还亮着灯，门缝里透出纸页翻动的声音。' },
+    downtown: { name: '市中心', shroud: 2, clues: 1, x: 61, y: 36, links: ['northside', 'university', 'easttown', 'church'], text: '午夜前的最后一批行人匆匆走过十字路口。' },
+    easttown: { name: '东城', shroud: 3, clues: 1, x: 82, y: 26, links: ['downtown', 'docks'], text: '仓库区一片死寂，只有铁皮在风里响。' },
+    docks: { name: '码头', shroud: 3, clues: 1, x: 86, y: 64, links: ['easttown', 'church'], text: '潮水拍着木桩，雾气里有人影在卸货。' },
+    riverside: { name: '河岸', shroud: 3, clues: 1, x: 20, y: 70, links: ['northside', 'church'], text: '河面浮着油光，对岸的钟声传得很慢。' },
+    church: { name: '南教堂', shroud: 4, clues: 1, x: 54, y: 82, links: ['downtown', 'docks', 'riverside'], text: '废弃教堂的彩窗被人重新点亮，里面在举行什么。' }
+  };
+
+  const CULTISTS = [
+    { name: '邪教徒·灰袍', fight: 3, evade: 2, health: 3, damage: 1, horror: 1 },
+    { name: '邪教徒·疤脸', fight: 4, evade: 2, health: 4, damage: 2, horror: 1 },
+    { name: '邪教徒·低语者', fight: 2, evade: 3, health: 3, damage: 1, horror: 2 },
+    { name: '邪教徒·执灯人', fight: 3, evade: 3, health: 3, damage: 1, horror: 1 },
+    { name: '邪教徒·掘墓人', fight: 4, evade: 3, health: 4, damage: 1, horror: 2 }
+  ];
+
+  const SCENARIOS = {
+    gathering: {
+      id: 'gathering', chapter: '第一章', name: '集结号', start: 'study',
+      subtitle: '第一章 · 集结号',
+      intro: '雨夜，你站在失踪屋主的房门前。书房里的笔记只写了半句话：“他们在地下室喂养它。”',
+      locations: LOCATIONS, encounters: ENCOUNTERS,
+      act: [
+        { stage: 1, label: '第一幕 · 屋子里的低语', clues: 3, advanceText: '地下室的门开了' },
+        { stage: 2, label: '第二幕 · 地下室的门' }
+      ],
+      agenda: [
+        { label: '议程 · 黑暗逼近', doom: 4 },
+        { label: '议程 · 房子醒了', doom: 7, lose: true }
+      ],
+      boss: { key: 'priest', loc: 'cellar', spawnText: '地下室的门开了，食尸鬼祭司在里面等着你' },
+      winText: '食尸鬼祭司倒下了。你点燃了房子，在火光里走进雨夜。',
+      loseText: '黑暗吞没了整栋房子，你没能撑到天亮。'
+    },
+    midnight: {
+      id: 'midnight', chapter: '第二章', name: '午夜狂欢', start: 'northside',
+      subtitle: '第二章 · 午夜狂欢',
+      intro: '午夜前，五名戴兜帽的邪教徒散进了阿卡姆的街区。你知道其中三人聚在一起，正在准备一场仪式。找到他们，别让钟声敲完。',
+      locations: CITY_LOCATIONS, encounters: ENCOUNTERS,
+      act: [
+        { stage: 1, label: '第一幕 · 猎杀邪教徒', cultists: 3, advanceText: '邪教徒的血引出了仪式主持者' },
+        { stage: 2, label: '第二幕 · 仪式主持者' }
+      ],
+      agenda: [
+        { label: '议程 · 午夜将至', doom: 5 },
+        { label: '议程 · 仪式完成', doom: 9, lose: true }
+      ],
+      boss: { key: 'masked', loc: 'church', spawnText: '南教堂的彩窗亮起，蒙面主持者走上祭坛' },
+      winText: '蒙面主持者倒下了。钟声停在午夜前一秒，你带着满身雨水离开教堂。',
+      loseText: '钟声敲完，整座城市在雾里安静下来。'
+    }
+  };
+
+  const MIDNIGHT_SPAWNS = [
+    { loc: 'university', cultist: 0 },
+    { loc: 'downtown', cultist: 1 },
+    { loc: 'easttown', cultist: 2 },
+    { loc: 'docks', cultist: 3 },
+    { loc: 'riverside', cultist: 4 }
   ];
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -126,13 +191,16 @@ window.ArkhamEngine = (function () {
   function enemiesAt(state, locId) { return (state.enemies || []).filter((e) => e.location === locId && e.health > 0); }
 
   function makeEnemy(state, key, locId) {
-    const base = ENEMIES[key];
+    return spawnEnemyDef(state, ENEMIES[key], locId, { key: key });
+  }
+
+  function spawnEnemyDef(state, base, locId, extra) {
     const id = 'e' + (state.nextEnemyId = (state.nextEnemyId || 0) + 1);
-    const e = {
-      id: id, key: key, name: base.name, fight: base.fight, evade: base.evade,
+    const e = Object.assign({
+      id: id, key: base.name, name: base.name, fight: base.fight, evade: base.evade,
       health: base.health, maxHealth: base.health, damage: base.damage, horror: base.horror,
       location: locId, engaged: locId === state.inv.location, exhausted: false, boss: !!base.boss
-    };
+    }, extra || {});
     state.enemies.push(e);
     return e;
   }
@@ -149,7 +217,7 @@ window.ArkhamEngine = (function () {
     if (left > 0) inv.damage += left;
     if (inv.damage >= inv.maxHealth) {
       inv.defeated = true;
-      endGame(state, 'lose', inv.name + ' 倒下了，房子里的东西围了上来。');
+      endGame(state, 'lose', '你倒下了。' + (state.loseText || ''));
     }
   }
 
@@ -165,7 +233,7 @@ window.ArkhamEngine = (function () {
     if (left > 0) inv.horror += left;
     if (inv.horror >= inv.maxSanity) {
       inv.defeated = true;
-      endGame(state, 'lose', inv.name + ' 的精神崩溃了。');
+      endGame(state, 'lose', '你的精神崩溃了。' + (state.loseText || ''));
     }
     if (left > 0 && inv.ability === 'agnes') {
       const target = enemiesAt(state, inv.location)[0];
@@ -182,10 +250,29 @@ window.ArkhamEngine = (function () {
       inv.clues += 1;
       log(state, '侦探的直觉：发现 1 个线索');
     }
+    if (enemy.cultist) {
+      state.cultistsFound = (state.cultistsFound || 0) + 1;
+      log(state, '已解决 ' + state.cultistsFound + ' 名邪教徒');
+      checkMidnightAct(state);
+      if (state.phase === 'ended') return;
+    }
     if (enemy.boss) {
       state.act.stage = 3;
-      endGame(state, 'win', '食尸鬼祭司倒下了。你点燃了房子，在火光里走进雨夜。');
+      endGame(state, 'win', state.winText || '你活了下来。');
     }
+  }
+
+  function checkMidnightAct(state) {
+    if (state.scenario !== 'midnight') return;
+    if (state.act.stage !== 1) return;
+    const need = state.act.cultists || 3;
+    if ((state.cultistsFound || 0) < need) return;
+    state.act.stage = 2;
+    const cfg = SCENARIOS.midnight;
+    const boss = makeEnemy(state, cfg.boss.key, cfg.boss.loc);
+    state.locations[cfg.boss.loc].revealed = true;
+    log(state, cfg.act[1].label + '：' + cfg.boss.spawnText);
+    if (boss) log(state, '仪式主持者现身：' + boss.name);
   }
 
   function test(state, statKey, difficulty, rng, opts) {
@@ -277,14 +364,14 @@ window.ArkhamEngine = (function () {
   }
 
   function advanceAgenda(state) {
-    const inv = state.inv;
-    if (state.agenda.stage === 1) {
-      state.agenda.stage = 2;
+    const stages = state.agenda.stages || [{ doom: 4 }, { doom: 9, lose: true }];
+    if (state.agenda.stage < stages.length) {
+      state.agenda.stage += 1;
       state.agenda.doom = 0;
-      state.agenda.max = 7;
-      log(state, '议程推进：房子醒了，黑暗更浓了');
+      state.agenda.max = stages[state.agenda.stage - 1].doom;
+      log(state, '议程推进：' + (stages[state.agenda.stage - 1].label || '黑暗更浓了'));
     } else {
-      endGame(state, 'lose', '黑暗吞没了整栋房子，你没能撑到天亮。');
+      endGame(state, 'lose', state.loseText || '你没能撑到天亮。');
     }
   }
 
@@ -371,30 +458,38 @@ window.ArkhamEngine = (function () {
 
   function createInitial(players, rng, opts) {
     const invDef = INVESTIGATORS.find((x) => x.id === (opts && opts.investigator)) || INVESTIGATORS[0];
+    const sc = SCENARIOS[(opts && opts.scenario)] || SCENARIOS.gathering;
     const locs = {};
-    Object.keys(LOCATIONS).forEach((k) => {
-      locs[k] = Object.assign({ id: k, clues: LOCATIONS[k].clues, clues0: LOCATIONS[k].clues, revealed: k === 'study' }, clone(LOCATIONS[k]));
+    Object.keys(sc.locations).forEach((k) => {
+      locs[k] = Object.assign({ id: k, clues: sc.locations[k].clues, clues0: sc.locations[k].clues, revealed: k === sc.start }, clone(sc.locations[k]));
     });
     const deck = shuffle(invDef.deck.slice(), rng);
     const inv = {
       id: invDef.id, name: invDef.name, role: invDef.role, color: invDef.color,
       stats: clone(invDef.stats), maxHealth: invDef.health, maxSanity: invDef.sanity,
-      damage: 0, horror: 0, resources: 5, clues: 0, location: 'study', soakHealth: 0, soakSanity: 0,
+      damage: 0, horror: 0, resources: 5, clues: 0, location: sc.start, soakHealth: 0, soakSanity: 0,
       deck: deck, hand: [], discard: [], assets: [], actions: 3, defeated: false,
       ability: invDef.ability, abilityText: invDef.abilityText
     };
     const state = {
       phase: 'investigation', round: 1, inv: inv,
       locations: locs, enemies: [], nextEnemyId: 0,
-      chaos: CHAOS.slice(), encounter: { deck: shuffle(ENCOUNTERS.slice(), rng), discard: [] },
-      act: { stage: 1, clues: 3 },
-      agenda: { stage: 1, doom: 0, max: 4 },
-      logs: ['你推开那扇没锁的门。屋主失踪了，书房里还留着他的笔记。'],
+      chaos: CHAOS.slice(), encounter: { deck: shuffle(sc.encounters.slice(), rng), discard: [] },
+      scenario: sc.id, scenarioName: sc.name, chapterLabel: sc.chapter, subtitle: sc.subtitle,
+      act: { stage: 1, clues: sc.act[0].clues || 0, cultists: sc.act[0].cultists || 0, label: sc.act[0].label },
+      agenda: { stage: 1, doom: 0, max: sc.agenda[0].doom, stages: clone(sc.agenda), label: sc.agenda[0].label },
+      logs: [sc.intro],
       lastTest: null, encounterCurrent: null,
       flags: { wendyLuck: false },
-      resolution: null,
+      resolution: null, cultistsFound: 0,
+      winText: sc.winText, loseText: sc.loseText,
       hostId: inv.id
     };
+    if (sc.id === 'midnight') {
+      MIDNIGHT_SPAWNS.forEach((s) => {
+        spawnEnemyDef(state, CULTISTS[s.cultist], s.loc, { cultist: true, key: 'cultist' });
+      });
+    }
     drawCards(state, inv, 5);
     return state;
   }
@@ -402,18 +497,30 @@ window.ArkhamEngine = (function () {
   function act(state, action, pid, rng) {
     if (!state) return { ok: false, msg: '对局数据异常' };
     if (action.type === 'restart') {
-      return { ok: true, state: createInitial([], rng, { investigator: action.investigator || state.inv.id }) };
+      return { ok: true, state: createInitial([], rng, { investigator: action.investigator || state.inv.id, scenario: action.scenario || state.scenario }) };
     }
     if (state.phase === 'ended') return { ok: false, msg: '这一章已经结束了' };
     const inv = state.inv;
     if (action.type === 'advanceAct') {
       if (state.act.stage !== 1) return { ok: false, msg: '密谋已经推进过了' };
+      if (!state.act.clues) return { ok: false, msg: '这一章靠行动推进密谋' };
       if (inv.clues < state.act.clues) return { ok: false, msg: '线索还不够' };
       inv.clues -= state.act.clues;
       state.act.stage = 2;
-      const boss = makeEnemy(state, 'priest', 'cellar');
-      state.locations.cellar.revealed = true;
-      log(state, '密谋推进：地下室的门开了，' + boss.name + ' 在里面等着你');
+      const sc = SCENARIOS[state.scenario] || SCENARIOS.gathering;
+      state.act.label = sc.act[1].label;
+      if (sc.boss) {
+        const boss = makeEnemy(state, sc.boss.key, sc.boss.loc);
+        state.locations[sc.boss.loc].revealed = true;
+        log(state, '密谋推进：' + sc.boss.spawnText + '（' + boss.name + '）');
+      }
+      return { ok: true, state: state };
+    }
+
+    if (action.type === 'resign') {
+      if (state.scenario !== 'midnight') return { ok: false, msg: '这一章不能撤退' };
+      const found = state.cultistsFound || 0;
+      endGame(state, 'resign', '你在午夜前撤出了阿卡姆，带走了 ' + found + ' 名邪教徒的线索。仪式还在继续。');
       return { ok: true, state: state };
     }
 
@@ -508,7 +615,7 @@ window.ArkhamEngine = (function () {
 
   return {
     INVESTIGATORS: INVESTIGATORS, CARDS: CARDS, LOCATIONS: LOCATIONS,
-    ENEMIES: ENEMIES, ENCOUNTERS: ENCOUNTERS,
+    ENEMIES: ENEMIES, ENCOUNTERS: ENCOUNTERS, SCENARIOS: SCENARIOS,
     createInitial: createInitial, act: act,
     helpers: { totalStat: totalStat, tokenText: tokenText, locationOf: locationOf, enemiesAt: enemiesAt }
   };
