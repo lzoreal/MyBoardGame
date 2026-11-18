@@ -232,6 +232,12 @@ function validateScenario(s, file, seen) {
     fail(file, 'factions.type 非法');
   }
   const heroGoal = validateGoal(s.heroGoal, 'heroGoal', file);
+  let ffaGoal = null;
+  if (rule === 'freeForAll') {
+    ffaGoal = validateGoal(s.ffaGoal || s.heroGoal, 'ffaGoal', file);
+  } else if (s.ffaGoal) {
+    fail(file, '只有 freeForAll 剧本可以设置 ffaGoal');
+  }
   let traitorGoal = null;
   if (s.traitorGoal) traitorGoal = validateGoal(s.traitorGoal, 'traitorGoal', file);
   else if (rule !== 'noTraitor' && rule !== 'freeForAll') fail(file, '剧本缺少 traitorGoal（禁止默认杀光英雄）');
@@ -255,7 +261,7 @@ function validateScenario(s, file, seen) {
   return {
     no: s.no === undefined ? 0 : integer(s.no, 'no', file, 0, 9999),
     key, name, story, trigger: trigger, traitorRule: rule, factions: s.factions,
-    heroGoal, traitorGoal, heroGoalText, traitorGoalText,
+    heroGoal, traitorGoal, heroGoalText, traitorGoalText, ffaGoal,
     setup: s.setup,
     priority, monsters,
     actions: s.actions === undefined ? undefined : validateActions(s.actions, 'actions', file),

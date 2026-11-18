@@ -264,9 +264,10 @@ window.GameShell = (function () {
       }
       const init = cfg.engine.createInitial(st.players.map((p) => ({ id: p.id, name: p.name })));
       init.hostId = st.hostId;
+      init.createdAt = st.createdAt;
       init.logs = ['房间 ' + esc(code || '') + ' 开局'].concat(init.logs || []);
       return init;
-    }).catch((e) => toast(e.message || '开局失败', true));
+    }, 'start').catch((e) => toast(e.message || '开局失败', true));
   }
 
   /* ---------------- 动作派发 ---------------- */
@@ -287,7 +288,7 @@ window.GameShell = (function () {
       const r = cfg.engine.act(st, action, baseId, Math.random);
       if (!r.ok) { toast(r.msg, true); return null; }
       return r.state;
-    }).catch((e) => toast(e.message || '同步失败', true));
+    }, action.type).catch((e) => toast(e.message || '同步失败', true));
     return true;
   }
 
@@ -415,7 +416,7 @@ window.GameShell = (function () {
       $('startPanel').classList.add('hidden');
 
       const joined = (st.players || []).some((p) => p.id === baseId);
-      if (!joined) {
+      if (!joined && !Net.PRIVATE) {
         if (st.phase !== 'lobby') throw new Error('这局已经开始了，等下一局吧');
         if (st.players.length >= cfg.max) throw new Error('房间满了（最多 ' + cfg.max + ' 人）');
         await Net.mutate((s) => {
@@ -423,7 +424,7 @@ window.GameShell = (function () {
           s.logs = (s.logs || []).concat((nickname || '玩家') + ' 加入了房间');
           if (s.logs.length > 24) s.logs = s.logs.slice(-24);
           return s;
-        });
+        }, 'join');
       }
 
       Net.subscribe(c, (st2) => setState(st2), onStatus);

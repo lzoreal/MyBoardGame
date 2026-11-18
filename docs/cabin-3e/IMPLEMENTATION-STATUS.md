@@ -1,15 +1,35 @@
 # Cabin 3E 规则引擎重构 · 实施状态
 
-更新时间：2026-11-18
+更新时间：2026-11-19
 对应规格：`docs/cabin-3e/ENGINE-REFACTOR-SPEC.md`
 
 ## 当前结论
 
 第三版迁移已经从“只把规则写进 JSON”推进到“规则有运行入口、内容有硬合同、关键路径有自动化测试”。
 
-- 5 组 Cabin 测试全部通过：**150 passed / 0 failed**
-- 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号）
+- 6 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）
+- 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号，room `X2Z2F`）
+- 线上权限复测：身份接管被拒、错误令牌读 secret 被拒、大厅成员不能直写 playing、playing 中非当前行动者被拒
 - 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**
+
+### 本轮 P0 私有联机修复
+
+- `cabin_join_room` 不再对已有 `(code,pid)` 覆盖 token；原令牌不匹配直接拒绝，无法用受害者 pid 接管身份
+- 新成员加入在大厅阶段由数据库事务完成：advisory lock、人数/席位上限、state.players 同事务写入
+- 删除客户端 `cabin_set_secret` 写入口；secret 只由 `cabin_split_hidden` 触发器写入
+- 客户端不再直接 `UPDATE rooms` 提交 Cabin 状态，改走 `cabin_push_state`：按 `state.turn` 校验当前行动者、成员令牌、版本号、房主/游戏类型/玩家 ID/createdAt 不可变；大厅阶段只允许房主 `start`
+- 开局 `startGame` 保留原房间 `createdAt`，避免服务端把正常开局判成“替换房间创建信息”而拒绝
+- 隐藏叛徒从 hidden=true 变 false 时，只有叛徒本人 secret 允许触发；触发器会从 secrets 重建完整 side/traitor 字段，不再直接删 secret 留下残缺公开状态
+- 隐藏状态公开 `haunt.sideCounts`（只给聚合人数，不给具体玩家阵营），`checkWin` / `killAll` 使用服务端聚合人数
+- `#12 援手` 自由混战改为“持有奇怪护符的最后一人获胜”，全员倒下不再误判英雄胜
+- 剧本 12 两只巨魔之手分别摆到入口大厅与底层平台，不再是 manual 随机集中
+
+### 仍然存在的联机安全边界
+
+`cabin_push_state` 只是把“任意成员可写整包状态”收窄为“当前行动者可提交”，**不是完整服务端规则引擎**。当前行动者仍可在自己的回合伪造属性、牌堆、怪物和结算字段。真正的 P0-4 闭环需要 Supabase Edge Function 或独立服务端：
+加载完整私有状态 → 验证身份/回合 → 在服务端运行 `CabinEngine.act()` → 只回写服务端计算出的状态。
+这一步尚未部署，不能宣称“客户端无法作弊”。
+
 
 ## 已落地
 
@@ -19,7 +39,7 @@
 - 删除构建器与运行时“缺 traitorGoal 就默认杀光英雄”的兜底
 - 50 个剧本全部写入 `factions`
 - 42 个有叛徒/隐藏叛徒的剧本写入显式 `traitorGoal`；8 个无叛徒/自由混战为 `null`
-- 50 个剧本全部写入 `setup` 合同（`mode: manual` + 官方 OCR Setup 原文）
+- 50 个剧本全部写入 `setup` 合同（除 #12 为 `scripted` 外，其余 49 个为 `manual` + 官方 OCR Setup 原文）
 - 构建器拒绝缺 `setup`、缺 factions、非法 goal 的剧本
 
 ### 2. 属性轨道
@@ -67,7 +87,7 @@
 - DD（1280×820）
 - 三号（手机 390×844）
 
-本轮结果：`SUMMARY 12/12 passed; room=UVYKS`
+本轮结果：`SUMMARY 12/12 passed; room=X2Z2F`
 
 覆盖：建房、三人入座、开始按钮、手机两行底栏、三人选角、DD 点击相邻房间移动、翻卡提示、翻卡动画截图、运行期无页面错误。
 
@@ -84,11 +104,11 @@
 以下缺口没有在本轮关闭，不能把当前状态称为“第三版完整迁移”：
 
 1. **剧本 Setup 仍是手动模式**  
-   50 个剧本都有 `setup` 合同和官方原文，但 `mode` 是 `manual`，怪物只先集中在闹鬼房间，没有按每个剧本的官方坐标自动摆放。  
+   50 个剧本都有 `setup` 合同和官方原文，但 49 个的 `mode` 仍是 `manual`，怪物只先集中在闹鬼房间，没有按每个剧本的官方坐标自动摆放。
    下一步需要逐条核实 50 份 Setup，写入 `placements`，再把 `mode` 改为 `scripted`。
 
 2. **部分剧本目标仍是声明式**  
-   `goalDone` 已支持 `killAll / anyOf / allOf / possessItem / convertAll`；`trackZero`、`custom` 仍没有通用执行器。
+   `goalDone` 已支持 `killAll / anyOf / allOf / possessItem / convertAll / destroyItem / trackZero / numberTrack / tokens perHero`；`custom` 仍只有 `haunt.custom[key]` 状态入口，没有完整剧本语义。
 
 3. **隐藏叛徒的服务端私有状态已启用**  
    `sql/rooms-private.sql` 已在 Supabase 执行：`room_members` 成员令牌、`room_secrets` 私有表、`rooms` 成员制 RLS、隐藏叛徒拆分触发器、建房/加入/读写 secret 的 RPC。  
@@ -112,6 +132,7 @@ node tests\cabin-packs.test.js
 node tests\cabin-official.test.js
 node tests\cabin-3e-rules.test.js
 node tests\cabin-specials.test.js
+node tests\cabin-security.test.js
 node --check js\games\cabin.js
 ```
 

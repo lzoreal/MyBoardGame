@@ -245,6 +245,7 @@
   .pickCard .tr span { background: #fff9ec; color: #4b3a27; }
   .pickCard .tr b { color: #7b2e3b; }
   .cabinBody .pickPanel { overscroll-behavior: contain; }
+  .cabinBody .boardWrap { container-type: size; }
   .cabinBody .pickCard .tr { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
   .cabinBody .pickCard .tr span { display: flex; align-items: baseline; gap: 3px; white-space: nowrap; }
   .cabinBody .pickCard .tr em { font-style: normal; color: #9b8768; font-size: 10px; }
@@ -355,10 +356,10 @@
 
 <script src="../js/config.js?v=12"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/net.js?v=15"></script>
-<script src="../js/games/cabin-packs.js?v=20261118"></script>
-<script src="../js/games/cabin.js?v=20261118"></script>
-<script src="games/shell.js?v=15"></script>
+<script src="../js/net.js?v=19"></script>
+<script src="../js/games/cabin-packs.js?v=20261119b"></script>
+<script src="../js/games/cabin.js?v=20261119b"></script>
+<script src="games/shell.js?v=19"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -459,6 +460,7 @@
     return roomsOf(st).find((r) => r.floor === p.floor && r.x === p.x && r.y === p.y);
   }
   function traitLabel(key) {
+    if (key === 'none') return '无属性';
     const t = C.TRAITS.find((x) => x.key === key);
     return t ? t.label : key;
   }
@@ -685,9 +687,7 @@
     svg.setAttribute('height', '100%');
     if (board) {
       board.style.aspectRatio = (W * CELL) + ' / ' + totalH;
-      board.style.width = merged
-        ? 'min(100%, calc((100vh - 300px) * ' + (W * CELL) + ' / ' + totalH + '))'
-        : '';
+      board.style.width = 'min(100%, calc(100cqh * ' + ((W * CELL) / totalH) + '))';
     }
 
     el('rect', { x: 0, y: 0, width: W * CELL, height: totalH, rx: 24, fill: '#2b2119' }, svg);
@@ -1555,7 +1555,7 @@
     const who = (playersOf(st)[pr.index] || {}).name || '玩家';
     const owner = playersOf(st)[pr.index] || {};
     const awaiting = !!pr.await && !!pr.result;
-    const diceN = awaiting ? pr.result.faces.length : Math.max(1, (Number(owner.traits && owner.traits[pr.trait]) || 0) + (C.helpers.itemTestBonus ? C.helpers.itemTestBonus(st, pr.index, pr.trait) : 0));
+    const diceN = awaiting ? pr.result.faces.length : (Number(pr.dice) > 0 ? Number(pr.dice) : Math.max(1, (Number(owner.traits && owner.traits[pr.trait]) || 0) + (C.helpers.itemTestBonus ? C.helpers.itemTestBonus(st, pr.index, pr.trait) : 0)));
     const faces = awaiting ? pr.result.faces : Array(diceN).fill('?');
     const diceFaces = faces.map((x) => '<i>' + x + '</i>').join('');
     const rerollItems = awaiting && canRoll ? (owner.items || []).map((it, k) => ({ it, k })).filter((x) => x.it.reroll && !(st.itemActions || {})[x.it.name]) : [];

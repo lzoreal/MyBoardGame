@@ -914,6 +914,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "摧毁戒指，或杀死叛徒",
       "traitorGoalText": "所有英雄死亡，或数字轨道归 0",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "YoumayrevealyourNumbertokenjustbeforesomeonesuccessfully 1.FindtheNumbertokenslabeled1through{3/4/5/63andshufflethem,face-down.Giveonetoeachplayer DestroystheRing!Ifyoudo，rturnallheroestoanyLandingtilesof IFTHETRAITORWINS 2.Eachplayerthenlooksattheirtokenwithoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is yourchoice.TheherotryingtoDestroytheRing!canfailasaresult. Youdiscoveredtatyoucouldcontrol thetraitor Whenyourevealyourselfasthetraitor,healallofyourtraitsandgain timewiththering.Luckilyyour 3.SettheNumberTrackto{6/5/4/3} 1Might. annoying“friends”didn'tcatchon 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. thatyou'retheonewhocreatedthe Ifyouhaverevealedyourself，ounottakedamageifyoudonot timeloop.Theydidn'tknowthatthis returntoaLandingtileattheendofthehauntrevealer'sturn wasn'tthefirsttimeyou²dmurdered HIDDENTRAITOR them...andnowtheyneverwill.",
@@ -975,6 +976,7 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "在仪式房完成 3 次神智判定（难度 5），解救中介",
       "traitorGoalText": "本剧本没有叛徒",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "Armory-Basement/GroundFloor WhileonthesametileastheDemonRealtormakeaSanityroll.Add Graveyard-GroundFloor 1.PlacetheDemontokenontheEntranceHalltile.ThisistheDemonRealtor 1totheresultofyourrollforeachFiretokenonatileinyourregion 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheDemonRealtorwilltakeitsturnafterthatplayer IfyourexplorerisontheRitualRoomtile,lsoadd1totheresult.If 3.Find6Firetokens.Place{3/2/1/0}ofthemontileswithheroes.ThesemarkCleansedRooms,whichwillhelp",
@@ -1033,6 +1035,7 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "用「捉迷藏」成对移除石头小天使（4 对）",
       "traitorGoalText": "本剧本没有叛徒",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "ties)butimmediatelystopassoonastheyenteranyhero'sline petrifiedhands.Youarenowapartof ofsight. 1.EachexplorerplacesaSmallMonstertokenontheirtile.TheseareStoneCherubs. thehouse.justanotherstatuelost tohistory 2.Find{3/4/5/6]additionalStoneCherubs.Ifpossible,placethemontilesthatarenotinheroes'linesofsight Cherubsthatstarttheirturninahero'slineofsightwillnotmove Ifyoucannot,placetherestaroundthehousehoweveryoulike duringthatturn. PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer 3. ATTHEENDOFTHEMONSTERTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. EachherotakesonedieofGeneraldamageforeachCherubintheir lineofsight COOPERATIVEHAUNT",
@@ -1142,6 +1145,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在图库或图书室配对证据，配齐 3 组",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "IFYOUDIE Withtherestofthe'familyburied TurnyourNumbertokenface-up 1.ThehauntrevealerplaceseachTraittokenface-uponadifferenttile,inadifferentregionfromitsmatchingTrait yougoaboutsearchingfortheold token.(Example:IftheMighttokenisontheUpperFloor,theotherMighttokenmustbeplacedontheGround man'sdocuments.Withanedithere ATTHEENDOFYOURTURN FloororBasement.）ThesetokensrepresentEvidence. andaforgedsignaturethere,the fyoudidnotattack,taketwodiceofMentaldamage.Yourgreat-uncle' 2.ShuffletheNumbertokenslabeled1through{3/4/5/6y,face-down.Giveoneofthesetokenstoeachplayer houseandallthewealthandstatus ghostdemandsvengeance.Itdoesn'tcarewho'sonthereceivingend thatcomeswithit、isnowyours 3.Eachplayerthenlooksattheirtoken,withoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is thetraitor. IFYOUARETHETRAITOR 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. Youmayrevealyourselfatan",
@@ -1225,6 +1229,7 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "在清理过的房里放满 5 个符文",
       "traitorGoalText": "本剧本没有叛徒",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "HousekeepersattackwithMightandmovetoward vanishwithoutatraceaghostly “thankyou”echoesinyourears theclosesthero.Ifthereisatie,theHousekeeprs 1.Ifthehousecontainsfewerthan{3/4/5/63tileswithEventsymbols,drawandplacetilesfromthetilestack Finally，thehouseisclean. until{3/4/5/63tileswithEventsymbolshavebeenplaced.Whenplacingthesetiles,donotresolvetheir willmovetowardtheeldesthero. effects. IFYOULOSE ATTHEENDOFTHEMONSTERTURN 2.Place{3/4/5/6}SmallMonstertokensonseparatetileswithEventsymbols,distributedasevenlyaspossible Deal1GeneraldamagetoeachexplorerChoking Youturntodustintheshapesofyour betweenregions.TheseareHousekeepers. witheringdust. formerselves.Slowlyyoucrumble 3.Setthe5Runetokensofftotheside yourremainsdriftingthroughthe 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. houseasspecksintheair.Youdon't evercompletelysettlebecausenow you'reapartofthishouse-andthe COOPE",
@@ -1312,6 +1317,9 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "成为最后活着的探险者",
       "traitorGoalText": "最后活着的探险者获胜",
+      "ffaGoal": {
+        "type": "killAll"
+      },
       "setup": {
         "mode": "manual",
         "heroText": "",
@@ -1370,6 +1378,10 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "出价抢到 3 份宝藏（力量最高者得）",
       "traitorGoalText": "最后活着的探险者获胜",
+      "ffaGoal": {
+        "type": "treasure",
+        "need": 3
+      },
       "setup": {
         "mode": "manual",
         "heroText": "",
@@ -1447,6 +1459,11 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "找到 3 份食物献祭，活到最后",
       "traitorGoalText": "最后活着的探险者获胜",
+      "ffaGoal": {
+        "type": "tokens",
+        "token": "食物",
+        "need": 3
+      },
       "setup": {
         "mode": "manual",
         "heroText": "",
@@ -1520,6 +1537,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在仪式房完成 3 次神智判定（难度 4），打断仪式",
       "traitorGoalText": "唤醒沉睡之她，或消灭所有英雄",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
@@ -1614,6 +1632,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "推进咒语 4 次（数字轨道归 0）",
       "traitorGoalText": "毁掉魔法书，或消灭所有英雄",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "SettheNumberTrackto{4/4/5/5} 1.S 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
@@ -1698,6 +1717,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "驱散全部 3 只怪物",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
@@ -1820,6 +1840,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在墓园完成 1 次神智判定（难度 5），安葬看门人遗骸",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.IftheGraveyardtilehasnotalreadybeenplaced,searchthetilestackforitandplaceitusingnormal tile-placementrules 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup REMAINS",
@@ -1899,6 +1920,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "消灭带有符文的 3 只小妖精，并杀死叛徒",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. GREMLINMAGIC",
@@ -1977,6 +1999,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "揭穿幻象，杀死叛徒真身",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THERINGOFILLUSIONS",
@@ -2071,6 +2094,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "摧毁 5 卷录像带后从入口大厅逃出",
       "traitorGoalText": "所有英雄死亡，或数字轨道归 0",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
@@ -2149,6 +2173,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "集齐音节后击败无名者",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Iftherearefewerthanfivenon-Landingtilesinthehouse,drawtilesfromthetilestackandplacetheminthe houseuntiltherearefive 2.Setaside{2/3//53Runetokens.ThesearetheSyllablesoftheFacelessMan'sName. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -2227,6 +2252,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "烧掉书，摆脱控制",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.IftheLibrarytileisnotinthehousefinditinthetilestackandplaceitinaregionotherthantheonecurrently occupiedbythetraitor 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEBOOK",
@@ -2307,6 +2333,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "从入口大厅逃出屋子",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.ShufflealloftheBasementtiles(otherthantheBasementLandingtile)backintothetilestack. 2.EachheroplacestheirfigureontheBasementLandingtile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -2387,6 +2414,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "关闭 3 台机器并破坏足够的板块",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "SettheNumberTrackto{2/3/4/5} 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
@@ -2467,6 +2495,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "把 4 盏精灵之火带到礼拜堂",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Find{2/3/4/5}Firetokens-theseareSeelieFlames.Placeoneofthesetokensoneachofthefollowing rooms(iftheyhavebeendiscovered):Tower,StatuaryCorridor,sevtoryaardUgodCavern， andUndergroundLake 2.SetanyremainingSeelieFlamestotheside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SEELIEFLAME",
@@ -2582,6 +2611,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在军械库完成 2 次神智判定（难度 5），破除咒语",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.SetasideaMight,Speed,Knowledge,andSitytoe.TheseareSpellIngredients 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
@@ -2677,6 +2707,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在仪式房完成 3 次神智判定（难度 4），毁掉祭品仪式",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.PlacetheAltartokenonanyGroundFloortile 2.IftheRitualRoomhasnotbeendiscovered,earchthetilestackforitandplaceitintheBasement,usingnorma tile-placementrules. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
@@ -2770,6 +2801,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死叛徒",
       "traitorGoalText": "把所有外星文字铺进屋里，或所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. 3.Find{3/4/4/5}Runetokensandsetthemasidefortheheroes.TheseareAlienWords ALIENWORDS",
@@ -2830,6 +2862,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "用炸药炸掉大白幽灵鲨",
       "traitorGoalText": "所有英雄死亡，或每块板块被淹没",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup FLIPPEDTILES",
@@ -2912,6 +2945,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在仪式房完成 3 次知识判定（难度 5），束缚妖精",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "Theheroeshavenoadditionalsetupsteps. 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
@@ -2998,6 +3032,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "拿到戒指，把灵魂引到祭坛完成仪式",
       "traitorGoalText": "拿到戒指",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.IftheSecretStairstilehasnotbeendiscovered,searchthetilestackforthattileandplaceitinthehouse,using normaltile-placementrules 2.Setasidethetop{4/6/9/12}tilesfromthetilestackandreturntheremainingtilestothegamebox.Ifthere arefewertilesthanthisinthestack，kipthisstep 3.TakeanyOmensheldbythetraitorandgivethemtothehauntrevealer 4.ThetraitoristryingtofindtheRing.Whentheteamsseparate,theheroesmayfreelytradeOmens,usingthe normaltradingrules.EachheromustplacetheirOmensface-downonthetableinfrontofthem 5.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. OMENS",
@@ -3083,6 +3118,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "带 4 件物品从入口大厅逃出",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKACURSEDITEMONYOURTILE",
@@ -3172,6 +3208,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "驱逐猫又",
       "traitorGoalText": "所有英雄死亡，或房子烧毁",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUENTERATILEWITHAFIRETOKEN",
@@ -3263,6 +3300,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在维度改写生效时抵达入口大厅",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.SetasideaSmallMonstertoken.Thisisyourfriendhristina 2.ReturnthedeckofEventcardstothegamebox 3.SettheNumberTrackto{6/3/1/0} 4.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
@@ -3333,6 +3371,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "用盐摧毁 2 个虫巢",
       "traitorGoalText": "所有英雄死亡，或全部被精神控制",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SALT FOOD",
@@ -3428,6 +3467,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "让 4 个幽灵得到安宁",
       "traitorGoalText": "获得觉悟（神智最大值），或所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -3540,6 +3580,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "关闭 3 台机器人，并留下 3 个 DNA 标记",
       "traitorGoalText": "收集每名英雄的一份 DNA",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.GiveeachherotheircorrespondingHerotokentoplaceontheirrespectivecharacterboards.ThisistheirDNA 2.SettheNumberTrackto{2/3/4/5} 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. BODYSWAPS",
@@ -3647,6 +3688,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死所有邻居",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "Theheroeshavenoadditionalsetupsteps 1. 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. THERINGOFFEASTS",
@@ -3741,6 +3783,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死大蜂后",
       "traitorGoalText": "所有英雄死亡，或时间耗尽",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.SettheNumberTrackto{5/4/4/3} 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup NEST WASPEGGS",
@@ -3820,6 +3863,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死所有邪恶双胞胎",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -3881,6 +3925,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "让 3 台发电机全部过载",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.SettheNumberTrackto0. 2.Place5SearchedtokensneartheNumberTrack. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup TRIGGERINGATRAP",
@@ -3985,6 +4030,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "让 3 个幽灵安息",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.IftheLardertilehasnotbeendiscoveredfinditinthetilestackandplaceitintheBasement 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -4083,6 +4129,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "撑过 6 轮，等到天亮",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.SettheNumberTrackto{6/7/8/9} 2.BurytheDog PlacetheWerewolftokenonthehauntrevealer'stile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
@@ -4163,6 +4210,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "让 5 间房烧起来",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Thehauntrevealermustturntheirtileface-downandplacetheirfigurinebackonthattile.Thattileisnow Burning.Ifthereareonlythreeplayers,fliptheotherhero'stileaswell(unlesstheyareonaLandingtile) 2.Find5Firetokensandsetthemaside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEHOUSEISONFIRE",
@@ -4271,6 +4319,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死叛徒并改写剧本",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
@@ -4362,6 +4411,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "持真解药击败巨型毛发怪",
       "traitorGoalText": "所有英雄都变成毛发怪",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANTIDOTES 1",
@@ -4442,6 +4492,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "关闭 3 道传送门（关闭时自己摆脱被困）",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
@@ -4541,6 +4592,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "把头骨带到恐慌室",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKTHEHEADOFTHEHOUSE",
@@ -4629,6 +4681,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "击败恶魔，烧掉契约",
       "traitorGoalText": "带来血之人的血，或所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.EachherotakesaBloodtokenandplacesitontheircharacterboard 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. THECONTRACT",
@@ -4720,6 +4773,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "每层至少放 1 个炸药，共 3 个",
       "traitorGoalText": "吞噬整栋房子，或所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Setaside(3/4/4/5)Traptokens.TheseareExplosives 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
@@ -4802,6 +4856,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "在图书室研习驱魔 3 次（知识难度 4）",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "seems,wasoutafterdark... Ifyoursidehasanyspecificsetupsteps,thisiswheretheywillbelisted Bothsideswillhavedifferentsetuprequirements.Allsetuphappensbefore SETUP thefirstturnofthehaunt,anditmaysignificantlychangewhatthehouse 1.Theheroeshavenoadditionalsetupsteps lookslike 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay SPECIALACTIONS",
@@ -4883,6 +4938,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "放满 8 个研究符文后治愈尘埃",
       "traitorGoalText": "全员变成叛徒或死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "Whileonatilewithanotherexploreryoumaytradeoneofyour Thefeverishrushoutofthehouse 1.FindthreeNumbertokensforeachplayerTheserepresenttheSickness.Ingameswith3-5players,thereshould Sicknesstokensatrandomwiththatexplorer.Thatexplorermust towreakhavocuponthetown.Dust beone“1”token.Ina6-playergame,thereshouldbetwo“1”tokens agreetothetrade.Thedustwantstospread todust. 2.ShuffletheSicknesstokensface-down,andgivethreetoeachplayer 3.PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer ATTHEENDOFYOURTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup Ifyouareonatilewithanotherexplorer,swaponeofyourSickness tokensatrandomwiththem.Ifmultipleexplorersareonyourtile swaptokenswitheachofthemoneatatime.Anexplorerwho HIDDENTRAITOR",
@@ -4961,6 +5017,7 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "掷出正确的属性+预兆+房间组合 3 次",
       "traitorGoalText": "本剧本没有叛徒",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "theMirrorBeingmoves.IfaMirrorBeingendsitsturnonaspace Thecreaturesfinalassaultdrawsyou 1.Thehauntrevealertipstheirfigureover.Theyarestillinthegame,butdeadtheirsoulistrappedinthe withanexplorer,itattacksthatexplorerusingSanity intotheMirrorRealm，whereyouand MirrorRealm. yourfriendsaretrappedforevermore 2.ThehauntrevealerselectsaTrait，Omen,andRoomatrandom(seebelow),notingtheirnamesonasheetof paper.Thisinformationshouldnotbesharedwithanyotherplayers. Onceduringyourturn，youmay ShuffletheTraittokensface-down，andselectoneatrandomMakeanoteofwhichtokewaschosen a. BreaktheSpell 福 b. ShuffleNumbertokensnumbered1-9face-down,andselectoneatrandom Whileonanytileheaitandrollit.Tellthehauntrevealerthe MakeanoteofwhichOmenthattokenrepresents: nameofoneofyourOmens. 2:Dog 4:Dagger 3:ldol 5:Armor 1:Mask 6:Ring IfyouhavethecorrectcombinationofTrait，Omen,andRoom， 7:Book 8:HolySymbol 5+ 9:Skull thehauntreveale",
@@ -5042,11 +5099,43 @@ window.CABIN_PACKS = {
       "traitorGoal": null,
       "heroGoalText": "最后活着的人获胜",
       "traitorGoalText": "最后活着的人获胜",
+      "ffaGoal": {
+        "type": "possessItem",
+        "item": "奇怪护符"
+      },
       "setup": {
-        "mode": "manual",
+        "mode": "scripted",
+        "placements": [
+          {
+            "monster": {
+              "key": "trollhand",
+              "name": "巨魔之手",
+              "might": 5,
+              "speed": 3,
+              "sanity": 4,
+              "known": 4,
+              "attack": "might",
+              "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+            },
+            "room": "入口大厅"
+          },
+          {
+            "monster": {
+              "key": "trollhand",
+              "name": "巨魔之手",
+              "might": 5,
+              "speed": 3,
+              "sanity": 4,
+              "known": 4,
+              "attack": "might",
+              "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+            },
+            "room": "底层平台"
+          }
+        ],
         "heroText": "",
         "traitorText": "1.IfnoonehastheStrangeAmuletltemcard,finditintheltemdeckandgiveittothehauntrevealer 2.PlacetheMonsterCardtotheleftofthehauntrevealerThemonsterswilltaketheirturnafterthehauntrevealer 3.PlaceoneTrollHandtokenontheEntranceHallandanotherontheBasementLanding 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+        "note": "两只巨魔之手分别放在入口大厅与底层平台"
       },
       "priority": 120,
       "monster": {
@@ -5122,6 +5211,7 @@ window.CABIN_PACKS = {
       },
       "heroGoalText": "杀死所有幽灵摄影师并砸毁魔法相机",
       "traitorGoalText": "所有英雄死亡",
+      "ffaGoal": null,
       "setup": {
         "mode": "manual",
         "heroText": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",

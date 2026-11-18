@@ -2500,6 +2500,10 @@
       "heroGoal": {
         "type": "killAll"
       },
+      "ffaGoal": {
+        "type": "possessItem",
+        "item": "奇怪护符"
+      },
       "heroGoalText": "最后活着的人获胜",
       "traitorGoalText": "最后活着的人获胜",
       "priority": 120,
@@ -2520,10 +2524,38 @@
       },
       "traitorGoal": null,
       "setup": {
-        "mode": "manual",
+        "mode": "scripted",
+        "placements": [
+          {
+            "monster": {
+              "key": "trollhand",
+              "name": "巨魔之手",
+              "might": 5,
+              "speed": 3,
+              "sanity": 4,
+              "known": 4,
+              "attack": "might",
+              "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+            },
+            "room": "入口大厅"
+          },
+          {
+            "monster": {
+              "key": "trollhand",
+              "name": "巨魔之手",
+              "might": 5,
+              "speed": 3,
+              "sanity": 4,
+              "known": 4,
+              "attack": "might",
+              "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+            },
+            "room": "底层平台"
+          }
+        ],
         "heroText": "",
         "traitorText": "1.IfnoonehastheStrangeAmuletltemcard,finditintheltemdeckandgiveittothehauntrevealer 2.PlacetheMonsterCardtotheleftofthehauntrevealerThemonsterswilltaketheirturnafterthehauntrevealer 3.PlaceoneTrollHandtokenontheEntranceHallandanotherontheBasementLanding 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
-        "note": "官方 OCR Setup 原文；怪物由桌面玩家按剧本摆放，引擎不随机生成"
+        "note": "两只巨魔之手分别放在入口大厅与底层平台"
       }
     },
     {

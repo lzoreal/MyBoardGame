@@ -182,7 +182,8 @@ window.Net = (function () {
     const res = await client.rpc('cabin_join_room', {
       p_code: code,
       p_pid: identity.id,
-      p_token: tk
+      p_token: tk,
+      p_name: identity.name || ''
     });
     if (res.error) throw new Error(res.error.message || '加入失败');
     setRoom(code, tk);
@@ -192,8 +193,10 @@ window.Net = (function () {
     return { state: mergeSecret(state, secret), version };
   }
 
-  /* 读 → 改 → 带版本号写回 */
-  async function mutate(fn) {
+  /* 读 → 改 → 受控 RPC 写回
+     私有模式下客户端不能直接 UPDATE rooms；服务端会校验成员令牌、
+     版本号、当前行动者和不可变身份字段。 */
+  async function mutate(fn, actionType) {
     if (!roomCode) throw new Error('还没进入房间');
     if (busy) return null;
     busy = true;
@@ -206,17 +209,36 @@ window.Net = (function () {
         const next = fn(clone(row.state));
         if (!next) return null;
 
-        const res = await sb.from('rooms')
-          .update({
-            state: next,
-            version: row.version + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('code', roomCode)
-          .eq('version', row.version)
-          .select('version');
+        let res;
+        if (PRIVATE) {
+          res = await sb.rpc('cabin_push_state', {
+            p_code: roomCode,
+            p_pid: identity.id,
+            p_token: token,
+            p_version: row.version,
+            p_state: next,
+            p_action: actionType || ''
+          });
+        } else {
+          res = await sb.from('rooms')
+            .update({
+              state: next,
+              version: row.version + 1,
+              updated_at: new Date().toISOString()
+            })
+            .eq('code', roomCode)
+            .eq('version', row.version)
+            .select('version');
+        }
 
         if (res.error) throw new Error(res.error.message);
+        if (PRIVATE) {
+          if (!res.data || !res.data.ok) throw new Error((res.data && res.data.error) || '同步失败');
+          version = Number(res.data.version) || (row.version + 1);
+          const fresh = await fetchRoom(roomCode);
+          if (listener) listener(fresh.state, fresh.version);
+          return fresh.state;
+        }
         if (res.data && res.data.length) {
           version = row.version + 1;
           const fresh = await fetchRoom(roomCode);
