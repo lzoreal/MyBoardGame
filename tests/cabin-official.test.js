@@ -43,8 +43,8 @@ const sh = official.find((s) => s.key === 'official_3e_50');
 ok('地下屋剧本带翻覆与分层目标', !!sh && sh.flipRooms === true && sh.heroGoal.type === 'rig');
 const wasp = official.find((s) => s.key === 'official_3e_39');
 ok('大蜂后怪物面板四项属性', !!wasp && wasp.monster && wasp.monster.might === 6 && wasp.monster.known === 5);
-ok('随机剧本卡落在 6 张之内', ['无', '待售', '诅咒', '神秘邀请', '离奇失踪', '超自然调查员'].indexOf(
-  E.createInitial(players, () => 0.5).scenarioCard) >= 0);
+ok('随机剧本卡只可能是 5 张官方卡（不含「无」）', E.SCENARIO_CARDS.length === 5 &&
+  E.SCENARIO_CARDS.indexOf('无') < 0 && E.SCENARIO_CARDS.indexOf(E.createInitial(players, () => 0.5).scenarioCard) >= 0);
 
 console.log('=== 事件直接触发 ===');
 const evState = E.createInitial(players, seeded(7), { skipSelect: true });

@@ -10,25 +10,68 @@
         "speed": {
           "start": 5,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 5
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 2
         }
       },
-      "age": 16
+      "age": 12,
+      "birthday": "06-11",
+      "boardId": "yellow"
     },
     {
       "key": "brittani",
@@ -39,25 +82,71 @@
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 5
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         }
       },
-      "age": 26
+      "age": 22,
+      "birthday": "12-01",
+      "boardId": "purple"
     },
     {
       "key": "dan",
@@ -68,25 +157,69 @@
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            7
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         }
       },
-      "age": 42
+      "age": 60,
+      "birthday": "05-06",
+      "boardId": "white"
     },
     {
       "key": "warren",
@@ -97,25 +230,69 @@
         "speed": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         }
       },
-      "age": 47
+      "age": 71,
+      "birthday": "11-17",
+      "boardId": "white"
     },
     {
       "key": "isa",
@@ -126,25 +303,66 @@
         "speed": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         }
       },
-      "age": 10
+      "age": 11,
+      "birthday": "03-30",
+      "boardId": "yellow"
     },
     {
       "key": "jaden",
@@ -155,25 +373,67 @@
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 5,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 4
         },
         "sanity": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         }
       },
-      "age": 9
+      "age": 11,
+      "birthday": "10-04",
+      "boardId": "green"
     },
     {
       "key": "josef",
@@ -184,25 +444,68 @@
         "speed": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "might": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            2,
+            3,
+            3,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         }
       },
-      "age": 21
+      "age": 25,
+      "birthday": "02-25",
+      "boardId": "red"
     },
     {
       "key": "michelle",
@@ -213,25 +516,71 @@
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            6,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            6,
+            6
+          ],
+          "startPos": 2
         }
       },
-      "age": 20
+      "age": 19,
+      "birthday": "08-19",
+      "boardId": "purple"
     },
     {
       "key": "oliver",
@@ -242,25 +591,68 @@
         "speed": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         }
       },
-      "age": 34
+      "age": 33,
+      "birthday": "07-03",
+      "boardId": "red"
     },
     {
       "key": "persephone",
@@ -271,25 +663,67 @@
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 4
         }
       },
-      "age": 30
+      "age": 49,
+      "birthday": "04-15",
+      "boardId": "blue"
     },
     {
       "key": "sammy",
@@ -300,25 +734,67 @@
         "speed": {
           "start": 5,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            8
+          ],
+          "startPos": 5
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            5,
+            6,
+            8
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         }
       },
-      "age": 8
+      "age": 9,
+      "birthday": "09-18",
+      "boardId": "green"
     },
     {
       "key": "stephanie",
@@ -329,25 +805,68 @@
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            5,
+            6
+          ],
+          "startPos": 4
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 2
         }
       },
-      "age": 39
+      "age": 40,
+      "birthday": "01-12",
+      "boardId": "blue"
     }
   ]
 }

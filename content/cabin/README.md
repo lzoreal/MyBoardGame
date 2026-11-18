@@ -1,9 +1,11 @@
 # 林中小屋内容包
 
-把 JSON 放进下面两个目录，push 到 `main` 后，GitHub Actions 会自动扫描、校验并生成 `js/games/cabin-packs.js`：
+把 JSON 放进下面四个目录，push 到 `main` 后，GitHub Actions 会自动扫描、校验并生成 `js/games/cabin-packs.js`：
 
-- `content/cabin/characters/`：角色包
-- `content/cabin/scenarios/`：剧本包
+- `content/cabin/characters/`：角色包（现在只有 3E 的 12 位调查员）
+- `content/cabin/scenarios/`：剧本包（现在只有官方 3E 的 50 条）
+- `content/cabin/rooms/`：房间包（46 间房 + 5 个起始房间，门位 N/E/S/W）
+- `content/cabin/cards/`：事件、物品、预兆牌（文件名含 event / item / omen 才会被收进对应牌堆）
 
 以 `_` 开头的 JSON 不会参与构建，可用来保存示例。
 
@@ -38,6 +40,8 @@ node tools/build-cabin-packs.mjs
 
 - `key` 使用字母、数字、下划线、连字符，不能与现有角色重复。
 - `art` 是角色头像上显示的 1–2 个字符。
+- `age`、`birthday`（`MM-DD`）、`boardId`（同一块双面人物板的两名角色共用）用于最年长判定、生日先手和板面锁定。
+- `traits.<属性>.track` 是卡面上的完整轨道（从最低到最高，允许重复数字）；`startPos` 是起始标记在轨道中的位置（从 1 开始）。伤害、治疗和骷髅死亡都按轨道位置计算。
 - 四项属性都必须有 `start`、`min`、`max`，且 `min ≤ start ≤ max`。
 
 ## 剧本包
@@ -66,6 +70,8 @@ node tools/build-cabin-packs.mjs
 - `trigger.room` / `trigger.omen` 要使用游戏内已有的房间名和预兆名。
 - `trigger.card` 可选：写剧本卡名（`无`/`待售`/`诅咒`/`神秘邀请`/`离奇失踪`/`超自然调查员`）。开局会随机抽一张剧本卡，命中要求卡名一致；这个字段用于还原官方「同一预兆在不同剧本卡下触发不同剧本」的规则。
 - `trigger.event` 可选：写事件卡名。抽到该事件卡时**立刻**触发闹鬼（跳过闹鬼检定），不需要预兆，也不看剧本卡。
+- `monster.counts` 可选：按人数给怪物数量，例如 `{ "3": 2, "4": 3, "5": 4, "6": 5 }`；缺省回退到 `monster.count`。
+- `content/cabin/scenarios/official-3e-rules.json` 是从官方幸存者册 / 背叛者册 OCR 抽出的按剧本号索引的 Setup / Objective / Tokens / Monster / 胜利条件原文；每条还带 `zh.hero` / `zh.traitor` 中文对照。构建时会挂到对应剧本的 `official` 字段，剧本弹窗默认显示中文，英文 OCR 放在折叠区，不参与规则计算。
 - `actions[].tiers[].do` 支持的操作：`token`（放标记）、`progress`、`gain`/`lose`/`heal`/`damage`、`flip`（翻覆当前房间）、`banish`（驱散怪物并计入 hunt 进度，如 `{type:'cherub',count:2}`）、`removeMonster`/`removeMonsterCount`、`addMonster`、`trap`/`untrap`（被困：不能移动、不能交易；`trap:'weakest'` 选最弱者）、`evidence`（证据配对数）、`bid`（同房间按力量出价抢宝藏）、`treasure`、`dimension`（维度改写：跨层同格视为同格）、`disguise`（给随机对手打幻象标记）、`reveal`（公开隐藏叛徒）、`swapBody`（与随机对手交换角色属性）、`transfer`（`{from:'weakest'|玩家id, trait, amount}`）、`revive`、`rewrite`（改目标文本/`heroGoal`）、`win`。
 - 目标类型：`killTraitor` / `killAll` / `survive` / `ritual` / `escape` / `hunt` / `tokens` / `rig` / `evidence`（证据配对组数）/ `treasure`（宝藏份数）/ `placeTokens`（`pairs:[{token,room}]` 指定房间放标记）/ `allOf`（`goals:[...]` 全部达成，用于「录像带 + 逃出」这类双条件）。
 - 剧本字段 `dimension:true` 会让这一章全程按维度改写结算；`monster.noAttack:true` 表示该怪物不可被攻击（如 #5 的石头小天使，只能靠剧本行动成对移除）。

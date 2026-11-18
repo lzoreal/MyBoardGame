@@ -1,0 +1,506 @@
+{
+  "_source": "3E 房间牌 46 张（design/cabin/rooms-3e.json 门位逐张复核结果）+ 5 个起始房间",
+  "rooms": [
+    {
+      "key": "entrance_hall",
+      "en": "Entrance Hall",
+      "name": "入口大厅",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "start": true,
+      "kind": "start",
+      "text": "前门在身后关上。"
+    },
+    {
+      "key": "foyer",
+      "en": "Foyer",
+      "name": "门厅",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "start": true,
+      "kind": "start",
+      "text": "门厅的镜子照不出你。"
+    },
+    {
+      "key": "grand_staircase",
+      "en": "Grand Staircase",
+      "name": "主楼梯",
+      "floor": "ground",
+      "doors": "SEW",
+      "symbol": null,
+      "start": true,
+      "kind": "grandStair",
+      "text": "楼梯向上延伸进黑暗。"
+    },
+    {
+      "key": "upper_landing",
+      "en": "Upper Landing",
+      "name": "上层平台",
+      "floor": "upper",
+      "doors": "SEW",
+      "symbol": null,
+      "start": true,
+      "kind": "landing",
+      "text": "楼梯在二层拐了个弯。"
+    },
+    {
+      "key": "basement_landing",
+      "en": "Basement Landing",
+      "name": "底层平台",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": null,
+      "start": true,
+      "kind": "landing",
+      "text": "地下室的门在身后合拢。"
+    },
+    {
+      "key": "armory",
+      "en": "Armory",
+      "name": "军械库",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": "item",
+      "text": "翻开物品堆直到出现一件武器，取走后把其余埋回堆底。"
+    },
+    {
+      "key": "ballroom",
+      "en": "Ballroom",
+      "name": "舞厅",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "bloody_room",
+      "en": "Bloody Room",
+      "name": "血屋",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "catacombs",
+      "en": "Catacombs",
+      "name": "地下墓穴",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "chapel",
+      "en": "Chapel",
+      "name": "礼拜堂",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时获得 1 点神智。",
+      "effect": {
+        "type": "gain",
+        "trait": "sanity",
+        "amount": 1
+      }
+    },
+    {
+      "key": "charred_room",
+      "en": "Charred Room",
+      "name": "焦屋",
+      "floor": "upper",
+      "doors": "NE",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "chasm",
+      "en": "Chasm",
+      "name": "深渊",
+      "floor": "basement",
+      "doors": "NS",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "collapsed_room",
+      "en": "Collapsed Room",
+      "name": "坍塌房间",
+      "floor": "upper",
+      "doors": "NE",
+      "symbol": null,
+      "text": "结束回合时进行速度判定：5+ 无事；0–4 落到底层平台并受 1 点物理伤害。",
+      "special": "collapsed"
+    },
+    {
+      "key": "conservatory",
+      "en": "Conservatory",
+      "name": "温室",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "item",
+      "text": ""
+    },
+    {
+      "key": "cramped_passageway",
+      "en": "Cramped Passageway",
+      "name": "狭窄通道",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "crawlspace",
+      "en": "Crawlspace",
+      "name": "爬行空间",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "dining_room",
+      "en": "Dining Room",
+      "name": "餐厅",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "furnace_room",
+      "en": "Furnace Room",
+      "name": "锅炉房",
+      "floor": "basement",
+      "doors": "ESW",
+      "symbol": "event",
+      "text": "结束回合时受 1 点物理伤害。"
+    },
+    {
+      "key": "gallery",
+      "en": "Gallery",
+      "name": "画廊",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "通向舞厅。",
+      "link": "舞厅"
+    },
+    {
+      "key": "game_room",
+      "en": "Game Room",
+      "name": "游戏室",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "item",
+      "text": "通向舞厅。",
+      "link": "舞厅"
+    },
+    {
+      "key": "graveyard",
+      "en": "Graveyard",
+      "name": "墓园",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": "通向地下洞穴。",
+      "link": "地下洞穴"
+    },
+    {
+      "key": "guest_quarters",
+      "en": "Guest Quarters",
+      "name": "客房",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "gymnasium",
+      "en": "Gymnasium",
+      "name": "体育馆",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "首次发现时获得 1 点速度。",
+      "effect": {
+        "type": "gain",
+        "trait": "speed",
+        "amount": 1
+      }
+    },
+    {
+      "key": "junk_room",
+      "en": "Junk Room",
+      "name": "垃圾房",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时放置障碍标记。"
+    },
+    {
+      "key": "kitchen",
+      "en": "Kitchen",
+      "name": "厨房",
+      "floor": "ground",
+      "doors": "NES",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "laboratory",
+      "en": "Laboratory",
+      "name": "实验室",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "larder",
+      "en": "Larder",
+      "name": "食品储藏室",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "首次发现时获得 1 点力量。",
+      "effect": {
+        "type": "gain",
+        "trait": "might",
+        "amount": 1
+      }
+    },
+    {
+      "key": "laundry_chute",
+      "en": "Laundry Chute",
+      "name": "洗衣滑道",
+      "floor": "ground",
+      "doors": "N",
+      "symbol": null,
+      "text": "通向底层平台；若在本板块结束回合，棋子直接落到下层平台。",
+      "special": "coal"
+    },
+    {
+      "key": "library",
+      "en": "Library",
+      "name": "图书室",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时获得 1 点知识。",
+      "effect": {
+        "type": "gain",
+        "trait": "known",
+        "amount": 1
+      }
+    },
+    {
+      "key": "mystic_elevator",
+      "en": "Mystic Elevator",
+      "name": "神秘电梯",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": null,
+      "text": "每回合进入时掷两骰：4+ 任意楼层；3 上层；2 地面层；0–1 底层。本实现把它当作连接上下层的电梯间。",
+      "special": "elevator"
+    },
+    {
+      "key": "nursery",
+      "en": "Nursery",
+      "name": "育婴室",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "observatory",
+      "en": "Observatory",
+      "name": "天文台",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "operating_theatre",
+      "en": "Operating Theatre",
+      "name": "手术室",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "item",
+      "text": ""
+    },
+    {
+      "key": "organ_room",
+      "en": "Organ Room",
+      "name": "管风琴房",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "oubliette",
+      "en": "Oubliette",
+      "name": "地牢",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "event",
+      "text": "通向战利品室。",
+      "link": "战利品室"
+    },
+    {
+      "key": "panic_room",
+      "en": "Panic Room",
+      "name": "恐慌室",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "omen",
+      "text": "若密梯尚未放置，从牌堆找出并放到下层，然后洗牌。"
+    },
+    {
+      "key": "primary_bedroom",
+      "en": "Primary Bedroom",
+      "name": "主卧",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "ritual_room",
+      "en": "Ritual Room",
+      "name": "仪式房",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "root_cellar",
+      "en": "Root Cellar",
+      "name": "根窖",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "item",
+      "text": "若时光树尚未放置，从牌堆找出并放到上层，然后洗牌；本板块通向时光树。",
+      "link": "时光树"
+    },
+    {
+      "key": "salon",
+      "en": "Salon",
+      "name": "沙龙",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "secret_staircase",
+      "en": "Secret Staircase",
+      "name": "密梯",
+      "floor": "upper",
+      "doors": "N",
+      "symbol": null,
+      "text": "通向门厅（Hallway）。",
+      "special": "basementStairs"
+    },
+    {
+      "key": "soundproofed_room",
+      "en": "Soundproofed Room",
+      "name": "隔音房间",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "specimen_room",
+      "en": "Specimen Room",
+      "name": "标本室",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": ""
+    },
+    {
+      "key": "statuary_corridor",
+      "en": "Statuary Corridor",
+      "name": "雕像回廊",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "time_lost_tree",
+      "en": "Time-Lost Tree",
+      "name": "时光树",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "若根窖尚未放置，从牌堆找出并放到底层，然后洗牌；本板块通向根窖。",
+      "link": "根窖"
+    },
+    {
+      "key": "tower",
+      "en": "Tower",
+      "name": "塔楼",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "trophy_room",
+      "en": "Trophy Room",
+      "name": "战利品室",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": "item",
+      "text": "通向地牢（Oubliette）。",
+      "link": "地牢"
+    },
+    {
+      "key": "underground_cavern",
+      "en": "Underground Cavern",
+      "name": "地下洞穴",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": "通向墓园。",
+      "link": "墓园"
+    },
+    {
+      "key": "underground_lake",
+      "en": "Underground Lake",
+      "name": "地下湖",
+      "floor": "basement",
+      "doors": "NE",
+      "symbol": "event",
+      "text": ""
+    },
+    {
+      "key": "vault",
+      "en": "Vault",
+      "name": "保险库",
+      "floor": "basement",
+      "doors": "NW",
+      "symbol": "item",
+      "text": ""
+    },
+    {
+      "key": "winter_bedroom",
+      "en": "Winter Bedroom",
+      "name": "冬屋",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": ""
+    }
+  ]
+}

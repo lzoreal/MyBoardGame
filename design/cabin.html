@@ -68,6 +68,9 @@
   .monsterCard { margin-top: 7px; padding: 9px 11px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; font-size: 12px; }
   .monsterCard b { color: #7b2e3b; }
   .monsterCard span { color: #7d674b; }
+  .officialBox { margin-top: 10px; padding: 8px 10px; border-radius: 12px; background: #f7f1e4; border: 1px dashed #cbb492; font-size: 12px; }
+  .officialBox summary { cursor: pointer; color: #7b2e3b; font-weight: 600; }
+  .officialBox .ruleText { margin: 4px 0 8px; padding: 6px 8px; background: #fffdf7; border-radius: 8px; color: #5d4b36; line-height: 1.45; word-break: break-word; }
   .tradePrompt { width: 100%; padding: 10px 12px; border-radius: 12px; background: #fff8e8; border: 1px solid #d8a94f; color: #4a3424; font-size: 12px; line-height: 1.5; }
   .tradePrompt b { color: #7b2e3b; }
   .tradePrompt .tradeBtns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -444,6 +447,20 @@
     $('cModal').classList.add('hidden');
     $('cModalCard').innerHTML = '';
   }
+  function sendAttackWithWeapon(st, mi, target, trait, distance) {
+    const me = playersOf(st)[mi];
+    const used = st.itemActions || {};
+    const fresh = st.newItems || [];
+    const weapons = (me.items || []).map((it, idx) => ({ it, idx })).filter(({ it }) =>
+      it.weapon === trait && !used[it.name] && fresh.indexOf(it.name) < 0);
+    const options = [{ name: '空手 / 不使用武器', idx: null }].concat(weapons.map(({ it, idx }) => ({
+      name: '「' + it.name + '」 +' + (it.attackBonus || 0) + ' 骰', idx: idx
+    })));
+    chooseTarget('这次攻击用哪件武器？', options, (o) => {
+      window.GameShell.send({ type: 'attack', target: target, trait: trait, distance: !!distance, weaponIndex: o.idx });
+    }, '本回合新拿到的武器不能马上使用；防御时不能用武器。');
+  }
+
   function chooseTarget(title, options, onPick, hint) {
     let html = '<h2>' + esc(title) + '</h2><p>' + esc(hint || '选择一个目标。') + '</p><div class="itemList">';
     options.forEach((o, k) => {
@@ -773,8 +790,10 @@
       '<div class="infoStory">' + esc(h.story || '（这个剧本没有附故事文本）') + '</div>' +
       '<div class="goalBox"><b>英雄目标</b><br>' + esc(h.heroGoalText || '完成剧本目标') +
       (need ? '（进度 ' + prog + '/' + need + '）' : '') + '</div>' +
-      '<div class="goalBox secret"><b>叛徒目标 · 秘密</b><br>' + esc(h.traitorGoalText || '消灭所有英雄') +
-      '<br><span style="font-size:11px;color:#8d6458">线下由叛徒阅读；本机同屏时请注意避让。</span></div>';
+      ((h.hidden && h.traitor !== myIndex(st))
+        ? '<div class="goalBox secret"><b>叛徒目标 · 秘密</b><br><span style="font-size:12px">本剧本是隐藏叛徒，秘密目标只对叛徒本人展示；轮到他/她时再查看。</span></div>'
+        : '<div class="goalBox secret"><b>叛徒目标 · 秘密</b><br>' + esc(h.traitorGoalText || '消灭所有英雄') +
+          '<br><span style="font-size:11px;color:#8d6458">线下由叛徒阅读；本机同屏时请注意避让。</span></div>');
     const acts = h.actions || [];
     if (acts.length) {
       html += '<div class="infoSub">剧本行动</div>';
@@ -788,11 +807,26 @@
           ' · 每回合一次</span></div>';
       });
     }
+    html += '<div class="infoSub">剧本设置</div>' +
+      '<div class="monsterCard"><b>触发</b><br><span>' +
+      esc(h.card ? '剧本卡「' + h.card + '」 + ' : '') +
+      esc(h.omen ? '预兆「' + h.omen + '」' : '事件直接触发') +
+      (h.room ? ' · 房间「' + esc(h.room) + '」' : '') + '</span></div>';
     if (h.monster) {
+      const tags = [];
+      if (h.monster.noAttack) tags.push('不可被攻击');
+      if (h.monster.oneHit) tags.push('受伤即消灭');
+      if (h.monster.noStun) tags.push('不会僵直');
+      if (h.monster.ignoreDoors) tags.push('无视门');
+      if (h.monster.damageReduce) tags.push('伤害减免');
+      if (h.monster.attackOnly) tags.push('只能用' + traitLabel(h.monster.attackOnly) + '攻击');
+      if (h.monster.boundRoom) tags.push('不能离开' + h.monster.boundRoom);
       html += '<div class="infoSub">怪物面板</div>' +
-        '<div class="monsterCard"><b>' + esc(h.monster.name || '怪物') + '</b><br><span>力量 ' + (h.monster.might || '?') +
+        '<div class="monsterCard"><b>' + esc(h.monster.name || '怪物') + '</b> × ' + (h.monster.count || 1) + '<br><span>力量 ' + (h.monster.might || '?') +
         ' · 速度 ' + (h.monster.speed || '?') + ' · 神智 ' + (h.monster.sanity || '?') +
-        ' · 知识 ' + (h.monster.known || '?') + '</span></div>';
+        ' · 知识 ' + (h.monster.known || '?') + '</span>' +
+        (tags.length ? '<br><span>' + esc(tags.join(' / ')) + '</span>' : '') +
+        (h.monster.rule ? '<br><span style="font-size:11px;color:#8d6458">' + esc(h.monster.rule) + '</span>' : '') + '</div>';
     }
     const ms = st.monsters || [];
     if (ms.length) {
@@ -803,6 +837,33 @@
           '<br><span>速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') +
           (m.stunned ? ' · 僵直' : '') + (m.noAttack ? ' · 不可攻击' : '') + '</span></div>';
       });
+    }
+    const sc = (C.SCENARIOS || []).find((s) => s.no === h.no);
+    if (sc && sc.official) {
+      const sec = (label, text) => (text ? '<div class="infoSub">' + esc(label) + '</div><div class="ruleText">' + esc(text) + '</div>' : '');
+      const free = !!sc.official.freeForAll;
+      const heroLabel = free ? '自由混战' : '英雄方';
+      const heroPart = sec(heroLabel + ' Setup', (sc.official.hero && sc.official.hero.setup) || (free && sc.official.traitor && sc.official.traitor.setup)) +
+        sec(heroLabel + ' Objective', (sc.official.hero && sc.official.hero.objective) || (free && sc.official.traitor && sc.official.traitor.objective)) +
+        sec(heroLabel + ' Tokens', (sc.official.hero && sc.official.hero.tokens) || (free && sc.official.traitor && sc.official.traitor.tokens)) +
+        sec(heroLabel + ' 怪物 / Monster', (sc.official.hero && sc.official.hero.monster) || (free && sc.official.traitor && sc.official.traitor.monster)) +
+        sec(heroLabel + ' 胜利条件', (sc.official.hero && sc.official.hero.win) || (free && sc.official.traitor && sc.official.traitor.win));
+      const traitorPart = free ? '' :
+        sec('叛徒方 Setup', sc.official.traitor && sc.official.traitor.setup) +
+        sec('叛徒方 Objective', sc.official.traitor && sc.official.traitor.objective) +
+        sec('叛徒方 Tokens', sc.official.traitor && sc.official.traitor.tokens) +
+        sec('叛徒方怪物 / Monster', sc.official.traitor && sc.official.traitor.monster) +
+        sec('叛徒方胜利条件', sc.official.traitor && sc.official.traitor.win);
+      const zh = sc.official.zh;
+      if (zh) {
+        html += '<div class="infoSub">官方规则 · 中文</div>';
+        if (zh.hero) html += '<div class="ruleText"><b>' + (free ? '自由混战' : '英雄方') + '</b><br>' + esc(zh.hero) + '</div>';
+        if (zh.traitor) html += '<div class="ruleText"><b>' + (free ? '自由混战' : '叛徒方') + '</b><br>' + esc(zh.traitor) + '</div>';
+      }
+      html += '<details class="officialBox"><summary>英文原文 · 第 ' + ((sc.official.heroPage || sc.official.traitorPage) || '?') + ' 页（OCR）</summary>' +
+        (sc.official.title ? '<p><b>' + esc(sc.official.title) + '</b></p>' : '') +
+        heroPart + traitorPart +
+        '</details>';
     }
     html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" id="scClose" type="button">收起</button></div>';
     openModal(html, 'scenario');
@@ -951,7 +1012,7 @@
     if (st.haunt && st.haunt.active && !lastHauntActive) {
       lastHauntActive = true;
       const traitor = playersOf(st)[st.haunt.traitor];
-      showBanner('闹鬼开始', '叛徒是 ' + (traitor ? traitor.name : '?') + ' · ' + (st.haunt.name || ''), 'haunt');
+      showBanner('闹鬼开始', (st.haunt.hidden ? '叛徒身份未知（隐藏叛徒）' : '叛徒是 ' + (traitor ? traitor.name : '?')) + ' · ' + (st.haunt.name || ''), 'haunt');
       haptic([30, 40, 30]);
     }
     if (st.pendingRoll) {
@@ -1050,6 +1111,23 @@
       '<div style="font-size:12px;color:#c9b797;margin-top:4px">还剩 ' + left + ' 人没选 · ' + C.CHARS.length + ' 名探险者 · 属性轨道</div>';
     panel.appendChild(head);
 
+    const cards = st.scenarioChoices || C.SCENARIO_CARDS || [];
+    const pickRow = document.createElement('div');
+    pickRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px';
+    cards.forEach((name) => {
+      const b = document.createElement('button');
+      b.className = 'btn ' + (st.scenarioCard === name ? 'primary' : 'ghost');
+      b.type = 'button';
+      b.textContent = name;
+      b.style.minHeight = '36px';
+      b.addEventListener('click', () => window.GameShell.send({ type: 'scenario', card: name }));
+      pickRow.appendChild(b);
+    });
+    if (cards.length) panel.appendChild(pickRow);
+
+    const boardTaken = {};
+    playersOf(st).forEach((p) => { if (p.boardId) boardTaken[p.boardId] = p.name; });
+
     const grid = document.createElement('div');
     grid.className = 'pickGrid';
     panel.appendChild(grid);
@@ -1060,16 +1138,17 @@
       const b = document.createElement('button');
       b.className = 'pickCard';
       b.type = 'button';
-      b.disabled = !!owner || !mine;
+      b.disabled = !!owner || !mine || (!!ch.boardId && !!boardTaken[ch.boardId]);
       const tr = C.TRAITS.map((t) => {
         const v = ch.traits[t.key];
         return '<span>' + t.label + ' <b>' + v.start + '</b><em>' + v.min + '–' + v.max + '</em></span>';
       }).join('');
       b.innerHTML =
         '<div class="top"><span class="art" style="background:' + SEAT[idx % SEAT.length] + '">' + ch.art + '</span>' +
-        '<span><div class="nm">' + ch.name + '</div><div class="role">' + ch.role + '</div></span></div>' +
+        '<span><div class="nm">' + ch.name + '</div><div class="role">' + ch.role + ' · ' + (ch.age || '?') + ' 岁</div></span></div>' +
         '<div class="tr">' + tr + '</div>' +
-        (owner ? '<div class="who">已被 ' + esc(owner.name) + ' 选走</div>' : '');
+        (owner ? '<div class="who">已被 ' + esc(owner.name) + ' 选走</div>' : '') +
+        (!owner && ch.boardId && boardTaken[ch.boardId] ? '<div class="who">同一块人物板的另一面已被 ' + esc(boardTaken[ch.boardId]) + ' 选走</div>' : '');
       b.addEventListener('click', () => {
         if (owner) return;
         window.GameShell.send({ type: 'pick', char: ch.key });
@@ -1138,42 +1217,51 @@
     }
     const owner = playersOf(st)[pd.index];
     const can = canControlOwner(st, pd.index);
-    const pair = pd.kind === 'physical' ? ['might', 'speed'] : ['known', 'sanity'];
-    const a = pair[0], b = pair[1];
-    const va = owner.traits[a], vb = owner.traits[b];
+    const group = pd.kind === 'general' ? ['might', 'speed', 'known', 'sanity'] : (pd.kind === 'physical' ? ['might', 'speed'] : ['known', 'sanity']);
     const amount = pd.amount;
-    let html = '<h2>' + esc(owner.name) + ' 受到 ' + amount + ' 点' + (pd.kind === 'physical' ? '物理' : '精神') + '伤害</h2>' +
-      '<p>' + (pd.source ? esc(pd.source) + ' · ' : '') + '在「' + traitLabel(a) + '」和「' + traitLabel(b) + '」之间分配。闹鬼后属性归零即死亡。</p>' +
-      '<div class="dmgTrack">' +
-      '<input id="dmgRange" type="range" min="0" max="' + amount + '" value="' + Math.ceil(amount / 2) + '" aria-label="第一属性分配点数">' +
-      '<div class="dmgPair">' +
-      '<div class="dmgBox" id="dmgA"><small>' + traitLabel(a) + '</small><span id="dmgAv">' + (va - Math.ceil(amount / 2)) + '</span></div>' +
-      '<b>← 分配 →</b>' +
-      '<div class="dmgBox" id="dmgB"><small>' + traitLabel(b) + '</small><span id="dmgBv">' + (vb - (amount - Math.ceil(amount / 2))) + '</span></div>' +
-      '</div></div>';
+    const valueAfter = (t, n) => {
+      const tr = owner.track && owner.track[t];
+      if (tr) return tr.list[Math.max(0, Math.min(tr.list.length - 1, tr.pos - n - 1))];
+      return Math.max(owner.min[t], owner.traits[t] - n);
+    };
+    const initial = Math.floor(amount / group.length);
+    const rest = amount - initial * group.length;
+    let html = '<h2>' + esc(owner.name) + ' 受到 ' + amount + ' 点' +
+      (pd.kind === 'physical' ? '物理' : pd.kind === 'mental' ? '精神' : '通用') + '伤害</h2>' +
+      '<p>' + (pd.source ? esc(pd.source) + ' · ' : '') + '伤害会让标记沿轨道下滑；走到骷髅即倒下。</p>' +
+      '<div class="dmgPair" style="grid-template-columns:repeat(2,1fr)">';
+    group.forEach((t, k) => {
+      const v = k === group.length - 1 ? amount - initial * (group.length - 1) : initial;
+      html += '<label class="dmgBox" style="display:block"><small>' + traitLabel(t) + '（' + owner.traits[t] + '）</small>' +
+        '<input class="dmgNum" data-trait="' + t + '" type="number" min="0" max="' + amount + '" value="' + v + '" style="width:100%;min-height:40px;font-size:18px"></label>';
+    });
+    html += '</div>';
     if (can) html += '<button class="btn primary" type="button" id="dmgOk" style="width:100%;min-height:48px">确认分配</button>';
     else html += '<p>等待 ' + esc(owner.name) + ' 分配伤害。</p>';
     openModal(html, 'damage');
 
-    const range = $('dmgRange');
-    const update = () => {
-      const first = Number(range.value);
-      const second = amount - first;
-      const hauntOn = st.haunt && st.haunt.active;
-      const nextA = hauntOn ? (va - first) : Math.max(va - first, owner.min[a]);
-      const nextB = hauntOn ? (vb - second) : Math.max(vb - second, owner.min[b]);
-      $('dmgAv').textContent = nextA + (hauntOn && nextA < owner.min[a] ? '（骷髅）' : (!hauntOn && nextA <= owner.min[a] ? '（最低）' : ''));
-      $('dmgBv').textContent = nextB + (hauntOn && nextB < owner.min[b] ? '（骷髅）' : (!hauntOn && nextB <= owner.min[b] ? '（最低）' : ''));
+    const nums = Array.from(document.querySelectorAll('.dmgNum'));
+    const sync = () => {
+      nums.forEach((n) => {
+        const t = n.getAttribute('data-trait');
+        const box = n.parentElement.querySelector('small');
+        box.textContent = traitLabel(t) + '（' + valueAfter(t, Number(n.value) || 0) + '）';
+      });
     };
-    if (range) {
-      range.addEventListener('input', update);
-      update();
-    }
+    nums.forEach((n) => n.addEventListener('input', sync));
+    sync();
     const ok = $('dmgOk');
     if (ok) ok.addEventListener('click', () => {
-      const first = Number($('dmgRange').value);
+      const parts = {};
+      let sum = 0;
+      nums.forEach((n) => {
+        const v = Math.max(0, Math.floor(Number(n.value) || 0));
+        if (v) parts[n.getAttribute('data-trait')] = v;
+        sum += v;
+      });
+      if (sum !== amount) { alert('分配合计必须等于 ' + amount); return; }
       const asPid = window.GameShell.isLocal() ? owner.id : undefined;
-      window.GameShell.send({ type: 'allocateDamage', first: a, second: amount - first }, asPid);
+      window.GameShell.send({ type: 'allocateDamage', parts: parts }, asPid);
     });
   }
 
@@ -1197,10 +1285,39 @@
     }, '你可以只送出「' + own.name + '」，也可以指定要对方一件物品；对方确认后才会交换。');
   }
 
+  function openTradeBuilder(st, mi, other) {
+    const me = playersOf(st)[mi];
+    const usable = (it) => !it.noTrade && !(st.itemActions || {})[it.name];
+    const box = (side, it, idx) => '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.08)">' +
+      '<input type="checkbox" data-side="' + side + '" data-idx="' + idx + '" style="margin-top:3px">' +
+      '<span><b>' + esc(it.name) + '</b><br><small>' + esc((it.text || '').slice(0, 60)) + '</small></span></label>';
+    let html = '<h2>与 ' + esc(other.name) + ' 交易</h2><p>勾选你给出的牌和你想从对方拿的牌；对方确认后才交换。</p>' +
+      '<h3 style="font-size:14px;margin:10px 0 4px">你给出</h3>';
+    const mine = (me.items || []).filter(usable);
+    html += mine.length ? mine.map((it) => box('own', it, me.items.indexOf(it))).join('') : '<p>你没有可交易的牌。</p>';
+    html += '<h3 style="font-size:14px;margin:10px 0 4px">你要 ' + esc(other.name) + ' 的</h3>';
+    const theirs = (other.items || []).filter(usable);
+    html += theirs.length ? theirs.map((it) => box('want', it, other.items.indexOf(it))).join('') : '<p>对方没有可交易的牌。</p>';
+    html += '<div class="actions" style="margin-top:14px"><button class="btn primary" type="button" id="tradeOk">发出交易</button>' +
+      '<button class="btn ghost" type="button" id="tradeCancel">取消</button></div>';
+    openModal(html, 'trade');
+    $('tradeCancel').addEventListener('click', () => closeModal());
+    $('tradeOk').addEventListener('click', () => {
+      const give = [], want = [];
+      Array.from(document.querySelectorAll('#cModalCard input[type=checkbox]')).forEach((c) => {
+        if (!c.checked) return;
+        (c.getAttribute('data-side') === 'own' ? give : want).push(Number(c.getAttribute('data-idx')));
+      });
+      if (!give.length && !want.length) { alert('至少勾一张牌'); return; }
+      window.GameShell.send({ type: 'tradeOffer', target: other.id, giveIndexes: give, wantIndexes: want });
+      closeModal();
+    });
+  }
+
   function renderInventory(st, mi) {
     const me = playersOf(st)[mi];
     const items = me.items || [];
-    let html = '<h2>' + esc(me.name) + ' 的物品</h2><p>物品不占携带上限。每件物品每回合只能执行「使用 / 交易 / 丢弃 / 偷窃 / 拾取」其中一项；卡面写明不能交易或丢弃的除外。</p>';
+    let html = '<h2>' + esc(me.name) + ' 的物品</h2><p>物品不占携带上限。每件物品每回合只能执行「使用 / 交易 / 丢弃 / 拾取」其中一项；卡面写明不能交易或丢弃的除外。第三版普通攻击不能偷牌，只有剧本写明才能抢。</p>';
     if (!items.length) {
       html += '<div class="emptyNote">还没有物品。探索房间、抽物品卡，或从地上拾取。</div>';
     } else {
@@ -1222,9 +1339,20 @@
       });
       html += '</div>';
     }
-    html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" type="button" id="invClose">收起</button></div>';
+    const partners = playersOf(st).filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
+    html += '<div class="actions" style="margin-top:14px">';
+    if (partners.length && !st.traded) {
+      html += '<button class="btn primary" type="button" id="invTrade">发起交易</button>';
+    }
+    html += '<button class="btn ghost" type="button" id="invClose">收起</button></div>';
     openModal(html, 'inventory');
 
+    const tradeBtn = $('invTrade');
+    if (tradeBtn) tradeBtn.addEventListener('click', () => {
+      const go = (p) => openTradeBuilder(st, mi, p);
+      if (partners.length === 1) go(partners[0]);
+      else chooseTarget('和谁交易？', partners.map((p) => ({ name: p.name, p: p })), (o) => go(o.p));
+    });
     $('invClose').addEventListener('click', () => closeModal());
     $('cModalCard').querySelectorAll('[data-use]').forEach((b) => b.addEventListener('click', () => {
       window.GameShell.send({ type: 'useItem', index: Number(b.dataset.use) });
@@ -1479,13 +1607,15 @@
     actions.innerHTML = '';
     const box = document.createElement('div');
     box.className = 'tradePrompt';
-    const hasRequest = o.requestIndex !== null && o.requestIndex !== undefined && o.requestIndex >= 0 && o.requestName;
-    const swap = hasRequest ? '，并要你的「<b>' + esc(o.requestName) + '</b>」' : '';
+    const hasRequest = (o.wantNames && o.wantNames.length) || (o.requestIndex !== null && o.requestIndex !== undefined && o.requestIndex >= 0 && o.requestName);
+    const give = (o.giveNames && o.giveNames.length ? o.giveNames : [o.itemName]).map((n) => '「<b>' + esc(n) + '</b>」').join('、');
+    const want = (o.wantNames && o.wantNames.length ? o.wantNames : (o.requestName ? [o.requestName] : [])).map((n) => '「<b>' + esc(n) + '</b>」').join('、');
+    const swap = hasRequest ? '，并要你的 ' + want : '';
     const title = isTo ? (hasRequest
-      ? '<b>' + esc(from ? from.name : '对方') + '</b> 想用「<b>' + esc(o.itemName) + '</b>」换你的「<b>' + esc(o.requestName) + '</b>」。'
-      : '<b>' + esc(from ? from.name : '对方') + '</b> 想把「<b>' + esc(o.itemName) + '</b>」交易给你。')
-      : local ? '把设备交给 <b>' + esc(to ? to.name : '接收方') + '</b>，由对方决定是否接受「<b>' + esc(o.itemName) + '</b>」' + swap + '。'
-      : '已向 <b>' + esc(to ? to.name : '对方') + '</b> 发起交易：<b>' + esc(o.itemName) + '</b>' + swap + '，等待对方回应。';
+      ? '<b>' + esc(from ? from.name : '对方') + '</b> 想用 ' + give + ' 换你的 ' + want + '。'
+      : '<b>' + esc(from ? from.name : '对方') + '</b> 想把 ' + give + ' 交易给你。')
+      : local ? '把设备交给 <b>' + esc(to ? to.name : '接收方') + '</b>，由对方决定是否接受 ' + give + swap + '。'
+      : '已向 <b>' + esc(to ? to.name : '对方') + '</b> 发起交易：' + give + swap + '，等待对方回应。';
     box.innerHTML = title + '<div class="tradeBtns"></div>';
     const btns = box.querySelector('.tradeBtns');
     const add = (label, cls, fn, disabled) => {
@@ -1634,10 +1764,17 @@
       const note = document.createElement('span');
       note.className = 'sub';
       note.style.cssText = 'font-size:12px;color:#e6c8a8;align-self:center;line-height:1.5';
-      note.textContent = '你已经倒下，物品已掉在「' + (here ? here.name : '原地') + '」，点结束回合跳过。';
+      note.textContent = '你已经倒下，物品与预兆仍放在你的板旁，其他人在这个房间可以搜刮。点结束回合跳过。';
       actions.appendChild(note);
       addBtn('结束回合', 'primary', () => window.GameShell.send({ type: 'end' }));
       return;
+    }
+    const corpse = playersOf(st).find((p) => p.dead && p !== me && p.floor === me.floor && p.x === me.x && p.y === me.y && (p.items || []).length);
+    if (corpse && !st.looted && isMine) {
+      addBtn('搜刮 ' + esc(corpse.name) + ' 的牌', 'ghost', () => {
+        const menu = (corpse.items || []).map((it, k) => ({ name: it.name, k }));
+        chooseTarget('从尸体上拿一张', menu, (o) => window.GameShell.send({ type: 'lootCorpse', target: playersOf(st).indexOf(corpse), index: o.k }));
+      });
     }
     if (st.tradeOffer) {
       renderTradePrompt(st, me, actions);
@@ -1712,32 +1849,10 @@
       });
       if (foes.length) {
         addBtn('攻击', 'primary', () => {
-          if (foes.length === 1) {
-            window.GameShell.send({ type: 'attack', target: foes[0].id, trait: 'might' });
-            return;
-          }
-          chooseTarget('攻击谁？', foes, (f) => {
-            window.GameShell.send({ type: 'attack', target: f.id, trait: 'might' });
-          });
+          const go = (f) => sendAttackWithWeapon(st, mi, f.id, 'might', false);
+          if (foes.length === 1) go(foes[0]);
+          else chooseTarget('攻击谁？', foes, go);
         }, !!st.attacked);
-        const stealFoes = foes.filter((f) => f.items);
-        if (stealFoes.length) {
-          addBtn('偷窃', 'ghost', () => {
-            chooseTarget('从谁身上偷物品？', stealFoes, (f) => {
-              const victim = playersOf(st).find((p) => p.id === f.id);
-              const loot = victim ? (victim.items || []).filter((it) => !it.noSteal && !it.noTrade) : [];
-              if (!loot.length) {
-                window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true });
-                return;
-              }
-              const options = loot.map((it) => ({ name: '偷「' + it.name + '」', item: it }));
-              chooseTarget('偷哪件物品？', options, (pick) => {
-                const itemIndex = victim.items.indexOf(pick.item);
-                window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', steal: true, stealIndex: itemIndex });
-              }, '偷窃也要先攻击命中，且差值至少 2 点才能抢走选定的物品。');
-            });
-          }, !!st.attacked);
-        }
       }
       const ranged = [];
       if (C.helpers.hasDistanceWeapon(st, mi, 'might')) {
@@ -1753,19 +1868,18 @@
       }
       if (ranged.length) {
         addBtn('远程攻击', 'ghost', () => {
-          chooseTarget('远程攻击谁？', ranged, (f) => {
-            window.GameShell.send({ type: 'attack', target: f.id, trait: 'might', distance: true });
-          });
+          chooseTarget('远程攻击谁？', ranged, (f) => sendAttackWithWeapon(st, mi, f.id, 'might', true));
         }, !!st.attacked);
       }
     }
 
     if (st.haunt && st.haunt.active && isMine) {
       const h = st.haunt;
-      const usedMap = h.used || {};
+      const gameUsed = h.gameUsed || {};
+      const turnUsed = h.turnUsed || h.used || {};
       (h.actions || []).forEach((a) => {
         if (a.side && a.side !== me.side) return;
-        const used = !!usedMap[me.id + '|' + a.key];
+        const used = a.once === 'game' ? !!gameUsed[me.id + '|' + a.key] : !!turnUsed[me.id + '|' + a.key];
         const okWhere = !a.where || a.where === 'any' ||
           (a.where === 'room' && here && here.name === a.room) ||
           (a.where === 'symbol' && here && here.symbol === (a.symbol || 'event')) ||
@@ -1879,7 +1993,7 @@
   window.GameShell.boot({
     game: 'cabin',
     title: '林中小屋',
-    blurb: '官方 Second Edition 核心机制：探索 44 间房、抽事件/物品/预兆，预兆累积后掷 6 骰触发闹鬼；按房间与预兆查剧本，叛徒与英雄按各自目标对抗。',
+    blurb: '官方第三版（3E）核心机制：探索 46 间房、抽事件/物品/预兆；预兆数就是闹鬼骰数，总点数 ≥5 触发，最后一张预兆抽出即自动闹鬼；按剧本卡 + 预兆查 50 个剧本，叛徒与英雄按各自目标对抗。',
     rules: [
       { h: '探索', items: [
         '所有探险者从<b>入口大厅</b>开始。每回合移动点等于当前<b>速度</b>，不掷速度骰。',
@@ -1892,17 +2006,18 @@
         '受到物理伤害时在力量/速度间分配，精神伤害在知识/神智间分配；护甲先减物理伤害。'
       ] },
       { h: '闹鬼', items: [
-        '每抽到一张预兆，回合结束时掷 6 颗骰；总点数<b>小于</b>全场预兆总数时闹鬼。',
+        '每抽到一张预兆，回合结束时按<b>全场预兆数</b>掷骰（几张预兆就掷几颗）；总点数 <b>≥5</b> 时闹鬼。',
+        '预兆牌堆的最后一张被抽出时，不再掷骰，回合结束直接闹鬼。',
         '用<b>触发房间 + 预兆</b>查 ' + C.SCENARIOS.length + ' 个剧本之一，剧本决定叛徒，叛徒不一定是抽预兆的人。',
         '闹鬼后同一房间的敌对角色移动额外消耗 1 点；每回合可攻击一次，双方掷同一属性，差值造成伤害。'
       ] },
       { h: '物品与交易', items: [
-        '物品卡在桌上公开；每件物品每回合只能执行<b>使用 / 交易 / 丢弃 / 偷窃 / 拾取</b>其中一项。',
+        '物品卡在桌上公开；每件物品每回合只能执行<b>使用 / 交易 / 丢弃 / 拾取</b>其中一项。第三版普通攻击不能偷牌。',
         '判定或攻击中用到物品，也会把该物品标记为本回合已使用，不能再用它交易或丢弃。',
-        '交易必须先向同房间玩家发起请求，<b>由接收方确认</b>后才转移。可以一件换一件，也可以纯赠送；对方拒绝或发起方撤回则双方物品都不动。',
-        '角色死亡时会把身上的物品全部掉在所在房间，其他玩家可拾取。',
+        '交易必须先向同房间玩家发起请求，<b>由接收方确认</b>后才转移。一次可以交换任意多张，也可以纯赠送；对方拒绝或发起方撤回则双方物品都不动。',
+        '角色死亡时，棋子留在死亡房间，物品与预兆仍放在人物板旁；其他玩家进入同一房间后每回合可以从尸体上拿一张。',
         '丢在地上的物品形成公开物品堆，同房间玩家可逐件拾取，也可以一次拿全部；地上物品不会消失。',
-        '偷窃命中且差值达到 2 点时，可以先选择目标身上的一件可偷物品。'
+        '第三版删除了普通偷窃：只有闹鬼剧本明确写出「可以抢牌」时，才按剧本行动处理。'
       ] },
       { h: '怪物与剧本', items: [
         '怪物默认不能被杀死；英雄击中怪物使其僵直并跳过下一个怪物阶段。',
@@ -1915,7 +2030,7 @@
     max: 6,
     engine: window.CabinEngine,
     seatColor: (p, i) => SEAT[i % SEAT.length],
-    seatTag: (p) => (cur && cur.haunt && cur.haunt.active && cur.players.indexOf(p) === cur.haunt.traitor ? '叛徒' : p.charName),
+    seatTag: (p) => (cur && cur.haunt && cur.haunt.active && !cur.haunt.hidden && cur.players.indexOf(p) === cur.haunt.traitor ? '叛徒' : p.charName),
     onSeatClick: (p, i, st) => openPlayerInfo(st, i),
     turnPill: (st) => {
       if (!st) return '等待开始';

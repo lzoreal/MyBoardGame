@@ -6,27 +6,70 @@ window.CABIN_PACKS = {
       "name": "安妮塔·赫尔南德斯",
       "role": "中学生·标本制作",
       "art": "安",
-      "age": 16,
+      "age": 12,
+      "birthday": "06-11",
+      "boardId": "yellow",
       "traits": {
         "speed": {
           "start": 5,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 5
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 2
         }
       },
       "custom": true
@@ -36,27 +79,73 @@ window.CABIN_PACKS = {
       "name": "布里塔妮·“节拍”·鲍恩",
       "role": "夜店 DJ",
       "art": "节",
-      "age": 26,
+      "age": 22,
+      "birthday": "12-01",
+      "boardId": "purple",
       "traits": {
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 5
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         }
       },
       "custom": true
@@ -66,27 +155,71 @@ window.CABIN_PACKS = {
       "name": "阮医生",
       "role": "内科医生",
       "art": "阮",
-      "age": 42,
+      "age": 60,
+      "birthday": "05-06",
+      "boardId": "white",
       "traits": {
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            7
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         }
       },
       "custom": true
@@ -96,27 +229,71 @@ window.CABIN_PACKS = {
       "name": "梁神父",
       "role": "本堂神父",
       "art": "梁",
-      "age": 47,
+      "age": 71,
+      "birthday": "11-17",
+      "boardId": "white",
       "traits": {
         "speed": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         }
       },
       "custom": true
@@ -126,27 +303,68 @@ window.CABIN_PACKS = {
       "name": "伊莎·瓦伦西亚",
       "role": "小学生·灵异博主",
       "art": "伊",
-      "age": 10,
+      "age": 11,
+      "birthday": "03-30",
+      "boardId": "yellow",
       "traits": {
         "speed": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         }
       },
       "custom": true
@@ -156,27 +374,69 @@ window.CABIN_PACKS = {
       "name": "杰登·琼斯",
       "role": "小学生·小侦探",
       "art": "杰",
-      "age": 9,
+      "age": 11,
+      "birthday": "10-04",
+      "boardId": "green",
       "traits": {
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 5,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 4
         },
         "sanity": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         }
       },
       "custom": true
@@ -186,27 +446,70 @@ window.CABIN_PACKS = {
       "name": "约瑟夫·“布罗”·胡珀",
       "role": "大学生·橄榄球员",
       "art": "约",
-      "age": 21,
+      "age": 25,
+      "birthday": "02-25",
+      "boardId": "red",
       "traits": {
         "speed": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "might": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            2,
+            3,
+            3,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            5,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         }
       },
       "custom": true
@@ -216,27 +519,73 @@ window.CABIN_PACKS = {
       "name": "米歇尔·门罗",
       "role": "长曲棍球队员",
       "art": "米",
-      "age": 20,
+      "age": 19,
+      "birthday": "08-19",
+      "boardId": "purple",
       "traits": {
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            6,
+            6,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            6,
+            6
+          ],
+          "startPos": 2
         }
       },
       "custom": true
@@ -246,27 +595,70 @@ window.CABIN_PACKS = {
       "name": "奥利弗·斯威夫特",
       "role": "哲学讲师·长跑者",
       "art": "奥",
-      "age": 34,
+      "age": 33,
+      "birthday": "07-03",
+      "boardId": "red",
       "traits": {
         "speed": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 4
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         }
       },
       "custom": true
@@ -276,27 +668,69 @@ window.CABIN_PACKS = {
       "name": "珀耳塞福涅·普莱里",
       "role": "药草店老板",
       "art": "珀",
-      "age": 30,
+      "age": 49,
+      "birthday": "04-15",
+      "boardId": "blue",
       "traits": {
         "speed": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 7
+          "max": 7,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 5,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 4
         }
       },
       "custom": true
@@ -306,27 +740,69 @@ window.CABIN_PACKS = {
       "name": "萨米·安格勒",
       "role": "小学生·魔术爱好者",
       "art": "萨",
-      "age": 8,
+      "age": 9,
+      "birthday": "09-18",
+      "boardId": "green",
       "traits": {
         "speed": {
           "start": 5,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            8
+          ],
+          "startPos": 5
         },
         "might": {
           "start": 4,
           "min": 3,
-          "max": 8
+          "max": 8,
+          "track": [
+            3,
+            4,
+            5,
+            5,
+            6,
+            8
+          ],
+          "startPos": 2
         },
         "known": {
           "start": 3,
           "min": 2,
-          "max": 8
+          "max": 8,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "startPos": 2
         },
         "sanity": {
           "start": 4,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            7
+          ],
+          "startPos": 3
         }
       },
       "custom": true
@@ -336,27 +812,70 @@ window.CABIN_PACKS = {
       "name": "斯蒂芬妮·里希特",
       "role": "纪录片导演",
       "art": "斯",
-      "age": 39,
+      "age": 40,
+      "birthday": "01-12",
+      "boardId": "blue",
       "traits": {
         "speed": {
           "start": 3,
           "min": 2,
-          "max": 7
+          "max": 7,
+          "track": [
+            2,
+            3,
+            3,
+            5,
+            5,
+            6,
+            7
+          ],
+          "startPos": 2
         },
         "might": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            3,
+            4,
+            5,
+            5,
+            6
+          ],
+          "startPos": 4
         },
         "known": {
           "start": 4,
           "min": 2,
-          "max": 6
+          "max": 6,
+          "track": [
+            2,
+            3,
+            4,
+            4,
+            5,
+            6,
+            6
+          ],
+          "startPos": 3
         },
         "sanity": {
           "start": 5,
           "min": 4,
-          "max": 8
+          "max": 8,
+          "track": [
+            4,
+            5,
+            5,
+            6,
+            6,
+            7,
+            8,
+            8
+          ],
+          "startPos": 2
         }
       },
       "custom": true
@@ -385,7 +904,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "FRIENDSFOREVER",
+        "heroPage": 4,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "YoumayrevealyourNumbertokenjustbeforesomeonesuccessfully 1.FindtheNumbertokenslabeled1through{3/4/5/63andshufflethem,face-down.Giveonetoeachplayer DestroystheRing!Ifyoudo，rturnallheroestoanyLandingtilesof IFTHETRAITORWINS 2.Eachplayerthenlooksattheirtokenwithoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is yourchoice.TheherotryingtoDestroytheRing!canfailasaresult. Youdiscoveredtatyoucouldcontrol thetraitor Whenyourevealyourselfasthetraitor,healallofyourtraitsandgain timewiththering.Luckilyyour 3.SettheNumberTrackto{6/5/4/3} 1Might. annoying“friends”didn'tcatchon 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. thatyou'retheonewhocreatedthe Ifyouhaverevealedyourself，ounottakedamageifyoudonot timeloop.Theydidn'tknowthatthis returntoaLandingtileattheendofthehauntrevealer'sturn wasn'tthefirsttimeyou²dmurdered HIDDENTRAITOR them...andnowtheyneverwill.",
+          "objective": "Thetraitorbeginsthishaunthiddenfromtherestoftheexplorers TheheroeswinwhentheRing Theplayerwhohasthetokenlabeled“1”isthetraitor.Playersmay hasbeendestroyedORwhenthe lookattheirowntokensatanytime. traitorisdead Youmaynotrevealyournumbertokenstootherplayersunless Thetraitorwinswhenallofthe heroesaredeadORwhenthe instructedmylimtoholdanynumber(s) NumberTrackisat0. Allexplorersmayattackotherexplorers TOKENS Itcoststwomovestoleaveatileoccupiedbyanotherexplorer.After NEEDED thetraitorisrevealedlongeractasobstaclestoeach NumberTrack other.(Theywillstillactasobstaclestothetraitor.） NumberTokens ATTHEEN",
+          "tokens": "",
+          "monster": "",
+          "win": "DestroytheRing INTRODUCTION Thiswholetimeyouthoughtitstrange WhileholdingtheRingyoumaymakeaSpeedorKnowledgeroll thatyourfriendhadbeensoguiet Forthepastweekyou'velivedthesamedayoverandoveragain.Youhavenoideawhatis Add1totheresultofyourrollforeachheroonatilewitha lately.Youfiguredtheywerejusta timedisturbance. happeningorwhy，buttodayyou'vebeenledtothishouse,tothisroom,whereyoudiscover littlemadatsomethingyou²dsaid Ifthetraitorisdeadyouwin!Ifthetraitorisnotdead,they 7+一 aringengravedwithstrangesymbols.Whenyouslipitontoyourfinger，yousuddenlyfeel butyoudidn'tthinktheywouldbe mustrevealthemselvesnow.TheRingisdestroyed differet,asthoughyoucanmomentarilystepoutsideofthetimeloop.Youknowthatyou madenoughtotrapyouinatime 0-6Take6Generaldamage.PlaceyourexploreronanyLandingtile loopjustsotheycouldkilly"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：按人数发 1–3/4/5/6 号数字标记，1 号是叛徒；数字轨道设为 6/5/4/3；叛徒左手先行动。目标：摧毁戒指，或杀死叛徒。胜利：杀死叛徒，或持戒指做速度/知识判定 7+ 摧毁它；失败则受 6 点通用伤害并被放到任一平台。",
+          "traitor": "布置：你是隐藏叛徒，身份只有自己知道。目标：杀光英雄，或把数字轨道降到 0。暴露时治疗全部属性并 +1 力量。"
+        }
+      }
     },
     {
       "no": 4,
@@ -413,7 +957,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE FREE REALTOR",
+        "heroPage": 6,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "Armory-Basement/GroundFloor WhileonthesametileastheDemonRealtormakeaSanityroll.Add Graveyard-GroundFloor 1.PlacetheDemontokenontheEntranceHalltile.ThisistheDemonRealtor 1totheresultofyourrollforeachFiretokenonatileinyourregion 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheDemonRealtorwilltakeitsturnafterthatplayer IfyourexplorerisontheRitualRoomtile,lsoadd1totheresult.If 3.Find6Firetokens.Place{3/2/1/0}ofthemontileswithheroes.ThesemarkCleansedRooms,whichwillhelp",
+          "objective": "comfortinghandonhershoulderand Thishaunthasnotraitor.Youareallfightingtosurvive AFTERTHEHAUNTREVEALER'STURN,THEDEMON Youwinwhenyouperformthe offer“Maybe'slet'sjuststartwith REALTORTAKESHERTURN. ritualtofreetherealtorfromher Onceduringyourturn，youmay gettingsomefoodfromtheplacedown curse GainKnowledgeoftheCurse theroad?” KnowledgeoftheCursewill WhieonatilewhereyoucanstudymkeaKnowledgeroll. helpyoutocompletetasks TakeaKnowledgetoken.ThisrepresentsKnowledgeoftheCurse 5+ CleansedRoomswillhelpyou IfyoualreadyhaveaKnowledgetoken,giveonetoanexploreron MONSTER:DEMONREALTOR toperformtheritual. yourtile",
+          "tokens": "Onceduringyourturn，oumay withSanity（ifsheisonthesametile) CleansetheRoom DemonToken-DemonRealtor TheDemonRealtorcannotbestunnedIfyoudamageheryou WhileonanytilethathasanEventsymbolmakeaSpeedrolllfyou 6FireTokens-CleansedRoom maymoveheruptothatmanytiles,instead haveaKnowledgetoken,add2totheresultofyourroll.Youcannot 2MightTokens-WardofProtection makethisrollifthereisalreadyaFiretokenonyourtile. WHENYOUATTACKORAREATTACKEDBYTHE 2KnowledgeTokens-Knowledge DEMONREALTOR PlaceaFiretokenonyourtile.ThisrepresentsaCleansedRoom 6+ oftheCurse IfyohaveaMighttoken,oltwoadditionaldice 0-5Nothinghappens.Maybetrytorecitetheincantationmorequickly ATTHEENDOFTHEMONSTERTURN EachherointhesameregionastheDemonRealto",
+          "monster": "",
+          "win": "youhaveaKnowledgetoken,alsoadd2totheresult. youtoperformtheritual.Donotplacemorethanonetokenonatile.Settheremainingtokensaside Therealtorcriesoverwhelmed 13+Youwin！Yousuccessfullyridtherealtorofhercurse！ 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. “l'mgoingtogoseeamovie-or 9-12Nothinghappens.Endyourturn. maybegeticecream-ormaybel'll gotoParisorTokyo！”Youplacea 0-8Eachheroloses1Sanity.Endyourturn.Therealtorscreams COOPERATIVEHAUNT OBJECTIVE comfortinghandonhershoulderand Thishaunthasnotraitor.Youareallfightingtosurvive AFTERTHEHAUNTREVEALER'STURN,THEDEMON Youwinwhenyouperformthe offer“Maybe'slet'sjuststartwith REALTORTAKESHERTURN. ritualtofreetherealtorfromher Onceduringyourturn，youmay gettingsomefoodfromtheplacedown curse GainKnowledgeoftheCurse theroad?” Knowledg"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：恶魔中介放门厅，6 个火焰标记按 3/2/1/0 放在有英雄的板块，揭示者左手先行动。目标：在仪式房做神智判定，累计 3 次成功解救她。胜利：13+ 成功；9–12 结束回合；0–8 每名英雄失去 1 神智。",
+          "traitor": "本剧本没有叛徒，全员合作。"
+        }
+      }
     },
     {
       "no": 5,
@@ -473,13 +1042,46 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 8,
         "attack": "might",
+        "noAttack": true,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 8,
         "known": 8,
-        "rule": "不可被攻击；只能靠「捉迷藏」成对移除，进入视线即停"
+        "rule": "不可被攻击；只能靠「捉迷藏」成对移除，进入视线即停",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "BLOODFROMASTONE",
+        "heroPage": 7,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "ties)butimmediatelystopassoonastheyenteranyhero'sline petrifiedhands.Youarenowapartof ofsight. 1.EachexplorerplacesaSmallMonstertokenontheirtile.TheseareStoneCherubs. thehouse.justanotherstatuelost tohistory 2.Find{3/4/5/6]additionalStoneCherubs.Ifpossible,placethemontilesthatarenotinheroes'linesofsight Cherubsthatstarttheirturninahero'slineofsightwillnotmove Ifyoucannot,placetherestaroundthehousehoweveryoulike duringthatturn. PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer 3. ATTHEENDOFTHEMONSTERTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. EachherotakesonedieofGeneraldamageforeachCherubintheir lineofsight COOPERATIVEHAUNT",
+          "objective": "ThishaunthasnotraitorYouareallfightingtosurvive. YouwinwhenalloftheCherubs STONYGAZE havebeenremovedfromthehouse Onceduringyourturn，oumay WheneveryouenteratilethathaslineofsighttoaCherubthatwasnotin PlayPeekaboo Youloseifalloftheheroesaredead yourlineofsightatthestartofyourturn,te2diceofGeneraldamage. WhileonatilewithaCherub，ifthereisanotherCherubinlineof Youcannottakethisdamagemorethanonceduringyourturn.",
+          "tokens": "sight,makeaKnowledgeroll.IfyouhavetheMirroradd2tothe resultofyourroll. SmallMonsterTokens-StoneCherubs RemovebothCherubsfromthehouse.Thecherubsmeeteach 4+ other'sgazesandbecomefrozenintime. 0-3TaketwodiceofGeneraldamage secretsofsurvival13 12Secretsofsurvival",
+          "monster": "",
+          "win": "CHERUBSTAKETHEIRTURN Thecherubsstandinstonysilence INTRODUCTION havingallbeenpetrifiedbytheirvery Youreyesaredrawntothestatuesofpeoplearrangedeverywherearoundthehouse.The owngazes.Allthesameyoudon't maskappearstobeapiecebrokenfromoneofthesmallerstatues.Thestatuesareonly daremeettheirlifelesseyes.You remarkableinthatthereseemstobeabsolutelynothingspecialaboutthem.Theyrepresent MONSTER:STONECHERUB slowlybackawaynotuningyour backonthemuntilyouaresafely peoplefromdifferentperiodsoftimebuttheyallsharethesamemundanegualities. Knowledge8 Might8 Speed4 Sanity8 awayfromthehouse Except,thatis,forthelittlecherubs.Everytimeyoublink,theyseemtomovealittlebit Cherubsdonotattack,andthey cannotbeattacked closertoyou IFYOULOSE Cherubsmovetowardtheclosesthero（thehauntrevealerbreaks Themaskclattersfromyoursto"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：每名探险者在自己板块放 1 只石像小天使，再按 3/4/5/6 把额外的放在英雄视线外。目标：用「捉迷藏」成对移除 4 对。胜利：与一只小天使同格、另一只在其视线内时做知识判定，4+ 移除两只；0–3 受两骰通用伤害。",
+          "traitor": "本剧本没有叛徒，全员合作。"
+        }
+      }
     },
     {
       "no": 6,
@@ -528,7 +1130,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "INHERITANCE",
+        "heroPage": 8,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "IFYOUDIE Withtherestofthe'familyburied TurnyourNumbertokenface-up 1.ThehauntrevealerplaceseachTraittokenface-uponadifferenttile,inadifferentregionfromitsmatchingTrait yougoaboutsearchingfortheold token.(Example:IftheMighttokenisontheUpperFloor,theotherMighttokenmustbeplacedontheGround man'sdocuments.Withanedithere ATTHEENDOFYOURTURN FloororBasement.）ThesetokensrepresentEvidence. andaforgedsignaturethere,the fyoudidnotattack,taketwodiceofMentaldamage.Yourgreat-uncle' 2.ShuffletheNumbertokenslabeled1through{3/4/5/6y,face-down.Giveoneofthesetokenstoeachplayer houseandallthewealthandstatus ghostdemandsvengeance.Itdoesn'tcarewho'sonthereceivingend thatcomeswithit、isnowyours 3.Eachplayerthenlooksattheirtoken,withoutrevealingittoanyoneelse.Theplayerwiththetokenlabeled1is thetraitor. IFYOUARETHETRAITOR 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. Youmayrevealyourselfatan",
+          "objective": "Thetraitorbeginsthishaunthiddenfromtherestoftheexplorers IfyoudiefromtakingMentaldamageattheendofyourturn,instead Theheroeswinwhenthetraitor revealyourselfasthetraitorHealallofyourtraitsandgain1Might Theplayerwhohasthetokenlabeled“1”isthetraitor.Playersmay isdead. OnceyouarerevealedasthetraitoryounolongertakeMentaldamageat lookattheirowntokensatanytime Thetraitorwinswhenallthe theendofyourturn. Youmaynotrevealyournumbertokenstootherplayersunless heroesaredead instructed,btmayclaimtoholdanynumber(s)",
+          "tokens": "Allexplorersmayattackotherexplorers. NumberTokens Itcoststwomovestoleaveatileoccupiedbyanotherexplorer.After 8TraitTokens-Evidence thetraitorisrevealedhenolongeractasobstaclestoeach other(Theywillstillactasobstaclestothetraitor.) EVIDENCE EachoftheTraittokensisapieceofEvidencethatmustbe TRAIT pairedwithitsmatchingtoken Evidencetokensmaybepickedupifitisonyourtile.Whenyou pickupEvidence,placeitonyourcharacterboard. Evidencetokensmaybetradedfromoneherotoanother （withpermission) Ifyourherodies,placeyourEvidencetokensonthetilewhere theydied. 14Secretsofsurviwal Secretsofsurvival15",
+          "monster": "",
+          "win": "UncovertheTruth INTRODUCTION Yourgreat-uncle'smurderhasbeen WhileholdinganEvidencetoken,ifyourheroisonatilewiththe Asyouopenthegildedboxyouseeadaggerwithin.Thefollowingnoteisattached: avenged.Withaheftysumsplit matchingEvidencetokenoraheroholdingthattoken,ollthetrait amongthesurvivingrelatives，you “Tomysurvivingrelatives:lamyourgreat-uncle,andyouhavebeeninvitedherebecausel namedonthosetokens areabletoretireinrelativecomfort havedied.Theestatethishousesitsuponwaspartofmyinheritance,whichlnowleaveto Theherowiththehighest-numbered,unrevealedNumbertoken 5+ Although,familygatheringswill revealsthattoken. youononecondition:youmustfindmymurdererandenactmyrevenge.Ihaveinvitedthe neverbethesame killerhereaswellandIhaveinstructedthedoorstobelockeduntilmorning.Goodluck.” 0-4Nothinghappens IFTHETRAITO"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：揭示者把 8 个属性标记分开放到不同区域，按人数发 1–3/4/5/6 号数字标记，1 号是叛徒。目标：在图库或图书室配对证据，配齐 3 组。",
+          "traitor": "布置：隐藏叛徒。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 8,
@@ -559,8 +1186,21 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6
+        },
+        "boundRoom": "",
         "sanity": 5,
         "known": 5,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": "",
         "endTurn": {
           "damage": {
             "amount": 1,
@@ -570,7 +1210,32 @@ window.CABIN_PACKS = {
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "HOUSEKEEPING",
+        "heroPage": 10,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "HousekeepersattackwithMightandmovetoward vanishwithoutatraceaghostly “thankyou”echoesinyourears theclosesthero.Ifthereisatie,theHousekeeprs 1.Ifthehousecontainsfewerthan{3/4/5/63tileswithEventsymbols,drawandplacetilesfromthetilestack Finally，thehouseisclean. until{3/4/5/63tileswithEventsymbolshavebeenplaced.Whenplacingthesetiles,donotresolvetheir willmovetowardtheeldesthero. effects. IFYOULOSE ATTHEENDOFTHEMONSTERTURN 2.Place{3/4/5/6}SmallMonstertokensonseparatetileswithEventsymbols,distributedasevenlyaspossible Deal1GeneraldamagetoeachexplorerChoking Youturntodustintheshapesofyour betweenregions.TheseareHousekeepers. witheringdust. formerselves.Slowlyyoucrumble 3.Setthe5Runetokensofftotheside yourremainsdriftingthroughthe 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup. houseasspecksintheair.Youdon't evercompletelysettlebecausenow you'reapartofthishouse-andthe COOPE",
+          "objective": "houseneversettles.Itwantstobe Thishaunthasnotraitor.Youareallfightingtosurvive Youwinwhenyouhavefull cleanagain.Itwillbecleanagain CleanedtheHouse Onceduringyourturn，youmay 图 CleantheHouse YoumustCleantheBloody Room，CharredRoom， WhileonatilethatcanbecleanedmakeaSpeedorSanityroll.You CollapsedRoomJunkRoom cannotmakethisrollonatilethatalreadyhasaRunetoken. andCatacombstiles PlaceaRunetokenonthetile.WhenyouplacethefifthRune 5+",
+          "tokens": "tokeow！Youcleantheroom 0-4Nothinghappens.Youstillhavealotofmesstotendto SmallMonsterTokens- Housekeepers 5RuneTokens-CleanedRoom TILESTHATCANBE CLEANED BloodyRoom-Ground/UpperFloor CharredRoom-Ground/UpperFloo CollapsedRoom-Ground/Upper Floor JunkRoom-Ground/UpperFloor Catacombs-Basement secretsofsurviwal19 18secretsofsurvival",
+          "monster": "",
+          "win": "THEHOUSEKEEPERS INTRODUCTION Asyouscrubthefinalroom,the Housekeepersappearinthedoorway ltwasagreatpartywellintothe.night,untilthatcute.dogsuddenlyturnedtodustright Justasthey'reabouttoentertowipe beforeyourveryeyes.Asyoubegantochokeonthedust，yourealizedthatsomethinghereis youout，youbrushawaytheroom's verywrong.Althoughyouwereinvitedheretoyourfriend'shouseyouhaven'tseenthemall MONSTER:HOUSEKEEPER lastspecksoffilth.Asyoucomplete thejob，theHousekeepersbegin evening.But,someoneelseishereandyougetthesensetheywantyoutostay Might5Speed4Sanity5 Knowledge5 fadingintonothingness.Asthey SETUP HousekeepersattackwithMightandmovetoward vanishwithoutatraceaghostly “thankyou”echoesinyourears theclosesthero.Ifthereisatie,theHousekeeprs 1.Ifthehousecontainsfewerthan{3/4/5/63tileswithEventsymbols,drawandplac"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：把事件符号板块补足到 3/4/5/6 块，在每块放 1 个家政工；5 个符文标记放一边。目标：清洁血房、焦房、坍塌房、杂物房和地下墓穴，放满 5 个符文。胜利：在可清洁板块做速度或神智判定 5+ 放符文。",
+          "traitor": "本剧本没有叛徒，全员合作。"
+        }
+      }
     },
     {
       "no": 9,
@@ -594,7 +1259,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "Bygonesbe Bygones Let",
+        "heroPage": null,
+        "traitorPage": 4,
+        "freeForAll": true,
+        "hero": {
+          "trigger": "",
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.S SettheNumberTrackto1 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
+          "objective": "Thishauntisafree-for-all.Allexplorersactasobstacles.Theymayattack Youwinwhenyouarethelast otherexplorers explorerstanding Onyourturn,wheyoumakeaMightattack",
+          "tokens": "lfyouareholdingtheldol，addthevalueontheNumberTracktoyourroll NumberTrack Whenyoukillanotherexplorer Ifyouareholdingtheldol，movetheNumberTrackupby1.Thephotoshift IfYou Win andchanges.There'sonelesssmugfaceglaringoutatyou Theclockstrikestwelveandasyou WhenyoumakeaMightattackagainsttheholderof walkthroughyourNewYear'sEve battlefieldyouseethephotolyingon theIdol thefloorstillheldbytheidol.butthe Ifyouwin，youmaystealtheldolinsteadofdealingdamage.lfyoulose takedamageasnormal. imagehaschanged.Nowitshowsjust yousmiling,asyoustandoveryou Onceduringyourturnoumay friends'remains SearchtheShelves Whileonatilethathasanltemsymbol，makeaKnowledgeroll Drawthetopcardoftheltemdeck 5+ 0-4Nothinghappens.Blastita",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：数字轨道设为 1，揭示者左手先行动；全员互为敌人。目标：成为最后活着的探险者。",
+          "traitor": "自由混战：所有人都是对手，最后活着的人获胜。"
+        }
+      }
     },
     {
       "no": 10,
@@ -637,7 +1327,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "Offer ASerious",
+        "heroPage": null,
+        "traitorPage": 5,
+        "freeForAll": true,
+        "hero": {
+          "trigger": "",
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.IftheVaultisnotinthehouse,thehauntrevealersearchesthetilestackforitandplacesitontheGroundFloor asfaraspossiblefromtheEntranceHall 2.AssembletwosetsofNumberTokensnumberedbetween1and{2/3/4/53（Example:ina4-playergame,take tw1s.two2s.andtwo3s.)TheseareTreasures Placeoneofthehighest-numberedTreasuretokensontheVaulttile.Shuffletherestface-downandplacethem 3 randomlyontilesthathaveOmensymbols,distributedasevenlyaspossiblebetweenregions SettheNumberTrackto4 4S 5.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-All",
+          "objective": "Thishauntisafree-for-all.Allexplorersactasobstaclesandmayattack Youwiniftherealtoraccept otherexplorers youroffer! Treasuretokens 1",
+          "tokens": "Therearericheshiddenwithinthehouse... NumberTrack KeepanyTreasuretokensyoupickuponyourcharacterboard NumberTokens-Treasure face-down.Youmaylookatyourtokensatanytime EachTreasuretokenhasvaluetotheDjinn Youcanloottreasurefromcorpsesjustlikeitemsandomens （Rememberyoucanonlylootonethingpercorpseperturn. WhenyoumakeaMightattackagainst anotherexplorer IfyouwinoumaystealarandomTreasuretokenfromthem(iftheyhave one)insteadofdealingdamagelfyouloedamageasnormal. BTRAITOR'STOME",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：金库不在场就找出来放在底层远离门厅；按人数准备 1–2/3/4/5 组宝藏数字标记，最高值放金库，其余放预兆板块；轨道设 4。目标：出价抢到 3 份宝藏。",
+          "traitor": "自由混战：出价抢宝藏，最后活着或抢够宝藏的人获胜。"
+        }
+      }
     },
     {
       "no": 11,
@@ -663,7 +1378,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "Cooked Don°t Get",
+        "heroPage": null,
+        "traitorPage": 6,
+        "freeForAll": true,
+        "hero": {
+          "trigger": "",
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.Setaside{2/3/4/5}Foodtokens.Leaetherestinthebox. 2.PlacetheMonsterCardtotheleftofthehauntrevealerTheWitcheswilleatexplorersattheendofthatplayer'sturn 3.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
+          "objective": "Thishauntisafree-for-all.Allexplorersactasobstaclesandmayattack Youwinwhenyouarethelast otherexplorers personalive FoodTokens FindFood FOOD Foodforthewitches OfferittotheWitches Youmayholdmorethan1Foodtoken",
+          "tokens": "Foodcanbetradedandyoucanlootitfromacorpseinsteadof FoodTokens takinganitemoromen.（Rememberyoucanonlylootonething percorpseperturn.) TileswithFood Onceduringyourturn，oumay RummageforFood Kitchen-GroundFloor WhileonanytilemakeaKnowledgeroll.Ifyouareonatilewith Larder-GroundFloor Foodadd2totheresltofyourroll DiningRoom-GroundFloor TakeaFoodtoken 6+ PanicRoom-Basement 0-5Nothinghappens. Graveyard-GroundFloor WhenyouattackanexplorerwithMight Ifyouwin，youmaystealaFoodtokenfromthatexplorer(iftheyhaveany IfYouWin insteadofdealingdamage Youskipalittleasyouleavethe house.You'veneverbeforethought Afterthehauntrevealersturn abouthowniceitistonotbecooked IfalloftheFoodtokenshavebeenfound,anyexpoeswithout",
+          "monster": "",
+          "win": "insteadofdealingdamage Youskipalittleasyouleavethe house.You'veneverbeforethought Afterthehauntrevealersturn abouthowniceitistonotbecooked IfalloftheFoodtokenshavebeenfound,anyexpoeswithoutFoodare intoacasserole offeredinsacrificetotheWitches.Thoseexplorersaredead IfmorethanoneexplorerisstillaliveaideallFoodtokensThen removeFoodtokensfromthegameuntilthenumberofavailable Foodtokensisonefewerthanthenumberoflivingexplorers Ifyouarethelastexploreralivuw 10TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：食物标记按 2/3/4/5 放好，女巫会在回合结束时吃掉探险者。目标：找到 3 份食物献祭，并活到最后。",
+          "traitor": "自由混战：女巫与所有人敌对，最后活着的人获胜。"
+        }
+      }
     },
     {
       "no": 13,
@@ -696,13 +1436,51 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6
+        },
+        "boundRoom": "",
         "sanity": 3,
         "known": 3,
-        "rule": "被击杀时改为击晕，可被献祭"
+        "rule": "被击杀时改为击晕，可被献祭",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "HOLY GROUND DISAPPEARANCE",
+        "heroPage": 11,
+        "traitorPage": 7,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+          "objective": "StudytheRitual Youwinwhenyoudisruptthe WhileonatilewhereyoucanstudymkeaKnowledgeroll Ritualwehetaitorandall TakeaRunetokenandplaceitonyourcharacterboard.These Cultistsaredead 5+ tokensrepresentRitualKnowledge.Theymaynotbetraded.",
+          "tokens": "0-4Nothinghappens NumberTrack Onceduringyourturnoumy SmallMonsterTokens-Cultists DisrupttheRitual 8RuneTokens-RitualKnowledge WhileontheRitualRoomtilemakeaSanityroll.ForeachRitual Knowledgetokenyouhave,add1totheresultofyourroll.Foreach",
+          "monster": "",
+          "win": "You'vemadeitoutalive,butour formerfriend'svoiceechoesinyour mind“NothingyoudocanstopHer theysaid.Weretheyright?Arethere morecultmembersoutthere somewhere,workingtoawakenHer? Secretsofsurvival21"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.SettheNumberTrackto3.ThisrepresentsyourRitualProgress. IftheRitualRoomandChasmtileshavenotbeendiscoveredindtheminthetilestackandplacetheminthe 4 Basement,followingnormaltile-placementrules. Place{3/4/5/6}SmallMonstertokensintheRitualRoom.TheseareCultists. 5. 6.Healallofyourtraits.Gain1Mightand1Speed HeavyBurden",
+          "objective": "YoumaypickupandcarrythecorpsesofCultistsandexplorers.Whenyou Youwinwhenyoufinishwaking do,placetheirfigure(ortoken)onyourcharacterboard.Youmayonly SheWhoSIeepsBelow，rwhen carryonecorpseatatime alloftheheroesaredead Onceduringyourturnoumay",
+          "tokens": "FeedHer NumberTrack WhileontheChasmtileifyouarecarryingacorpsereturnthat SmallMonsterTokens-Cultists corpsebacktothegameboxandmakeaSanityroll.Thebodytumbles 8RuneTokens-RitualKnowledge intothevoid.AllforHer MovetheNumberTrackdownby1.lfitreaches0youwin！ 7+ Sheawakens！ IfYouWin 0-6Gain2Sanity，Hmm，thatdidn'twork.Tryanotherone Thegroundrumbles,andthewalls shake.Thehousebeginstocrumble Attheendofyourturn aroundyouasthechasmtearsopen Eachherosuffers1Generaldamage.NoonemayignoreHercall intoanabyss.ltistime.Sheishere Afteryourturn， takeaturnwiththeCultists Atlonglast,Sheisreborn",
+          "monster": "",
+          "win": "0-6Gain2Sanity，Hmm，thatdidn'twork.Tryanotherone Thegroundrumbles,andthewalls shake.Thehousebeginstocrumble Attheendofyourturn aroundyouasthechasmtearsopen Eachherosuffers1Generaldamage.NoonemayignoreHercall intoanabyss.ltistime.Sheishere Afteryourturn， takeaturnwiththeCultists Atlonglast,Sheisreborn Monster：Cultists Sanity3Knowledge3 Might5 Speed3 Cultistsarekilledinsteadofstunned.WhenaCultistiskilled flipittoitsstunnedside.Itisnowacorpsethatcanbesacrificed toSheWhoSleepsBelow 12TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：在仪式房做神智判定，累计 3 次成功（4+）打断仪式。",
+          "traitor": "布置：轨道设 3 代表仪式进度；找出仪式房和裂隙放到底层；邪教徒按 3/4/5/6 放进仪式房；治疗全部属性并 +1 力量、+1 速度。目标：唤醒沉睡之她，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 14,
@@ -733,12 +1511,50 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 1,
+          "4": 2,
+          "5": 3,
+          "6": 4
+        },
+        "boundRoom": "",
         "sanity": 4,
-        "known": 2
+        "known": 2,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "OBJECTPERMANENCE",
+        "heroPage": 12,
+        "traitorPage": 7,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "SettheNumberTrackto{4/4/5/5} 1.S 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+          "objective": "HastentheSpell YouwinwhenyoucasttheSpell WhileyouareholdingtheBookmakeaSanityroll KeeptheBookawayfromthe MovetheNumberTrackdownby1,andlose1Sanity.Ifthe 5+ traitor. numbertrackreaches0，youwin！ HastentheSpelltocastit 0-4Lose1Sanity.Youchantthewrongsyllablesandgiveyourselfaheadache morequickly",
+          "tokens": "OLDSPELLBOOK Awell-oiled,leather-boundspellbookwithafour-pointedstarengravea NumberTrack insilveronthefrontandbackcovers. SmallMonsterTokens-Animated Furniture HeroesmaynotHastentheSpellmorethanonceperround (Theroundisoverwhenthemonstertakesaturn.) IfthetraitordestroystheBook，youlose! IFYOUWIN Asthewarlockfallsonceandforall AFTERTHEMONSTERTURN there'saloudcrackintheairand IfalivingheroisholdingtheSpellbookmovetheNumberTrackdownby1. theroomisengulfedinpinksmoke IftheNumberTrackreachesO，youwin！ Whereyouexpecttofindthe warlock'sbodyyouinsteadfinda humble,antiquetable.Thewitch fromthemirrorcomesoutofthe bedroom.Shebrewssometeaand invitesyoutoindulgewiththemasthe otherpiecesshiftbackintothepeople",
+          "monster": "",
+          "win": "Asthewarlockfallsonceandforall AFTERTHEMONSTERTURN there'saloudcrackintheairand IfalivingheroisholdingtheSpellbookmovetheNumberTrackdownby1. theroomisengulfedinpinksmoke IftheNumberTrackreachesO，youwin！ Whereyouexpecttofindthe warlock'sbodyyouinsteadfinda humble,antiquetable.Thewitch fromthemirrorcomesoutofthe bedroom.Shebrewssometeaand invitesyoutoindulgewiththemasthe otherpiecesshiftbackintothepeople theyoncewere.Thewitchturnsto yourgroupandsayswithawink “Thistableisarealpieceofwork.” 22Secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Find{1/2/3/4}SmallMonstertokens.TheserepresentAnimatedFurniture.PlaceoneAnimatedFurniture tokenneachtilewithahero.Ifatilehasmorethanoneheroplaceatokenforeachheroonthattile.Donot placeatokenfortheherowhohastheBook Whenyoudie",
+          "objective": "IfthereisatleastoneAnimatedFurnituretokenontheboardhealallof Youwinwhenyoudestroythe yourtraitsandplaceyourselfonanytilewithoneofthem.Returnthat Bookorwhelloftheheroes tokentothebox.IfyouareholdingtheBookgiveittothenearesthero.If aredead alloftheAnimatedFurnitureisgoneyoustaydead.Splintersflyeverywhere asyoueruptoutofapieceoffurniture",
+          "tokens": "Onceduringyourturn，youmay NumberTrack DestroytheSpellbook SmallMonsterTokens-Animated Furniture IfyouareonatilewherethereisfiretosstheBookintothefire Youwin！ TilesWhereThere Afteryourturn,takeaturnwiththeAnimatedFurniture IsFire Kitchen-GroundFloor FurnaceRoom-Basement",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：数字轨道设为 4/4/5/5；家具按 1/2/3/4 放在有英雄的板块；揭示者左手先行动。目标：推进咒语 4 次，把轨道降到 0。",
+          "traitor": "布置：你是叛徒，家具按 1/2/3/4 放在有英雄的板块。目标：毁掉魔法书，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 15,
@@ -768,7 +1584,10 @@ window.CABIN_PACKS = {
           "count": 1,
           "speed": 4,
           "might": 4,
-          "attack": "sanity"
+          "attack": "sanity",
+          "noAttack": false,
+          "counts": null,
+          "boundRoom": ""
         },
         {
           "key": "vampire",
@@ -776,7 +1595,10 @@ window.CABIN_PACKS = {
           "count": 1,
           "speed": 4,
           "might": 5,
-          "attack": "might"
+          "attack": "might",
+          "noAttack": false,
+          "counts": null,
+          "boundRoom": ""
         },
         {
           "key": "werewolf",
@@ -784,12 +1606,40 @@ window.CABIN_PACKS = {
           "count": 1,
           "speed": 4,
           "might": 6,
-          "attack": "might"
+          "attack": "might",
+          "noAttack": false,
+          "counts": null,
+          "boundRoom": ""
         }
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "MAYHEM AND OF",
+        "heroPage": 12,
+        "traitorPage": 8,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+          "objective": "SearchforWeapons Youwinwhenyoudefeatallofthe WhileonatilethathasanItemorOmensymbol，makea monstersinthehouse Knowledgeroll: Findandusetheweapons Lookatthetop4cardsoftheltemdeck(ifyouareonatilewith 4+ requiredtodefeateach anltemsymbol)ortheOmendeck(ifyouareonatilewithan monster（HolySymbolfor Omensymbol).Addoneofthosecardstoyourhandandplace theGhost，Crossbowforthe therestonthebottomofthedeck Vampire,andDaggerforthe Werewolf) 0-3Nothinghappens.Youriflethroughthemessandfindnothing",
+          "tokens": "WHENYOUATTACKTHEGHOST IfyouhavetheHolySymbolyoumayuseitasyourweapon.Youand GhostToken theGhostrollSanity.Ifyouwin,theGhostisddfyouloe,take VampireToken Mentaldamage WerewolfToken 3BloodTokens WHENYOUATTACKTHEVAMPIREWITHTHECROSSBOW fyouwin,theVampireisdestroyed IFYOUWIN WHENYOUATTACKTHEWEREWOLFWITHTHEDAGGER Thepowerinstilledinyoubythe Ifyouwin，theWerewolfisdestroyed HOAcompelsyoutosmitethelastof thesupernaturalsquatters.Having defeatedtheterrorwithinthehouse youmakeyourwayoutofthefront doorandadjustthewelcomematjust so.Everylittlethingproperlyinits placeandnobodygetshurt secretsofsurvival23",
+          "monster": "",
+          "win": "WHENYOUATTACKTHEWEREWOLFWITHTHEDAGGER Thepowerinstilledinyoubythe Ifyouwin，theWerewolfisdestroyed HOAcompelsyoutosmitethelastof thesupernaturalsquatters.Having defeatedtheterrorwithinthehouse youmakeyourwayoutofthefront doorandadjustthewelcomematjust so.Everylittlethingproperlyinits placeandnobodygetshurt secretsofsurvival23"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerhasdied.Younowcontrolthemonsters.GhostsandWerewolvesandVampires,ohmy 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours. 3.FindtheLargeMonstertokensfortheGhost,VampireandWerewolfSelect{1/2//fthosetokensat randomandplacethemonthetilewhereyourexplorerdied.Returnany unselectedtokenstothegamebox Insteadofyourturn,takeaturnwitheachmonster",
+          "objective": "presentinthehouse.Themonstersmaytaketheir Youwinwhenalloftheheroes turnsinanyorder.RollSpeedindividuallyfor aredead eachmonster。",
+          "tokens": "GhostToken",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：驱散全部 3 只怪物。",
+          "traitor": "布置：你的探险者已死亡，改为控制幽灵、狼人和吸血鬼；随机把 1/2 只大怪物放在死亡板块。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 16,
@@ -822,12 +1672,45 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
-        "known": 4
+        "known": 4,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "COME PLAY WITHUS",
+        "heroPage": 13,
+        "traitorPage": 9,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.IftheGraveyardtilehasnotalreadybeenplaced,searchthetilestackforitandplaceitusingnormal tile-placementrules 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup REMAINS",
+          "objective": "Bonesofanunfortunatesoul. Youwinwhenyoulaythe TheCaretaker'sRemainsarerepresentedbythe“1”Remainstoken Caretaker'sRemainstorest HeroesmaytradeRemainswitheachotherfollowingnormal Searchforthe tradingrules Caretaker'sRemains TakethoseRemainsto IfanylootRemainsfromanexplorer'scorpseyoumusttakeall theGraveyard. Remainstheywerecarrying LaytheRemainstorest Onceduringyourturn，youmay UnearthRemains",
+          "tokens": "Whileonatilewithaface-downRemainstoken,turnitface-upandplaceit NumberTokens-Remains onyourcharacterboard SmallMonsterTokens-Angry Ghosts Onceduringyourturn，youmay 图IdentifyRemains IFYOUWIN WhileonatilewithaRemainstokenmkeaKnowledgeroll Youburythecaretaker'sremains FliptheRemainstokenface-up.IfitistheCaretaker'sRemains 5+ seeinghimtohisfinalrest.After （the“1”token)placeitonyourcharacterboard. thisjobyou'regoingtoneedabreak 0-4Youlearnnothing torestandrechargebuttheideaof checkinginanywheremakesyouthink Onceduringyourturn，youmay twice.Maybeastaycationisinorder ConsecrateRemains IfyouareontheGraveyardtileandhavetheCaretaker'sRemains （the“1”token)mkeaSaityoll. Youwin！Youlaytheremainsinanopengrav",
+          "monster": "",
+          "win": "WhileonatilewithaRemainstokenmkeaKnowledgeroll Youburythecaretaker'sremains FliptheRemainstokenface-up.IfitistheCaretaker'sRemains 5+ seeinghimtohisfinalrest.After （the“1”token)placeitonyourcharacterboard. thisjobyou'regoingtoneedabreak 0-4Youlearnnothing torestandrechargebuttheideaof checkinginanywheremakesyouthink Onceduringyourturn，youmay twice.Maybeastaycationisinorder ConsecrateRemains IfyouareontheGraveyardtileandhavetheCaretaker'sRemains （the“1”token)mkeaSaityoll. Youwin！Youlaytheremainsinanopengrave.Theoldhousefallssilent 5+ 0-4Take2Mentaldamage ATTHEBEGINNINGOFTHETRAITOR'STURN Eachherotakes1MentaldamageforeachRemainstokenontheir characterboard.Thespiritsofthedeadcryout 24secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.FindoneofeachNumberTokenlabeled1through{4/5/6/7.TheseareHumanRemains.Thetokenlabeled “1”representstheCaretaker'sRemains 5.PlacetheRemainstokensface-downthroughoutthehouse,keepingtheirnumberssecretfromtheheroes.(You maylookatthem.)YoumustplaceatleastoneRemainstokenineachregionofthehouse.Donotplacemore thanonetokenpertile Place2SmallMonstertokensonanytilewithoutahero.TheseareAngryGhosts.Setaside{2/3/5more 6. AngryGhosttokens Onceduringyourturnoumay",
+          "objective": "BreakThrough Youwinwhenalloftheheroes Youmaymovetoatilewithaheroonitthatistouchingyour aredead currenttile",
+          "tokens": "Whenyoudie PlaceaGhosttokenonthetilewithyourfigure NumberTokens-Remains SmallMonsterTokens-AngryGhosts Whenaherodies PlaceaGhosttokenonthetilewiththeirfigure IfYouWin Afteryourturn,takeaturnwiththeGhosts Withthelastofthe“guests”checked in，youpatyourselfonthebackfo ajobwelldone.Youcommenceyour roundsofthehotelandwhenyou",
+          "monster": "",
+          "win": "Afteryourturn,takeaturnwiththeGhosts Withthelastofthe“guests”checked in，youpatyourselfonthebackfo ajobwelldone.Youcommenceyour roundsofthehotelandwhenyou Monster:Ghost reachthekitchen,thechefoffersyou Might5 Speed4Sanity4Knowledge4 adrink.Yousmileappreciativelybut Ghostsmay attackwithMightorSanity politelydeclineremindinghim“No restforthewicked” AGhostplacedduringthemonsterturnmaynotmoveor attackduringthatturn. 6TRATOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：墓地未放就找出来放好，叛徒左手先行动。目标：收集遗骸，在墓园做神智判定 5+ 安葬看门人。",
+          "traitor": "布置：遗骸标记按 1–4/5/6/7 发给英雄并藏好；2 只小怪物。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 17,
@@ -857,13 +1740,46 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 6,
         "known": 2,
-        "rule": "带符文时被消灭而不是击晕"
+        "rule": "带符文时被消灭而不是击晕",
+        "noStun": false,
+        "oneHit": true,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THISORDIE FORWARD",
+        "heroPage": 13,
+        "traitorPage": 9,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. GREMLINMAGIC",
+          "objective": "YoucannotattackaGremlinthatdoesn'thaveaRunetokenonit Youwinwhenyoukillthe IfyouattackaGremlinthatdoeshaveaRunetokenonit,itis traitorandalloftheGremlins killedinsteadofstunned. inthehouse Onceduringyourturnyoumay",
+          "tokens": "DoResearchonyourPhone 3SmallMonsterTokens-Gremlins Whileonatilewhereyoucangetasignal,makeaKnowledgeroll. 3RuneTokens Therehastobemoreinformationonthesegremlins... PlaceaRunetokenontoaGremlin.Youcannowattack 5+ thisGremlin.Onasuccessfulattack,itwillbekilledinstead",
+          "monster": "",
+          "win": "Youdiscoverthatyourfriend'smurderous ragecamefromacursedemailtheyhad receivedontheirphone.Aftersome diggingyoulearnthatitcamefromthose gremlins-somehow，thoseancientpests learnedhowtousetheinternet.Although youputanendtothegremlinsantics， yourvictorycameatthecostofyour friend'slife.Asyouclosetheirlifeless eyesyoushudderatthetoo-widegrinstill frozenontheirface.Youstartleastheir phonebuzzeswithanotification:“FWD OPENTHIS!!URGENT!!' secretsofsurviwal25"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4Place3SmallMonstertokensonyourtile.ThesearetheGrmlins 5.Take{6/5/4/3}scrapsofpaperandwritean“X”oneverypieceexceptone.Thefinalpieceshouldsay“DIE.” Foldthesescraps,shufflethemandplacetheminthetopofthegamebox.Thesewillrepresenttheemails receivedbytheheroes Attheendofeachhero'sturn",
+          "objective": "Theywilldrawamessageoutoftheboxtop: Youwinwhenalloftheheroes IfthemessagehasanX,nothinghappens.Setthatmessageaside aredead Ifthemessagesays“DIE”returnallofthemessagestotheboxtop:",
+          "tokens": "Then，moveuptotwoun-stunnedGremlinstothathero'stile.Each 3SmallMonsterTokens-Gremlins ofthoseGremlinsmakesaMightattackagainstthathero 3RuneTokens Afteryourturn,takeaturnwiththeGremlins IfYou Win Asyoustandoveryourfriends",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：消灭带符文的 3 只小妖精，并杀死叛徒。",
+          "traitor": "布置：3 只小妖精放自己板块；纸条按 6/5/4/3 准备，其中一张写「DIE」。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 18,
@@ -911,7 +1827,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "TOIT RING ANICE",
+        "heroPage": 14,
+        "traitorPage": 10,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THERINGOFILLUSIONS",
+          "objective": "Thetraitorcanhideamongtheirlllusions.TheNumberToken Youwinwhenyoukillthetraitor. labeled“1”istherealtraitor.",
+          "tokens": "ThetraitorwilltaketheirturnaseithertheIllusions(tokens)or theirtrueself(explorerfigure),butneverboth. NumberTokens-lllusions YoumaydispelIllusionstotrytorevealthetraitor. WHENYOUDISPELANILLUSION IFYOUWIN Flipthatlllusionface-upandreturnittothetraitor'scharacterboard Withtheirlastbreathyourformer Iftherevealedtokenisthe“1”thetraitorhasbeenrevealed.Theymust friendbeginstofade.Theyandall placetheirexploreronthetilewherethattokenwaslocatedandreturr theirpossessionswaftintotheair allNumberTokensinthehousetotheircharacterboard.Then,they likesmokeleavingbehindnothing mustreturnthehighest-numberedlllusiontokentothegamebox. butthering.Thesmokehangsin theairforabriefmomentbeforeit Onceduringyourturn，y",
+          "monster": "",
+          "win": "Flipthatlllusionface-upandreturnittothetraitor'scharacterboard Withtheirlastbreathyourformer Iftherevealedtokenisthe“1”thetraitorhasbeenrevealed.Theymust friendbeginstofade.Theyandall placetheirexploreronthetilewherethattokenwaslocatedandreturr theirpossessionswaftintotheair allNumberTokensinthehousetotheircharacterboard.Then,they likesmokeleavingbehindnothing mustreturnthehighest-numberedlllusiontokentothegamebox. butthering.Thesmokehangsin theairforabriefmomentbeforeit Onceduringyourturn，youmay isdrawnintothering.Youspot ConfrontanIllusion somemovementinthetrinketand WhileonatilewithanlllusionmakeaKnowledgeroll.Ifyohavethe pickituptohaveacloserlook.. Mirror，add2totheresultofyourroll. isthatyourfriend'sface,trapped Dispelthelllusionasdescribedabove 5+ inthesmoothmetal？Asyouask yourselfthe"
+        },
+        "traitor": {
+          "setup": "1.Removeyourexplorerfromthehouse.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Anymonstersinthehousewilltaketheirturninplaceofyours 3.Healallofyourtraits 4FindoneofeachNumberTokenlabeled1through{3/4/5/6y.Theseareyourlllusions.The“1”tokenisthe realyou 5.Shufflethelllusionsface-down(youmaylookatthematanytime)andplaceoneonyourtile.Thenplacethe restofthelllusionsaroundthehouseontilesfartherawaythanthevalueofyourSpeedtrait.Ifpossible youmustplaceeachIllusiononadifferenttile.Removeyourexplorerfromthehouse,youarenowHidden Amonglllusions TheRingofIllusions",
+          "objective": "TheRingletsyoubreakyourformintomanylllusions.Youwilltakeyour Youwinwhenalloftheheroes turneitherasthellusionsorasyourself,butneverboth aredead Keepthelllusiontokensface-downuntilinstructedotherwise.Youmay",
+          "tokens": "lookatthenumbersonthosetokensatanytime.Thellusionlabeled“1” istherealyou NumberTokens-Illusions Heroesmayattempttodispelyourlllusionsinordertorevealyourexplorer IfYou Win Theringisyoursandyoursalone Retreatingintothedarkestreaches ofthehouseyouvowtootectyour treasurefromtheoutsideworld Youronlycompanynowareyourown reflections,whisperinginyourmind astheyplotagainsteachother 8TRAITOR'STOME",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：揭穿幻象，杀死叛徒真身。",
+          "traitor": "布置：把自己的棋子移出屋子；幻象按 1–3/4/5/6 放置，1 号是真身。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 19,
@@ -942,13 +1883,46 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 7,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
         "known": 3,
-        "rule": "可把有录像带的板块视作相邻移动"
+        "rule": "可把有录像带的板块视作相邻移动",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "ON TAPE CAUGHT",
+        "heroPage": 14,
+        "traitorPage": 11,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+          "objective": "DestroytheTapes Youwinifyoucandestroyevy WhileonanytilewithaVideotapemakeaMightroll. Videotapeandescapethehouse TheVideotapeisdestroyed.Removethetokenfromthegame throughtheLandingbeforethe 4+ ltmakesasatisfyingcrunch.And..afaintscream? cursetakeshold. 0-3Nothinghappens DestroyalloftheVideotapes GototheLandingtile Onceduringyourturn，youmay StaveofftheCurse TOKENSEEDED WhileonatilewiththeVengefulSpirit,lladie NumberTrack MovetheNumberTrackupby1. 2 VideotapeTokens GhostToken-VengefulSpirit MovetheNumberTrackupby1andendyourturn 1 Endyourturn. 0",
+          "tokens": "",
+          "monster": "",
+          "win": "ATTHEENDOFYOURTURN Youl'vedestroyedthetapesand IfalloftheVideotapeshavebeendestroyedandatleast1heroisonthe escapedthehouse,butyouhadto EntranceHalltile，youwin！ leaveyourfriendbehind.Although youcanheartheirscreaming，you don'tdarelookback.Thevengeful spirithasclaimedthemandyou're luckytohaveescapedwithyourlife Onceyou'vemadeitasafedistance fromthehouseyoupausetocatch yourbreath.Suddenlyyourphone rings,andyouanswer.Ontheother endyouhearstaticandavoicethat whispersSeeyouoon Secretsofsurviwal27"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonstertakesitsturnafteryours 3.Gain1Sanity 4.SettheNumberTrackto{6/4/3/2} Place5Videotapetokensonfivedifferenttiles,asfarfromtheheroesaspossible 5. 6.PlacetheGhosttokenonanytilewithaVideotapetoken.ThisistheVengefulSpirit WhenYouAttack",
+          "objective": "YoumayattackusingSanityinsteadfyoo，rtagetalsoollsSity Youwinwhenalloftheheroesare ThelosertakesMentaldamage deadorwhentheNumberTrack reaches0. Attheendofyourturn MovetheNumberTrackdownby1.lfitreachesO，youwin！",
+          "tokens": "Afteryourturn,takeaturnwiththeVengefulSpirit NumberTrack VideotapeTokens GhostToken-VengefulSpirit",
+          "monster": "",
+          "win": "Might7 Sanity4 Knowledge3 Speed3 Youhavesacrificedyourfriendsto TheVengefulSpiritmaymovebetweentileswithVideotape appeasethevengefulspirit.Youbeg tokensonthemasthoughtheywereadjacent ittoletyougo，tonoavail.Youstare aghast,asitsmouthopenswiderand widerunhinginglikethejawsofa snake.Staticseepsfromthegaping mawandyoufindyourselffrozenin terrorasitwrapsaroundyoulikea blanket.Itonlytakesmomentsfor youtosurrendertotheoblivionof theabyss 20TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：摧毁 5 卷录像带后从入口大厅逃出。",
+          "traitor": "布置：数字轨道 6/4/3/2；5 卷录像带分散放好；复仇幽灵放在任一卷录像带板块。目标：杀光英雄，或把轨道降到 0。"
+        }
+      }
     },
     {
       "no": 20,
@@ -977,13 +1951,46 @@ window.CABIN_PACKS = {
         "speed": 2,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
         "known": 5,
-        "rule": "不可击晕"
+        "rule": "不可击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "SAYIT DON'T",
+        "heroPage": 15,
+        "traitorPage": 11,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Iftherearefewerthanfivenon-Landingtilesinthehouse,drawtilesfromthetilestackandplacetheminthe houseuntiltherearefive 2.Setaside{2/3//53Runetokens.ThesearetheSyllablesoftheFacelessMan'sName. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "FindaSyllable Youwinwhenyoudestroythe FacelessMan WhileonatileaskthetraitorifthenextSyllableisonthattile Searchthehousetofind Ifyouarecorrect,placeaRunetokenonyourtileWy theSyllablesoftheFaceless placethelastRunetoken，theheroeshavelearnedtheFaceless Man'sName. Man'sname. Whenyouhavefoundallof fyouareincorrect,tetraitorwillgiveyouahint. theSyllables,sccessfully attacktheFacelessManto WHENYOUATTACKTHEFACELESSMAN destroyhim. IfyoudefeattheFacelessManandyouknowhisname（alloftheRune tokenshavebeenplacedinthehouse),heisdestroyed.Youwin！",
+          "tokens": "FacelessManToken RuneTokens-Syllablesofthe FacelessMan'sName IFYOUWIN Yourvoiceisreleased,andyouhave escapedthethingwithoutaface.You hearsoundsofcelebrationcoming fromyourtown.Youheadtowardthe party，butthefeelingofexcitemet guicklyfadesasyoulookbacktosee theshapeofamanloominginoneof thehouse'swindows. 28Secretsofsurviwal",
+          "monster": "",
+          "win": "Yourvoiceisreleased,andyouhave escapedthethingwithoutaface.You hearsoundsofcelebrationcoming fromyourtown.Youheadtowardthe party，butthefeelingofexcitemet guicklyfadesasyoulookbacktosee theshapeofamanloominginoneof thehouse'swindows. 28Secretsofsurviwal"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. Choose{2/3/4/5}roomsinthehouseetwitetheirnamesonasheetofpapertandnumberthem 4 ThesetilesholdtheSyllablesoftheFacelessMan'sName.Theseroomsmaybelocatedinanyorallregionsofthe house.(Example:ina4-playergame,writedownthenamesofthreetilesandnumberthem12d.) 5.PlacetheFacelessMantokenonyourtile GuessingtheFacelessMan'sName",
+          "objective": "Theheroesaretryingtoguesstheorderofthetilesthatyouwrotedown Youwinwhenalloftheheroes duringsetup.Oneachheroplayer'sturn,theymayaskyouiftheyareon aredead thecorrecttile.Theyarecorrectiftheyareonthelowest-numberedtileon yourlistthatyouhavenotyetcrossedoff.Otherwisetheyareincorrect.",
+          "tokens": "Ifaplayeriscorrect,tellthemsoandcrossthattileoffyourlist FacelessManToken Ifaplayerisincorrect,dothefollowinginorder: Runetokens-Syllablesofthe FacelessMan'sName Tellthemiftheyareinthecorrectregionornot. 1. 2.Iftheyareinthecorrectregion,tellthemhowmanymovesitwouldtake themtogettothecorrecttile.Donotfactorinspecialtilemovement Win IfYou (liketheMysticElevator)orltemeffects(liketheSkeletonKey） TheFacelessManlooksathis PlacetheFacelessManonthathero'stile.TheFacelessManmakesa 3. collectedheartslikethetreasures Mightattackagainstthathero. theyare.Hecradlesonesoftlyinhis hand,guietlyturningitoverand Afteryourturn,takeaturnwiththeFacelessMan. studyingthebloodthatdripsout.A slitappearsacrosshisfaceg",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：补足至少 5 块非平台板块；音节符文按 2/3/5 放好。目标：集齐音节后击败无名者。",
+          "traitor": "布置：选 2/3/4/5 个房间写下名字并编号，作为无名者的音节；无名者放自己板块。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 21,
@@ -1012,13 +2019,46 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "图书室",
         "sanity": 6,
         "known": 8,
-        "rule": "不能离开图书室；不可击晕"
+        "rule": "不能离开图书室；不可击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "MCMASTERSPRESENTS... SPOOKY",
+        "heroPage": 15,
+        "traitorPage": 12,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.IftheLibrarytileisnotinthehousefinditinthetilestackandplaceitinaregionotherthantheonecurrently occupiedbythetraitor 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEBOOK",
+          "objective": "“A4outof10readjustentertainingenough YouwinwhenyoudestroytheBook WhileyouhavetheBookoumayattackHorrorswithanyof GettheBookfromSpooky yourtraits. McMasters. ThrowtheBookinthefire WHENYOUUSEMIGHTTOATTACKSPOOKYMCMASTERS fyouwinandSpookyhasthebook，taketheBook",
+          "tokens": "Onceduringyourturn，youmay DemonToken-SpookyMcMasters BurntheBook SmallMonsterTokens-Horrors WhileonatilewherethereisfiremkeaSanityroll Youwin！Themanuscriptburnstoashes.YouarefreefromSpooky 5+ McMasters'creativecontrol. TILESWHERETHEREIS FIRE 0-4Nothinghappens.Themanuscriptdoesnotburn. FurnaceRoom-Basement Onceduringyourturn，youmay RitualRoom-Basement BuildCharacter Kitchen-GroundFloor WhileontheLibrarytilemkeaSanityroll Laboratory-GroundFloor Gain1ineitherMightorSpeed.It'sallstartingtomakesense 4+ CharredRoom-Ground/UpperFloor 0-3PlaceaHorroronyourtile.“Strengththroughadversity”Spooky alwayssays IFYOUWIN Withthebookburnedouallleavethe houseandgoforsomemidnightpizza YouaskSpookyifhe'devercons",
+          "monster": "",
+          "win": "Withthebookburnedouallleavethe houseandgoforsomemidnightpizza YouaskSpookyifhe'deverconsider writinghistoricalromance,instead Secretsofsurvival29"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlacetheDemontokenintheLibrary.ThisisSpookyMcMasters 4GiveSpookyMcMasterstheBookOmencard.PlaceitnexttotheMonsterCard 5.PlaceaSmallMonstertokenonyourtile.ThisisaHorror Healallofyourtraits. 6 Gain{1/1/2/3}MightandSpeed. TheBook",
+          "objective": "“It'sathrillingreadabookthatwillbetaughtinclassroomsahundredyears Youwinwhenalloftheheroes fromnow” aredead fyouareontheLibrarytiewithSpookyoumaygivetheBook",
+          "tokens": "backtohim DemonToken-SpookyMcMasters WhenyouattackaherowithMight SmallMonsterTokens-Horrors Ifyouwin，youmaystealtheBookfromthem(iftheyhaveit)insteadof dealingdamage IfYou Win Yourfriends sarenowdead.Whatdo horror-novelmonstersdooncethe bookhasended? 22TRAITOR'STOME",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：图书室不在场就找出来放在叛徒所在区域以外，叛徒左手先行动。目标：烧掉书，摆脱控制。",
+          "traitor": "布置：Spooky McMasters 放图书室并持有书；自己板块放 1 个恐惧标记；按 1/1/2/3 获得力量与速度。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 22,
@@ -1049,13 +2089,46 @@ window.CABIN_PACKS = {
         "speed": 2,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 2,
         "known": 2,
-        "rule": "被消灭而不是击晕"
+        "rule": "被消灭而不是击晕",
+        "noStun": false,
+        "oneHit": true,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "：UNDERGROUND OPERATION",
+        "heroPage": 16,
+        "traitorPage": 13,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.ShufflealloftheBasementtiles(otherthantheBasementLandingtile)backintothetilestack. 2.EachheroplacestheirfigureontheBasementLandingtile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "EscapetheHouse Youwinwhenyouescape WhileontheEntranceHallorGraveyardtilemkeaSpeedroll thehouse. IfyouhaveDynamiteortheSkeletonKeyadd2totheresultof yourroll.",
+          "tokens": "Youwin！Youescapethehouse！ 6+ SmallMonsters-ColdWarZombies 0-5Nothinghappens IFYOUWIN Onceduringyourturn，youmay StudytheFloorPlan Evenasyouescapethehouseyou can'tshakethefeelingthatyou're IfyouhavetheSkull,makeaKnowledgeroll stillbeingwatched.. LookatthenextBasementtileinthetilestack.Youmayreturnit 5+ tothetoporthebottomofthetilestack.Theetchingsontheskull aresomesortofmap 0-4Nothinghappens 30secretsofsurvival",
+          "monster": "",
+          "win": "Onceduringyourturn，youmay StudytheFloorPlan Evenasyouescapethehouseyou can'tshakethefeelingthatyou're IfyouhavetheSkull,makeaKnowledgeroll stillbeingwatched.. LookatthenextBasementtileinthetilestack.Youmayreturnit 5+ tothetoporthebottomofthetilestack.Theetchingsontheskull aresomesortofmap 0-4Nothinghappens 30secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours IftheLaboratorytilehasnotbeendiscoveredsarchthetilestackforitandplaceitontheGroundFloor 3. Placeyourexploreronthattile MissionFirst",
+          "objective": "YoucannotleavetheLaboratoryuntilaherohasmadeittothe Youwinwhenalloftheheroes GroundFloor aredead Onceduringyourturnyoumay",
+          "tokens": "Createadiversion SmallMonsters-ColdWarZombies WhileyouareintheLaboratoryyoumayrevealtilesfromthe stackuntilyoufindaBasementtile.Placethattileanywherein theBasement IfYouWin Attheendofyourturn You'vewononebattleutthisisa Place{0/0/1/1}ZombiesontheBasementLanding.Then，ifyouareon warthatneverends theLaboratorytileplaceaZombieoneachtileintheBasementwithan opendoorway.lfyourunoutofSmallMonstertokens,placeany moreZombies. Afteryourturn,takeaturnwiththeColdWarZombies.",
+          "monster": "",
+          "win": "Attheendofyourturn You'vewononebattleutthisisa Place{0/0/1/1}ZombiesontheBasementLanding.Then，ifyouareon warthatneverends theLaboratorytileplaceaZombieoneachtileintheBasementwithan opendoorway.lfyourunoutofSmallMonstertokens,placeany moreZombies. Afteryourturn,takeaturnwiththeColdWarZombies. Monster：ColdWarZombie Might5 Knowledge2 Speed2Sanity2 Zombiesarekilledinsteadofstunned WheneveraZombiekillsahero，removethathero'scorpse fromthehouseandburyalloftheirItemsandOmens. 24TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：除底层平台外的所有地下室板块洗回牌堆；每名英雄放在底层平台。目标：从入口大厅逃出屋子。",
+          "traitor": "布置：实验室找出来放到底层，自己放在那里；冷战僵尸 3 只。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 23,
@@ -1086,13 +2159,46 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 2,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 2,
         "known": 2,
-        "rule": "受伤时不被击晕"
+        "rule": "受伤时不被击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "RALERT INTRUDER",
+        "heroPage": 16,
+        "traitorPage": 13,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "SettheNumberTrackto{2/3/4/5} 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
+          "objective": "TurntheMachineOff YouwinwhenalloftheMachine lfyouareonthesametileasanONToken,makeaKnowledgeroll tokenshavebeenturnedOFFand youhaveWreckedtherequired FlipthetokentoitsOFFside.StunaRobotintheregion 5+ Themachinehasbeenturnedoff numberoftiles. 0-4Nothinghappens",
+          "tokens": "Onceduringyourturn，youmay NumberTrack WrecktheHouse 福 ON/OFFTokens-Circuits WhileonanytilewithanOmenSymbol,makeaMightroll. SmallMonsterTokens -RobotAssistants Flipthetileover.ltisWrecked.MovetheNumberTrackdownby1 4+ 0-3Nothinghappens IFYOUWIN WRECKEDROOMS “Goodbye,”Sya'svoicefadesinto Wreckedroomtilesareturnedface-down.Wreckedtilesarenotconsidered silenceasyouturnthefinalmachine tohaveanysymbolsoreffects,andtheycountashavingdoorwaysonall OffTheidol'slightdiesandyoufeel foursides. aweightbeingliftedfromthehouse butyour“companion”isnowhere ATTHEENDOFYOURTURN insight.Youlookoutthewindowto IfalltheMachinetokenshavebeenturnedOFFandtheNumberTrackis seetheelectricityreturningtolocal atO，youwin！ hom",
+          "monster": "",
+          "win": "WRECKEDROOMS “Goodbye,”Sya'svoicefadesinto Wreckedroomtilesareturnedface-down.Wreckedtilesarenotconsidered silenceasyouturnthefinalmachine tohaveanysymbolsoreffects,andtheycountashavingdoorwaysonall OffTheidol'slightdiesandyoufeel foursides. aweightbeingliftedfromthehouse butyour“companion”isnowhere ATTHEENDOFYOURTURN insight.Youlookoutthewindowto IfalltheMachinetokenshavebeenturnedOFFandtheNumberTrackis seetheelectricityreturningtolocal atO，youwin！ homesandbusinesses.You'vefinally banishedthetown'scursebutwho knowsifthistechnologywillfallinto thewronghandsinthefuture? Secretsofsurviwal31"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours. 3.Healallofyourtraits 4Place{2/3/4/5}ONtokensanywhereinthehousedistributedasevenlyaspossiblebetweenregions. 5.PlaceaSmallMonstertokenoneachtilewithanONtoken.TheseareyourRobotAssistants WreckedRooms",
+          "objective": "Wreckedtilesareturnedface-down.Wreckedtileshavenosymbolso Youwinwhenalloftheheroes effects,andcountashavingdoorwaysonallfoursides. aredead Onceduringyourturnyoumay",
+          "tokens": "ShifttheBlueprint NumberTrack Chooseatilethathasaheroonit.Movethattiletoadifferent locationinthesameregionofthehouse.Thismovemaynotcause ON/OFFTokens-Circuits anytiletobecomeinaccessiblevianormalmovement. SmallMonsterTokens-Robot Assistants withtheRobotAssistants. Afteryourturn,tkeaturn IfYouWin Thelimitstoyourpowerareendless.",
+          "monster": "",
+          "win": "Thelimitstoyourpowerareendless. Monster:RobotAssistants Youcontrolthedigitalspace,bending Knowledge2 Might2 Sanity2 Speed6 Syaandtherestoftheexplorersto yourwill.Theworldisbeholdento RobotAssistantsarenotstunnedwhentheytakedamage yourgreatnessasyouspreadyour (Theycanstillbestunnedinotherways.） networkacrosseveryhome,every conglomerateoliticaloffice. Onceduringyourturnoumy Youareeverywhere TurnontheLasers Chooseanyheroinlineofsight.Thatheromakesa Speedroll Thatheroplacesthemselvesonanyadjacenttile 5+ 0-4Thatherotakes2diceofPhysicaldamage TRAITOR'STOME25"
+        },
+        "zh": {
+          "hero": "布置：数字轨道设为 2/3/4/5。目标：关闭 3 台机器，并破坏足够多的板块。",
+          "traitor": "布置：ON 标记按 2/3/4/5 分布；每个 ON 板块放 1 个机器人助手。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 24,
@@ -1151,12 +2257,50 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 3,
         "attack": "speed",
+        "noAttack": false,
+        "counts": {
+          "3": 1,
+          "4": 2,
+          "5": 3,
+          "6": 4
+        },
+        "boundRoom": "",
         "sanity": 3,
-        "known": 2
+        "known": 2,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE MASQUERADE SHADOW",
+        "heroPage": 17,
+        "traitorPage": 14,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Find{2/3/4/5}Firetokens-theseareSeelieFlames.Placeoneofthesetokensoneachofthefollowing rooms(iftheyhavebeendiscovered):Tower,StatuaryCorridor,sevtoryaardUgodCavern， andUndergroundLake 2.SetanyremainingSeelieFlamestotheside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SEELIEFLAME",
+          "objective": "Ahoodedtorchholdingavigoroussprite FIRE Youwinwhenyoustopthe SeelieFlamescanbecarriedandtraded,usingthenormal Masquerade. tradingrules BringtheSeelieFlamesto YoumayonlyholdoneSeelieFlameatatime theChapel. IfyoudiewhilecarryingaSeelieFlameplaceitstokenonthetile",
+          "tokens": "whereyoudied FireTokens-SeelieFlame YoumayvoluntarilydropyourSeelieFlameatanytimeduring DarkQueenToken yourturn. SmallMonsterToken-FaeDancer Onceduringyourturnyoumay PickuptheFlame TILESWITHSEELIE WhileonatilewithaSeelieFlameplacethattokenon FLAME characterboardandmakeaKnowledgeorSpeedroll. Tower-UpperFloor YouarenowcarryingaSeelieFlame.Carefullynow..yes!Gotit! 5+ StatuaryCorridor-UpperFloor 0-4Take2Generaldamage.YouarenowcarryingaSeelieFlame. Conservatory-GroundFloor Youhandletheflameclumsilylturns! Graveyard-GroundFloor WHENYOUDISCOVERATILEWITHSEELIEFLAME UndergroundCavern-Basement PlaceaSeelieFlametokenonthattile(ifanyremain) UndergroundLake-Basement TURN ATTHEENDOF FYOUR IfallSeelieFlame",
+          "monster": "",
+          "win": "Thespritesdancefromtheirtorches ignitingeverythinginthechapelbefore movingontotherestofthehouse 32secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor. 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBallroomand/orChapeltileshavenotbeendiscovered,findtheminthetilestackandplacethemonthe GroundFloor,followingnormaltile-placementrules 5.PlaceyourexplorerintheBallroom，alongwith{1/2/3/4}SmallMonstertokens.TheseareFaeDancers 6.SettheDarkQueentokenaside.Shemaycomeintoplaylater CometotheDance",
+          "objective": "Ifyouattackwithoutaweapon，youmayattackusingSpeedinsteadof Youwinwhenalloftheheroes Might.Ifyouwin,inteadofdealingdamage,youmaymovebothfigures aredead eachanumberoftilesuptothedamageyouwouldhavedealt.",
+          "tokens": "ThefirsttimeanexplorerdiesontheBallroomtile FireTokens-SeelieFlame PlacetheDarkQueentokenontheBallroomtile DarkQueenToken Afteryourturn,takeaturn withtheFaeDancers SmallMonsterToken-FaeDancer IfYouWin",
+          "monster": "",
+          "win": "Monster:FaeDancer Theshadowsaroundyouspillovel Might3Speed6Sanity3Knowledge2 withnight-bloomingflowersas FaeDancerstaketheirturnsoneatatime.Moveandattack theNightKingjoinsyouandhis withonebeforethenextstartsitsturn. OueenintheballroomTheShadow Masqueradeisreadytobegin！ FaeDancersattackwithSpeed.Theymaynotattackahero unlessthatheroisintheBallroom.Heroesdefendagainstthese attackswithSpeed.Ifaheroishit,theytakePhysicaldamage 26TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：精灵之火按 2/3/4/5 放在塔、雕像走廊、温室、地下洞穴和地下湖（已发现的）。目标：把 4 盏精灵之火带到礼拜堂。",
+          "traitor": "布置：舞厅和礼拜堂找出放到底层；自己与妖精舞者 1/2/3/4 放舞厅；暗女王先放一边。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 25,
@@ -1216,7 +2360,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "TIME BORROWED",
+        "heroPage": 17,
+        "traitorPage": 15,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.SetasideaMight,Speed,Knowledge,andSitytoe.TheseareSpellIngredients 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. Onceduringyourturn，youmay",
+          "objective": "FindIngredients Youwinwhenyouhavebrokenthe Whileonatilelistedbelowmakethecorrespondingtraitroll.You Armor'sspell. cannotmakethisrollifthetraittokenforthattraithasalready beenplaced.",
+          "tokens": "Sanity：OperatingTheatre,GraveyardBloodyRoom-avialof Might，pedoand driedblood SanityTokens-SpellIngredients Might:Larder,SpecimenRoomDiningRoom-abiteofmysterymeat TILESTHATHAVE Knowledge:Furnace,ObvtoryLaythedustofages INGREDIENTS Speed:UndergroundLake,CoyKitchen-ahandfulof causticnightweed. OperatingTheatre-Basement UpperFloor PlacetheTraittokenonyourtile 4+ Graveyard-GroundFloor 0-3Nothinghappens BloodyRoom-Ground/UpperFloo UndergroundLake-Basement Onceduringyourturnyoumay BreaktheArmorsSpell Conservatory-GroundFloor Kitchen-GroundFloor WhileontheArmoryorRitualRoomtilemakeaSanityroll.You Larder-GroundFloor canonlymakethisollifyohaveplaced{1/2/3/4Traittokens SpecimenRoom-Ground/UpperFloo You",
+          "monster": "",
+          "win": "Youwatchasyourformerfriend'sskin desiccates.thenpetrifieshenturnsto dust.Theirtimehasfinallyrunout Secretsofsurvival33"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits WhenyouwinaMightattackagainstahero",
+          "objective": "IfyouhavetheArmordonotdealdamage.Instead,givetheArmorto Youwinwhenalloftheheroes thathero. aredead Atthebeginningofyourturn",
+          "tokens": "IfyouaredeadplaceyourexploreothesametileastheArmorandheal Might，pedKowand allofyourtraits.Takeyourturnasnormal.Thearmorsustainsyou Sanity yTokens-SpellIngredients Attheendofyourturn IfaherohastheArmor,theyloselineachtraitandyougain1ineachof yourtraits IfYou Win IfyouhavetheArmornothinghappens Youdonthearmoragain.You've wornitforcenturiesnowand thankstothefoolswhokeepcoming intoyourhouseu²llwearitfo centuriesmore 28TRAITOR'STOME",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：力量、速度、知识、神智各留 1 个标记作为法术材料；叛徒左手先行动。目标：在军械库做 2 次神智判定 5+，破除咒语。",
+          "traitor": "布置：你是叛徒，治疗全部属性。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 26,
@@ -1249,12 +2418,50 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 4,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        },
+        "boundRoom": "",
         "sanity": 3,
-        "known": 4
+        "known": 4,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE FAMILY'SBLESSING",
+        "heroPage": 18,
+        "traitorPage": 15,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.PlacetheAltartokenonanyGroundFloortile 2.IftheRitualRoomhasnotbeendiscovered,earchthetilestackforitandplaceitintheBasement,usingnorma tile-placementrules. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+          "objective": "RuintheTribute Youwinwhenthetraitorisdead WhileontheRitualRoomtilemkeaSanityroll theTributehasbeenruined,and YoudisturbtheAltar'sarrangement.TheElderwatcheson theAltardestroyed. 4+ 0-3Take1Physicaldamage.YouhavedisturbedTheElder YoucannotdestroytheAltar untilyouhaveRuinedthe Onceduringyourturn，youmay Tributeandkilledthetraitor DestroytheAltar TOKENSEEDED WhileonthetilewiththeAltar，makeaMightroll.Youcannot AltarToken DestroytheAltaruntilyouhaveRuinedtheTributeandkilled thetraitor. SmallMonsterTokens-Relatives Ifthetraitorisdeadouwin！ 4+ DarkQueenToken-TheElder 0-3Take1Mentaldamage.Arcanepunishm",
+          "tokens": "",
+          "monster": "",
+          "win": "Themembersofthetwistedfamil agerapidlybeforeyoureyes, witheringtohusksinmereminutes Theycollapseandcrumbletodust 34secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 Place{2/3/4/5}SmallMonstertokensondifferenttileswithOmensymbols.TheseareyourRelatives.Ifthere arenotenoughtileswithOmensymbols,placetheremainingRelativesontheEntranceHall. SettheDarkQueentokenaside.ThisisTheElderItwillcomeintoplaylater 5.S Onceduringyourturn，ouma",
+          "objective": "UseHiddenPassages Youwinwhenalloftheheroes Whieonabedroomtileyoumayplaceyourexploreronanytile aredead Attheendofyoursecondturn",
+          "tokens": "PlacetheTheElderonthetilewiththeAltartoken.Itwillriseand collectthetributeitself AltarToken SmallMonsterTokens-Relatives Afteryourturn,tkeaturnwithyourRelatives DarkQueenToken-TheElder",
+          "monster": "",
+          "win": "TheEldersmilesasmileredderthan theonesyouandyourfamilygave yournow-coldsacrifices,andyour Monster:TheElder robesabsorbthecolorandessence Might7Speed5Sanity6Knowledge6 oftheirblood.Yourfamily，anding beforeyou,areonceagainintheir TheEldermayusetheHiddenPassagesaction. prime.Thenextdecadewillserve yourlinealmostaswellasyour friendsjustdid TRAITOR'STOME29"
+        },
+        "zh": {
+          "hero": "布置：祭坛放任一底层板块；仪式房找出来放到底层；叛徒左手先行动。目标：在仪式房做神智判定，累计 3 次 4+，毁掉祭品仪式。",
+          "traitor": "布置：亲属按 2/3/4/5 放在有预兆符号的板块；暗女王作为长老稍后入场。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 27,
@@ -1278,7 +2485,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE STARS FROM",
+        "heroPage": 18,
+        "traitorPage": 16,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. 3.Find{3/4/4/5}Runetokensandsetthemasidefortheheroes.TheseareAlienWords ALIENWORDS",
+          "objective": "Theyseemtopulsefaintly Youwinwhenthetraitorisdead AlienWordsmaynotbepickeduportraded TOKENSEEDED ItcostsheroestwomovestoleaveanytilewithanAlienWord HeroTokens-KnowledgeofAliens Onceduringyourturn，youmay RuneTokens-AlienWords LearntheLanguage Whileonatilewithnotesonthelanguage,makeaKnowledgeroll TILESWITHNOTESON Takeyourhero'smatchingHerotoken(ifyoudon'talreadyhave 4+ THELANGUAGE it).ThistokenrepresentsyourKnowledgeofAliens.Thingsare startingtomakesense. Library-Ground/UpperFloor 0-3PlaceanAlienWordfromtheheroes'pileinthisroomIfthere Observatory-UpperFloor isalreadyanAlienWordinthisroomplaceanA",
+          "tokens": "",
+          "monster": "",
+          "win": "haveit)insteadofdealingdamage Whileyouwillwonderforeverabout themeaningofthosealienwords ATTHEENDOFYOURTURN youwillalsobeforevergratefulthat IfyouareonoradjacenttoatilewithanAlienWordtake1Mental youneverfoundout.Andwhenthe damage.Thewordspulseinyourbrain silencepressesincloseandyouhear faintwhispers,whichmightonlybe figmentsofyourimaginationyou turnontheradioandtrytodrown themout Secretsofsurvial35"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{5/4/4/3}Runetokensandsetthemtothesideinfrontofyou.TheseareAlienWords PlaceanAlienWordonyourtile 4、 AlienWords",
+          "objective": "Astrangescript,butyoualmostunderstandit Youwinwhenyouplaceallof AlienWordscannotbepickedup yourAlienWordsinthehouse,or whenalloftheheroesaredead ItcostsheroestwomovestoleaveanytilewithanAlienWord",
+          "tokens": "AlienWordswillhurtnearbyheroes HeroTokens-KnowledgeofAliens Onceduringyourturn，youmay RuneTokens-AlienWords oSpreadtheWord WhileonatilewithoutaherooranAlienWordmakeaKnowledge roll.ForeachadjacenttilewithanAlienWorddd1totheresult IfYou Win ofyourroll. Youscribblethelastwordintothe PlaceanAlienWordonyourtile.Themessagemustbecompleted 7+ wallandeverythingfallsquiet 0-6Gain2Knowledge.Thewhispersgrowloudermoreinsistent.More Ahowlingportaltearsopeninthe understandable entrancehallsuckingallofthe air-andyou-outofthehouse Whenyouattackorareattacked Asyoudriftintothevacuum，as IfyouareinaroomwithanAlienWordemeneofthehero'sdiceafter yourvisiondims,thelastthingyou theyroll(andafteranyreroll).Removeddice",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置；给英雄 3/4/4/5 个外星文字符文。目标：杀死叛徒。",
+          "traitor": "布置：给自己 5/4/4/3 个外星文字符文，并在自己板块放 1 个。目标：把所有外星文字铺进屋里，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 28,
@@ -1308,13 +2540,46 @@ window.CABIN_PACKS = {
         "speed": 2,
         "might": 8,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
         "known": 4,
-        "rule": "不可击晕"
+        "rule": "不可击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "TO NEED GOING",
+        "heroPage": 19,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup FLIPPEDTILES",
+          "objective": "TilesthathavebeenflippedoverareFlooded,andhavedoorwaysonall Youwinwhenyoublowupthe 4sides.Floodedtilesdonothaveanysymbolsonthem.Landingscannot GreatWhiteGhostShark beFlooded. FindExplosivesand/or EXPLOSIVES Dynamite TRAP Volatile SummontheSharkto yourspace Explosivescanbetradedbetweenheroes,usingthenormaltradingrules FeedExplosivestotheShark Onceduringyourturnyoumay TOKENSEEDED SearchforExplosives GhostSharkToken Onanytilewithanltemsymbol,makeaSpeedroll 5TrapTokens-Explosives TakeaTraptoken.TheseareExplosives 4+ 0-3Nothinghappens Onceduringyourturnyoumay",
+          "tokens": "",
+          "monster": "",
+          "win": "ForceExplosivesdowntheShark'sThroat Youemergefromthehousesoaked WhileonatilewiththeSharkmakeaMightroll.Discardany andcoveredinsharkguts,talive numberofTraptokenstoadd2totheresultofyourrollforeach Nowthatyou'rebackonfirmland tokendiscarded.IfyouhaveDynamite,add2totheresultof you'reremindedwhyyouneverliked yourroll. thewater 10+Youwin！Thesharkexplodes 0-9Take2Physicaldamageandendyourturn. 36secretsofsurvial"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：翻开板块时按剧本处理；大白幽灵鲨出现。目标：用炸药炸掉大白幽灵鲨，或撑到它被消灭。",
+          "traitor": "自由混战式剧本：鲨鱼与所有人敌对，最后活着的人获胜。"
+        }
+      }
     },
     {
       "no": 29,
@@ -1347,13 +2612,51 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 2,
         "attack": "speed",
+        "noAttack": false,
+        "counts": {
+          "3": 1,
+          "4": 2,
+          "5": 3,
+          "6": 3
+        },
+        "boundRoom": "",
         "sanity": 4,
         "known": 4,
-        "rule": "不可击晕"
+        "rule": "不可击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "GARDEN ABEAUTIFUL",
+        "heroPage": 19,
+        "traitorPage": 17,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "Theheroeshavenoadditionalsetupsteps. 1. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+          "objective": "RendIron Youwinwhenyouperformthe WhileonatilewithanItemsymbol,makeaMightroll ritualtobindtheFae TakeaMighttoken(ifanyremain).ThisisColdIron. 5+ TOKENSEEDED 0-4Nothinghappens SmallMonsterTokens-Fae COLDIRON HeroTokens-KnowledgeoftheFae Poisonoustofaeries. 2MightTokens-ColdIron ColdIroncanbetradedbetweenheroes,usingthenorma tradingrules. TILESWITH INFORMATIONABOUT Onceduringyourturnyoumay LearnabouttheFae THEFAE WhileonatilewithinformationabouttheFae,makeaKnowledgeroll Library-Ground/UpperFloor RitualRoom-Basement Takeyourhero'smatchingHerotoken.Thisrepresents 5+ KnowledgeoftheFae.Thistokencanno",
+          "tokens": "",
+          "monster": "",
+          "win": "Therewillbenogardenhere.The Onceduringyourturn，youmay faehavebeenboundIftheyreturn BindtheFae you²llburntheplacedownandsalt WhileonatilewithoneoftheFaemakeaKnowledgeroll.Add theearthsothatnothingwillgrow 2totheresultofyourrollforeachofthefollowingyoupossess: hereeveragain. KnowledgeoftheFaeColdIron,theRingOmen. YousuccessfullyperformtheritualandbindtheFae.Youwin 9+ 0-8Nothinghappens secretsofsurvival37"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Place{1/2/3/3}SmallMonstertokensonthetilewithyou.ThesearetheFae WhenyouAttackaHero",
+          "objective": "Ifyouaren'tusingaweaponyoumayattackwithSpeedinsteadofMight. Youwinwhenalloftheheroes aredead Afteryourturn,takeaturnwiththeFae",
+          "tokens": "SmallMonsterTokens-Fae",
+          "monster": "",
+          "win": "TheFaeuseSpeedtoattackanyheroinlineofsight Youdancethroughthebluebells,the foxgloves,thepeonies,andtraipse aroundthemushroomcircles.You stuffyourfacewithenchantedfaerie foodanddrink.Youcan'tleavethe landofthefaeriebutwhywouldyou wantto？It'ssobeautifulhere 32TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：在仪式房做知识判定，累计 3 次 5+，束缚妖精。",
+          "traitor": "布置：妖精按 1/2/3/3 放在自己板块。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 30,
@@ -1384,12 +2687,50 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 1,
+          "4": 2,
+          "5": 3,
+          "6": 4
+        },
+        "boundRoom": "",
         "sanity": 2,
-        "known": 3
+        "known": 3,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "DEATHDOUSPART TIL",
+        "heroPage": 20,
+        "traitorPage": 17,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.IftheSecretStairstilehasnotbeendiscovered,searchthetilestackforthattileandplaceitinthehouse,using normaltile-placementrules 2.Setasidethetop{4/6/9/12}tilesfromthetilestackandreturntheremainingtilestothegamebox.Ifthere arefewertilesthanthisinthestack，kipthisstep 3.TakeanyOmensheldbythetraitorandgivethemtothehauntrevealer 4.ThetraitoristryingtofindtheRing.Whentheteamsseparate,theheroesmayfreelytradeOmens,usingthe normaltradingrules.EachheromustplacetheirOmensface-downonthetableinfrontofthem 5.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. OMENS",
+          "objective": "ThetraitorislookingfortheRing YouwinwhenyouPerformthe KeepyourOmensface-downinfrontofyouunlessinstructedotherwise Ceremony Youmaylookatthematanytime Exploretheentirehouse Ifyouwanttouseorbenefitfromoneofyourface-downOmens，you tofindtheAltar mustrevealittothetraitor.Thenturnitface-downagain CompeltheSpirittolure IfyoufindanewOmen,donotrevealit.Placeitface-downinfrontofyou. themtotheAltar. PerformtheCeremony WhentradingOmensbetweenheroesyoudonothavetorevealthem.",
+          "tokens": "WHENYOUDISCOVERTHEFINALTILEINTHETILESTACK PlacetheAltartokenonthattile.Aperfectplaceforawedding AltarToken SmallMonsters-WeddingPart Onceduringyourturn，youmay CompeltheSpirit WhileyouhavetheRingrevealitandmakeaKnowledgeroll. IFYOUWIN Movethetraitoranumberoftilesuptothevalueofyourroll Usingthepowerfulobjectsinthis houseyou'vemanagedtowrestthe Onceduringyourturnyoumay spiritfromyourfriend'spossessed PerformtheCeremony body.Youdragthemouttothe WhileonthetilewiththeAltarandthetraitormkeaSanityroll. streetandcallforanambulance Youbanishthespiritandfreeyourfriend.Youwin！ 6+ 0-5Nothinghappens 38secretsofsurviva",
+          "monster": "",
+          "win": "Movethetraitoranumberoftilesuptothevalueofyourroll Usingthepowerfulobjectsinthis houseyou'vemanagedtowrestthe Onceduringyourturnyoumay spiritfromyourfriend'spossessed PerformtheCeremony body.Youdragthemouttothe WhileonthetilewiththeAltarandthetraitormkeaSanityroll. streetandcallforanambulance Youbanishthespiritandfreeyourfriend.Youwin！ 6+ 0-5Nothinghappens 38secretsofsurviva"
+        },
+        "traitor": {
+          "setup": "1.Youhavebeenpossessedbyaspirit!Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4 PlaceyourexplorerontheEntranceHall. Place{1/2/3/4}SmallMonstertokensondifferenttileswithOmensymbols.ThesearetheWeddingParty 5. IftherearenotenoughtileswithOmensymbols,placetheremainingmembersoftheWeddingPartyonthe GroundFloorStaircase. Whenyouattackahero",
+          "objective": "YoumayturnoneoftheirOmensface-up.ThatOmenwillremainface-up YouwinwhenyouhavetheRing fortheremainderofthehaunt",
+          "tokens": "Whenaherodies TurnalloftheirOmensface-up AltarToken SmallMonsters-WeddingParty InSicknessandinHealth Yourtraitsmaynotgobelowtheirstartingvalues.Yourloveiseternal IfYou Win ForeverandEver Youholdyourbeloved'shands OnceyouenterthetilewiththeAltar，youmaynotmoveoutofthattile andsingherpraisesoutloud“Oh Effectscannotcauseyoutoleavethistile Genevieve Genevieve!Togethe again！Handinhand,always!” takeaturnwithTheWeddingParty Afteryourturn,",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：秘密楼梯找出来放好；从牌堆顶拿走 4/6/9/12 块板块，其余放回盒子；叛徒身上的预兆交给揭示者。目标：拿到戒指，把灵魂引到祭坛完成仪式。",
+          "traitor": "布置：你被幽灵附身；自己放门厅；婚礼队伍按 1/2/3/4 放在有预兆的板块。目标：抢到戒指。"
+        }
+      }
     },
     {
       "no": 31,
@@ -1420,12 +2761,45 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
-        "known": 5
+        "known": 5,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "OFACHANCE AGHOST",
+        "heroPage": 20,
+        "traitorPage": 18,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKACURSEDITEMONYOURTILE",
+          "objective": "Ifyouaren'tusingaweapon，youmayattackwithSanityorKnowledge Youwinwhenyouescapethe fyoudo,tkeMentaldamageifyoulose.)Spiritusmundi,! housewiththerequirednumber ofitems. WHENYOUATTACKTHETRAITORWITHMIGHT AttackCursedItemstostun",
+          "tokens": "WhileonatilewithastunnedCursedItem,removeitstokenand 2setsofNumberTokens-Cursed taketheassociatedItemorOmencard.Youarenowcarryingthat Items ItemorOmen.Itisnolongercursed. Onceduringyourturn，oumay TILESWITH SpeakwiththeSpirits SPIRITUALENERGY WhileonatilewithspiritualenergykeonedieofGeneraldamage Gallery-UpperFloor andincreaseanyofyourtraitsby1. Graveyard-GroundFloor WHENYOUENDYOURTURNONTHEENTRANCEHALL OperatingTheatre-Basement UpperFloor fyouhavetheHolySymboland{3/4/5/7otherltemsorOmens SoundproofedRoom-Basement youwin！ UpperFloor ATTHEENDOFYOURTURN IfyouareholdingtheHolySymboltakeonedieofGeneraldamage.(lfyou FYOUWIN areontheEntranceHallwiththenumberofitemsrequiredtowin,kipthis Youdidit.Youm",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits. 4TakeallltemsandOmensfromeveryplayerStartingwiththeHolySymbol,set{4/5/7/9}ofthosecards asideface-up.Iftherearefewercardsthanthis,ettemllaside BuryanyremainingltemsandOmens. 5.B PlaceonesetofNumbertokensontheset-asideltemandOmens,thenplaceamatchingNumberTokeninthe 6. house.ThesetokensrepresentCursedItems.EachCursedItemmustbeplacedonadifferentItemorOmentile IfanyCursedItemsremainplacethemontheEntranceHall Onceduringyourturnyoumay",
+          "objective": "ChannelaCursedSpirit Youwinwhenalloftheheroes WhileonthesametileasaCursedItem,removethattokenandtake aredead thecorrespondingcard.YounowcarrythatltemorOmen.Choose aheroinyourregiontotake2diceofGeneraldamage.Theghost",
+          "tokens": "trappedintheitemexplodesoutward. 2setsofNumberTokens-Cursed WhenyouattackaherowithMight Items Ifyouwin，youmaystealanltemorOmenfromthatheroinsteadof dealingdamage IfYou Win Afteryourturn,takeaturnwiththeCursedItem Whatanepicendtoakillernightof extremeghosthunting，brah!lt'stoo badthatithadtoendthiswaybut youshrugitoffasyouprythefinal",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：带 4 件物品从入口大厅逃出。",
+          "traitor": "布置：收走所有玩家的物品和预兆，留下 4/5/7/9 张；被诅咒的物品 2 只。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 32,
@@ -1455,13 +2829,51 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 3,
         "attack": "speed",
+        "noAttack": false,
+        "counts": {
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 7
+        },
+        "boundRoom": "",
         "sanity": 6,
         "known": 2,
-        "rule": "区域内每只亡灵猫力量 +1（最高 8）"
+        "rule": "区域内每只亡灵猫力量 +1（最高 8）",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE CATASTROPHE",
+        "heroPage": 21,
+        "traitorPage": 19,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUENTERATILEWITHAFIRETOKEN",
+          "objective": "MakeaSpeedroll. YouwinwhentheBakenekohas Nothinghappens.Youmovethroughthefirewithoutissue. 5+ beenbanished. 0-4Take1Physicaldamage KillUndeadCatstoweaken theBakeneko Onceduringyourturn，youmay Attackanddefeatthe Make“PSPSPSPSPS”sounds Bakeneko. WhileonatilewithanUndeadCat,buryoneofyourltemsor",
+          "tokens": "Omens.MoveoneUndeadCatonyourtileupto4tilesaway. ThatCatbecomesstunned.Thisdoesnotcountasanattack. BakenekoToken SmallMonsterTokens-UndeadCats WHENYOUATTACKANUNDEADCAT FireTokens-RoomonFire fyouwin,thecatiskilledinsteadofstunned. WHENYOUDEFEATTHEBAKENEKOWITHAMIGHTATTACK IFYOUWIN IftherearenoUndeadCatsintheregionyouwin！Thecatisbanished. Youneverimaginedthatyour knowledgeofinternetmemeswould Otherwise,theBakenekoisstunned. prepareyouforajoblikethist somehowithelpedyoutosucceed indistractingandtriumphingover aghostcatanditsarmyofundead attendants.Youcanresteasy knowingthatyousentthemacrossthe RainbowBridge...orwherever itisthatdemoncatsgotoplayin theafterlife 40secretsofsurviwal",
+          "monster": "",
+          "win": "IftherearenoUndeadCatsintheregionyouwin！Thecatisbanished. Youneverimaginedthatyour knowledgeofinternetmemeswould Otherwise,theBakenekoisstunned. prepareyouforajoblikethist somehowithelpedyoutosucceed indistractingandtriumphingover aghostcatanditsarmyofundead attendants.Youcanresteasy knowingthatyousentthemacrossthe RainbowBridge...orwherever itisthatdemoncatsgotoplayin theafterlife 40secretsofsurviwal"
+        },
+        "traitor": {
+          "setup": "Catsswarmyou.Yourexplorerhasdied.BuryyourltemsandOmensandremoveyourfigurefromthehouse 1 PlacetheBakenekotokenonyourtile.YounowcommandtheBakenekoandtheUndeadCats. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Findandsetaside{6/5/4/3}Firetokens.Puttherestbackinthebox. 4.Place{3/4/5/7}SmallMonstertokensinyourregion.TheseareyourUndeadCats Insteadofyourturn,takeaturnwiththeBakeneko",
+          "objective": "Youwinwhenalloftheheroes aredeadrwhenthehousehas burneddown. Monster:Bkeneko Speed6Sanity6Knowledge2 Might3*",
+          "tokens": "TheBakenekoadds+1toitsMightforeachUndeadCatinits BakenekoToken region(toamaximumMightof8). SmallMonsterTokens-UndeadCats FireTokens-RoomonFire Onceduringyourturn，oumay BurnThemAll IfYou Win Whileonanytileooseatileinlineofsightthat Theghostcatpadsthroughashana doesnotalreadyhaveaFiretokenonit.PlaceaFire Alamefollowedbyitsenourageof tokenonthattile.WhenyouplacethelastFiretoken undeadfelines.Thetroopgathers youwin！ outsidethehousejoininginan WhenaheroentersatilewithaFiretoken unearthlychorusofyowlsasthey TheymustmakeaSpeedroll. watchtheBakeneko'sfirereducethe housetorubble Nothinghappens.Theymovethroughthefire 5+ withoutissue 0-4Theytake1Physicaldamage Onceduringyourturn，youmay SummonKitties Wh",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置。目标：驱逐猫又。进入带火焰标记的板块会受伤。",
+          "traitor": "布置：你的探险者已死亡，改为控制猫又与亡灵猫；火焰 6/5/4/3，亡灵猫 3/4/5/7。目标：烧毁房子，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 34,
@@ -1493,7 +2905,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": true,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "SECOND THE HALL",
+        "heroPage": 22,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.SetasideaSmallMonstertoken.Thisisyourfriendhristina 2.ReturnthedeckofEventcardstothegamebox 3.SettheNumberTrackto{6/3/1/0} 4.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
+          "objective": "AllofthetilesarenowontheGroundFloor.TheBasementand YouwinwhenyoubringChristina UpperFloorregionsnolongerexist. throughthefrontdoor Anyconnectedtiles(suchastheUpperLanding,whichleadsto FindChristinabydiscovering theGroundFloorStaircase)remainconnected,eveniftheyarenot tileswithOmensymbols adjacenttoeachother Escapethehousebyreturning TheMysticElevatorwillonlymoveonarollof2or4. totheEntranceHallwith Christina. Onlytheheroesmaydiscovernewtiles. CHRISTINA TOKENSEEDED SMALL MONSTER She'sunconscious.You'llhavetocarryher NumberTrack Christinacanbetradedtootherheroes,usingthenormal SmallMonsterToken-C",
+          "tokens": "",
+          "monster": "She'sunconscious.You'llhavetocarryher NumberTrack Christinacanbetradedtootherheroes,usingthenormal SmallMonsterToken-Christina tradingrules.Ifyoudie,anothrheomtkeChristinafrom yourcorpse.ThetraitorcannottakeChristina. 42secretsofsurvival",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：数字轨道 6/3/1/0；事件牌堆移出游戏；留 1 个小怪物标记作为朋友。目标：在维度改写生效时抵达入口大厅。",
+          "traitor": "自由混战：所有人在维度改写中争夺出口，最后活着的人获胜。"
+        }
+      }
     },
     {
       "no": 35,
@@ -1524,13 +2961,51 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 3,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": {
+          "3": 2,
+          "4": 3,
+          "5": 5,
+          "6": 5
+        },
+        "boundRoom": "",
         "sanity": 3,
         "known": 5,
-        "rule": "命中后英雄被精神控制；攻击后该板块鼻涕虫全灭"
+        "rule": "命中后英雄被精神控制；攻击后该板块鼻涕虫全灭",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "SLUGS SPACE",
+        "heroPage": 23,
+        "traitorPage": 21,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup SALT FOOD",
+          "objective": "Basicgrocery-brandsalt：goodforcookinggoodforkillingslugs YouwinwhenyoudestroybothNests. WhenaherowithaSalttokendies,theydropanycarried FindSalt Salttokensontheirtile UseSalttodestroybothNests Salttokensmaybetradedbetweenheroes,usingthenorma tradingrules",
+          "tokens": "Onceduringyourturn，oumay SmallMonsterTokens-Slugs FindSalt 2Nesttokens-SlugNest 6 WhileonatilewhereyoucanfindSalt,makeaKnowledgeor 5Foodtokens-Salt Speedroll. GainaSalttoken.Foundsomesalt! 5+",
+          "monster": "",
+          "win": "5-8Nothinghappens Thenexttimeyou'reatapartyandpeople starttodebatewhetherornotaliensexist 0-4PlaceaSlugonyourtile.Gah!Disturbedthenest! youkeepyourmouthshut.Youknowwhat horrorsexistintheworldsabove 44secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaNesttokenonanyBasementtile.PlaceasecondNesttokenonanyUpperFloortile 4Place{2/3/5}SmallMonstertokensonyourtile.TheseareSlugs NEST Nesttoken",
+          "objective": "It'smorethanjustarock.ltteemswithlife Youwinwhenalloftheheroesare ProtecttheNestsatallcosts eitherdeadormind-contolled. Onceduringyourturn，oumay",
+          "tokens": "SummontheHorde SmallMonsterTokens-Slugs WhileonatilewithaNest,placetwoSlugsonthattile 2NestTokens-SlugNest Afteryourturn,takeaturnwiththeSlugs 5FoodTokens-Salt IfYou Win Youlookoutthewindow，thinking",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：用盐摧毁 2 个虫巢。",
+          "traitor": "布置：两个虫巢分别放底层和上层；鼻涕虫按 2/3/5 放在自己板块。目标：精神控制所有英雄，或杀光他们。"
+        }
+      }
     },
     {
       "no": 36,
@@ -1580,13 +3055,46 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 3,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 3,
         "known": 4,
-        "rule": "不攻击也不能被攻击"
+        "rule": "不攻击也不能被攻击",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "FINDING PEACE",
+        "heroPage": 23,
+        "traitorPage": 21,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "FindReconciliation Youwinwhenthehouse WhileonatilewithaGhost,makeaSanityroll findspeace. RemovetheGhostfromthehouseandplaceitonyourcharacter Ghostsappearontilesthat 5+ board.Ifthereare{4/5/6/8}Ghostsoncharacterboards,the haveEventsymbols househasbeencleansedandyouwin！ HelpGhostsfind 0-4Nothinghappens. reconciliation.",
+          "tokens": "WHENYOUATTACKTHETRAITOR Ifyouwin，youmaytakeanltemorOmenfromtheminsteadof SmallMonsterTokens-Ghosts dealingdamage IFYOUWIN WHENYOUREVEALANEWTILETHATHASANEVENTICON Onebyone,theghostsconfessed DonotdrawanEventcard.InsteadplaceaGhostonthenewtile theirwrongs,theirpettyspites,their lonesomeregrets.Onebyone,they foundrestbysharingtheirburdens withyou.Thehousestillcreaks,ut nowitisonlyfromthewind.Itisa peacefulsound secretsofsurvival45",
+          "monster": "",
+          "win": "WHENYOUREVEALANEWTILETHATHASANEVENTICON Onebyone,theghostsconfessed DonotdrawanEventcard.InsteadplaceaGhostonthenewtile theirwrongs,theirpettyspites,their lonesomeregrets.Onebyone,they foundrestbysharingtheirburdens withyou.Thehousestillcreaks,ut nowitisonlyfromthewind.Itisa peacefulsound secretsofsurvival45"
+        },
+        "traitor": {
+          "setup": "1 Yourexplorerisstillinthegame.Youarethetraitor 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaSmallMonstertokenoneachtilethathasanEventsymbol.TheseareGhosts Onceduringyourturn，youmay",
+          "objective": "ConsumeaGhost Youwinwhenyouachieve WhileonatilewithaGhost,makeaKnowledgeroll enlightenmentORkillallof RemovetheGhostfromthetileandgain1Sanity 4+ theheroes! 0-3MovealloftheGhostsonthistiletoanyadjacenttiles,ignoringwalls ConsumeGhoststoincrease yourSanity WhenyourevealatilewithanEventsymbol “Enlightenment”means DonotdrawanEventcardInsteadplaceaGhostonthenewtile havingmaximumSanity Whenaherodies",
+          "tokens": "PlaceaGhostonthathero'stile.YoucontrolthatGhost SmallMonsterTokens-Ghosts Ifyouwouldtakedamagefromanattack Insteadmovethatmanytilesawayfromyourcurrenttileinanydirection IfYouWin andgain1MightorKnowledge.Thehousewon'tletyoudie. Afteryourturn,takeaturnwiththeGhosts. Youaresatedfornow.Buttherewil bemoreghosts..",
+          "monster": "",
+          "win": "andgain1MightorKnowledge.Thehousewon'tletyoudie. Afteryourturn,takeaturnwiththeGhosts. Youaresatedfornow.Buttherewil bemoreghosts.. Monster：Ghosts Might3Speed3Sanity3Knowledge4 Ghostscannotattackorbeattacked. AttheendoftheGhoststurn EachheroonatilewithanynumberofGhoststakes2 Generaldamage Attheendfyourturn IfyouhavereachedmaximumSanityyouhaveachievedenlightenment Youwin！ TRAITOR'STOME41"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：让 4 个幽灵得到安宁。胜利：在带事件符号的板块做神智判定 5+，移除幽灵。",
+          "traitor": "布置：每个带事件符号的板块放 1 个幽灵。目标：获得觉悟（神智达到最大值），或杀光英雄。"
+        }
+      }
     },
     {
       "no": 37,
@@ -1656,13 +3164,46 @@ window.CABIN_PACKS = {
         "speed": 5,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
         "known": 4,
-        "rule": "受到任何伤害即被消灭"
+        "rule": "受到任何伤害即被消灭",
+        "noStun": false,
+        "oneHit": true,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "OF BODY OUT",
+        "heroPage": 24,
+        "traitorPage": 22,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.GiveeachherotheircorrespondingHerotokentoplaceontheirrespectivecharacterboards.ThisistheirDNA 2.SettheNumberTrackto{2/3/4/5} 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. BODYSWAPS",
+          "objective": "Overthecourseofthishaunt,theheroeswillswapbodies.When YouwinwhenalloftheSecurityRobots abodyswaphappens,exchangecharacterboardswiththeother havebeendisabledandoneofyouescapes playerbutdonotexchangeltemsorOmens.Youcontrolthefigure thehouse. associatedwiththecharacterboardinfrontofyou.Theturn DisabletheSecurityRobotsby orderremainsunchanged successfullyattackingthem Onceduringyourturn，oumay YoumayalsoMesswithCircuitsto MesswithCircuits disabletheRobots. Whileyouareonatilewithtechnologyyoumayattack EscapethroughtheEntranceHall. anySecurityRobotinyourregion.Youcannotuseweapons",
+          "tokens": "forthisattack，whichusesKnowledge.Thiscountsasyour attackfortheturn. SmallMonsters-SecurityRobots Ifyouwin，theRobotisdisabled.Removeitfromthehouse HeroTokens-HeroDNA Ifyoulose,youtakeMentaldamageinsteadofPhysical. TILESWITH Onceduringyourturn，youmay TECHNOLOGY AttemptanEscape Observatory-UpperFloor YoumayonlyAttemptanEscapeonceallSecurityRobots havebeendisabled GameRoom-Basement/UpperFloor WhileontheEntranceHallmakeaSpeedroll. Laboratory-GroundFloor PanicRoom-Basement Youdisablesomeofthelocksonthedoor.Movethe 4+ NumberTrackdownby1.IftheNumberTrackreaches O，youeethehouadyouwin！ IFYOUWIN 0-3Nothinghappens Witharush,thefinalboltslidesfree.Dashing downthestreet，ouescapeintothenightair Youhearathu",
+          "monster": "",
+          "win": "0-3Nothinghappens Witharush,thefinalboltslidesfree.Dashing downthestreet，ouescapeintothenightair Youhearathunderousnoisecomingfrombehind you.It'stheentirehouse,blatingoffintospace 46secretsofsurvwal"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.BurytheArmorandsetallofyourtraitstotheirstartingvalues 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4PlaceyourfigureontheEntranceHallalongwith/1/1/2SmallMonstertokens.Theseareyour SecurityRobots. 5.EachheroplacesaSecurityRobotontheirtile DNA",
+          "objective": "Duringabodyswap,DNAtokensreminonheroes Youwinwhenyou'vecollected characterboards.DNAcannotbetraded. aDNAsamplefromeachof theheroes. DNAcanonlyberemovedfromacharacterboardwher youUploadaSample",
+          "tokens": "Onceduringyourturnyoumay SmallMonsters-SecurityRobots MetamorphaSubject HeroTokens-HeroDNA WhileonatilewithaherowhohastheirDNAagecharacter boardswiththatherobutdonotexchangeanyltemsorOmens.You IfYouWin nowcontroltheirfigure,andtheycontrolyours.Healallofyournew character'straitsandimmediatelyendyourturn. Sillythings.thesespecimens.They holdsomuchvivacityandtheir Onceduringyourturnyoumay guaint，fragileframesholdsomuch UploadaSample potential.Youandyourassociates IfyouareonatilewithanOmensymbolandthereisaDNAtokenon havecomefromyourdistantsolar yourcurrentcharacterboardrturnthatDNAtothegamebox.If systemwiththeintentionofexploring ouhavetakenDNAfromeachhero，youwin！ thatpotential.Theguestionbefore",
+          "monster": "",
+          "win": "nowcontroltheirfigure,andtheycontrolyours.Healallofyournew character'straitsandimmediatelyendyourturn. Sillythings.thesespecimens.They holdsomuchvivacityandtheir Onceduringyourturnyoumay guaint，fragileframesholdsomuch UploadaSample potential.Youandyourassociates IfyouareonatilewithanOmensymbolandthereisaDNAtokenon havecomefromyourdistantsolar yourcurrentcharacterboardrturnthatDNAtothegamebox.If systemwiththeintentionofexploring ouhavetakenDNAfromeachhero，youwin！ thatpotential.Theguestionbefore MissionFirst youisWhatmakesahuman? IfthereisstillDNAonahero'scurrentcharacterboardththero'straits cannotgobelowcriticalforanyreason. AherowhosecurrentcharacterboarddoesnothaveDNAmaydieas normal.Sampleacquired.Subjectisnowexpendable WhenyouDie SetyourtraitstotheirstartingvaluesandplaceyourfigureonanyL"
+        },
+        "zh": {
+          "hero": "布置：每名英雄拿自己的 DNA 标记；数字轨道 2/3/4/5。目标：关闭 3 台机器人，并留下 3 个 DNA 标记。",
+          "traitor": "布置：自己是叛徒，安全机器人按 1/1/2 放在门厅和自己的板块，并给每名英雄放 1 台。目标：收集每名英雄的一份 DNA。"
+        }
+      }
     },
     {
       "no": 38,
@@ -1692,13 +3233,51 @@ window.CABIN_PACKS = {
         "speed": 2,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6
+        },
+        "boundRoom": "",
         "sanity": 3,
         "known": 5,
-        "rule": "被消灭而不是击晕"
+        "rule": "被消灭而不是击晕",
+        "noStun": false,
+        "oneHit": true,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE SINISTERSOIREE",
+        "heroPage": 24,
+        "traitorPage": 23,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "Theheroeshavenoadditionalsetupsteps 1. 2.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. THERINGOFFEASTS",
+          "objective": "Asimplebandforacomplexbond Youwinwhenyoukillallofthe Whenthetraitoriskilled,taketheRingfromthem Neighbors. TheRingwillletyoukill ANUNUSUALBOND multipleNeighborsinaturn. YoumayattackusingtheRinganynumberoftimesduringyourturn,until Calloffthepartytoreduce youloseanattackwiththeRing thenumberofNeighbors thatshowup. YoumaynotattackwiththeRingduringthesameturninwhichyou obtainedit,andyoumaynottradetheRingtoanotherheroifyouhave",
+          "tokens": "attackedwithitduringthatturn. NumberTrack Onceduringyourturn，youmay SmallMonsterTokens-Neighbors CallofftheParty WhileonanytilewithanEventsymbol,makeaKnowledgeor IFYOUWIN Speedroll. Youlookatyourfriendockedby MovetheNumberTrackdownby1 6+ thesidewaysturntheirpartyhas 0-5Nothinghappens taken.Dazed，youwalkoutthe frontdoorandgiveavaguewaveto ATTHEENDOFYOURTURN theneighborsheadingyourway. IfalloftheNeighborsaredeadyouwin！ Theyreturnyourgreetingwith chillingenthusiasm，makingthe hairsonthebackofyourneckstand up.Asyoustaggerawayyouthink thatmaybeyou'renotcutoutforthe suburbanlife Secretsofsurviwal47",
+          "monster": "",
+          "win": "Speedroll. Youlookatyourfriendockedby MovetheNumberTrackdownby1 6+ thesidewaysturntheirpartyhas 0-5Nothinghappens taken.Dazed，youwalkoutthe frontdoorandgiveavaguewaveto ATTHEENDOFYOURTURN theneighborsheadingyourway. IfalloftheNeighborsaredeadyouwin！ Theyreturnyourgreetingwith chillingenthusiasm，makingthe hairsonthebackofyourneckstand up.Asyoustaggerawayyouthink thatmaybeyou'renotcutoutforthe suburbanlife Secretsofsurviwal47"
+        },
+        "traitor": {
+          "setup": "1.IftheKitchentilehasnotbeendiscoveredtetilestackforitandplaceitontheGroundFloorasfaras possiblefromtheEntranceHall 2.Healallofyourtraits. 3.SettheNumberTrackto{2/3/4/4} Place{3/4/5/6]SmallMonstertokensaroundthehouse,oneoneachtilewithanEventsymbol.These 4. areNeighbors.lfyoumustplacemoreNeighborsthantherearetileswithEventsymbols,placetherestof thoseNeighborsintheEntranceHall. 5.PlacetheMonsterCardonyourleft.Themonsterswilltaketheirturnaferyours Whenyoudie",
+          "objective": "HealallofyourtraitsandmoveyourexplorertotheKitchen.Thengive Youwinwhenalloftheheroes theRingtoyourkiller aredead Afteryourturn,takeaturnwiththeNeighbors",
+          "tokens": "NumberTrack SmallMonsterTokens-Neighbors",
+          "monster": "",
+          "win": "Might5 Speed2Sanity3 Whatamess.Thosedecorations Knowledge5 werealmostmoretroublethanthey Neighborsarekilledinsteadofstunned. wereworth,butnowthatthey've stoppedmoving,thepartycanbegin inearnest.Asyouposethelastofthe Attheendofthemonsterturn bodiesinanimmaculatewavevisible PlaceanumberofnewNeighborsinthehouse,equaltothecurrentvalue fromthefrontporchwindows，you ontheNumberTrack.PlaceoneoftheseNeighborsoneachtilewithan thinktoyourselfl'vegottogetthe Eventsymbol.IftherearemorenewNeighborsthantherearetileswith cakeintotheoven. where's Now Eventsymbols,donotplacetheremainingNeighbors.Moreguests thatring?” 44TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，揭示者左手先行动。目标：杀死所有邻居。",
+          "traitor": "布置：厨房找出放到底层；轨道 2/3/4/4；邻居按 3/4/5/6 放在事件板块。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 39,
@@ -1728,12 +3307,45 @@ window.CABIN_PACKS = {
         "speed": 5,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
-        "known": 5
+        "known": 5,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "HIVE MIND",
+        "heroPage": 25,
+        "traitorPage": 24,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.SettheNumberTrackto{5/4/4/3} 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup NEST WASPEGGS",
+          "objective": "Youcanfeelsomethingsquirminginside Youwinwhenyoukillthe HeroesmaypickupNesttokens.TheseareWaspEggs GiantWasp. HeroesmaytradeWaspEggs,usingthenormaltradingrules.",
+          "tokens": "Onceduringyourturn，youmay NumberTrack DestroyanEgg GiantWaspToken WhileyouareholdinganynumberofWaspEggs,makeaKnowledge SmallMonsterTokens-Worker rolltoattempttodestroythem. Wasps ReturnallofyourWaspEggstothetraitorYoudestroytheeggs 5+ NestTokens-WaspEggs 0-4PlaceaSmallMonstertokenonyourtile.ThisisaWorkerWasp It'smoving! IFYOUWIN WHENYOUATTACKTHEGIANTWASP Thegiantwaspthatwasonceyour ForeachWaspEgginthehouse(includingthoseheldbyheroes)，btract friendshrivelsasthoughit'sbeen 1fromtheresultofyourroll.IfyousuccessfullyattacktheGiantWasp， outinthesunfortoolong.Th otherinsectsfalltotheirdeaths youwin！ rainingoveryourhairyourclothes everything.Youleaveguicklycovd inexoskeletalhusks.You'regoingto need",
+          "monster": "",
+          "win": "WHENYOUATTACKTHEGIANTWASP Thegiantwaspthatwasonceyour ForeachWaspEgginthehouse(includingthoseheldbyheroes)，btract friendshrivelsasthoughit'sbeen 1fromtheresultofyourroll.IfyousuccessfullyattacktheGiantWasp， outinthesunfortoolong.Th otherinsectsfalltotheirdeaths youwin！ rainingoveryourhairyourclothes everything.Youleaveguicklycovd inexoskeletalhusks.You'regoingto needashower 48secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Youcompleteyourmetamorphosis.RemoveyourexplorerfromthehouseandreplaceitwiththeGiantWasp BuryallofyourltemsandOmens. 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours 3.Distribute5NesttokensacrossdifferentGroundand/orUpperFloortiles.ThesearetheWaspEggsthatthe heroesaretryingtodestroy Place{o/2/3mllMonstertokensonyourtile.TheseareyourWorkerWasps 4.F Insteadofyourturn,takeaturnwitheach",
+          "objective": "WorkerWasp Youwinwhenalloftheheroesare deadorwhentimerunsout",
+          "tokens": "",
+          "monster": "",
+          "win": "tile.ThisWasphasdied.Removeitfromthehouse Yourbabiesfinallyhatchoutoftheir eggs,theirtinyheadspokingoutof theirshells.They'rehungry，and theygoafterthefirstbitsoffoodthey canfind-thehumansthatyouonce calledyourfriends.TheAgeofthe Waspshasbegun！ 46TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：数字轨道 5/4/4/3。目标：杀死大蜂后。",
+          "traitor": "布置：自己变成大蜂后，物品和预兆埋掉；虫巢 5 个；工蜂 0/2/3 放在自己板块。目标：时间耗尽，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 40,
@@ -1758,7 +3370,32 @@ window.CABIN_PACKS = {
       "priority": 100,
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "RETURNOF THE FLESHWALKERS",
+        "heroPage": 25,
+        "traitorPage": 25,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "ConsulttheCrystalBall Youwinwhenyouhavekilledall WhileonatilewhereyoucanscrymakeaKnowledgeroll oftheEvilTwins. StunanEvilTwin.Youpoketheballandthefigureinthe 5+ YoumaykillyourownEvil imagestumbles Twin. 0-4Nothinghappens fyouhavetheMask，yo maykillanyEvilTwin. WHENYOUATTACKTHETRAITORWITHMIGHT TOKENSEEDED fyouwin，youmaystealtheMaskfromthem(iftheyhaveit)insteadof SmallMonsterTokens-EvilTwins dealingdamage HeroTokens-Twinldentities WHENYOUKILLANEVILTWIN IftherearenomoreEvilTwins，youwi！ TILESWHEREYOU CANSCRY Tower-UpperFloor RitualRoom-Basement",
+          "tokens": "",
+          "monster": "",
+          "win": "Youlookintothecrystalballandsee thefrontdooropenasseveralfigures walkthrough.Youpeerincloser tryingtogetabetterlookthroughthe distortedglass.Oneofthese newcomerslooksexactlylikeyou No...itcan'tbe.Notagain secretsofsurvival49"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.Healallofyourtraits 4.Place{2/3/4/5}SmallMonstertokensontoyourtile.Thesearetheheroes'EvilTwins Findeachhero'smatchingHerotoken.ThesearetheTwins'ldentities.PlaceoneunderneatheachEvilTwin. 5. Onceduringyourturnyoumay",
+          "objective": "ProtectYourFamily Youwinwhenalloftheheroes WhileonatilewithastunnedEvilTwin，flipthatEvilTwinbackover aredead Itisnolongerstunned,andmayactasnormalonitsnextturn.",
+          "tokens": "SmallMonsterTokens-EvilTwins HeroTokens-Twinldentities IfYouWin Yourhomeissafe.Youactouta versionofyourlifethatfeelsalmost real.Thenexttimethefrontdoor opensandyouseeyourselfwalking throughyouareready 48TRAITOR'STOME",
+          "monster": "",
+          "win": "Yourhomeissafe.Youactouta versionofyourlifethatfeelsalmost real.Thenexttimethefrontdoor opensandyouseeyourselfwalking throughyouareready 48TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：杀死所有邪恶双胞胎。",
+          "traitor": "布置：邪恶双胞胎按 2/3/4/5 放在自己板块，每个下面放一张对应的英雄身份。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 41,
@@ -1813,13 +3450,46 @@ window.CABIN_PACKS = {
         "speed": 1,
         "might": 7,
         "attack": "might",
+        "noAttack": true,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
         "known": 5,
-        "rule": "不可攻击或击晕；只攻击发电机板块附近的英雄"
+        "rule": "不可攻击或击晕；只攻击发电机板块附近的英雄",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "MACHINE AGODINTHE",
+        "heroPage": 26,
+        "traitorPage": 26,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.SettheNumberTrackto0. 2.Place5SearchedtokensneartheNumberTrack. 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup TRIGGERINGATRAP",
+          "objective": "WhenyouenteratilewithaTraptoken,taketwodiceofGeneral Youwinwhenyouoverloadallofthe damage.TheTrapstaysonthetile Generators Onceduringyourturn，youmay SabotageElectronicsandDisable DisableaTrap Trapstofindsuppliestohelpyou OverloadtheGenerators WhieonoradjacenttoatilewithaTraptokenmakeaSpeedroll. IfyouareonthesametileastheTrap，add2totheresultofyourroll",
+          "tokens": "RemovetheTrapandgiveittothetraitorMovetheNumber 6+ NumberTrack Trackupby1. 5ON/OFFTokens-Generators 0-5Nothinghappens 5TrapTokens Onceduringyourturnyoumay 5SearchedTokens-Sabotage SabotageElectronics Whileonatilewithelectronics,mkeaKnowledgeorMightroll TILESWITH MovetheNumberTrackupbyone.PlaceaSearchedtoken ELECTRONICS 5+ onthetile PanicRoom-Basement 0-4Nothinghappens.ZZZZAAP Vault-Basement YoucannotSabotageElectronicsonatilethatalreadyhasbeen Kitchen-GroundFloor sabotaged Laboratory-GroundFloor Onceduringyourturn，youmay GameRoom-Basement/Upper Floor OverloadtheGenerator 图 WhileonanytilewithaGeneratorrolldiceequaltothenumber IFYOUWIN ontheNumberTrack. Youdon'tknowwhatwaslivinginthe FliptheGe",
+          "monster": "",
+          "win": "ontheNumberTrack. Youdon'tknowwhatwaslivinginthe FliptheGeneratortokentoOFFIfallGeneratorsareOFF 5+ wiresherebutitfeltenormous.Youtake youwin！ yourescapeasvictoryenoughandhope 0-4Endyourturn thatwhateveritisneverfindsitswayout ofthishouse. 50secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 3.PlaceaTraptokenonyourtile.SettheremainingTraptokensaside 4.Take{3/3/4/5}ON/OFFtokensandreturntheresttothebox.TheseareGenerators.Placeoneonyourtile andthenoneoneachtileofyourchoicethathasanItemorOmensymbol.Ifanytokensremainpacetheseon Landingtiles Onceduringyourturnyoumay",
+          "objective": "ReactivateGenerators Youwinwhenallofthe WhileonatilewithaGeneratorintheOFFposition，makeaKnowledgeroll heroesaredead FliptheGeneratortoitsONposition 4+",
+          "tokens": "0-3NothingHappens NumberTrack TriggeringaTrap 50N/OFFtokens-Generators WhenaheroentersatilewithaTraptoken,theytaketwodiceofGenera 5TrapTokens damage.TheTrapstaysonthetile. 5SearchedTokens-Sabotage Afteryourturn,keaturnwiththeHouse IfYouWin",
+          "monster": "",
+          "win": "Monster:TheHouse Thehouseshiversandsettles Onedayyouwillhelpthething Might7SpeedOSanity5Knowledge5 thatlivesheretoescapethis TheHousecannotbeattackedorstunned.Itdoesnotmove cage.Whenyoudo，theworld willkneelbeforethepowerof TheHousemaymakeaMightattackagainstaheroonoradjacent thisterriblegod.andyouwill toanytilewithanONGenerator（OFFtokensdonotcount) beitshighpriest. Onceduringyourturnyoumay PossessElectronics PlaceaTraponanyt tilethatdoesnothaveaheroor Traponit.YoumaynotusePossessElectronicsto placetrapsonoradjacenttoatilewithaGenerator Onceduringyourturnoumay TwistHallways Roll2dice.Moveanyexploreruptothatmanytilesin anydirection.Ifthiscausestheexplorertotriggera Trap,theystopmoving 5OTRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：数字轨道设为 0；5 个搜查标记放轨道旁。目标：让 3 台发电机全部过载。",
+          "traitor": "布置：自己板块放陷阱；发电机按 3/3/4/5 放在自己板块和带物品/预兆符号的板块；房子作为怪物。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 42,
@@ -1869,13 +3539,46 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 4,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 5,
         "known": 4,
-        "rule": "不可击晕；怪物卡旁每份食物力量 +1"
+        "rule": "不可击晕；怪物卡旁每份食物力量 +1",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "ATTACK SNACK",
+        "heroPage": 26,
+        "traitorPage": 26,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.IftheLardertilehasnotbeendiscoveredfinditinthetilestackandplaceitintheBasement 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "ExorcisetheSpirit Youwinwhenyoulayenough Whileonahauntedtilemakethecorrespondingtraitroll.You spiritstorest cannotmakethisrollifthereisalreadyaSearchedtokenonthattile Exorcisespiritsinspecific Library:MakeaKnowledgeroll rooms. Larder:MakeaMightroll.",
+          "tokens": "Gymnasium:MakeaSpeedroll Chapel:MakeaSanityroll. SearchedToken-ExorcisedSpirit DemonDogToken 4+ PlaceaSearchedtokenonthattile 5FoodTokens-StolenFooc 0-3Nothinghappens. WHENYOUATTACKTHEDEMONICDOG HAUNTEDTILES YoumayattackusingSanityIfyourattackissuccessfuland{2/3/4/4} thespiritshavebeenexorcisedouwin！ Library-Ground/UpperFloor Larder-GroundFloor IFYOUAREATTACKEDBYTHEDEMONICDOGAND FOOD Gymnasium-Basement/Ground YOUHAVEAFOODTOKEN Floor Itismuchmoreinterestedinthemeat Chapel-GroundFloor YoumaygivetheDemonicDogaFoodtokenfodact4 fromtheresultoftheDog'sroll Onceduringyourturn，youmay StealFoodfromtheLarder WhileontheLardertilemakeaSpeedroll TakeaFoodtoken,fanyremain 4+ 0-3Noeffect. Secretsofsurviwal",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturnafteryours 4.BurytheDogPlacetheDemonDogtokenonyourtile. 5.Place{0/1/1/2}FoodtokensontheMonsterCard.Settheresttotheside. Onceduringyourturn，youmay",
+          "objective": "VisittheGang'sFavoritePlaces Youwinwhenalloftheheroes IfyouareononeoftheGang'sFavoritePlaceshlallofyourtraits aredead Afteryourturn,takeaturnwiththeDemonicDog",
+          "tokens": "SearchedToken-ExorcisedSpirit DemonDogToken",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：储藏室找出来放到底层，叛徒左手先行动。目标：让 3 个幽灵安息。",
+          "traitor": "布置：恶魔犬放自己板块；食物按 0/1/1/2 放在怪物卡上。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 43,
@@ -1905,13 +3608,46 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 7,
         "attack": "might",
+        "noAttack": true,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 2,
         "known": 3,
-        "rule": "不能攻击躲藏中的英雄"
+        "rule": "不能攻击躲藏中的英雄",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "EAT AND HIDE",
+        "heroPage": 27,
+        "traitorPage": 27,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.SettheNumberTrackto{6/7/8/9} 2.BurytheDog PlacetheWerewolftokenonthehauntrevealer'stile 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "Hide Youwinwhendawnhascome MakeaSpeedroll.lfyouareonatilewithahidingspot,add1to Hidetospeedthecomingofdawn theresultofyourroll.YoucannottakethisactioniftheWerewolf isinlineofsight.",
+          "tokens": "5+ TakeaHiddentoken.Youarenowhidden,andyoucannot NumberTrack beattacked. WerewolfToken 0-4Nothinghappens HiddenTokens-HiddenHeroes WHENYOUMOVE DiscardyourHiddentoken.YouarenolongerHidden TILESWITHHIDING SPOTS Onceduringyourturn，youmay 图 CharmtheBeast Armory-Basement/GroundFloor WhileonatilewiththeWerewolfmkeaSanityroll.Foreach SoundproofedRoom-Basement heroonthattilethatisnothidingadd1totheresultofyourroll UpperFloor StuntheWerewolf Catacombs-Basement 8+ WinterBedroom-Ground/UpperFloor 5-7Nothinghappens. Graveyard-GroundFloor 0-4Take1Physicaldamage StatuaryCorridor-UpperFloor ATTHEENDOFTHEMONSTERTURN Thewerewolfhowls. IFYOUWIN MovetheNumberTrackdownby1.Ifnoherotookdamagethisturn Whileyou'lln",
+          "monster": "",
+          "win": "MovetheNumberTrackdownby1.Ifnoherotookdamagethisturn Whileyou'llneverknowexactlywhy moveitdownby2instead.IftheNumberTrackisatOyouwin！ yourfriendbetrayedyouyouueata rumorthatbloodspilledinthishousehas OtherwisehaidetheirHiddentoken.Theheroesareno thepowertograntimmortality-maybe longerHidden. thathassomethingtodowithit 52secretsofsurvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2 PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours HiddenHeroes HIDDEN",
+          "objective": "HeroeswhoareHiddencannotbeattacked,andtheydonot Youwinwhenalloftheheroes countasobstacles. aredead Onceduringyourturn，youmay",
+          "tokens": "图 RevealtheHidden NumberTrack WhileonatilewithaHiddenheromkeaSanityroll WerewolfToken ThatherolosestheirHiddentoken 5+ 0-4Nothinghappens. HiddenTokens-Hidden Heroes Onceduringyourturn，youmay CommunewithWolves WhileonatilewiththeWerewolf,ifitisn'tstunnedmoveitonetile IfYou Win Then，makeaMightattackwiththeWerewolf. You'reimmortalnow-youthink Onceduringyourturn，youmay You'renotexactlysurehowtotell CurseyourEnemies Whileinlineofsightofanon-HiddenheromkeaSanityroll ThatherochoosesandburiesoneoftheirItemorOmencards 5+ 0-4Nothinghappens Afteryourturn,takeaturnwiththeWerewlf.",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：数字轨道 6/7/8/9；狼人放在揭示者板块。目标：撑过 6 轮，等到天亮。",
+          "traitor": "布置：狼人放揭示者板块。目标：杀死所有英雄；英雄躲藏时狼人不能攻击。"
+        }
+      }
     },
     {
       "no": 44,
@@ -1967,13 +3703,51 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 7,
         "attack": "might",
+        "noAttack": false,
+        "counts": {
+          "3": 1,
+          "4": 2,
+          "5": 3,
+          "6": 4
+        },
+        "boundRoom": "",
         "sanity": 4,
         "known": 2,
-        "rule": "所有伤害 -1；不受着火伤害"
+        "rule": "所有伤害 -1；不受着火伤害",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": true,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "SEAM AMISSING",
+        "heroPage": 27,
+        "traitorPage": 27,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Thehauntrevealermustturntheirtileface-downandplacetheirfigurinebackonthattile.Thattileisnow Burning.Ifthereareonlythreeplayers,fliptheotherhero'stileaswell(unlesstheyareonaLandingtile) 2.Find5Firetokensandsetthemaside 3.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup THEHOUSEISONFIRE",
+          "objective": "Burningtilesareturnedface-down.Burningtilesarenotconsideredtohaveany Youwinwhenyousetthe symbolsoreffects,andtheycountashavingdoorwaysonallfoursides. houseonfireandescape IfaLandingtilewouldbesetonfire,donotturnitface-down.Instead,placea Burneveryroominthe FiretokenonthatLanding.YoumaystillmovebetweentheBasementLanding house. andtheGroundFloorstaircase,andbetweentheGroundFloorstaircaseand theUpperLanding,eveniftheyareBurning.(TheGroundFloorLandingcounts",
+          "tokens": "asonetileforfires.) SmallMonsterTokens- Mannequins WHENYOUMOVEONTOABURNINGTILE FireTokens Youtake1Generaldamage.Theflamesarespreading Onceduringyourturn，youmay IFYOUWIN SetaFire Yourushoutthedoormanaging WhileonanytilemkeaSityoll toescapethechokingsmokeang bitingflamesthatareburning Flipthetileover.ItisnowBurning.IfthisisaLandingtile,placeaFire 4+ tokenonitinstead thisplacetotheground.You seethe“person”youonce 0-3Nothinghappens.Youcan'tbringyourselftodoit calledyourfriendatoneof ATTHEENDOFTHEMONSTERTURN thewindows.Theirfacemelts Thefirespreads.EachcontinuoussectionofBurningroomscountsasasinglefire theireyeballsdroopingwiththe Foreachofthosefires,chooseanytileinthehousethatisadjacenttothatfir",
+          "monster": "",
+          "win": "SetaFire Yourushoutthedoormanaging WhileonanytilemkeaSityoll toescapethechokingsmokeang bitingflamesthatareburning Flipthetileover.ItisnowBurning.IfthisisaLandingtile,placeaFire 4+ tokenonitinstead thisplacetotheground.You seethe“person”youonce 0-3Nothinghappens.Youcan'tbringyourselftodoit calledyourfriendatoneof ATTHEENDOFTHEMONSTERTURN thewindows.Theirfacemelts Thefirespreads.EachcontinuoussectionofBurningroomscountsasasinglefire theireyeballsdroopingwiththe Foreachofthosefires,chooseanytileinthehousethatisadjacenttothatfire saggingweightoftheirplastic （whetherornotthereisanopendoorbetweenthem),thensimultaneouslyflip exterior.Itillbesometimebefore thosetilesface-down.ThosetilesarenowBurning youfeelcomfortableshoppingat themallagain. IfnofiresareabletospreadplaceaFietokenonaLandingtiletha"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.Place{1/2/3/4}SmallMonstertokensonLandingtiles.TheseareyourMannequins. Thehouseisonfire",
+          "objective": "Burningtilesareplacedface-down.Burningtilesarenotconsidered Youwinwhenalloftheheroes tohaveanysymbolsoreffects,andtheycountashavingdoorwayson aredead allfoursides. HeroestakedamagewhentheyenterBurningtiles.Youandyour",
+          "tokens": "MannequinsdonottakedamagefromBurningtiles SmallMonsterTokens-Mannequins FireTokens MadeofPlastic Damagefromallattacksagainstyouisreducedby1. IfYou Win Afteryourturn,takeaturnwiththeMannequins Youcarveoutthefinalpiece ofmaterialforyourfashionshow. “Thiswilldojustperfectly.This",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：揭示者的板块翻面并放回棋子，视为着火；3 人局再翻另一名英雄的板块；5 个火焰标记。目标：让 5 间房烧起来。",
+          "traitor": "布置：人体模型按 1/2/3/4 放在平台板块。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 45,
@@ -2027,7 +3801,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "SDEBUT AN AUDACIOUS",
+        "heroPage": 28,
+        "traitorPage": 28,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturnyoumay",
+          "objective": "StealtheScript Youwinwhenyouruinthe WhileonthetilewiththetraitoriftheyareholdingtheBookmake audition. aSpeedroll Killthetraitorandmakesure TaketheBook 4+ theyarenotjustplayingdead Rewritethescripttohasten 0-3Nothinghappens thedeathscene Onceduringyourturn，youmay",
+          "tokens": "RewritetheScript NumberTrack fyohavetheBookandyouareonatilewhereyoucanwritemke aKnowledgeroll. MovetheNumberTrackdownby1.Youscribbleaguickdeathscene 6+",
+          "monster": "",
+          "win": "Yourphoneringssuddenlyanda voiceyouknowfromtelevisionspeaks “Impressiveshow!Theaudienceloved thispremiere!Caretocomebacknext weekforthenextepisode?Youbring somefriends.We'llbringthefans. 54secretsofsurvwwal"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.IftheArmorytilehasnotbeendiscoveredsearchthetilestackforitandplaceitontheGroundFloorof thehouse. 4 Drawcardsfromtheltemdeckuntilyouhave2weaponsTakethose2weaponsandplacetherestofthedrawn cardsonthebottomoftheltemdeck.Ifnoweaponsremainintheltemdeck,skipthisstep. 5.SettheNumberTrackto{2/3/4/5} Whenyoudie",
+          "objective": "Say“Cut!”PlaceyourexplorerintheArmoryHealallofyourtraits.You Youwinwhenalloftheheroes takethenextturn.Playthencontinuesinclockwiseordersartingwiththe aredeadThereisnosuchthingas playertoyourleft aco-star SceneryChewing",
+          "tokens": "WhieyouareonatilewithanEventsymbol，andifaheroisalsoonthat tileadoneadditionaldietoallofyordicerolls NumberTrack PropWeapons IfYouWin Whendealingdamage,weaponscannotbeusedtobringanyone'straits Aphoneringsinthehouseandit's belowcritical.Thisincludesyou thecallyou'vebeenwaitingfor.When youanswerafamiliarvoicespeaks “Lovelyperformance.Who'syour supportingcastforepisode2? 4TRAITOR'STOME",
+          "monster": "",
+          "win": "Whendealingdamage,weaponscannotbeusedtobringanyone'straits Aphoneringsinthehouseandit's belowcritical.Thisincludesyou thecallyou'vebeenwaitingfor.When youanswerafamiliarvoicespeaks “Lovelyperformance.Who'syour supportingcastforepisode2? 4TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置。目标：杀死叛徒并改写剧本。",
+          "traitor": "布置：军械库找出放到底层；从物品牌抽 2 件武器；轨道 2/3/4/5。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 46,
@@ -2057,13 +3856,46 @@ window.CABIN_PACKS = {
         "speed": 7,
         "might": 7,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 6,
         "known": 4,
-        "rule": "只能被力量攻击伤害"
+        "rule": "只能被力量攻击伤害",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": "might"
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "HAIR GHOST",
+        "heroPage": 28,
+        "traitorPage": 28,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANTIDOTES 1",
+          "objective": "Aquickexperiment Youwinwhenyousuccessfully Numbertoken“1”istherealAntidote curethetraitor. IfyouhavetherealAntidote,youmaytradeitusingthenormal FindtherealAntidote tradingrules. DefeattheGiantHair Monsterwhileyouhave Onceduringyourturn，youmay therealAntidote LearnabouttheCurse",
+          "tokens": "WhileontheLibrarymakeaKnowledgeroll GiantHairMonsterToken Flipaface-downAntidotetokentoitsface-upside 5+F SmallMonsterTokens-Small 0-4Nothinghappens. HairMonsters Onceduringyourturn，oumay NumberTokens-Antidotes MakeaDiscovery WhileonatilewithanAntidotetokenyoucanflipitovertoseeifit IFYOU WIN istherealAntidote.Ifitis,oumaypickitup Yousplashtheantidotealloveryour friendandacrossthewallsofthe WHENYOUATTACKTHEGIANTHAIRMONSTER house,whicharenowtangledwith IfyouhavetherealAntidote,add3toyourresult.Ifyousuccessfullyattack wet,moldyhair.Thehairrecedes theGiantHairMonsterwhileyouhavetherealAntidoteouwin！ untilitdisappears,ruingyour friendbacktoyou.Asyouleavethe houseyouickahairoutofyour mouth.You'res",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "YouhavebeenconsumedbyhairReplaceyourfigurewiththeGiantHairMonstertoken.Buryallofyourltems 1. andOmens. 2. PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturninplaceofyours FindoneofeachNumberTokenlabeled1through{4/6/8/10}.TheseareAntidotes.Shufflethemandplace 3 themface-downaroundthehousearrangedhoweveyoulike Place1SmallMonstertokenontheEntranceHall.ThisisaSmallHairMonster 4、 Findandsetaside{1/2/3/4additionalSmallHairMonsters 5. Whenaherodies",
+          "objective": "ReplacetheirexplorerwithaSmallHairMonster Youwinwhenallofthe heroeshaveturnedinto Insteadofyourturn,takeaturnwiththeSmallHairMonsters HairMonsters.",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置。目标：持真解药击败巨型毛发怪。",
+          "traitor": "布置：自己变成巨型毛发怪；解药按 1–4/6/8/10 藏好；门厅放 1 个毛发怪。目标：把所有英雄都变成毛发怪。"
+        }
+      }
     },
     {
       "no": 47,
@@ -2127,7 +3959,32 @@ window.CABIN_PACKS = {
       ],
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "TO REMEMBER AKNIGHT",
+        "heroPage": 29,
+        "traitorPage": 29,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup ANOTHERDIMENSION",
+          "objective": "AherowithaHerotokenisTrapped.Trappedheroesmaynottradewith YouwinwhenallofthePortals non-Trappedheroes. havebeenclosed EscapethePortals. LEAPTHROUGHAPORTAL ClosethePortals Atthestartofyourturn,makeaSpeedrolltodeterminehowfaryouare abletomove（minimum1tile) TOKENS SNEEDED Onceduringyourturnyoumay HeroTokens-TrappedHeroes EscapethePortal PortalTokens-DimensionalPortals WhileonatilewithaPortaltoken(andyouareTrapped)makea Knowledgeroll.Inthereisanon-Trappedheroonyourtile,add2to",
+          "tokens": "",
+          "monster": "",
+          "win": "yourroll. Thelastoftheportalscloses,ending GivethetraitoryourHerotoken.YouarenolongerTrapped 6+ theknight'sreignofterroronthis Madeit! sideofexistence.Asyouexitthe 0-5Gain1Knowledge.Notquitebutyougainedsomeinsight... houseyoutakeamomenttothink ofthosepoorsoulsforeverlostto Onceduringyourturn，youmay gnothertime ClosethePortal WhileonatilewithaPortaltoken(andyouarenotTrapped)makea KnowledgeorSanityroll YouclosethePortal.RemovethatPortalfromthehouse.Ifthis 4+ wasthelastPortalyouwin！ 0-3TakeonedieofMentaldamage 56secretsofsnrvival"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.Find{2/3/4/5}Portaltokens.ThenforeachheroplaceaPortaltokeninthathero'sregiononthetile farthestfromthathero GiveeachherotheirHeromatchingtoken.AherowhohastheirHerotokenisTrapped 4 AnotherDimension",
+          "objective": "AherowhohastheirHerotokenisTrapped.Trappedheroescannottrade Youwinwhenalloftheheroes withheroeswhoarenotTrapped aredead WhataCruelKnight",
+          "tokens": "Youmayattackonceonyourturnforeachlivinghero，butyoumaynot HeroTokens-TrappedHeroes attackanyheromorethanonceperturn.Thetypeofattackyoumakeis determinedbywhetherornottheheroisTrapped. PortalTokens-DimensionalPortals TrappedHeroes-SanityAttack IfYou Win Add2totheresultofyourroll.Ifyouwin,theherotakes Physicaldamage Theknightsighssheathinghissword Timetorestagain-butforashort Non-TrappedHeroes-MightAttack spell.Youarenowandforever fyouwin，youdonotdealdamage.Insteadgiveyourtargettheir hissquire Trappedtoken.ThatheroisTrapped.Youdonottakedamageifyou losethisattack Ifyouwoulddie Healallofyourtraits,instead.Thecruelknightisinvincible 56TRATOR'STOME",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：关闭 3 道传送门；关闭时自己摆脱被困。",
+          "traitor": "布置：传送门按 2/3/4/5 放好，给每名英雄发英雄标记使其被困。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 48,
@@ -2158,13 +4015,46 @@ window.CABIN_PACKS = {
         "speed": 6,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 6,
         "known": 8,
-        "rule": "被击败时改为击晕，头骨交给攻击者"
+        "rule": "被击败时改为击晕，头骨交给攻击者",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE HOST! DON'T",
+        "heroPage": 29,
+        "traitorPage": 29,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup WHENYOUATTACKTHEHEADOFTHEHOUSE",
+          "objective": "",
+          "tokens": "0-4Take2Physicaldamage.Ouch,itbites! HeadoftheHouseToken WHENYOUREACHTHEPANICROOM IfyouarecarryingtheSkullyouwin！Andstaythere! IFYOUWIN Withaclick.thedoortotepanic roomlocksyourhostinside.Itshouts butyouhavealreadybeguntowalk away.Asyouleavethemanoryou lockyourformerfriendinside.Their poundingonthedoorquicklyfades tonothing,andthekeytothehouse meltsawayinyourhand,leaving behindacongealedmassofblood andash. secretsofsurviwal57",
+          "monster": "",
+          "win": "Withaclick.thedoortotepanic roomlocksyourhostinside.Itshouts butyouhavealreadybeguntowalk away.Asyouleavethemanoryou lockyourformerfriendinside.Their poundingonthedoorquicklyfades tonothing,andthekeytothehouse meltsawayinyourhand,leaving behindacongealedmassofblood andash. secretsofsurviwal57"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits.Gain1Might 3.PlacetheMonsterCardtoyourleft.Themonsterswilltaketheirturnafteryours 4.IftheBloodyRoomtilehasnotbeendiscoveredchthetilestackforitandplaceitontheGroundFloor PlacetheHeadoftheHousetokenontheBloodyRoom 5. PlacetheSkullundertheMonsterCard.TheHeadoftheHouseiscarryingit 6 Onceduringyourturn，youmay",
+          "objective": "RevivetheHost 8 Youwinwhenalloftheheroes IfyouareholdingtheSkullplacetheHeadoftheHouseonyourtile aredead Then，placetheSkullundertheMonsterCard",
+          "tokens": "Attheendofeachhero'sturn IfthatheroiscarryingtheSkull,theymakeaSpeedroll HeadoftheHouseToken Nothinghappens 5+ Theherotakes2Physicaldamage.Ouch,itbites! 0-4 IfYouWin Whenyoudie It'salongfiveminutesastheBloody PlaceyourselfontheBloodyRoomtileandhealallofyourtraits Roomfinishesitsdigestion.Asyou Yourserviceisn'tfinished. standoveryourmaster,handsome clothesgatheredforhisarrival Afteryourturn,takeaturnwiththeHeadoftheHouse fleshcrawlsfromthehouse'sfloor andwallsweavingaroundhim.Hi handsomeformgaspstolifeasyou",
+          "monster": "",
+          "win": "Whenyoudie It'salongfiveminutesastheBloody PlaceyourselfontheBloodyRoomtileandhealallofyourtraits Roomfinishesitsdigestion.Asyou Yourserviceisn'tfinished. standoveryourmaster,handsome clothesgatheredforhisarrival Afteryourturn,takeaturnwiththeHeadoftheHouse fleshcrawlsfromthehouse'sfloor andwallsweavingaroundhim.Hi handsomeformgaspstolifeasyou MonsterHeadoftheHouse presenthissuit.Hedressessharply justlikeeverytimebeforeandhe Might6Speed6Sanity6Knowledge8 .You'regoing retreatstohisbedroom WhentheHeadoftheHouseisdefeatedbyanattack，itis tohavetomakesomenew friends killedinsteadofstunned.Removeitfromthehouseandgive theSkulltotheattacker TRAITOR'STOME57"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：把头骨带到恐慌室。",
+          "traitor": "布置：血房找出放到底层；房主放血房并持有头骨；自身 +1 力量。目标：杀光英雄。"
+        }
+      }
     },
     {
       "no": 49,
@@ -2193,13 +4083,46 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 6,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
         "known": 5,
-        "rule": "持契约时不可击晕"
+        "rule": "持契约时不可击晕",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "AND CONDITIONS TERMS",
+        "heroPage": 30,
+        "traitorPage": 30,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.EachherotakesaBloodtokenandplacesitontheircharacterboard 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup. THECONTRACT",
+          "objective": "CONTRACT Aninfernaldocument;theparchmentiswarmtothetouch Youwinwhenyouburnthe TheContractcanbetradedbetweenheroes,usingthenorma Contract. tradingrules.Thetraitorcannotholdortouchthecontract. StealtheContractfromthe Demon. WHENYOUATTACKTHEDEMONWITHMIGHT BurntheContract",
+          "tokens": "Onceduringyourturn，youmay BloodTokens BurntheContract ContractToken WhileyouhavetheContract,makeaKnowledgerollIfyouareina DemonToken roomwithfire，add4totheresultofyourroll. 7+Youburnthecontract.Youwin！ ROOMSWITHFIRE 4-6Nothinghappens FurnaceRoom-Basement 0-3Take1Physicaldamage.Ouch!Itburns! RitualRoom-Basement Kitchen-GroundFloor BLOODTOKENS BLOOD Laboratory-GroundFloor Youpreferitinsideyourbody CharredRoom-Ground/UpperFloo Bloodtokenscannotbetraded,andaheromaynotpickupa Bloodtokenthathasbeendropped. IFYOUWIN lfyoudieortakePhysicaldamageplaceyourBloodtokenon You²realive,butyoualsohaven't yourtile. foundahousetobuy.Obviously Ifyoudon'thaveyourBloodtokenattheendofyourturn,take theformerismorei",
+          "monster": "",
+          "win": "lfyoudieortakePhysicaldamageplaceyourBloodtokenon You²realive,butyoualsohaven't yourtile. foundahousetobuy.Obviously Ifyoudon'thaveyourBloodtokenattheendofyourturn,take theformerismoreimportant-you 1dieofMentaldamage reallydolikebeingnotmurderedby Onceduringyourturn，youmay ademonbutstill...youthoughtthis PerformBloodMagic housewastheone fyouhaveyourBloodtoken,takedieofMentaldamageandgain 1Might. 58secretsofsurviwal"
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Healallofyourtraits. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltaketheirturnafteryours 4Gain/1/2/2MightandSpeed. 5.PlacetheDemontokenontheBasementtilefarthestfromtheBasementLanding PlacetheContracttokenontheDemon.ItisholdingtheContract. 6. WhenyouattackaHero",
+          "objective": "Ifyouaren'tusingaweapon，youmayattackusingSanity.Thelosertakes Youwinwhenyoubringthe Mentaldamage.See“SpecialBenefits,”underparagraph3，subsection Demoneveryone'sblood,r whenalloftheheroesaredead BloodTokens Usedtofulfilltheinfernalcontract.",
+          "tokens": "BLOOD IfaherodiesortakesPhysicaldamage,theydroptheirBlood BloodTokens token. ContractToken IfyouareonatilewithanyBloodtokensypckthem DemonToken up.Placethemonyourcharacterboard Afteryourturn,takeaturnwiththeDemon IfYouWin Thedemonsighsandtucksthe contractbackintoahiddenpocket Onewayoranotherthecontractwas",
+          "monster": "",
+          "win": "Thedemonsighsandtucksthe contractbackintoahiddenpocket Onewayoranotherthecontractwas Monster:Demon fulfilledandyou'refreefrom Might6Speed4Sanity4Knowledge5 clause4b IftheDemonisholdingtheContract,itcannotbestunned WhenyouenteratilewiththeDemon fyouhaveeachhero'sBloodtokenlomtheritual.Youwin！ 58TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：每名英雄拿 1 个血标记。目标：击败恶魔，烧掉契约。",
+          "traitor": "布置：恶魔放底层远离底层平台处，契约放恶魔身上；按 1/1/2/2 获得力量与速度。目标：带来血之人的血，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 50,
@@ -2231,13 +4154,46 @@ window.CABIN_PACKS = {
         "speed": 4,
         "might": 8,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
         "known": 4,
-        "rule": "不可击晕；速度等于数字轨道"
+        "rule": "不可击晕；速度等于数字轨道",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": true,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "TASTEOF THE AND",
+        "heroPage": 30,
+        "traitorPage": 30,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Setaside(3/4/4/5)Traptokens.TheseareExplosives 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，oumay",
+          "objective": "SetMakeshiftExplosive Youwinwhenyoudestroy WhileonanytilebyanItemorOmen.Then,makeaSpeedor thehouse Knowledgeroll SetExplosivestorigthe PlaceanExplosiveonyourtile.IftherearenoExplosivesleft 6+ housetoexplode youmaymoveanalready-placedExplosivetoyourtile Unconventionaltutcrazyenhtowork",
+          "tokens": "0-5Nothinghappens.DonotplaceanExplosive.Youdestroythetrap NumberTrack beforeitisset. ConstructToken TrapTokens-Explosives CONSUMEDROOMS TheConstructisConsumingrooms.Consumedroomtilesareturned face-down.Theyareconsideredtohavenosymbolsortext,andtheyhave IFYOUWIN doorwaysonall4sides.LandingtilescannotbeConsumed.Explosives Youlookbackasthehousecollapses remainonConsumedroomswhentheyareturnedoverYoumayplace oddexplosionsrockingitsstructure ExplosivesonConsumedrooms. Notallofyoumadeitout,butat leastthatthingisgoneforgood ATTHEENDOFYOURTURN Youhope IfalloftheExplosiveshavebeenplaced,andthereisatleastoneExplosive ineachregion，ouwin！ secretsofsurvival59",
+          "monster": "",
+          "win": "doorwaysonall4sides.LandingtilescannotbeConsumed.Explosives Youlookbackasthehousecollapses remainonConsumedroomswhentheyareturnedoverYoumayplace oddexplosionsrockingitsstructure ExplosivesonConsumedrooms. Notallofyoumadeitout,butat leastthatthingisgoneforgood ATTHEENDOFYOURTURN Youhope IfalloftheExplosiveshavebeenplaced,andthereisatleastoneExplosive ineachregion，ouwin！ secretsofsurvival59"
+        },
+        "traitor": {
+          "setup": "1.Youhavebeenconsumed.BuryallofyourltemsandOmens.Removeyourexplorerfromthehouseandreplace itwiththeConstructtoken 2.Turnthetileyouareonface-down.ThattilehasbeenConsumed. 3.PlacetheMonsterCardtoyourleft.Themonsterwilltakeitsturninplaceofyours 4.SettheNumberTrackto{2/3/3/4.ThisisyourSpeed. ConsumedRooms",
+          "objective": "Consumedroomsareturnedface-down.Theyareconsideredtohaveno Youwinwhenalloftheheroes symbolsortext,andtheyhavedoorwaysonall4sides. aredead Insteadofyourturn,takeaturnwiththeConstruct Consumedtheentirehouse",
+          "tokens": "NumberTrack",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：炸药标记按 3/4/4/5 放好。目标：在每层至少放 1 个炸药，共 3 个。",
+          "traitor": "布置：自己变成构造体，所在板块翻面；数字轨道 2/3/3/4 代表速度。目标：吞噬整栋房子，或杀光英雄。"
+        }
+      }
     },
     {
       "no": 1,
@@ -2270,12 +4226,45 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
-        "known": 4
+        "known": 4,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "2： STACKEDLIKE CORDWOOD",
+        "heroPage": 3,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "seems,wasoutafterdark... Ifyoursidehasanyspecificsetupsteps,thisiswheretheywillbelisted Bothsideswillhavedifferentsetuprequirements.Allsetuphappensbefore SETUP thefirstturnofthehaunt,anditmaysignificantlychangewhatthehouse 1.Theheroeshavenoadditionalsetupsteps lookslike 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay SPECIALACTIONS",
+          "objective": "LearnaboutJack Youwinwhenyouexorcise Mosthauntsprovideruleslikethis,forspecialactionsyoumaytakeon WhileontheLibrarytilemkeaKnowledgeroll Jack'sSpirit yourturn.Theseactionsareindicatedbythesymbol,andtheyare GiveaKnowledgeofJacktokentoaherowhodoesnotalready 5+ alwaysoptional.Youmayperformanynumberofspecialactionsonyour Killthetraitortorelease haveone. turn,butyoumayonlyperformeachspecialactiononceperturn.Any Jack'sSpirit 0-4Nothinghappens specialrulesassociatedwiththoseactionswillbelistedwiththem. ExorciseJack WHENYOUATTACKTHETRAITORORAREATTACKED",
+          "tokens": "BYJACK'SSPIRIT Jack'sSpiritToken IfyouhaveaKnowledgeofJacktoken,add2totheresultof TOKENSNEEDED 2SanityTokens-ExorcismCircle yourroll. Alistofeverytokenneededtoplaythishauntoftenwithadescriptionof 2MightTokens-KnowledgeofJack Onceduringyourturn，youmay whattheyrepresent.Thissectionwillbethesameinbothhauntbooks StudytheExorcism Don'tworryifyourhauntbookdoesn'ttellyouhowatokenworksthe IFYOUWIN otherteamwillhavethatinformation. WhileonatilethathasanEventsymbol,makeaKnowledgeroll Withaflashoflightapuffofsmoke PlaceanExorcismCircletokenonyourtileormoveonethereif andawhiffofsulfurJack'sSpii theyarebothontheboard vanishes.That'sthelastyou'llseeof 0-4Take2Mentaldamage him...youhope IFYOUWIN Onceduring",
+          "monster": "",
+          "win": "otherteamwillhavethatinformation. WhileonatilethathasanEventsymbol,makeaKnowledgeroll Withaflashoflightapuffofsmoke PlaceanExorcismCircletokenonyourtileormoveonethereif andawhiffofsulfurJack'sSpii theyarebothontheboard vanishes.That'sthelastyou'llseeof 0-4Take2Mentaldamage him...youhope IFYOUWIN Onceduringyourturn，youmay Sometimeseverythinggoesaccordingtoplan.Ifyoursidewins,readthis ExorciseJack'sSpirit sectionoutloudforaflavorfulclosingscene WhileonthesametileasJack'sSpirit,makeaSanityroll ForeachExorcismCircletokeninyourregion,additotheresultof yourroll. SPECIALRULES Youwin！YouexorciseJack'sSpirit 7+ Eachhaunthassomespecialrules,likethis.Theserulesmayalwaysbe 0-6Eachherotakes1Physicaldamage.Jackwon'tgoeasily ineffect,forexamlsthowtilediscoveryworks,theymay WHENTHETRAITORDIES triggerwhens"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置步骤，叛徒左手边的玩家先行动。目标：在图书室做知识判定，把「杰克的知识」交给还没有该标记的英雄，并杀死叛徒以释放杰克之灵。胜利：与杰克之灵同格做神智判定，本区域内每个驱魔圈 +1，7+ 成功；0–6 每名英雄受 1 点物理伤害。",
+          "traitor": "布置：你是揭示者，把杰克之灵放到图书室。目标：阻止英雄完成驱魔，杀光英雄。"
+        }
+      }
     },
     {
       "no": 3,
@@ -2306,12 +4295,45 @@ window.CABIN_PACKS = {
         "speed": 5,
         "might": 6,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 3,
-        "known": 3
+        "known": 3,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE DUST",
+        "heroPage": 5,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "Whileonatilewithanotherexploreryoumaytradeoneofyour Thefeverishrushoutofthehouse 1.FindthreeNumbertokensforeachplayerTheserepresenttheSickness.Ingameswith3-5players,thereshould Sicknesstokensatrandomwiththatexplorer.Thatexplorermust towreakhavocuponthetown.Dust beone“1”token.Ina6-playergame,thereshouldbetwo“1”tokens agreetothetrade.Thedustwantstospread todust. 2.ShuffletheSicknesstokensface-down,andgivethreetoeachplayer 3.PlacetheMonsterCardtotheleftofthehauntrevealer.Themonsterswilltaketheirturnafterthatplayer ATTHEENDOFYOURTURN 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturnaftersetup Ifyouareonatilewithanotherexplorer,swaponeofyourSickness tokensatrandomwiththem.Ifmultipleexplorersareonyourtile swaptokenswitheachofthemoneatatime.Anexplorerwho HIDDENTRAITOR",
+          "objective": "receivesaSicknesstokenlabeled“1”atanytimepermanently Thetraitor(s)beginthishaunthiddenfromtherestoftheexplorers Theheroeswinwhentheycure becomesatraitor（eveniftheylaterlosethattoken) Allexplorersmayattackotherexplorers. thedust. IfyoudidnotswapSicknesstokensthisturn（eitherby“Control ltcoststwomovestoleaveatileoccupiedbyanotherexplorer Thetraitorswinifallexplorers lmpulses”orbyendingyourturnonatilewithanotherexplorer) havebecometraitorsordied taketwodiceofGeneraldamage Anyplayerwhohas（orhad)aSicknesstokenlabeled“1”isatraitor Playersmaylookattheirowntokensatanytime.Youarestilla Ifthiskillsyouand",
+          "tokens": "",
+          "monster": "",
+          "win": "CuretheDust INTRODUCTION Youplungeamakeshiftsyringeinto Whileonatilewhereyoucanresearchmakearollwithanytrait yourarm,andyourcoughquickly It'sdustyinhere.Asyouinhaleyouknowsomethingiswrong.Thedustinthishouseis ForeachResearchtokeninthehouse.add2totheresultofthisroll. ceases.Youstopseeingred,but somethingelse.Ithasn'ttakenaholdofyouyetbutyoubegintofeel...violent.Youcan 13+ Youwin！ thedustparticlescontinuetofloat feelthatwhateverisinthedustwantstospread,andfeed,andinfect.Bynowoneofyour throughoutthehouse.You'dbest 0-12SwaponeofyourSicknesstokensatrandomwiththeplayerto friendsmustalreadybeinfected.Butwho?Youreasonthatthecuremustbesomewherein yourleft.Thedustwantstospread leaveguickly，beforeyourimmunity wearsoff thehouseandyouresolvetofinditbeforeit'stoolate. Onceduringyourturn，youmay ControlIm"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：每人 3 个疾病标记；3–5 人局只有 1 个「1」，6 人局有 2 个「1」；怪物卡放揭示者左侧，揭示者左手先行动。目标：放满 8 个研究符文治愈尘埃。",
+          "traitor": "布置：隐藏叛徒，带「1」疾病标记的人永久成为叛徒。目标：让所有英雄变成叛徒或死亡。"
+        }
+      }
     },
     {
       "no": 7,
@@ -2342,12 +4364,50 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 4,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        },
+        "boundRoom": "",
         "sanity": 6,
-        "known": 4
+        "known": 4,
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "OPON REFLECTION",
+        "heroPage": 9,
+        "traitorPage": null,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "theMirrorBeingmoves.IfaMirrorBeingendsitsturnonaspace Thecreaturesfinalassaultdrawsyou 1.Thehauntrevealertipstheirfigureover.Theyarestillinthegame,butdeadtheirsoulistrappedinthe withanexplorer,itattacksthatexplorerusingSanity intotheMirrorRealm，whereyouand MirrorRealm. yourfriendsaretrappedforevermore 2.ThehauntrevealerselectsaTrait，Omen,andRoomatrandom(seebelow),notingtheirnamesonasheetof paper.Thisinformationshouldnotbesharedwithanyotherplayers. Onceduringyourturn，youmay ShuffletheTraittokensface-down，andselectoneatrandomMakeanoteofwhichtokewaschosen a. BreaktheSpell 福 b. ShuffleNumbertokensnumbered1-9face-down,andselectoneatrandom Whileonanytileheaitandrollit.Tellthehauntrevealerthe MakeanoteofwhichOmenthattokenrepresents: nameofoneofyourOmens. 2:Dog 4:Dagger 3:ldol 5:Armor 1:Mask 6:Ring IfyouhavethecorrectcombinationofTrait，Omen,andRoom， 7:Book 8:HolySymbol 5+ 9:Skull thehauntreveale",
+          "objective": "ThishaunthasnotraitorYouareallfightingtosurvive Youwinwhenyousuccessfully makearollwiththecorrect THEHOUSEISEERILYSILENT combinationofTrait,Omen IfanexplorerdiscoversatilethathasanEventsymbol,thatplayerdoes andRoom notdrawanEventcard.Discoveringoneofthesetilesdoesnotcausea player'sturntoend.",
+          "tokens": "SmallMonsterTokens-MirrorBeings THEHAUNTREVEALERCANNOTCOMMUNICATE NumberTokens ThehauntrevealeristrappedintheMirrorRealm.Theymaynottalk TraitTokens mimewriteorotherwisecommunicatewiththeotherplayersexceptas describedbelow ONTHEHAUNTREVEALER'STURN ChooseanyEventcardfromtheEventdeckandhandittoanyplayer.The heroesmayinterpretthiscardhowevertheywish，buttheywillnotresolve theEvent.SettheEventcardasideafterwards. Secretsofsurviwal17 16secretsofsurvial",
+          "monster": "",
+          "win": "THEMIRRORBEINGS INTRODUCTION Youlookintothemirrortoseeyour friendgivingyouathumbs-up.The YoulookdeeplyintothemirrorWhatyouseelookingbackappearstobeyoubutsomehow mirrorrippleslikewaterandyour backwards.Theworldbehindyourushesforwardcontortingandinverting.Yourvision friend'ssoulfliesbackintotheir MONSTER:MIRRORBEING blurssandsuddenlyyouareinaroomfullofwindows.Youseeallyourfriends,andyou body.Youfleethegroundswithhaste realizethatyou²relookingoutfromthemirrorsallaroundthehouse！ifyoudon'twarn swearingtoyourselfthatyou'llnever Might4 Speed3 Sanity Knowledge4 6 lookintoamirroragain. them,they'llbecometrappedwithyou MirrorBeings smustalwaysmovetowardtheclosestexplorerIfthere isatieforwhichexplorerisclosest, ，thehauntrevealerchooseswhere IFYOULOSE SETUP theMirrorBeingmoves.IfaMirrorBeingendsitstur"
+        },
+        "traitor": {
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：揭示者把棋子翻倒，仍算存活但困在镜界；随机记下一个属性、预兆和房间；镜像体按 2/3/4/5 放在门厅。目标：掷出正确的属性 + 预兆 + 房间组合 3 次破咒。",
+          "traitor": "本剧本没有叛徒，全员合作；揭示者被困镜界，只能用事件牌间接交流。"
+        }
+      }
     },
     {
       "no": 12,
@@ -2376,13 +4436,46 @@ window.CABIN_PACKS = {
         "speed": 3,
         "might": 5,
         "attack": "might",
+        "noAttack": false,
+        "counts": null,
+        "boundRoom": "",
         "sanity": 4,
         "known": 4,
-        "rule": "不可击晕；同格两只可合并为力量 8 攻击"
+        "rule": "不可击晕；同格两只可合并为力量 8 攻击",
+        "noStun": true,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "Helping Hands",
+        "heroPage": null,
+        "traitorPage": 6,
+        "freeForAll": true,
+        "hero": {
+          "trigger": "",
+          "setup": "",
+          "objective": "",
+          "tokens": "",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.IfnoonehastheStrangeAmuletltemcard,finditintheltemdeckandgiveittothehauntrevealer 2.PlacetheMonsterCardtotheleftofthehauntrevealerThemonsterswilltaketheirturnafterthehauntrevealer 3.PlaceoneTrollHandtokenontheEntranceHallandanotherontheBasementLanding 4.Theplayertotheleftofthehauntrevealerwilltakethefirstturn. Free-for-Al",
+          "objective": "Thishauntisafree-for-all.Allexplorersactasobstacles.Theymayattack Youwinifyouareholdingthe otherexplorers. StrangeAmuletandallofthe otherexploresaredead WhenyouattackanotherexplorerwithMight",
+          "tokens": "dealingdamagetothem. 2TrollHandTokens Afterthehauntrevealersturn,theTrollHands takeaturn。 Win IfYou TheTrollHandsarecontrolledbytheplayerwhohastheStrangeAmulet Yourfriends'pulpedremainsvanish IfnoonecurrentlyholdstheStrangeAmulet,skipthemonsterturn. quicklyinthetroll'shands.The rumblingsubsides,butyouhavea feelingitwon'tlastlong.Itlookslike youllneedtofindmorefoodforyour",
+          "monster": "",
+          "win": ""
+        },
+        "zh": {
+          "hero": "布置：奇怪护符交给揭示者；两个巨魔之手分别放门厅和底层平台。目标：最后活着的人获胜。",
+          "traitor": "自由混战：巨魔之手会攻击所有人，最后活着的人获胜。"
+        }
+      }
     },
     {
       "no": 33,
@@ -2413,13 +4506,1923 @@ window.CABIN_PACKS = {
         "speed": 1,
         "might": 4,
         "attack": "sanity",
+        "noAttack": false,
+        "counts": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        },
+        "boundRoom": "",
         "sanity": 6,
         "known": 2,
-        "rule": "被力量攻击受伤时被消灭"
+        "rule": "被力量攻击受伤时被消灭",
+        "noStun": false,
+        "oneHit": false,
+        "ignoreDoors": false,
+        "damageReduce": false,
+        "attackOnly": ""
       },
       "flipRooms": false,
       "dimension": false,
-      "custom": true
+      "custom": true,
+      "official": {
+        "title": "THE SMILEFOR CAMERA",
+        "heroPage": 21,
+        "traitorPage": 20,
+        "freeForAll": false,
+        "hero": {
+          "trigger": "",
+          "setup": "1.Theheroeshavenoadditionalsetupsteps. 2.Theplayertotheleftofthetraitorwilltakethefirstturnaftersetup Onceduringyourturn，youmay",
+          "objective": "SmashtheMagicCamera Youwinwhenyouhavedestroyec WhileonatilewiththetraitormakeaSanityroll alloftheCameras IfthetraitorhastheMagicCamera,returnittothegamebox. KillallofthePhantom 6+ TheMagicCameraisdestroyed. Photographers SmashtheMagicCamera 0-5Nothinghappens.",
+          "tokens": "GHOSTLYPAPARAZZI SmallMonsterTokens-Phantom PhantomPhotographerscanonlybekilledwithMightattacks.Other Photographers successfulattackswillstunthem. Herotokens-Heroes'Essence ATTHEENDOFYOURTURN IfallofthePhantomPhotographershavebeenkilledandtheMagicCamera IFYOU WIN hasbeensmashed，youwin Youdon'twanttorisktouching anythingyoudon'thaveto，soyou decidetoleavetheremnantsofthe camerainthehouse.Youopenthe doorwhichisnowmysteriously unlocked,andyouhelpyourfriendto walkoutside.You²llbringthemtothe hospitalbutyou'reskepticalthatthe doctorswillknowwhattodo Secretsofsurvival41",
+          "monster": "",
+          "win": ""
+        },
+        "traitor": {
+          "setup": "1.Yourexplorerisstillinthegame.Youarethetraitor 2.Place{2/3/4/5}SmallMonstertokensonanynon-Landingtileistributedasevenlyaspossibleamongregions.Theseare PhantomPhotographers 3.IftheMagicCamerahasnotbeendiscoveredachtheltemdeckfortheMagicCameraandplaceitface-upinfrontofyou GiveeachherotheirmatchingHerotoken.ThisistheirEssence 4 Onceduringyourturnyoumay",
+          "objective": "TakeaPhoto Youwinwhenalloftheheroes WhileonatilewithaheromakeaSpeedroll.lfyouhavetheMagic aredead Camera，oumymakethisrollagainstanyheroinlineofsight.You maynottakeaphotoofaherowhonolongerhastheirEssence",
+          "tokens": "6+ Takethehero'sEssencetokenandincreaseoneofyourtraits SmallMonsterTokens-Phantom by1.Youcapturetheiressence Photographers 0-5Nothinghappens. HeroTokens-Heroes'Essence TheGhostinsidetheCamera AslongasyouhavetheMagicCamera，yourtraitscannotgobelowcritical IfYouWin Whenyouattackahero Yousitdownintheentrancehall blank-eyed.Thecamerasaresetup fyouhavethathero'sEssencel2additionaldice allaround.Atsomepoint,people Afteryourturn,takeaturnwiththePhantomPhotographers willcomelookingforyou.Then,he cameraswillhavetheirfillagain",
+          "monster": "",
+          "win": "Whenyouattackahero Yousitdownintheentrancehall blank-eyed.Thecamerasaresetup fyouhavethathero'sEssencel2additionaldice allaround.Atsomepoint,people Afteryourturn,takeaturnwiththePhantomPhotographers willcomelookingforyou.Then,he cameraswillhavetheirfillagain Monster:PhantomPhotographer Might4Speed1Sanity6 Knowledge2 PhantomPhotographersattackwithSanityandcanattack anyheroinlineofsight.Iftheywinanattack,thetargeted herotakesMentaldamage IfaPhantomPhotographertakesdamagefromaMight attack,itiskilledinsteadofstunned Ifaheroendstheirturninlineofsightofa PhantomPhotographer IftheyhavetheirEssence,takeitandplaceitonyour characterboard 8TRAITOR'STOME"
+        },
+        "zh": {
+          "hero": "布置：英雄没有额外布置，叛徒左手先行动。目标：杀死所有幽灵摄影师，并砸毁魔法相机。",
+          "traitor": "布置：幽灵摄影师按 2/3/4/5 放在非平台板块；魔法相机找出放在自己面前；给每名英雄发英雄精华标记。目标：杀光英雄。"
+        }
+      }
+    }
+  ],
+  "rooms": [
+    {
+      "key": "entrance_hall",
+      "name": "入口大厅",
+      "en": "Entrance Hall",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "前门在身后关上。",
+      "start": true,
+      "kind": "start"
+    },
+    {
+      "key": "foyer",
+      "name": "门厅",
+      "en": "Foyer",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "门厅的镜子照不出你。",
+      "start": true,
+      "kind": "start"
+    },
+    {
+      "key": "grand_staircase",
+      "name": "主楼梯",
+      "en": "Grand Staircase",
+      "floor": "ground",
+      "doors": "SEW",
+      "symbol": null,
+      "text": "楼梯向上延伸进黑暗。",
+      "start": true,
+      "kind": "grandStair"
+    },
+    {
+      "key": "upper_landing",
+      "name": "上层平台",
+      "en": "Upper Landing",
+      "floor": "upper",
+      "doors": "SEW",
+      "symbol": null,
+      "text": "楼梯在二层拐了个弯。",
+      "start": true,
+      "kind": "landing"
+    },
+    {
+      "key": "basement_landing",
+      "name": "底层平台",
+      "en": "Basement Landing",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "地下室的门在身后合拢。",
+      "start": true,
+      "kind": "landing"
+    },
+    {
+      "key": "armory",
+      "name": "军械库",
+      "en": "Armory",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": "item",
+      "text": "翻开物品堆直到出现一件武器，取走后把其余埋回堆底。",
+      "start": false
+    },
+    {
+      "key": "ballroom",
+      "name": "舞厅",
+      "en": "Ballroom",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "bloody_room",
+      "name": "血屋",
+      "en": "Bloody Room",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "catacombs",
+      "name": "地下墓穴",
+      "en": "Catacombs",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "chapel",
+      "name": "礼拜堂",
+      "en": "Chapel",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时获得 1 点神智。",
+      "effect": {
+        "type": "gain",
+        "trait": "sanity",
+        "amount": 1
+      },
+      "start": false
+    },
+    {
+      "key": "charred_room",
+      "name": "焦屋",
+      "en": "Charred Room",
+      "floor": "upper",
+      "doors": "NE",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "chasm",
+      "name": "深渊",
+      "en": "Chasm",
+      "floor": "basement",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "collapsed_room",
+      "name": "坍塌房间",
+      "en": "Collapsed Room",
+      "floor": "upper",
+      "doors": "NE",
+      "symbol": null,
+      "text": "结束回合时进行速度判定：5+ 无事；0–4 落到底层平台并受 1 点物理伤害。",
+      "special": "collapsed",
+      "start": false
+    },
+    {
+      "key": "conservatory",
+      "name": "温室",
+      "en": "Conservatory",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "item",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "cramped_passageway",
+      "name": "狭窄通道",
+      "en": "Cramped Passageway",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "crawlspace",
+      "name": "爬行空间",
+      "en": "Crawlspace",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "dining_room",
+      "name": "餐厅",
+      "en": "Dining Room",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "furnace_room",
+      "name": "锅炉房",
+      "en": "Furnace Room",
+      "floor": "basement",
+      "doors": "ESW",
+      "symbol": "event",
+      "text": "结束回合时受 1 点物理伤害。",
+      "start": false
+    },
+    {
+      "key": "gallery",
+      "name": "画廊",
+      "en": "Gallery",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "通向舞厅。",
+      "link": "舞厅",
+      "start": false
+    },
+    {
+      "key": "game_room",
+      "name": "游戏室",
+      "en": "Game Room",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "item",
+      "text": "通向舞厅。",
+      "link": "舞厅",
+      "start": false
+    },
+    {
+      "key": "graveyard",
+      "name": "墓园",
+      "en": "Graveyard",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": "通向地下洞穴。",
+      "link": "地下洞穴",
+      "start": false
+    },
+    {
+      "key": "guest_quarters",
+      "name": "客房",
+      "en": "Guest Quarters",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "gymnasium",
+      "name": "体育馆",
+      "en": "Gymnasium",
+      "floor": "ground",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "首次发现时获得 1 点速度。",
+      "effect": {
+        "type": "gain",
+        "trait": "speed",
+        "amount": 1
+      },
+      "start": false
+    },
+    {
+      "key": "junk_room",
+      "name": "垃圾房",
+      "en": "Junk Room",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时放置障碍标记。",
+      "start": false
+    },
+    {
+      "key": "kitchen",
+      "name": "厨房",
+      "en": "Kitchen",
+      "floor": "ground",
+      "doors": "NES",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "laboratory",
+      "name": "实验室",
+      "en": "Laboratory",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "larder",
+      "name": "食品储藏室",
+      "en": "Larder",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": null,
+      "text": "首次发现时获得 1 点力量。",
+      "effect": {
+        "type": "gain",
+        "trait": "might",
+        "amount": 1
+      },
+      "start": false
+    },
+    {
+      "key": "laundry_chute",
+      "name": "洗衣滑道",
+      "en": "Laundry Chute",
+      "floor": "ground",
+      "doors": "N",
+      "symbol": null,
+      "text": "通向底层平台；若在本板块结束回合，棋子直接落到下层平台。",
+      "special": "coal",
+      "start": false
+    },
+    {
+      "key": "library",
+      "name": "图书室",
+      "en": "Library",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "首次发现时获得 1 点知识。",
+      "effect": {
+        "type": "gain",
+        "trait": "known",
+        "amount": 1
+      },
+      "start": false
+    },
+    {
+      "key": "mystic_elevator",
+      "name": "神秘电梯",
+      "en": "Mystic Elevator",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": null,
+      "text": "每回合进入时掷两骰：4+ 任意楼层；3 上层；2 地面层；0–1 底层。本实现把它当作连接上下层的电梯间。",
+      "special": "elevator",
+      "start": false
+    },
+    {
+      "key": "nursery",
+      "name": "育婴室",
+      "en": "Nursery",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "observatory",
+      "name": "天文台",
+      "en": "Observatory",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "operating_theatre",
+      "name": "手术室",
+      "en": "Operating Theatre",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "item",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "organ_room",
+      "name": "管风琴房",
+      "en": "Organ Room",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "oubliette",
+      "name": "地牢",
+      "en": "Oubliette",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "event",
+      "text": "通向战利品室。",
+      "link": "战利品室",
+      "start": false
+    },
+    {
+      "key": "panic_room",
+      "name": "恐慌室",
+      "en": "Panic Room",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "omen",
+      "text": "若密梯尚未放置，从牌堆找出并放到下层，然后洗牌。",
+      "start": false
+    },
+    {
+      "key": "primary_bedroom",
+      "name": "主卧",
+      "en": "Primary Bedroom",
+      "floor": "upper",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "ritual_room",
+      "name": "仪式房",
+      "en": "Ritual Room",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "root_cellar",
+      "name": "根窖",
+      "en": "Root Cellar",
+      "floor": "basement",
+      "doors": "N",
+      "symbol": "item",
+      "text": "若时光树尚未放置，从牌堆找出并放到上层，然后洗牌；本板块通向时光树。",
+      "link": "时光树",
+      "start": false
+    },
+    {
+      "key": "salon",
+      "name": "沙龙",
+      "en": "Salon",
+      "floor": "ground",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "secret_staircase",
+      "name": "密梯",
+      "en": "Secret Staircase",
+      "floor": "upper",
+      "doors": "N",
+      "symbol": null,
+      "text": "通向门厅（Hallway）。",
+      "special": "basementStairs",
+      "start": false
+    },
+    {
+      "key": "soundproofed_room",
+      "name": "隔音房间",
+      "en": "Soundproofed Room",
+      "floor": "ground",
+      "doors": "NS",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "specimen_room",
+      "name": "标本室",
+      "en": "Specimen Room",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "statuary_corridor",
+      "name": "雕像回廊",
+      "en": "Statuary Corridor",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "time_lost_tree",
+      "name": "时光树",
+      "en": "Time-Lost Tree",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "若根窖尚未放置，从牌堆找出并放到底层，然后洗牌；本板块通向根窖。",
+      "link": "根窖",
+      "start": false
+    },
+    {
+      "key": "tower",
+      "name": "塔楼",
+      "en": "Tower",
+      "floor": "upper",
+      "doors": "NS",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "trophy_room",
+      "name": "战利品室",
+      "en": "Trophy Room",
+      "floor": "basement",
+      "doors": "NEW",
+      "symbol": "item",
+      "text": "通向地牢（Oubliette）。",
+      "link": "地牢",
+      "start": false
+    },
+    {
+      "key": "underground_cavern",
+      "name": "地下洞穴",
+      "en": "Underground Cavern",
+      "floor": "basement",
+      "doors": "NESW",
+      "symbol": "event",
+      "text": "通向墓园。",
+      "link": "墓园",
+      "start": false
+    },
+    {
+      "key": "underground_lake",
+      "name": "地下湖",
+      "en": "Underground Lake",
+      "floor": "basement",
+      "doors": "NE",
+      "symbol": "event",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "vault",
+      "name": "保险库",
+      "en": "Vault",
+      "floor": "basement",
+      "doors": "NW",
+      "symbol": "item",
+      "text": "",
+      "start": false
+    },
+    {
+      "key": "winter_bedroom",
+      "name": "冬屋",
+      "en": "Winter Bedroom",
+      "floor": "upper",
+      "doors": "NEW",
+      "symbol": "omen",
+      "text": "",
+      "start": false
+    }
+  ],
+  "events": [
+    {
+      "key": "moment_of_hope",
+      "name": "一线希望",
+      "text": "这间屋子有一处让房子本身都反感的东西。把「祝福」标记放在你所在的房间；与它同格的英雄做任何属性判定时额外掷一骰。",
+      "effect": {
+        "ops": [
+          {
+            "token": "祝福"
+          }
+        ]
+      },
+      "hauntNo": 0
+    },
+    {
+      "key": "a_cry_for_help",
+      "name": "呼救声",
+      "text": "走廊尽头有个男人在喊你的名字，声音里全是疼。做知识判定：4+ 把探险者放到本区域任意一格；0–3 受 1 点精神伤害。",
+      "roll": {
+        "trait": "known",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {}
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "a_full_table",
+      "name": "满桌宾客",
+      "text": "十几个蜡像围着一桌摆好的饭菜，其中一张椅子是留给你的。做知识或神智判定：5+ 速度 +1；0–4 受 1 点通用伤害。",
+      "roll": {
+        "trait": "known",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "gain": {
+              "trait": "speed",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "general",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "a_bite",
+      "name": "被咬了",
+      "text": "暗处有东西扑上来咬你。做力量判定：4+ 挣脱，它退回阴影；2–3 受 1 点物理伤害；0–1 受 3 点物理伤害。",
+      "roll": {
+        "trait": "might",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {}
+        },
+        {
+          "at": 2,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "amount": 3
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "splash_of_crimson",
+      "name": "绯红之溅",
+      "text": "地上出现血脚印，还在往门口走。闹鬼前可做闹鬼检定：5+ 翻到背叛者册第 1 号剧本，你是叛徒；0–4 速度 +1。闹鬼后若不做检定，受一骰物理伤害。",
+      "roll": {
+        "trait": "none",
+        "diff": 5,
+        "hauntRoll": true
+      },
+      "hauntNo": 1
+    },
+    {
+      "key": "an_eerie_feeling",
+      "name": "诡异的感觉",
+      "text": "跨过门槛时胸口发闷，像有人在你肺里翻东西。掷两骰：4 无事；3 速度 −1；2 神智 −1；1 知识 −1；0 力量 −1。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "a_secret_passage",
+      "name": "密道",
+      "text": "这面墙敲起来是空的。放下「密道」标记并做知识判定：5+ 在任意其他房间再放一个标记并知识 +1；3–4 再放在地面层；0–2 再放在底层并神智 −1。带密道标记的房间互通。",
+      "roll": {
+        "trait": "known",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "ops": [
+              {
+                "token": "密道"
+              },
+              {
+                "gain": {
+                  "trait": "known",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "at": 3,
+          "effect": {
+            "ops": [
+              {
+                "token": "密道"
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "ops": [
+              {
+                "token": "密道"
+              },
+              {
+                "lose": {
+                  "trait": "sanity",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "brain_food",
+      "name": "脑髓",
+      "text": "银盘上有一团颤动的胶质，闻起来居然很香。做力量判定：5+ 力量 +1 或速度 +1；1–4 速度 +1、神智 −1；0 受 2 点通用伤害。",
+      "roll": {
+        "trait": "might",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "gain": {
+              "trait": "might",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 1,
+          "effect": {
+            "ops": [
+              {
+                "gain": {
+                  "trait": "speed",
+                  "amount": 1
+                }
+              },
+              {
+                "lose": {
+                  "trait": "sanity",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "general",
+              "amount": 2
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "vial_of_dust",
+      "name": "一管尘",
+      "text": "玻璃罩里装着细得反常的粉尘，贴在玻璃内壁上。闹鬼前可做闹鬼检定：5+ 翻到背叛者册第 3 号剧本，你是揭示者；0–4 神智 +1。闹鬼后若不做检定，力量 −1、神智 +1。",
+      "roll": {
+        "trait": "none",
+        "diff": 5,
+        "hauntRoll": true
+      },
+      "hauntNo": 3
+    },
+    {
+      "key": "behind_you",
+      "name": "你背后",
+      "text": "有人在你肩上拍了一下。做速度判定：4+ 神智 +1；0–3 受 1 点物理伤害，脸上多了三道爪痕。",
+      "roll": {
+        "trait": "speed",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "alien_geometry",
+      "name": "异形几何",
+      "text": "这个房间的角加起来不对：方形的房间有五个角，有一个角是里外翻的。做知识判定：4+ 神智 +1；0–3 速度 −1，你开始眩晕。",
+      "roll": {
+        "trait": "known",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "lose": {
+              "trait": "speed",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "bat_out_of_hell",
+      "name": "地狱之蝠",
+      "text": "一只着火的蝙蝠尖叫着朝你的脸俯冲。做速度判定：4+ 移到相邻格躲开；0–3 受 1 点物理伤害，它烧了起来。",
+      "roll": {
+        "trait": "speed",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {}
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "clown_room",
+      "name": "小丑房间",
+      "text": "屋里所有家具上都长着小脸，全在笑，全在盯着你。做神智判定：4+ 无事；0–3 受 2 点精神伤害，灯和椅子开始嘲笑你。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {}
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 2
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "creaking_door",
+      "name": "吱呀作响的门",
+      "text": "一扇本来不存在的门开了，门后的人提着灯向你招手。做知识判定：6+ 放到任意上层或地面房间；4–5 放到任意地面房间；0–3 放到「底层平台」。",
+      "roll": {
+        "trait": "known",
+        "diff": 6,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 6,
+          "effect": {}
+        },
+        {
+          "at": 4,
+          "effect": {}
+        },
+        {
+          "at": 0,
+          "effect": {}
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "cassette_player",
+      "name": "磁带录音机",
+      "text": "桌上的录音机自己响了：「如果你能听见，说明来不及了，但也许我还能帮你。」做神智判定：4+ 知识 +1；0–3 受 1 点精神伤害，它告诉你你会怎么死。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "known",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "burning_figure",
+      "name": "燃烧的人",
+      "text": "一个着火的人从你面前跑过，皮肤裂开，露出后面的火焰头骨。做神智判定：4+ 神智 +1；2–3 移到「入口大厅」；0–1 受一骰物理伤害和一骰精神伤害。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 2,
+          "effect": {}
+        },
+        {
+          "at": 0,
+          "effect": {
+            "ops": [
+              {
+                "damage": {
+                  "type": "physical",
+                  "dice": 1
+                }
+              },
+              {
+                "damage": {
+                  "type": "mental",
+                  "dice": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "dark_and_stormy_night",
+      "name": "风雨之夜",
+      "text": "雷声在外面炸开，风抽着墙，有什么在敲门，声音越来越大。做知识判定：4+ 神智 +1；0–3 受 1 点精神伤害。",
+      "roll": {
+        "trait": "known",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "hanged_men",
+      "name": "吊死的人",
+      "text": "三具尸体挂在磨破的绳子上，眼睛又冷又空，然后化成灰。四项属性各掷一骰：2+ 无事，0–1 该属性 −1；四项都掷出 2+ 则任一属性 +1。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "impossible_architecture",
+      "name": "不可能的建筑",
+      "text": "这间屋子比它该有的大得多，里面还多出一个梳妆台，正在抖。做神智判定：4+ 抽一张物品牌；0–3 受一骰精神伤害。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "ops": [
+              {
+                "draw": "items"
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "dice": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "jar_of_organs",
+      "name": "器官罐",
+      "text": "一个巨大的罐子里泡着胃和几样认不出的器官，胃还在鼓。做神智判定：4+ 抽一张物品牌；0–3 力量 −1。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "ops": [
+              {
+                "draw": "items"
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "lose": {
+              "trait": "might",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "eerie_mirror",
+      "name": "诡异镜子",
+      "text": "镜子里有人站在你身后，伸手够你。闹鬼前可做闹鬼检定：5+ 翻到幸存者册第 7 号剧本（本剧本没有叛徒），你是揭示者；0–4 神智 +1。闹鬼后若不做检定，抽一张物品牌。",
+      "roll": {
+        "trait": "none",
+        "diff": 5,
+        "hauntRoll": true
+      },
+      "hauntNo": 7
+    },
+    {
+      "key": "flickering_lights",
+      "name": "闪烁的灯",
+      "text": "灯暗下去又亮起来，房间另一头有个人影明明灭灭。做速度或力量判定：5+ 速度 +1；0–4 受一骰物理伤害。",
+      "roll": {
+        "trait": "speed",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "gain": {
+              "trait": "speed",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "dice": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "meat_moss",
+      "name": "血肉苔",
+      "text": "整间屋子长满奇怪的植物，带着泥土和生肉的气味，还会自己动。可以选择吸一口：掷两骰，3–4 任一属性 +1；0–2 受一骰精神伤害。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "forbidden_knowledge",
+      "name": "禁忌知识",
+      "text": "地板缝里藏着必须被埋掉的记载。做神智判定：4+ 知识 +1；2–3 知识 +1、神智 −1；0–1 受 2 点精神伤害。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "known",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 2,
+          "effect": {
+            "ops": [
+              {
+                "gain": {
+                  "trait": "known",
+                  "amount": 1
+                }
+              },
+              {
+                "lose": {
+                  "trait": "sanity",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 2
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "mysterious_fluid",
+      "name": "神秘液体",
+      "text": "它在光下发亮，闻起来像浆果。可以选择喝下去，掷三骰：6 四项各 +1；5 力量与速度 +1；4 知识与神智 +1；3 知识 +1、力量 −1；2 知识与神智 −1；1 力量与速度 −1；0 四项各 −1。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "funeral",
+      "name": "葬礼",
+      "text": "你看见一口打开的棺材，自己正躺在里面。做神智判定：4+ 神智 +1；2–3 神智 −1；0–1 神智 −1、力量 −1，如果你已经发现墓园或地下墓穴，把探险者放到那里。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 2,
+          "effect": {
+            "lose": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "ops": [
+              {
+                "lose": {
+                  "trait": "sanity",
+                  "amount": 1
+                }
+              },
+              {
+                "lose": {
+                  "trait": "might",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "jonahs_turn",
+      "name": "约拿的回合",
+      "text": "两个男孩为一只木陀螺和一副面具争吵，然后打了起来，其中一个开始不停打另一个。你可以丢掉一件非武器物品来神智 +1；否则受一骰精神伤害。",
+      "effect": {
+        "damage": {
+          "type": "mental",
+          "dice": 1
+        }
+      },
+      "hauntNo": 0
+    },
+    {
+      "key": "say_cheese",
+      "name": "说茄子",
+      "text": "进门的瞬间闪光灯亮起，眼前全是光斑，光斑像在给你带路。闹鬼前可做闹鬼检定：5+ 翻到背叛者册第 33 号剧本；若某位英雄拿着「魔法相机」，那人就是叛徒，否则你是叛徒。0–4 抽一张物品牌。闹鬼后或不做检定，抽一张物品牌。",
+      "roll": {
+        "trait": "none",
+        "diff": 5,
+        "hauntRoll": true
+      },
+      "hauntNo": 33
+    },
+    {
+      "key": "severed_hand",
+      "name": "断手",
+      "text": "那只手里握着什么。你可以选择受 2 点物理伤害；如果这样做，抽一张物品牌。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "radio_broadcast",
+      "name": "广播",
+      "text": "身后的收音机嘶嘶作响，一个沙哑的声音开始念旧新闻：「1980 年的今天……」掷两骰：3–4 知识 +1；0–2 受一骰精神伤害。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "poor_yorick",
+      "name": "可怜的约里克",
+      "text": "桌上的头骨对着摊开的书念台词：「生存还是毁灭……」做神智判定：4+ 知识 +1；0–3 受 1 点精神伤害。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "known",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "phone_call",
+      "name": "电话",
+      "text": "老式电话响了，另一端是个甜腻的女声。掷两骰：4+ 神智 +1；3 知识 +1；1–2 受一骰精神伤害；0 受两骰物理伤害。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "technical_difficulties",
+      "name": "技术故障",
+      "text": "你打开壁橱，里面有人在理线。他说「你不该在这儿」，拉下一根杆，地板塌了。把你放到下一层的平台上；如果你已经在底层，改放到「上层平台」；受 1 点精神伤害。",
+      "effect": {
+        "damage": {
+          "type": "mental",
+          "amount": 1
+        }
+      },
+      "hauntNo": 0
+    },
+    {
+      "key": "deepest_closet",
+      "name": "最深的壁橱",
+      "text": "这个壁橱比墙还深，你摸不到底。做速度判定：4+ 抽一张物品牌；1–3 受 1 点精神伤害；0 受一骰物理伤害，并掉到「底层平台」。",
+      "roll": {
+        "trait": "speed",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "ops": [
+              {
+                "draw": "items"
+              }
+            ]
+          }
+        },
+        {
+          "at": 1,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "dice": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "spiders",
+      "name": "蜘蛛",
+      "text": "成千上万的蜘蛛从天花板落下来，往裤腿里爬。做神智判定：4+ 神智 +1 或速度 +1，并移到相邻格；2–3 速度 +1、神智 −1；0–1 速度 −1，你被钉在原地。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 2,
+          "effect": {
+            "ops": [
+              {
+                "gain": {
+                  "trait": "speed",
+                  "amount": 1
+                }
+              },
+              {
+                "lose": {
+                  "trait": "sanity",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "lose": {
+              "trait": "speed",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "taxidermy",
+      "name": "动物标本",
+      "text": "一大堆动物被胡乱缝在一起，你推了它一下。做力量判定：5+ 神智 +1；0–4 受 1 点物理伤害，并在本房间放一个「障碍」标记。",
+      "roll": {
+        "trait": "might",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "ops": [
+              {
+                "damage": {
+                  "type": "physical",
+                  "amount": 1
+                }
+              },
+              {
+                "token": "障碍"
+              }
+            ]
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "secret_elevator",
+      "name": "秘密电梯",
+      "text": "墙转开，露出一台送餐梯。挤，但能钻进去。你可以把自己放到另一个区域的任意一格。",
+      "effect": {},
+      "hauntNo": 0
+    },
+    {
+      "key": "house_is_hungry",
+      "name": "房子饿了",
+      "text": "四周传来咕噜声，像空着的胃。闹鬼前可做闹鬼检定：5+ 翻到背叛者册第 12 号剧本（本剧本没有叛徒），你是揭示者；0–4 力量 +1。闹鬼后或不做检定，任一属性 +1。",
+      "roll": {
+        "trait": "none",
+        "diff": 5,
+        "hauntRoll": true
+      },
+      "hauntNo": 12
+    },
+    {
+      "key": "the_flowering",
+      "name": "花期",
+      "text": "一整面墙开着一朵巨花，花瓣中间是一条路。受 1 点通用伤害，然后把自己放到任意底层或地面房间；如果温室已经发现，必须放到温室。",
+      "effect": {
+        "damage": {
+          "type": "general",
+          "amount": 1
+        }
+      },
+      "hauntNo": 0
+    },
+    {
+      "key": "tiny_robot",
+      "name": "小机器人",
+      "text": "脚边有个嗡嗡响的小机器人，对你哔哔叫。做知识判定：5+ 抽一张物品牌；0–4 受一骰物理伤害，它扎了你的腿。",
+      "roll": {
+        "trait": "known",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "ops": [
+              {
+                "draw": "items"
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "physical",
+              "dice": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "oldest_house",
+      "name": "最古老的房子",
+      "text": "这里的空气更老，距离失去意义，你很快忘了时间。做速度或力量判定：5+ 放到任意一格；3–4 放到任意地面房间并受 1 点通用伤害；0–2 放到任意底层房间并受 1 点精神伤害。",
+      "roll": {
+        "trait": "speed",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {}
+        },
+        {
+          "at": 3,
+          "effect": {
+            "damage": {
+              "type": "general",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "mental",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "stars_at_night",
+      "name": "夜空群星",
+      "text": "天花板上全是光点，多得数不清。选一项属性掷骰：5+ 该项 +1；4 该项 −1；0–3 该项治到上限。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 5,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 5,
+          "effect": {
+            "gain": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 4,
+          "effect": {
+            "lose": {
+              "trait": "sanity",
+              "amount": 1
+            }
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "heal": {
+              "trait": "sanity",
+              "amount": 9
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    },
+    {
+      "key": "wandering_ghost",
+      "name": "游荡的鬼魂",
+      "text": "一个裹着布的身影从墙里出来，伸出半透明的手。你可以埋掉一件物品来让任一属性 +1；否则做神智判定：4+ 抽一张物品牌；0–3 受 1 点通用伤害。",
+      "roll": {
+        "trait": "sanity",
+        "diff": 4,
+        "hauntRoll": false
+      },
+      "tiers": [
+        {
+          "at": 4,
+          "effect": {
+            "ops": [
+              {
+                "draw": "items"
+              }
+            ]
+          }
+        },
+        {
+          "at": 0,
+          "effect": {
+            "damage": {
+              "type": "general",
+              "amount": 1
+            }
+          }
+        }
+      ],
+      "hauntNo": 0
+    }
+  ],
+  "items": [
+    {
+      "key": "angel_feather",
+      "name": "天使羽毛",
+      "text": "握在手里会感到平静。需要做属性判定时，可以埋掉它，自己选一个 0–8 的数字当作判定结果（加值照常叠加）。"
+    },
+    {
+      "key": "brooch",
+      "name": "胸针",
+      "text": "冰凉，却莫名让人安心。每次受到物理或精神伤害时，可以改为受等量的通用伤害。"
+    },
+    {
+      "key": "chainsaw",
+      "name": "电锯",
+      "text": "居然还有启动键。武器；用它攻击时额外掷一骰。",
+      "weapon": "might",
+      "attackBonus": 1
+    },
+    {
+      "key": "creepy_doll",
+      "name": "诡异玩偶",
+      "text": "眼睛柔软得反常，还带点评判意味。每回合一次，可以重掷刚做的一次属性判定的全部骰子，然后失去 1 点神智。",
+      "use": {
+        "type": "heal",
+        "trait": "sanity",
+        "amount": -1
+      }
+    },
+    {
+      "key": "crossbow",
+      "name": "弩",
+      "text": "旧，但好用。武器；可以攻击自己或相邻格上的任意角色（调查员或怪物），攻守双方各掷速度，你额外掷一骰，输了不受伤害。",
+      "weapon": "speed",
+      "attackBonus": 1,
+      "distance": true
+    },
+    {
+      "key": "dynamite",
+      "name": "炸药",
+      "text": "大概还算稳定。可以代替一次普通攻击：埋掉炸药，选自己或相邻的一格，该格上所有人（调查员与怪物）各掷速度，4+ 无事，0–3 受 4 点物理伤害。",
+      "weapon": "might"
+    },
+    {
+      "key": "first_aid_kit",
+      "name": "急救包",
+      "text": "什么都有。回合内可以埋掉它，治好自己的全部重伤属性；也可以治疗同格的另一名调查员。"
+    },
+    {
+      "key": "flashlight",
+      "name": "手电筒",
+      "text": "注意别照眼睛。结算事件牌时，属性判定可以额外掷两骰。"
+    },
+    {
+      "key": "gun",
+      "name": "枪",
+      "text": "子弹是满的。武器；可以攻击视线内的任意目标，攻守双方各掷速度，你输了不受伤害。",
+      "weapon": "speed",
+      "attackBonus": 0,
+      "distance": true
+    },
+    {
+      "key": "headphones",
+      "name": "耳机",
+      "text": "没接任何东西，却一直在放一首让人安心的曲子。每次受到精神伤害减 1 点。"
+    },
+    {
+      "key": "leather_jacket",
+      "name": "皮夹克",
+      "text": "很沉，看不出是什么动物的皮。防御时额外掷一骰。"
+    },
+    {
+      "key": "lucky_coin",
+      "name": "幸运币",
+      "text": "每次翻面，图案都不一样。每回合一次，可以重掷刚做的一次属性判定里的空白骰；每重掷一个空白骰，受 1 点精神伤害。"
+    },
+    {
+      "key": "machete",
+      "name": "砍刀",
+      "text": "刀刃依然锋利。武器；攻击时结果 +1。",
+      "weapon": "might",
+      "attackBonus": 1
+    },
+    {
+      "key": "magic_camera",
+      "name": "魔法相机",
+      "text": "咔嚓。可以用神智来做知识判定。"
+    },
+    {
+      "key": "map",
+      "name": "地图",
+      "text": "图上的门一直在变，不同的门总通向同一个地方。回合内可以埋掉它，把自己移到任意一格。"
+    },
+    {
+      "key": "mirror",
+      "name": "镜子",
+      "text": "镜中的脸比你平静，也比你懂得多。回合内可以埋掉它，治好你的知识和神智。"
+    },
+    {
+      "key": "stopwatch",
+      "name": "神秘秒表",
+      "text": "一按下，指针就倒着走。回合内可以埋掉它，本回合结束后再行动一次；闹鬼开始后才能用。"
+    },
+    {
+      "key": "necklace_teeth",
+      "name": "牙齿项链",
+      "text": "大部分牙齿不是人的。回合结束时，可以让自己的一项重伤属性 +1。"
+    },
+    {
+      "key": "rabbit_foot",
+      "name": "兔脚",
+      "text": "对有些人灵，对兔子肯定不灵。每回合一次，可以重掷刚掷出的一颗骰子。"
+    },
+    {
+      "key": "skeleton_key",
+      "name": "万能钥匙",
+      "text": "真骨头做的。可以穿墙移动；每次穿墙掷一骰，掷出空白就埋掉这把钥匙。不能用它翻新房间。"
+    },
+    {
+      "key": "strange_medicine",
+      "name": "古怪药",
+      "text": "副作用是发抖、恶心和疑神疑鬼。回合内可以埋掉它，治好你的力量和速度。"
+    },
+    {
+      "key": "strange_amulet",
+      "name": "古怪护符",
+      "text": "戴着它，思路会异常清晰。每次受到物理伤害后，获得 1 点神智；通用伤害与力量/速度的直接流失不算。"
+    }
+  ],
+  "omens": [
+    {
+      "key": "armor",
+      "name": "铁十字",
+      "text": "锈迹斑斑，却依然结实。每次受到物理伤害时减 1 点（不能减免通用伤害，也不能抵消力量/速度的直接流失）。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "might",
+        "amount": 1
+      }
+    },
+    {
+      "key": "dog",
+      "name": "野狗",
+      "text": "它用聪慧得反常的眼睛盯着你。速度判定 +1；每回合一次，可以替你把任意数量的物品或预兆，与 4 格以内的另一名玩家按正常交易规则交换。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "speed",
+        "amount": 1
+      }
+    },
+    {
+      "key": "idol",
+      "name": "石神像",
+      "text": "一尊说不出材质的旧石像，看不出在模仿什么。力量判定 +1；发现带事件符号的房间时，可以选择不抽事件牌。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "might",
+        "amount": 1
+      }
+    },
+    {
+      "key": "book",
+      "name": "旧书",
+      "text": "书页上写满看不懂的涂写。知识判定 +1；每回合一次，可以失去 1 点神智，让本回合下一次非攻击的属性判定改用知识（加值也按知识算）。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "known",
+        "amount": 1
+      }
+    },
+    {
+      "key": "ring",
+      "name": "骨戒",
+      "text": "武器。它在指间自己扭动。神智判定 +1；用它攻击时，攻守双方改为各掷神智，输的一方受精神伤害。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "sanity",
+        "amount": 1
+      },
+      "weapon": "sanity",
+      "attackBonus": 1
+    },
+    {
+      "key": "mask",
+      "name": "面具",
+      "text": "看不出材质，光滑而微温。速度判定 +1；每回合一次，可以把同格其他所有人（调查员与怪物）移到相邻格，不能用它翻新房间。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "speed",
+        "amount": 1
+      }
+    },
+    {
+      "key": "holy_symbol",
+      "name": "圣徽",
+      "text": "一枚在黑暗里会发光的银饰。神智判定 +1；每当你发现新房间时，可以选择把它埋掉，改为再翻下一个房间（第一个房间的任何效果都不结算）。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "sanity",
+        "amount": 1
+      }
+    },
+    {
+      "key": "dagger",
+      "name": "血匕首",
+      "text": "刀身上的血腥味很冲，而且是你自己的血。武器；用它攻击时先失去 1 点速度，再额外掷两骰。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "might",
+        "amount": 1
+      },
+      "weapon": "might",
+      "attackBonus": 2
+    },
+    {
+      "key": "skull",
+      "name": "骷髅",
+      "text": "上面刻着陌生的纹路。知识判定 +1；当某个效果会让你死亡时，改为掷一骰：4–6 把全部属性移到最差的一档（记为 0，不死），0–3 照常死亡。抽到这张牌时进行一次闹鬼检定。",
+      "omen": true,
+      "delta": {
+        "trait": "known",
+        "amount": 1
+      }
     }
   ]
 };
