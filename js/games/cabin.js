@@ -2750,6 +2750,7 @@ window.CabinEngine = (function () {
     }
     if (st.monsterTurn) {
       if (action.type === 'monsterMove' || action.type === 'monsterEnd' || action.type === 'monsterSkip') return monsterAct(st, i, action, rand);
+      if (action.type === 'hauntAction' && st.monsterTurn.actor === st.players[i].id) return scenarioAction(st, i, action, rand);
       return { ok: false, msg: '先完成怪物阶段' };
     }
     if (st.turn !== i) return { ok: false, msg: '还没轮到你' };

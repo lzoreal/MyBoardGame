@@ -357,8 +357,8 @@
 <script src="../js/config.js?v=12"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js?v=19"></script>
-<script src="../js/games/cabin-packs.js?v=20261119f"></script>
-<script src="../js/games/cabin.js?v=20261119f"></script>
+<script src="../js/games/cabin-packs.js?v=20261119g"></script>
+<script src="../js/games/cabin.js?v=20261119g"></script>
 <script src="games/shell.js?v=19"></script>
 <script>
 (function () {
@@ -1748,6 +1748,16 @@
     const heroes = playersOf(st).filter((p) => !p.dead && p.side === 'hero');
     let html = '<h2>怪物阶段</h2><p>叛徒 <b>' + esc(actor ? actor.name : '?') + '</b> 指挥怪物行动，剩余 ' + mt.queue.length + ' 只。</p>' +
       '<div class="infoStory">每只怪物可以追向一名英雄：移动最多等于速度，抵达后攻击；也可以跳过。线下怪物卡和目标由叛徒决定。</div>';
+    const hauntActions = (st.haunt && st.haunt.active && st.haunt.actions) ? st.haunt.actions.filter((a) => !a.side || a.side === 'traitor') : [];
+    if (hauntActions.length) {
+      html += '<div class="actions" style="margin:8px 0 4px">';
+      const used = st.haunt.turnUsed || {};
+      hauntActions.forEach((a) => {
+        const u = !!used[(actor ? actor.id : '') + '|' + a.key];
+        html += '<button class="btn ghost" type="button" data-haunt="' + esc(a.key) + '"' + (u ? ' disabled' : '') + '>⚄ ' + esc(a.name) + '</button>';
+      });
+      html += '</div>';
+    }
     mt.queue.forEach((id) => {
       const m = monstersOf(st).find((x) => x.id === id);
       if (!m) return;
@@ -1777,6 +1787,13 @@
       b.addEventListener('click', () => {
         window.GameShell.send({ type: 'monsterSkip', monsterId: b.dataset.monsterSkip });
         haptic(5);
+      });
+    });
+    $('cModalCard').querySelectorAll('[data-haunt]').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        window.GameShell.send({ type: 'hauntAction', key: b.dataset.haunt });
+        haptic(8);
       });
     });
     const done = $('monsterDone');
