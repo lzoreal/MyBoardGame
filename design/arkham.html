@@ -73,6 +73,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
 .loc .clues{margin-top:6px;display:flex;gap:3px;flex-wrap:wrap}
 .clue{width:8px;height:8px;border-radius:50%;background:#8a6a33;box-shadow:0 0 0 1px rgba(42,33,24,.4)}
 .clue.off{background:rgba(42,33,24,.18);box-shadow:none}
+.sigilRow{margin-top:7px;padding:5px 7px;border-radius:8px;border:1px dashed #8a4a2a;background:rgba(122,47,39,.12);
+  display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:10.5px;color:#6f3b22}
+.sigilRow button{font-size:10px;padding:3px 6px;border-radius:6px;border:1px solid #8a4a2a;background:#7a2f27;color:#f3e6cf}
+.sigilRow button:hover{background:#8f3a30}
 .enemy{margin-top:8px;padding:6px 7px;border-radius:8px;background:rgba(42,33,24,.92);color:#f0e6d6;
   font-size:11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .enemy .en{flex:1;min-width:70px;font-weight:600}
@@ -177,13 +181,25 @@ button:disabled{cursor:not-allowed;opacity:.42}
 
 /* 开局 / 结算 */
 .pickGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-.chapterPick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px 0 14px}
+.chapterPick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 12px}
 .chap{border:1px solid rgba(42,33,24,.25);border-radius:12px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.28);transition:background .18s ease,border-color .18s ease}
 .chap .cn{display:block;font-family:Georgia,"Songti SC",serif;font-size:14px;color:#2a2118}
 .chap .cs{display:block;margin-top:3px;font-size:11px;color:#8b7960}
 .chap.sel{border-color:#7a2f27;background:rgba(255,255,255,.6);box-shadow:0 0 0 2px rgba(122,47,39,.18)}
 .chap:hover{background:rgba(255,255,255,.5)}
-@media(max-width:520px){.pickGrid{grid-template-columns:1fr}.chapterPick{grid-template-columns:1fr}}
+.shopGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.shopWrap{margin-top:8px;border:1px solid rgba(42,33,24,.18);border-radius:11px;padding:8px 10px;background:rgba(255,255,255,.2)}
+.shopWrap summary{cursor:pointer;font-size:12.5px;color:#4a3b29;list-style:none}
+.shopWrap summary::-webkit-details-marker{display:none}
+.shopWrap summary:before{content:'＋';margin-right:6px;color:#7a2f27}
+.shopWrap[open] summary:before{content:'−'}
+.shopItem{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;border:1px solid rgba(42,33,24,.25);border-radius:11px;padding:8px 10px;background:rgba(255,255,255,.3)}
+.shopItem:disabled{opacity:.55}
+.shopItem .sn{font-size:12.5px;font-weight:600;color:#2a2118}
+.shopItem .sc2{font-size:11px;color:#7a2f27;align-self:center}
+.shopItem .sd{grid-column:1/-1;font-size:10.5px;color:#7a6a52}
+.shopItem:hover:not(:disabled){background:rgba(255,255,255,.55)}
+@media(max-width:520px){.pickGrid{grid-template-columns:1fr}.chapterPick{grid-template-columns:1fr}.shopGrid{grid-template-columns:1fr}}
 .pick{border:1px solid rgba(42,33,24,.28);border-radius:12px;padding:11px;text-align:left;background:rgba(255,255,255,.32)}
 .pick:hover{border-color:#7a5f36;background:rgba(255,255,255,.5)}
 .pick.sel{border-color:#7a2f27;box-shadow:0 0 0 2px rgba(122,47,39,.22);background:rgba(255,255,255,.55)}
@@ -279,6 +295,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot'}[c]));
   const STORE = 'arkham:campaign';
+  const ORDER = ['gathering', 'midnight', 'abyss'];
+  const UPGRADES = [
+    { key: 'health', name: '强健体魄', cost: 2, text: '生命上限 +1' },
+    { key: 'will', name: '坚定意志', cost: 2, text: '意志 +1' },
+    { key: 'combat', name: '实战磨炼', cost: 3, text: '战力 +1' },
+    { key: 'int', name: '档案研读', cost: 2, text: '智力 +1' }
+  ];
   let state = null;
   let picked = 'detective';
   let pickedChapter = 'gathering';
@@ -287,6 +310,8 @@ button:disabled{cursor:not-allowed;opacity:.42}
   let seenEnc = '';
   let endShown = false;
   let started = false;
+  let interKey = '';
+  let shopOpen = false;
 
   const STAT_LABEL = { will: '意志', int: '智力', combat: '战力', agi: '敏捷' };
 
@@ -301,23 +326,45 @@ button:disabled{cursor:not-allowed;opacity:.42}
     $('#modal').classList.add('on');
   }
   function closeSheet(){
+    if (state && state.pendingInterrogation) return;
     $('#modal').classList.remove('on');
     if (state && state.phase === 'ended' && state.resolution && !endShown) {
       setTimeout(() => { if (!endShown) showEnd(); }, 80);
     }
   }
 
+  /* ---------------- 战役档 ---------------- */
+  function readCampaign(){
+    let c = null;
+    try { c = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { c = null; }
+    if (!c) c = { xp: 0, trauma: 0, chapters: [], upgrades: {} };
+    if (!c.chapters) c.chapters = [];
+    if (!c.upgrades) c.upgrades = {};
+    return c;
+  }
+  function upgradesOf(camp, id){
+    const u = (camp.upgrades && camp.upgrades[id]) || {};
+    return { health: u.health || 0, will: u.will || 0, combat: u.combat || 0, int: u.int || 0 };
+  }
+  function currentUpgrades(id){
+    return upgradesOf(readCampaign(), id);
+  }
+
   /* ---------------- 开局 ---------------- */
   function showStart(){
     const invs = E.INVESTIGATORS;
     const sc = E.SCENARIOS[pickedChapter] || E.SCENARIOS.gathering;
-    let camp = null;
-    try { camp = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { camp = null; }
-    if (!camp) camp = { xp: 0, trauma: 0, chapters: [] };
+    const camp = readCampaign();
     const done = (camp.chapters || []).indexOf(sc.id) >= 0;
     const how = sc.id === 'midnight'
-      ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。五名邪教徒分散在城区，解决其中 3 名就会逼出仪式主持者；在南教堂击败他，才能赶在午夜前结束仪式。撑不住时可以撤退，但仪式会继续。'
-      : '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。';
+      ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。五名邪教徒分散在城区，解决其中 3 名就会逼出仪式主持者；击败邪教徒后可以审问他，换取线索或拖慢仪式。仪式倒计时每回合减少，归零后主持者会变强。撑不住时可以撤退，但仪式会继续。'
+      : (sc.id === 'abyss'
+        ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。三座仪式节点分布在潮湿通道、地下湖和裂缝，靠近后做意志检定（4）将其熄灭；三座全灭才会逼出深渊吞噬者，在深渊边缘击败他。潮水倒计时每回合减少，归零后他会更强。'
+        : '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。');
+    const idx = ORDER.indexOf(sc.id);
+    const prev = idx > 0 ? E.SCENARIOS[ORDER[idx - 1]] : null;
+    const prevDone = prev ? camp.chapters.indexOf(prev.id) >= 0 : true;
+    const own = upgradesOf(camp, picked);
     openSheet(`
       <div class="sheetHead">
         <div><h2>${esc(sc.name)}</h2><p>${esc(sc.chapter)} · 单人调查</p></div>
@@ -328,10 +375,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
           ${Object.keys(E.SCENARIOS).map((id) => {
             const s = E.SCENARIOS[id];
             const ok = (camp.chapters || []).indexOf(id) >= 0;
-            const firstDone = (camp.chapters || []).indexOf('gathering') >= 0;
+            const i = ORDER.indexOf(id);
+            const p = i > 0 ? E.SCENARIOS[ORDER[i - 1]] : null;
+            const pDone = p ? camp.chapters.indexOf(p.id) >= 0 : true;
+            const cs = ok ? '已完成' : (i === 0 ? '从这里开始' : (pDone ? '可继续' : '推荐先玩' + p.chapter));
             return `<button class="chap ${id === pickedChapter ? 'sel' : ''}" data-ch="${id}">
               <span class="cn">${esc(s.chapter)} · ${esc(s.name)}</span>
-              <span class="cs">${ok ? '已完成' : (id === 'gathering' ? '从这里开始' : (firstDone ? '可继续' : '推荐先玩第一章'))}</span>
+              <span class="cs">${cs}</span>
             </button>`;
           }).join('')}
         </div>
@@ -339,16 +389,34 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <p style="color:#7a6a52;font-size:12.5px">战役记录：经验 <b>${camp.xp}</b> · 创伤 <b>${camp.trauma}</b> · 已完成 <b>${(camp.chapters || []).length}</b> 章${done ? ' · 本章已通关，可再挑战' : ''}</p>
         <h3>选择调查员</h3>
         <div class="pickGrid">
-          ${invs.map((x) => `
+          ${invs.map((x) => {
+            const ou = upgradesOf(camp, x.id);
+            return `
             <button class="pick ${x.id === picked ? 'sel' : ''}" data-pick="${x.id}">
               <div class="pn" style="color:${x.color}">${esc(x.name)}</div>
-              <div class="pr">${esc(x.role)} · ${x.health} 生命 / ${x.sanity} 理智</div>
-              <div class="ps">意志 ${x.stats.will} · 智力 ${x.stats.int} · 战力 ${x.stats.combat} · 敏捷 ${x.stats.agi}<br>${esc(x.abilityText)}</div>
-            </button>`).join('')}
+              <div class="pr">${esc(x.role)} · ${x.health + (ou.health || 0)} 生命 / ${x.sanity + (ou.sanity || 0)} 理智</div>
+              <div class="ps">意志 ${x.stats.will + (ou.will || 0)} · 智力 ${x.stats.int + (ou.int || 0)} · 战力 ${x.stats.combat + (ou.combat || 0)} · 敏捷 ${x.stats.agi}<br>${esc(x.abilityText)}</div>
+            </button>`;
+          }).join('')}
         </div>
+        <details class="shopWrap" ${shopOpen ? 'open' : ''}>
+          <summary>调查员成长 · 可用经验 ${camp.xp}</summary>
+          <div class="shopGrid">
+            ${UPGRADES.map((u) => {
+              const lv = own[u.key] || 0;
+              const can = camp.xp >= u.cost;
+              return `<button class="shopItem" data-buy="${u.key}" ${can ? '' : 'disabled'}>
+                <span class="sn">${esc(u.name)}</span>
+                <span class="sd">${esc(u.text)} · Lv ${lv}</span>
+                <span class="sc2">${u.cost} 经验</span>
+              </button>`;
+            }).join('')}
+          </div>
+          <p style="font-size:11px;color:#8b7960;margin-top:6px">升级永久写入战役档，按调查员分别记录。</p>
+        </details>
         <h3>这一章怎么玩</h3>
         <p style="font-size:12.5px;color:#5b4a34">${esc(how)}</p>
-        <button class="sheetBtn" id="btnStart">${sc.id === 'midnight' ? '走上午夜街头' : '进入屋子'}</button>
+        <button class="sheetBtn" id="btnStart">${sc.id === 'midnight' ? '走上午夜街头' : (sc.id === 'abyss' ? '潜下裂缝' : '进入屋子')}</button>
       </div>`);
     $('#sheet').querySelectorAll('[data-ch]').forEach((b) => {
       b.onclick = () => { pickedChapter = b.dataset.ch; showStart(); };
@@ -356,12 +424,27 @@ button:disabled{cursor:not-allowed;opacity:.42}
     $('#sheet').querySelectorAll('[data-pick]').forEach((b) => {
       b.onclick = () => { picked = b.dataset.pick; showStart(); };
     });
+    $('#sheet').querySelectorAll('[data-buy]').forEach((b) => {
+      b.onclick = () => {
+        const u = UPGRADES.find((x) => x.key === b.dataset.buy);
+        const c = readCampaign();
+        if (c.xp < u.cost) { toast('经验不够'); return; }
+        c.xp -= u.cost;
+        if (!c.upgrades[picked]) c.upgrades[picked] = {};
+        c.upgrades[picked][u.key] = (c.upgrades[picked][u.key] || 0) + 1;
+        localStorage.setItem(STORE, JSON.stringify(c));
+        toast('已升级：' + u.name);
+        showStart();
+      };
+    });
+    const det = $('#sheet').querySelector('.shopWrap');
+    if (det) det.addEventListener('toggle', () => { shopOpen = det.open; });
     $('#sheet').querySelector('[data-close]').onclick = closeSheet;
     $('#btnStart').onclick = () => {
       started = true;
       closeSheet();
-      state = E.createInitial([], Math.random, { investigator: picked, scenario: pickedChapter });
-      seenTest = ''; seenEnc = ''; endShown = false;
+      state = E.createInitial([], Math.random, { investigator: picked, scenario: pickedChapter, upgrades: currentUpgrades(picked) });
+      seenTest = ''; seenEnc = ''; endShown = false; interKey = '';
       render();
       toast('调查开始：' + state.inv.name + ' 进入了' + state.locations[state.inv.location].name);
     };
@@ -381,24 +464,29 @@ button:disabled{cursor:not-allowed;opacity:.42}
     const ag = (state.agenda.stages || [])[state.agenda.stage - 1];
     $('#agendaLabel').textContent = (ag && ag.label) || '议程';
     const isMidnight = state.scenario === 'midnight';
+    const isAbyss = state.scenario === 'abyss';
     if (state.act.stage >= 2) {
       const boss = state.enemies.find((e) => e.boss && e.health > 0);
-      $('#actProg').textContent = boss ? boss.name + ' ' + Math.max(0, boss.health) + ' / ' + boss.maxHealth : '主持者已倒下';
+      $('#actProg').textContent = boss ? boss.name + ' ' + Math.max(0, boss.health) + ' / ' + boss.maxHealth : '首领已倒下';
       $('#actBar').style.width = boss ? pct(boss.maxHealth - boss.health, boss.maxHealth) + '%' : '100%';
     } else if (isMidnight) {
       const need = state.act.cultists || 3;
       const found = state.cultistsFound || 0;
       $('#actProg').textContent = '邪教徒 ' + found + ' / ' + need;
       $('#actBar').style.width = pct(found, need) + '%';
+    } else if (isAbyss) {
+      const need = state.act.sigils || 3;
+      $('#actProg').textContent = '节点 ' + (need - (state.sigilsLeft || 0)) + ' / ' + need;
+      $('#actBar').style.width = pct(need - (state.sigilsLeft || 0), need) + '%';
     } else {
       $('#actProg').textContent = inv.clues + ' / ' + state.act.clues;
       $('#actBar').style.width = pct(inv.clues, state.act.clues) + '%';
     }
-    $('#agendaProg').textContent = state.agenda.doom + ' / ' + state.agenda.max;
+    $('#agendaProg').textContent = state.agenda.doom + ' / ' + state.agenda.max + (state.ritual ? ' · 余 ' + state.ritual.left : '');
     $('#agendaBar').style.width = pct(state.agenda.doom, state.agenda.max) + '%';
     const btnAdv = $('#btnAdvance');
-    btnAdv.style.display = (state.act.stage === 1 && !isMidnight) ? 'block' : 'none';
-    if (!isMidnight) {
+    btnAdv.style.display = (state.act.stage === 1 && state.act.clues > 0) ? 'block' : 'none';
+    if (state.act.clues > 0) {
       btnAdv.disabled = inv.clues < state.act.clues;
       btnAdv.textContent = inv.clues >= state.act.clues ? '线索够了，推进密谋' : '还需要 ' + (state.act.clues - inv.clues) + ' 个线索';
     }
@@ -436,10 +524,12 @@ button:disabled{cursor:not-allowed;opacity:.42}
           <span class="stat">战 ${e.fight} / 闪 ${e.evade} / 血 ${Math.max(0, e.health)}</span>
           ${here && inv.actions > 0 ? `<button data-fight="${e.id}">战斗</button><button data-evade="${e.id}">闪避</button>` : ''}
         </div>`).join('');
+      const sigilRow = (isAbyss && L.sigil) ? `<div class="sigilRow"><span>仪式节点</span>${here && inv.actions > 0 && state.act.stage === 1 ? `<button data-sigil="${k}">熄灭</button>` : ''}</div>` : '';
       el.innerHTML = `
         <div class="name">${esc(L.name)}</div>
         <div class="meta"><span>隐蔽 ${L.shroud}</span><span>线索 <b>${L.clues}</b></span></div>
         <div class="clues">${clues}</div>
+        ${sigilRow}
         ${enemies}
         ${reachable && !here ? `<button class="go" data-move="${k}" title="移动到${esc(L.name)}">→</button>` : ''}`;
       map.appendChild(el);
@@ -495,8 +585,16 @@ button:disabled{cursor:not-allowed;opacity:.42}
 
     $('#logBox').innerHTML = state.logs.slice(-8).reverse().map((l) => '<p>' + esc(l) + '</p>').join('');
 
+    // 审问弹层
+    if (state.pendingInterrogation) {
+      const key = state.pendingInterrogation.id + '|' + state.pendingInterrogation.name;
+      if (key !== interKey) {
+        if (state.lastTest) seenTest = JSON.stringify(state.lastTest) + '|' + state.round + '|' + state.inv.actions;
+        showInterrogation();
+      }
+    }
     // 检定弹层
-    if (state.lastTest) {
+    else if (state.lastTest) {
       const sig = JSON.stringify(state.lastTest) + '|' + state.round + '|' + state.inv.actions;
       if (sig !== seenTest) { seenTest = sig; showTest(state.lastTest); }
     }
@@ -506,6 +604,26 @@ button:disabled{cursor:not-allowed;opacity:.42}
       if (sig !== seenEnc) { seenEnc = sig; showEncounter(state.encounterCurrent); }
     }
     if (state.phase === 'ended' && state.resolution && !endShown) showEnd();
+  }
+
+  function showInterrogation(){
+    const p = state.pendingInterrogation;
+    if (!p) return;
+    interKey = p.id + '|' + p.name;
+    openSheet(`
+      <div class="sheetHead"><div><h2>审问</h2><p>${esc(p.name)} · 已失去反抗</p></div></div>
+      <div class="sheetBody">
+        <p>他跪在湿地上，兜帽滑落。你可以逼问一件事，然后离开。</p>
+        <button class="sheetBtn" data-int="ritual" style="background:#5e211d">追问仪式 · 议程 doom −1</button>
+        <button class="sheetBtn" data-int="lair" style="margin-top:8px">逼问据点 · 获得 2 个线索</button>
+        <button class="sheetBtn" data-int="bribe" style="margin-top:8px;background:#3f5a3a">拿走财物 · 资源 +2、恐惧 −1</button>
+      </div>`);
+    $('#sheet').querySelectorAll('[data-int]').forEach((b) => {
+      b.onclick = () => {
+        doAct({ type: 'interrogate', choice: b.dataset.int });
+        closeSheet();
+      };
+    });
   }
 
   function showTest(t){
@@ -545,13 +663,10 @@ button:disabled{cursor:not-allowed;opacity:.42}
     endShown = true;
     const r = state.resolution;
     const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
-    let camp = null;
-    try { camp = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { camp = null; }
-    if (!camp) camp = { xp: 0, trauma: 0, chapters: [] };
-    if (!camp.chapters) camp.chapters = [];
+    const camp = readCampaign();
     let gain = 0;
     if (r.result === 'win') {
-      gain = sc.id === 'midnight' ? 3 : 2;
+      gain = sc.id === 'abyss' ? 4 : (sc.id === 'midnight' ? 3 : 2);
       camp.xp += gain;
       if (camp.chapters.indexOf(sc.id) < 0) camp.chapters.push(sc.id);
     } else if (r.result === 'resign') {
@@ -561,9 +676,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
       camp.trauma += 1;
     }
     localStorage.setItem(STORE, JSON.stringify(camp));
-    const canNext = sc.id === 'gathering' && r.result === 'win';
+    const nextId = ORDER[ORDER.indexOf(sc.id) + 1];
+    const nextSc = nextId ? E.SCENARIOS[nextId] : null;
+    const canNext = !!nextSc && r.result === 'win';
     const title = r.result === 'win' ? sc.chapter + '完成' : (r.result === 'resign' ? '撤出阿卡姆' : '调查终止');
-    const big = r.result === 'win' ? '天亮之前' : (r.result === 'resign' ? '午夜撤退' : '黑暗吞没');
+    const big = r.result === 'win'
+      ? (sc.id === 'abyss' ? '潮水退去' : (sc.id === 'midnight' ? '钟声停下' : '天亮之前'))
+      : (r.result === 'resign' ? '午夜撤退' : '黑暗吞没');
     openSheet(`
       <div class="sheetHead"><div><h2>${esc(title)}</h2><p>${esc(sc.name)} · 结局</p></div></div>
       <div class="sheetBody">
@@ -571,16 +690,16 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <p class="endText">${esc(r.text)}</p>
         <div class="campaign">
           战役记录：经验 <b>${camp.xp}</b> · 创伤 <b>${camp.trauma}</b> · 已完成章节 <b>${camp.chapters.length}</b><br>
-          ${r.result === 'win' ? '本章获得 ' + gain + ' 点经验。' : (r.result === 'resign' ? '带着 ' + (state.cultistsFound || 0) + ' 名邪教徒的战果撤退，获得 ' + gain + ' 点经验；本章未计入完成。' : '本次失败，创伤 +1；可以重开这一章。')}
+          ${r.result === 'win' ? '本章获得 ' + gain + ' 点经验，可在下一章开局前用来升级调查员。' : (r.result === 'resign' ? '带着 ' + (state.cultistsFound || 0) + ' 名邪教徒的战果撤退，获得 ' + gain + ' 点经验；本章未计入完成。' : '本次失败，创伤 +1；可以重开这一章。')}
         </div>
-        <button class="sheetBtn" id="btnAgain">${canNext ? '进入第二章 · 午夜狂欢' : '再调查一次'}</button>
+        <button class="sheetBtn" id="btnAgain">${canNext ? '进入' + nextSc.chapter + ' · ' + nextSc.name : '再调查一次'}</button>
         <button class="sheetBtn" id="btnHome" style="margin-top:8px;background:transparent;color:#5b4a34">返回大厅</button>
       </div>`);
     $('#btnAgain').onclick = () => {
-      const next = canNext ? 'midnight' : state.scenario;
+      const next = canNext ? nextId : state.scenario;
       pickedChapter = next;
-      state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: next });
-      seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render();
+      state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: next, upgrades: currentUpgrades(state.inv.id) });
+      seenTest = ''; seenEnc = ''; endShown = false; interKey = ''; closeSheet(); render();
     };
     $('#btnHome').onclick = () => { location.href = '../index.html'; };
   }
@@ -605,6 +724,8 @@ button:disabled{cursor:not-allowed;opacity:.42}
     if (f) { doAct({ type: 'fight', enemy: f.dataset.fight }); return; }
     const e = ev.target.closest('[data-evade]');
     if (e) { doAct({ type: 'evade', enemy: e.dataset.evade }); return; }
+    const sg = ev.target.closest('[data-sigil]');
+    if (sg) { doAct({ type: 'breakSigil', at: sg.dataset.sigil }); return; }
   });
   $('#invPanel').addEventListener('click', (ev) => {
     const p = ev.target.closest('[data-play]');
@@ -624,13 +745,14 @@ button:disabled{cursor:not-allowed;opacity:.42}
   $('#btnBack').onclick = () => { location.href = '../index.html'; };
   $('#btnRestart').onclick = () => {
     if (!state) return;
-    state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: state.scenario });
-    seenTest = ''; seenEnc = ''; endShown = false; closeSheet(); render(); toast('本章已重新开始');
+    state = E.createInitial([], Math.random, { investigator: state.inv.id, scenario: state.scenario, upgrades: currentUpgrades(state.inv.id) });
+    seenTest = ''; seenEnc = ''; endShown = false; interKey = ''; closeSheet(); render(); toast('本章已重新开始');
   };
 
   $('#btnRules').onclick = () => {
     const sc = (state && E.SCENARIOS[state.scenario]) || E.SCENARIOS.gathering;
     const isMid = sc.id === 'midnight';
+    const isAbyss = sc.id === 'abyss';
     openSheet(`
       <div class="sheetHead"><div><h2>规则速查</h2><p>诡镇奇谈 · ${esc(sc.chapter)}</p></div><button class="x" data-close="1">✕</button></div>
       <div class="sheetBody">
@@ -643,17 +765,23 @@ button:disabled{cursor:not-allowed;opacity:.42}
         <p>属性 + 混沌标记修正 ≥ 难度即成功。骷髅按场上首领数量加重，石碑 −3，自动失败直接失败，古神印记 +1。</p>
         ${isMid ? `
         <h3>猎杀邪教徒</h3>
-        <p>五名邪教徒分散在大学、市中心、东城、码头、河岸，各自有战力/闪避/生命与伤害。解决其中 3 名后，密谋推进到第二幕，仪式主持者在南教堂现身。</p>
+        <p>五名邪教徒分散在大学、市中心、东城、码头、河岸。解决其中 3 名后，密谋推进到第二幕，仪式主持者在南教堂现身。</p>
+        <h3>审问与倒计时</h3>
+        <p>每击败一名邪教徒，可以选择审问一次：追问仪式让议程 doom −1，逼问据点获得 2 个线索，拿走财物获得 2 资源并回复 1 恐惧。仪式倒计时每回合 −1，归零后主持者战力 +1、生命 +2。</p>
         <h3>撤退</h3>
-        <p>随时可以撤退结束本章：按已解决的邪教徒数量结算经验，但本章不计入完成，也不能进入下一章。</p>` : `
+        <p>随时可以撤退结束本章：按已解决的邪教徒数量结算经验，但本章不计入完成，也不能进入下一章。</p>` : (isAbyss ? `
+        <h3>熄灭仪式节点</h3>
+        <p>三座节点在潮湿通道、地下湖、裂缝。在本地点花 1 行动做意志检定（4）：成功熄灭节点；失败受到 1 点恐惧。三座全灭后，深渊吞噬者在深渊边缘出现。</p>
+        <h3>潮水倒计时</h3>
+        <p>每回合倒计时 −1。归零后吞噬者战力 +1、生命 +2；如果它还没出现，出现时直接带上加成。</p>` : `
         <h3>线索与密谋</h3>
-        <p>调查成功在所在地点获得 1 个线索。集齐 3 个线索后推进密谋，第二幕会打开地下室并放出「食尸鬼祭司」。</p>`}
+        <p>调查成功在所在地点获得 1 个线索。集齐 3 个线索后推进密谋，第二幕会打开地下室并放出「食尸鬼祭司」。</p>`)}
         <h3>战斗与闪避</h3>
         <p>战斗成功造成 1 + 武器加值伤害；闪避成功让敌人疲惫并解除交战，但它下个敌影阶段仍会恢复。</p>
         <h3>失败条件</h3>
-        <p>生命或理智归零、议程第二幕 doom 满，都会结束本章。${isMid ? '击败仪式主持者则完成第二章。' : '击败祭司则完成第一章。'}</p>
+        <p>生命或理智归零、议程第二幕 doom 满，都会结束本章。${isMid ? '击败仪式主持者则完成第二章。' : (isAbyss ? '击败深渊吞噬者则完成第三章。' : '击败祭司则完成第一章。')}</p>
         <h3>战役</h3>
-        <p>第一章胜利 +2 经验，第二章胜利 +3 经验；失败创伤 +1。记录在本地战役档。</p>
+        <p>第一章胜利 +2 经验，第二章 +3，第三章 +4；失败创伤 +1。经验可在开局前永久升级调查员。</p>
       </div>`);
     bindClose();
   };

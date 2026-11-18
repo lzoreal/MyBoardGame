@@ -117,7 +117,85 @@ let mr = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'mi
 mr = E.act(mr, { type: 'restart' }, mr.inv.id, rngHigh).state;
 eq('重开保持第二章', mr.scenario, 'midnight');
 
-console.log('— 第二章随机整局不崩');
+console.log('— 调查员成长与第二章审问');
+let up = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight', upgrades: { health: 1, combat: 1, will: 1 } });
+eq('升级后生命上限 +1', up.inv.maxHealth, 10);
+eq('升级后战力 +1', up.inv.stats.combat, 5);
+eq('升级后意志 +1', up.inv.stats.will, 4);
+
+let iq = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight' });
+iq.inv.location = 'university';
+iq.inv.actions = 3;
+const qtarget = iq.enemies.find((e) => e.cultist && e.location === 'university');
+qtarget.health = 1;
+iq = E.act(iq, { type: 'fight', enemy: qtarget.id }, iq.inv.id, rngHigh).state;
+ok('击败邪教徒后进入待审问', !!iq.pendingInterrogation, iq.pendingInterrogation && iq.pendingInterrogation.name);
+iq.agenda.doom = 2;
+iq = E.act(iq, { type: 'interrogate', choice: 'ritual' }, iq.inv.id, rngHigh).state;
+eq('追问仪式让 doom −1', iq.agenda.doom, 1);
+ok('审问结束后清空', iq.pendingInterrogation === null);
+
+let rt = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight' });
+rt.enemies = [];
+rt.ritual.left = 1;
+rt.inv.actions = 0;
+rt = E.act(rt, { type: 'endTurn' }, rt.inv.id, rngHigh).state;
+eq('仪式倒计时归零', rt.ritual.left, 0);
+ok('归零后标记首领强化', rt.flags.ritualOver === true);
+
+console.log('— 第三章：深渊之下');
+let a = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'abyss' });
+eq('第三章章节', a.scenario, 'abyss');
+eq('深渊地点 6 个', Object.keys(a.locations).length, 6);
+eq('起点洞口', a.inv.location, 'mouth');
+eq('三座仪式节点', a.sigilsLeft, 3);
+eq('初始没有吞噬者', a.enemies.filter((e) => e.boss).length, 0);
+eq('潮水倒计时 10', a.ritual.left, 10);
+
+for (const loc of ['tunnel', 'lake', 'rift']) {
+  a.inv.location = loc;
+  a.inv.actions = 3;
+  a = E.act(a, { type: 'breakSigil', at: loc }, a.inv.id, rngHigh).state;
+  ok('熄灭节点：' + loc, !a.locations[loc].sigil);
+}
+eq('节点全灭', a.sigilsLeft, 0);
+eq('密谋进入第二幕', a.act.stage, 2);
+ok('吞噬者在深渊边缘现身', a.enemies.some((e) => e.boss && e.location === 'edge'));
+
+const dev = a.enemies.find((e) => e.boss && e.health > 0);
+a.inv.location = 'edge';
+a.inv.actions = 3;
+dev.health = 1;
+a = E.act(a, { type: 'fight', enemy: dev.id }, a.inv.id, rngHigh).state;
+ok('击败吞噬者完成第三章', a.phase === 'ended' && a.resolution.result === 'win', a.resolution && a.resolution.text);
+
+let af = E.createInitial([], rngHigh, { investigator: 'scholar', scenario: 'abyss' });
+af.enemies = [];
+af.agenda.stage = 2; af.agenda.max = 10; af.agenda.doom = 9;
+af.inv.actions = 0;
+af = E.act(af, { type: 'endTurn' }, af.inv.id, rngHigh).state;
+ok('深渊议程爆掉失败', af.phase === 'ended' && af.resolution.result === 'lose', af.resolution && af.resolution.text);
+
+console.log('— 第三章随机整局不崩');
+for (let t = 0; t < 3; t++) {
+  let s = E.createInitial([], Math.random, { investigator: ['detective', 'scholar', 'medium'][t], scenario: 'abyss' });
+  let steps = 0;
+  while (s.phase !== 'ended' && steps++ < 120) {
+    const here = s.enemies.find((e) => e.health > 0 && e.location === s.inv.location);
+    let a = { type: 'endTurn' };
+    if (s.inv.actions > 0) {
+      if (here && here.boss) a = { type: 'fight', enemy: here.id };
+      else if (s.locations[s.inv.location].sigil && s.act.stage === 1) a = { type: 'breakSigil', at: s.inv.location };
+      else if (here) a = { type: 'fight', enemy: here.id };
+      else a = { type: 'move', to: s.locations[s.inv.location].links[Math.floor(Math.random() * s.locations[s.inv.location].links.length)] };
+    }
+    const r = E.act(s, a, s.inv.id, Math.random);
+    if (r.state) s = r.state;
+  }
+  ok('第三章第 ' + (t + 1) + ' 局跑到结束', s.phase === 'ended', s.resolution && s.resolution.result);
+  ok('第三章生命值没有负数', s.inv.damage >= 0 && s.inv.horror >= 0, s.inv.damage + '/' + s.inv.horror);
+}
+
 for (let t = 0; t < 4; t++) {
   let s = E.createInitial([], Math.random, { investigator: ['detective', 'scholar', 'medium', 'reporter'][t], scenario: 'midnight' });
   let steps = 0;

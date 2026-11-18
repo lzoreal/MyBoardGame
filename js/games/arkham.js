@@ -69,7 +69,11 @@ window.ArkhamEngine = (function () {
     ghoul: { name: '食尸鬼', fight: 3, evade: 2, health: 2, damage: 1, horror: 1 },
     ghost: { name: '游魂', fight: 4, evade: 3, health: 3, damage: 1, horror: 2 },
     priest: { name: '食尸鬼祭司', fight: 3, evade: 3, health: 4, damage: 1, horror: 1, boss: true },
-    masked: { name: '蒙面主持者', fight: 4, evade: 3, health: 6, damage: 2, horror: 2, boss: true }
+    masked: { name: '蒙面主持者', fight: 4, evade: 3, health: 6, damage: 2, horror: 2, boss: true },
+    larva: { name: '深渊幼虫', fight: 2, evade: 2, health: 2, damage: 1, horror: 0 },
+    faceless: { name: '无面信徒', fight: 3, evade: 2, health: 3, damage: 1, horror: 2 },
+    shadow: { name: '粘稠暗影', fight: 4, evade: 4, health: 3, damage: 0, horror: 2 },
+    devourer: { name: '深渊吞噬者', fight: 5, evade: 3, health: 8, damage: 3, horror: 2, boss: true }
   };
 
   const ENCOUNTERS = [
@@ -102,6 +106,27 @@ window.ArkhamEngine = (function () {
     { name: '邪教徒·低语者', fight: 2, evade: 3, health: 3, damage: 1, horror: 2 },
     { name: '邪教徒·执灯人', fight: 3, evade: 3, health: 3, damage: 1, horror: 1 },
     { name: '邪教徒·掘墓人', fight: 4, evade: 3, health: 4, damage: 1, horror: 2 }
+  ];
+
+  /* ---------- 第三章：深渊之下 ---------- */
+  const ABYSS_LOCATIONS = {
+    mouth: { name: '洞口', shroud: 2, clues: 1, x: 18, y: 68, links: ['tunnel'], text: '海崖下的裂缝，冷风从里面吹出来。' },
+    tunnel: { name: '潮湿通道', shroud: 2, clues: 1, x: 38, y: 80, links: ['mouth', 'lake'], sigil: true, text: '岩壁上刻着一圈圈螺旋，摸上去像还在呼吸。' },
+    lake: { name: '地下湖', shroud: 3, clues: 1, x: 46, y: 52, links: ['tunnel', 'altar', 'rift'], sigil: true, text: '黑水一直漫到脚边，水面下有东西缓慢移动。' },
+    altar: { name: '祭坛', shroud: 4, clues: 1, x: 66, y: 30, links: ['lake', 'rift'], text: '石台上摆着还没干透的供品，烛火是绿色的。' },
+    rift: { name: '裂缝', shroud: 3, clues: 1, x: 84, y: 58, links: ['lake', 'altar', 'edge'], sigil: true, text: '地面裂开一道口子，底下传来潮水与心跳的声音。' },
+    edge: { name: '深渊边缘', shroud: 5, clues: 0, x: 62, y: 88, links: ['rift'], text: '再往前就没有路了，只有一张正在张开的口。' }
+  };
+
+  const ABYSS_ENCOUNTERS = [
+    { key: 'larva', name: '幼虫群', text: '细小的白色虫体从石缝里涌出来。' },
+    { key: 'faceless', name: '无面信徒', text: '一个没有五官的人站在你面前。' },
+    { key: 'shadow', name: '粘稠暗影', text: '影子贴着地面爬过来，带着海水味。' },
+    { key: 'tide', name: '潮声', text: '意志检定（3）：失败受到 1 点恐惧。' },
+    { key: 'slip', name: '石壁滑落', text: '敏捷检定（3）：失败受到 1 点伤害。' },
+    { key: 'dark', name: '无光', text: '智力检定（3）：失败失去 1 个行动点。' },
+    { key: 'chant', name: '深处低语', text: '意志检定（4）：失败受到 1 点恐惧，议程 +1 doom。' },
+    { key: 'offering', name: '新的供品', text: '议程 +1 doom。' }
   ];
 
   const SCENARIOS = {
@@ -137,7 +162,26 @@ window.ArkhamEngine = (function () {
       ],
       boss: { key: 'masked', loc: 'church', spawnText: '南教堂的彩窗亮起，蒙面主持者走上祭坛' },
       winText: '蒙面主持者倒下了。钟声停在午夜前一秒，你带着满身雨水离开教堂。',
-      loseText: '钟声敲完，整座城市在雾里安静下来。'
+      loseText: '钟声敲完，整座城市在雾里安静下来。',
+      ritual: { rounds: 8, buffText: '午夜的钟声加快了，主持者变得更强' }
+    },
+    abyss: {
+      id: 'abyss', chapter: '第三章', name: '深渊之下', start: 'mouth',
+      subtitle: '第三章 · 深渊之下',
+      intro: '仪式的源头在海崖下面。你沿着裂缝潜进去，三座刻着螺旋的仪式节点正在把潮水往上推；再晚一点，深渊里的东西就会爬出来。',
+      locations: ABYSS_LOCATIONS, encounters: ABYSS_ENCOUNTERS,
+      act: [
+        { stage: 1, label: '第一幕 · 熄灭仪式节点', sigils: 3, advanceText: '三座节点熄灭，深渊吞噬者从裂缝里挤出' },
+        { stage: 2, label: '第二幕 · 深渊之下' }
+      ],
+      agenda: [
+        { label: '议程 · 潮声逼近', doom: 6 },
+        { label: '议程 · 深渊苏醒', doom: 10, lose: true }
+      ],
+      boss: { key: 'devourer', loc: 'edge', spawnText: '深渊边缘的口张开了，深渊吞噬者从里面爬出来' },
+      winText: '深渊吞噬者沉回裂缝。你把最后一座节点砸碎，潮水退回黑暗里。',
+      loseText: '潮水漫过洞口，阿卡姆的街道在凌晨被海水吞没。',
+      ritual: { rounds: 10, buffText: '潮水涨得更快，深渊吞噬者变得更强' }
     }
   };
 
@@ -253,6 +297,9 @@ window.ArkhamEngine = (function () {
     if (enemy.cultist) {
       state.cultistsFound = (state.cultistsFound || 0) + 1;
       log(state, '已解决 ' + state.cultistsFound + ' 名邪教徒');
+      if (state.scenario === 'midnight') {
+        state.pendingInterrogation = { name: enemy.name, location: enemy.location, id: enemy.id };
+      }
       checkMidnightAct(state);
       if (state.phase === 'ended') return;
     }
@@ -268,11 +315,26 @@ window.ArkhamEngine = (function () {
     const need = state.act.cultists || 3;
     if ((state.cultistsFound || 0) < need) return;
     state.act.stage = 2;
+    state.act.label = SCENARIOS.midnight.act[1].label;
     const cfg = SCENARIOS.midnight;
     const boss = makeEnemy(state, cfg.boss.key, cfg.boss.loc);
     state.locations[cfg.boss.loc].revealed = true;
+    if (state.flags.ritualOver) buffBoss(state, boss);
     log(state, cfg.act[1].label + '：' + cfg.boss.spawnText);
     if (boss) log(state, '仪式主持者现身：' + boss.name);
+  }
+
+  function advanceAbyssAct(state) {
+    if (state.scenario !== 'abyss') return;
+    if (state.act.stage !== 1) return;
+    state.act.stage = 2;
+    state.act.label = SCENARIOS.abyss.act[1].label;
+    const cfg = SCENARIOS.abyss;
+    const boss = makeEnemy(state, cfg.boss.key, cfg.boss.loc);
+    state.locations[cfg.boss.loc].revealed = true;
+    if (state.flags.ritualOver) buffBoss(state, boss);
+    log(state, cfg.act[1].label + '：' + cfg.boss.spawnText);
+    if (boss) log(state, '深渊吞噬者现身：' + boss.name);
   }
 
   function test(state, statKey, difficulty, rng, opts) {
@@ -312,7 +374,7 @@ window.ArkhamEngine = (function () {
 
   function spawnEncounter(state, card, rng) {
     const inv = state.inv;
-    if (card.key === 'rats' || card.key === 'ghoul' || card.key === 'ghost') {
+    if (card.key && ENEMIES[card.key] && !ENEMIES[card.key].boss) {
       const e = makeEnemy(state, card.key, inv.location);
       log(state, card.name + ' 出现在' + state.locations[inv.location].name + '，与你交战');
       return;
@@ -341,7 +403,23 @@ window.ArkhamEngine = (function () {
       if (!test(state, 'agi', 4, rng)) takeDamage(state, inv, 2);
       return;
     }
-    if (card.key === 'ritual') {
+    if (card.key === 'tide') {
+      if (!test(state, 'will', 3, rng)) takeHorror(state, inv, 1);
+      return;
+    }
+    if (card.key === 'slip') {
+      if (!test(state, 'agi', 3, rng)) takeDamage(state, inv, 1);
+      return;
+    }
+    if (card.key === 'dark') {
+      if (!test(state, 'int', 3, rng)) inv.actions = Math.max(0, inv.actions - 1);
+      return;
+    }
+    if (card.key === 'chant') {
+      if (!test(state, 'will', 4, rng)) { takeHorror(state, inv, 1); state.agenda.doom += 1; }
+      return;
+    }
+    if (card.key === 'ritual' || card.key === 'offering') {
       state.agenda.doom += 1;
       log(state, '仪式推进：议程 +1 doom');
     }
@@ -369,6 +447,7 @@ window.ArkhamEngine = (function () {
       state.agenda.stage += 1;
       state.agenda.doom = 0;
       state.agenda.max = stages[state.agenda.stage - 1].doom;
+      state.agenda.label = stages[state.agenda.stage - 1].label || state.agenda.label;
       log(state, '议程推进：' + (stages[state.agenda.stage - 1].label || '黑暗更浓了'));
     } else {
       endGame(state, 'lose', state.loseText || '你没能撑到天亮。');
@@ -398,6 +477,7 @@ window.ArkhamEngine = (function () {
     inv.actions = 3;
     state.flags.wendyLuck = false;
     state.flags.scholarUsed = false;
+    tickRitual(state);
     state.round += 1;
     state.phase = 'investigation';
     mythosPhase(state, rng);
@@ -456,6 +536,27 @@ window.ArkhamEngine = (function () {
     return { ok: true };
   }
 
+  function buffBoss(state, boss) {
+    if (!boss) return;
+    boss.fight += 1;
+    boss.maxHealth += 2;
+    boss.health += 2;
+    log(state, '仪式加速：' + boss.name + ' 战力 +1、生命 +2');
+  }
+
+  function tickRitual(state) {
+    const r = state.ritual;
+    if (!r || r.done) return;
+    r.left = Math.max(0, r.left - 1);
+    if (r.left > 0) return;
+    r.done = true;
+    state.flags.ritualOver = true;
+    log(state, '倒计时归零：' + (state.scenario === 'midnight' ? '午夜的钟声敲响了' : '潮水漫上来了'));
+    const boss = (state.enemies || []).find((e) => e.boss && e.health > 0);
+    if (boss) buffBoss(state, boss);
+    else log(state, '仪式加速，接下来现身的首领会更难对付');
+  }
+
   function createInitial(players, rng, opts) {
     const invDef = INVESTIGATORS.find((x) => x.id === (opts && opts.investigator)) || INVESTIGATORS[0];
     const sc = SCENARIOS[(opts && opts.scenario)] || SCENARIOS.gathering;
@@ -464,10 +565,13 @@ window.ArkhamEngine = (function () {
       locs[k] = Object.assign({ id: k, clues: sc.locations[k].clues, clues0: sc.locations[k].clues, revealed: k === sc.start }, clone(sc.locations[k]));
     });
     const deck = shuffle(invDef.deck.slice(), rng);
+    const up = (opts && opts.upgrades) || {};
+    const stats = clone(invDef.stats);
+    ['will', 'int', 'combat', 'agi'].forEach((k) => { stats[k] += Number(up[k]) || 0; });
     const inv = {
       id: invDef.id, name: invDef.name, role: invDef.role, color: invDef.color,
-      stats: clone(invDef.stats), maxHealth: invDef.health, maxSanity: invDef.sanity,
-      damage: 0, horror: 0, resources: 5, clues: 0, location: sc.start, soakHealth: 0, soakSanity: 0,
+      stats: stats, maxHealth: invDef.health + (Number(up.health) || 0), maxSanity: invDef.sanity + (Number(up.sanity) || 0),
+      damage: 0, horror: 0, resources: 5 + (Number(up.resources) || 0), clues: 0, location: sc.start, soakHealth: 0, soakSanity: 0,
       deck: deck, hand: [], discard: [], assets: [], actions: 3, defeated: false,
       ability: invDef.ability, abilityText: invDef.abilityText
     };
@@ -476,12 +580,18 @@ window.ArkhamEngine = (function () {
       locations: locs, enemies: [], nextEnemyId: 0,
       chaos: CHAOS.slice(), encounter: { deck: shuffle(sc.encounters.slice(), rng), discard: [] },
       scenario: sc.id, scenarioName: sc.name, chapterLabel: sc.chapter, subtitle: sc.subtitle,
-      act: { stage: 1, clues: sc.act[0].clues || 0, cultists: sc.act[0].cultists || 0, label: sc.act[0].label },
+      act: {
+        stage: 1, clues: sc.act[0].clues || 0, cultists: sc.act[0].cultists || 0,
+        sigils: sc.act[0].sigils || 0, label: sc.act[0].label
+      },
       agenda: { stage: 1, doom: 0, max: sc.agenda[0].doom, stages: clone(sc.agenda), label: sc.agenda[0].label },
       logs: [sc.intro],
       lastTest: null, encounterCurrent: null,
       flags: { wendyLuck: false },
       resolution: null, cultistsFound: 0,
+      sigilsLeft: sc.act[0].sigils || 0,
+      ritual: sc.ritual ? { left: sc.ritual.rounds, max: sc.ritual.rounds, done: false } : null,
+      pendingInterrogation: null,
       winText: sc.winText, loseText: sc.loseText,
       hostId: inv.id
     };
@@ -524,6 +634,45 @@ window.ArkhamEngine = (function () {
         ? '你撤出了阿卡姆。仪式还在继续，钟声在雾里越敲越近。'
         : '你在午夜前撤出了阿卡姆，带走了 ' + found + ' 名邪教徒的战果。仪式还在继续。';
       endGame(state, 'resign', text);
+      return { ok: true, state: state };
+    }
+
+    if (action.type === 'interrogate') {
+      const p = state.pendingInterrogation;
+      if (!p) return { ok: false, msg: '现在没有可以审问的人' };
+      const choice = action.choice;
+      if (choice === 'ritual') {
+        state.agenda.doom = Math.max(0, state.agenda.doom - 1);
+        log(state, '审问' + p.name + '：问出了仪式的下一步，议程 doom −1');
+      } else if (choice === 'lair') {
+        inv.clues += 2;
+        log(state, '审问' + p.name + '：问出了据点位置，获得 2 个线索');
+      } else if (choice === 'bribe') {
+        inv.resources += 2;
+        inv.horror = Math.max(0, inv.horror - 1);
+        log(state, '审问' + p.name + '：拿到了钱和一句实话，资源 +2，恐惧 −1');
+      } else {
+        return { ok: false, msg: '审问方式不对' };
+      }
+      state.pendingInterrogation = null;
+      return { ok: true, state: state };
+    }
+
+    if (action.type === 'breakSigil') {
+      if (state.scenario !== 'abyss') return { ok: false, msg: '这一章没有仪式节点' };
+      if (state.act.stage !== 1) return { ok: false, msg: '节点已经全部熄灭了' };
+      const loc = state.locations[action.at];
+      if (!loc || !loc.sigil || loc.id !== inv.location) return { ok: false, msg: '这里没有能熄灭的节点' };
+      if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
+      if (test(state, 'will', 4, rng)) {
+        loc.sigil = false;
+        state.sigilsLeft = Math.max(0, (state.sigilsLeft || 0) - 1);
+        log(state, '熄灭了' + loc.name + '的仪式节点，还剩 ' + state.sigilsLeft + ' 座');
+        if (state.sigilsLeft <= 0) advanceAbyssAct(state);
+      } else {
+        log(state, '仪式节点抗拒你的意志，你受到 1 点恐惧');
+        takeHorror(state, inv, 1);
+      }
       return { ok: true, state: state };
     }
 
