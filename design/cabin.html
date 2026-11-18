@@ -55,6 +55,35 @@
   .playerTrait.low .ptRow b { color: #a33a2c; }
   .playerTrait.low .ptBar span { background: #b65545; }
   .itemRule { margin-top: 3px; font-size: 11px; color: #2f6fa3; font-weight: 700; }
+  .deckGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin: 8px 0 12px; }
+  .deckCard { padding: 9px 11px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; }
+  .deckCard span { display: block; font-size: 11px; color: #7d674b; }
+  .deckCard b { font-size: 24px; color: #4a3424; line-height: 1.1; }
+  .deckCard em { display: block; margin-top: 2px; font-style: normal; font-size: 10px; color: #9b8768; }
+  .infoSub { margin: 13px 0 6px; font-size: 13px; font-weight: 900; color: #4a3424; }
+  .infoStory { padding: 10px 12px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; font-size: 12px; line-height: 1.65; color: #5c4631; white-space: pre-wrap; }
+  .goalBox { margin-top: 7px; padding: 10px 12px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; font-size: 12px; line-height: 1.55; }
+  .goalBox b { color: #7b2e3b; }
+  .goalBox.secret { background: #f4e3e0; border-color: #d7b2aa; }
+  .monsterCard { margin-top: 7px; padding: 9px 11px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; font-size: 12px; }
+  .monsterCard b { color: #7b2e3b; }
+  .monsterCard span { color: #7d674b; }
+  .tradePrompt { width: 100%; padding: 10px 12px; border-radius: 12px; background: #fff8e8; border: 1px solid #d8a94f; color: #4a3424; font-size: 12px; line-height: 1.5; }
+  .tradePrompt b { color: #7b2e3b; }
+  .tradePrompt .tradeBtns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tradePrompt .tradeBtns .btn { flex: 1; min-height: 40px; }
+  .monsterRow { padding: 10px 12px; margin-top: 8px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; }
+  .monsterRow .mh { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+  .monsterRow .mh b { color: #7b2e3b; font-size: 15px; }
+  .monsterRow .mh span { color: #7d674b; font-size: 11px; }
+  .monsterRow .targets { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .monsterRow .targets .btn { min-height: 38px; padding: 0 10px; font-size: 12px; }
+  .monsterRow .targets .btn:disabled { opacity: .45; }
+  .cardClose { display: block; width: 100%; margin-top: 10px; min-height: 38px; }
+  @media (max-width: 720px) {
+    .deckGrid { grid-template-columns: repeat(2, 1fr); }
+    .monsterRow .targets .btn { flex: 1 1 42%; }
+  }
   .floorTabs { justify-content: center; }
   .floorTab { background: #3a2c21; color: #f3e7d0; border: 2px solid #6b4e32; min-height: 40px; }
   .floorTab[aria-pressed="true"] { background: var(--c-paper); color: #3a2a1c; border-color: var(--c-paper); }
@@ -245,6 +274,7 @@
     <button class="icon-btn" id="btnHome" type="button" aria-label="返回大厅">←</button>
     <div class="pill" id="roomPill">房间：—</div>
     <div class="pill round" id="turnPill">未开局</div>
+    <button class="icon-btn" id="btnInfo" type="button" aria-label="查看牌堆、剧本与怪物">i</button>
     <button class="icon-btn" id="btnLog" type="button" aria-label="查看本局动态">≡</button>
   </header>
 
@@ -286,9 +316,9 @@
 <script src="../js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js"></script>
-<script src="../js/games/cabin-packs.js"></script>
-<script src="../js/games/cabin.js"></script>
-<script src="games/shell.js?v=10"></script>
+<script src="../js/games/cabin-packs.js?v=20261118"></script>
+<script src="../js/games/cabin.js?v=20261118"></script>
+<script src="games/shell.js?v=11"></script>
 <script>
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -311,6 +341,7 @@
   let svg = null;
   let viewFloor = 'ground';
   let lastCardKey = '';
+  let cardDismissedKey = '';
   let cardTimer = 0;
   let rolling = false;
   let rollFxTimer = 0;
@@ -454,6 +485,20 @@
     }
     drawDoors(g, room, x0, y0, w, h);
 
+    const pile = (st.itemPiles && st.itemPiles[room.floor + '|' + room.x + '|' + room.y]) || [];
+    if (pile.length) {
+      el('rect', { x: x0 + w - 44, y: y0 + 8, width: 42, height: 24, rx: 12, fill: '#f3e7d0', stroke: '#b99a6a', 'stroke-width': 1.5 }, g);
+      txt(g, x0 + w - 23, y0 + 25, '物 ' + pile.length, { 'font-size': 12, 'font-weight': 900, fill: '#7b2e3b' });
+    }
+    g.style.cursor = st.phase === 'playing' ? 'pointer' : '';
+    g.setAttribute('data-room', room.floor + '|' + room.x + '|' + room.y);
+    if (st.phase === 'playing') {
+      g.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        openRoomCard(st, room);
+      });
+    }
+
     if (room.special === 'goal') {
       el('circle', { cx: x0 + w / 2, cy: y0 + 17, r: 6, fill: '#a52f2f' }, g);
     }
@@ -513,6 +558,10 @@
           'stroke-width': isTraitor ? 4 : 2.5
         }, tg);
         txt(tg, 0, narrow ? 6 : 5, o.p.art || '?', { 'font-size': AF, 'font-weight': 800, fill: '#fff' });
+        tg.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          openPlayerInfo(st, o.i);
+        });
       } else {
         el('circle', { cx: 0, cy: 0, r: R, fill: '#5d2430', stroke: '#f0cba0', 'stroke-width': 2.5 }, tg);
         txt(tg, 0, narrow ? 6 : 5, '怪', { 'font-size': AF, 'font-weight': 800, fill: '#ffe7cb' });
@@ -624,14 +673,139 @@
 
   function renderScenario(st) {
     const bar = $('scenarioBar');
-    if (!st.haunt || !st.haunt.active) { bar.classList.remove('show'); bar.innerHTML = ''; return; }
+    if (!st.haunt || !st.haunt.active) { bar.classList.remove('show'); bar.innerHTML = ''; bar.onclick = null; bar.style.cursor = ''; return; }
     const h = st.haunt;
     bar.classList.add('show');
     const traitor = st.players[h.traitor];
     const prog = h.heroGoal.type === 'hunt' ? (h.monsterBanish || 0) : (h.progress || 0);
     bar.innerHTML = '<b>' + esc(h.name) + '</b> · 叛徒 ' + esc(traitor ? traitor.name : '?') +
       ' · 英雄：' + esc(h.heroGoalText) + '（' + prog + '/' + (h.heroGoal.need || 0) + '）' +
-      ' · 第 ' + (h.round || 0) + ' 轮';
+      ' · 第 ' + (h.round || 0) + ' 轮 · 点开看双方目标';
+    bar.title = '查看剧本卡、故事与双方目标';
+    bar.style.cursor = 'pointer';
+    bar.onclick = () => openScenarioCard(st);
+  }
+
+  function openScenarioCard(st) {
+    const h = st.haunt;
+    if (!h || !h.active) return;
+    const traitor = st.players[h.traitor];
+    const prog = h.heroGoal && h.heroGoal.type === 'hunt' ? (h.monsterBanish || 0) : (h.progress || 0);
+    const need = h.heroGoal ? (h.heroGoal.need || 0) : 0;
+    let html = '<h2>剧本 · ' + esc(h.name) + '</h2>' +
+      '<p>叛徒：' + esc(traitor ? traitor.name : '?') + ' · 第 ' + (h.round || 0) + ' 轮</p>' +
+      '<div class="infoSub">剧本故事</div>' +
+      '<div class="infoStory">' + esc(h.story || '（这个剧本没有附故事文本）') + '</div>' +
+      '<div class="goalBox"><b>英雄目标</b><br>' + esc(h.heroGoalText || '完成剧本目标') +
+      (need ? '（进度 ' + prog + '/' + need + '）' : '') + '</div>' +
+      '<div class="goalBox secret"><b>叛徒目标 · 秘密</b><br>' + esc(h.traitorGoalText || '消灭所有英雄') +
+      '<br><span style="font-size:11px;color:#8d6458">线下由叛徒阅读；本机同屏时请注意避让。</span></div>';
+    const ms = st.monsters || [];
+    if (ms.length) {
+      html += '<div class="infoSub">怪物</div>';
+      ms.forEach((m) => {
+        const room = C.helpers.roomAt(st, m.floor, m.x, m.y);
+        html += '<div class="monsterCard"><b>' + esc(m.name) + '</b> · ' + esc(C.FLOOR_LABEL[m.floor] || '') + ' · ' + esc(room ? room.name : '?') +
+          '<br><span>速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') + (m.stunned ? ' · 僵直' : '') + '</span></div>';
+      });
+    }
+    html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" id="scClose" type="button">收起</button></div>';
+    openModal(html, 'scenario');
+    const btn = $('scClose');
+    if (btn) btn.addEventListener('click', () => closeModal());
+  }
+
+  function openInfo(st) {
+    const d = st.decks || {};
+    const deck = (label, n, extra) => '<div class="deckCard"><span>' + esc(label) + '</span><b>' + (n || 0) + '</b>' + (extra ? '<em>' + esc(extra) + '</em>' : '') + '</div>';
+    let html = '<h2>公开情报</h2><p>牌堆、弃牌、剧本与怪物。线下桌上能看到的公开信息都在这里。</p>' +
+      '<div class="infoSub">牌堆与弃牌</div><div class="deckGrid">' +
+      deck('房间牌剩余', (st.roomDeck || []).length, '弃牌 ' + ((st.roomDiscard || []).length)) +
+      deck('事件牌剩余', (d.events || []).length, '弃牌 ' + ((st.eventDiscard || []).length)) +
+      deck('物品牌剩余', (d.items || []).length) +
+      deck('预兆牌剩余', (d.omens || []).length) +
+      '</div>';
+
+    const pileKeys = Object.keys(st.itemPiles || {}).filter((k) => (st.itemPiles[k] || []).length);
+    html += '<div class="infoSub">地面物品堆</div>';
+    if (!pileKeys.length) html += '<div class="emptyNote">目前没有丢在地上的物品。</div>';
+    else {
+      pileKeys.forEach((key) => {
+        const parts = key.split('|');
+        const room = C.helpers.roomAt(st, parts[0], Number(parts[1]), Number(parts[2]));
+        const pile = st.itemPiles[key] || [];
+        html += '<div class="monsterCard"><b>' + esc(C.FLOOR_LABEL[parts[0]] || '') + ' · ' + esc(room ? room.name : '?') + '</b><br><span>' +
+          esc(pile.map((it) => it.name).join('、')) + '</span></div>';
+      });
+    }
+
+    const h = st.haunt;
+    html += '<div class="infoSub">剧本</div>';
+    if (!h || !h.active) html += '<div class="emptyNote">还没有进入闹鬼阶段。</div>';
+    else {
+      html += '<div class="goalBox"><b>' + esc(h.name) + '</b><br>' + esc(h.story || '') +
+        '<div style="margin-top:6px;font-size:12px">英雄目标：' + esc(h.heroGoalText || '') + '</div></div>' +
+        '<div class="actions" style="margin-top:8px"><button class="btn ghost" id="infoSc" type="button">查看完整剧本卡</button></div>';
+    }
+
+    const ms = st.monsters || [];
+    html += '<div class="infoSub">怪物 ' + ms.length + '</div>';
+    if (!ms.length) html += '<div class="emptyNote">当前没有怪物。</div>';
+    ms.forEach((m) => {
+      const room = C.helpers.roomAt(st, m.floor, m.x, m.y);
+      html += '<div class="monsterCard"><b>' + esc(m.name) + '</b> · ' + esc(C.FLOOR_LABEL[m.floor] || '') + ' · ' + esc(room ? room.name : '?') +
+        '<br><span>速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') + (m.stunned ? ' · 僵直' : '') + '</span></div>';
+    });
+
+    html += '<div class="actions" style="margin-top:14px"><button class="btn ghost" id="infoClose" type="button">收起</button></div>';
+    openModal(html, 'info');
+    const close = $('infoClose');
+    if (close) close.addEventListener('click', () => closeModal());
+    const sc = $('infoSc');
+    if (sc) sc.addEventListener('click', () => openScenarioCard(st));
+  }
+
+  function openRoomCard(st, room) {
+    if (!room) return;
+    const key = room.floor + '|' + room.x + '|' + room.y;
+    const pile = (st.itemPiles && st.itemPiles[key]) || [];
+    const here = st.players.filter((p) => !p.dead && p.floor === room.floor && p.x === room.x && p.y === room.y);
+    const monsters = (st.monsters || []).filter((m) => m.floor === room.floor && m.x === room.x && m.y === room.y);
+    const me = st.players[myIndex(st)];
+    let effect = '';
+    if (room.effect) {
+      if (room.effect.type === 'gain') effect = traitLabel(room.effect.trait) + ' +' + room.effect.amount;
+      else if (room.effect.type === 'lose') effect = traitLabel(room.effect.trait) + ' -' + room.effect.amount;
+      else if (room.effect.type === 'check') effect = traitLabel(room.effect.trait) + ' 判定 ' + room.effect.diff;
+    }
+    let html = '<h2>' + esc(room.name) + '</h2>' +
+      '<p>' + esc(C.FLOOR_LABEL[room.floor] || '') + ' · ' + (room.resolved ? '已探索并结算' : '已翻开的房间') + '</p>' +
+      '<div class="infoStory">' + esc(room.text || '（这张房间卡没有附文案）') + '</div>' +
+      (effect ? '<div class="goalBox"><b>房间效果</b><br>' + esc(effect) + (room.resolved ? ' · 已结算' : '') + '</div>' : '') +
+      '<div class="infoSub">在场</div>';
+    if (!here.length && !monsters.length) html += '<div class="emptyNote">这间房现在没有人或怪物。</div>';
+    else {
+      html += '<div class="goalBox">' + here.map((p) => esc(p.name) + '（' + esc(p.charName || '') + '）').join('、') +
+        (here.length && monsters.length ? '；' : '') + monsters.map((m) => esc(m.name) + (m.stunned ? '（僵直）' : '')).join('、') + '</div>';
+    }
+    html += '<div class="infoSub">地面物品 ' + pile.length + '</div>';
+    if (!pile.length) html += '<div class="emptyNote">地上没有物品。</div>';
+    else {
+      html += '<div class="itemList">' + pile.map((it) => '<div class="itemRow"><div><div class="nm">' + esc(it.name) + '</div><div class="ds">' + esc(it.text || '') + '</div></div></div>').join('') + '</div>';
+    }
+    html += '<div class="actions" style="margin-top:14px">';
+    if (pile.length && me && me.floor === room.floor && me.x === room.x && me.y === room.y && myTurn(st)) {
+      html += '<button class="btn primary" id="roomPick" type="button">拾取全部</button>';
+    }
+    html += '<button class="btn ghost" id="roomClose" type="button">收起</button></div>';
+    openModal(html, 'room');
+    const close = $('roomClose');
+    if (close) close.addEventListener('click', () => closeModal());
+    const pick = $('roomPick');
+    if (pick) pick.addEventListener('click', () => {
+      window.GameShell.send({ type: 'pickup' });
+      closeModal();
+    });
   }
 
   function showBanner(title, sub, tone) {
@@ -715,6 +889,14 @@
       cls = 'hot';
       text = (st.players[st.pendingRoll.index] || {}).name + ' 需要 ' + traitLabel(st.pendingRoll.trait) + '判定';
       action = myTurn(st) ? '点掷骰' : '等待对方';
+    } else if (st.tradeOffer) {
+      cls = 'hot';
+      text = '交易请求 · ' + esc(st.tradeOffer.fromName) + ' → ' + esc(st.tradeOffer.toName);
+      action = '等待对方确认';
+    } else if (st.monsterTurn) {
+      cls = 'warn';
+      text = '怪物阶段 · ' + (st.players.find((p) => p.id === st.monsterTurn.actor) || {}).name + ' 指挥怪物';
+      action = myTurn(st) ? '选择怪物行动' : '等待叛徒';
     } else if (!myTurn(st)) {
       cls = 'cool';
       text = '等待 ' + (st.players[st.turn] || {}).name + ' 行动';
@@ -887,7 +1069,8 @@
     const ok = $('dmgOk');
     if (ok) ok.addEventListener('click', () => {
       const first = Number($('dmgRange').value);
-      window.GameShell.send({ type: 'allocateDamage', first: a, second: amount - first });
+      const asPid = window.GameShell.isLocal() ? owner.id : undefined;
+      window.GameShell.send({ type: 'allocateDamage', first: a, second: amount - first }, asPid);
     });
   }
 
@@ -933,12 +1116,12 @@
       const idx = Number(b.dataset.trade);
       const others = st.players.filter((p, i) => i !== mi && !p.dead && p.floor === me.floor && p.x === me.x && p.y === me.y);
       if (others.length === 1) {
-        window.GameShell.send({ type: 'trade', target: others[0].id, index: idx });
+        window.GameShell.send({ type: 'tradeOffer', target: others[0].id, index: idx });
         renderInventory(cur, mi);
         return;
       }
       chooseTarget('把「' + me.items[idx].name + '」交易给谁？', others, (pick) => {
-        window.GameShell.send({ type: 'trade', target: pick.id, index: idx });
+        window.GameShell.send({ type: 'tradeOffer', target: pick.id, index: idx });
         renderInventory(cur, mi);
       });
     }));
@@ -1092,13 +1275,13 @@
   function renderCard(st) {
     const box = $('cabinCard');
     if (st.pendingRoll) { renderRollPrompt(st); return; }
-    if (!st.lastCard) { box.className = ''; box.innerHTML = ''; lastCardKey = ''; return; }
-    const key = st.lastCard.kind + '|' + st.lastCard.title + '|' + (st.logs || []).length + '|' + (st.lastRoll ? st.lastRoll.total + st.lastRoll.ok : '') + '|' + (st.lastDamageRoll ? st.lastDamageRoll.total : '');
-    if (key === lastCardKey) return;
+    if (!st.lastCard) { box.className = ''; box.innerHTML = ''; lastCardKey = ''; cardDismissedKey = ''; return; }
+    const key = st.lastCard.kind + '|' + st.lastCard.title + '|' + (st.lastCard.text || '') + '|' + (st.lastRoll ? st.lastRoll.total + st.lastRoll.ok : '') + '|' + (st.lastDamageRoll ? st.lastDamageRoll.total : '');
+    if (key === lastCardKey || key === cardDismissedKey) return;
     lastCardKey = key;
     const c = st.lastCard;
     box.className = 'show' + (c.tone === 'bad' ? ' bad' : '');
-    box.innerHTML = '<div class="k">' + (c.kind === 'omen' ? '预兆' : c.kind === 'item' ? '物品' : c.kind === 'haunt' ? '闹鬼' : c.kind === 'room' ? '房间' : '事件') +
+    box.innerHTML = '<div class="k">' + (c.kind === 'omen' ? '预兆' : c.kind === 'item' ? '物品' : c.kind === 'haunt' ? '闹鬼' : c.kind === 'room' ? '房间' : c.kind === 'monster' ? '怪物' : '事件') +
       '</div><div class="t">' + esc(c.title) + '</div><div class="d">' + esc(c.text) + '</div>';
     if (st.lastRoll) {
       const result = document.createElement('div');
@@ -1152,8 +1335,102 @@
         box.appendChild(drRow);
       }
     }
-    clearTimeout(cardTimer);
-    cardTimer = setTimeout(() => { box.className = ''; }, 8000);
+    const close = document.createElement('button');
+    close.className = 'btn ghost cardClose';
+    close.type = 'button';
+    close.textContent = '收起这张卡';
+    close.addEventListener('click', () => {
+      cardDismissedKey = key;
+      box.className = '';
+      box.innerHTML = '';
+    });
+    box.appendChild(close);
+  }
+
+  /* ---------------- 交易确认 ---------------- */
+  function renderTradePrompt(st, me, actions) {
+    const o = st.tradeOffer;
+    if (!o) return false;
+    const from = st.players.find((p) => p.id === o.from);
+    const to = st.players.find((p) => p.id === o.to);
+    const local = window.GameShell.isLocal && window.GameShell.isLocal();
+    const isTo = me && me.id === o.to;
+    actions.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'tradePrompt';
+    const title = isTo ? '<b>' + esc(from ? from.name : '对方') + '</b> 想把「<b>' + esc(o.itemName) + '</b>」交易给你。'
+      : local ? '把设备交给 <b>' + esc(to ? to.name : '接收方') + '</b>，由对方决定是否接受「<b>' + esc(o.itemName) + '</b>」。'
+      : '已向 <b>' + esc(to ? to.name : '对方') + '</b> 发起交易：<b>' + esc(o.itemName) + '</b>，等待对方回应。';
+    box.innerHTML = title + '<div class="tradeBtns"></div>';
+    const btns = box.querySelector('.tradeBtns');
+    const add = (label, cls, fn, disabled) => {
+      const b = document.createElement('button');
+      b.className = 'btn ' + (cls || 'ghost');
+      b.type = 'button';
+      b.innerHTML = label;
+      if (disabled) b.disabled = true;
+      b.addEventListener('click', fn);
+      btns.appendChild(b);
+    };
+    const sendAs = (type, pid) => {
+      window.GameShell.send({ type: type }, pid);
+      haptic(8);
+    };
+    if (isTo || local) {
+      add('接受', 'primary', () => sendAs('tradeAccept', o.to), false);
+      add('拒绝', 'ghost', () => sendAs('tradeReject', o.to), false);
+    }
+    if (me && me.id === o.from) {
+      add('撤回', 'ghost', () => sendAs('tradeCancel', o.from), false);
+    }
+    actions.appendChild(box);
+    return true;
+  }
+
+  /* ---------------- 怪物阶段 ---------------- */
+  function renderMonsterTurn(st) {
+    const mt = st.monsterTurn;
+    if (!mt) return;
+    const actor = st.players.find((p) => p.id === mt.actor);
+    const heroes = st.players.filter((p) => !p.dead && p.side === 'hero');
+    let html = '<h2>怪物阶段</h2><p>叛徒 <b>' + esc(actor ? actor.name : '?') + '</b> 指挥怪物行动，剩余 ' + mt.queue.length + ' 只。</p>' +
+      '<div class="infoStory">每只怪物可以追向一名英雄：移动最多等于速度，抵达后攻击；也可以跳过。线下怪物卡和目标由叛徒决定。</div>';
+    mt.queue.forEach((id) => {
+      const m = st.monsters.find((x) => x.id === id);
+      if (!m) return;
+      const room = C.helpers.roomAt(st, m.floor, m.x, m.y);
+      html += '<div class="monsterRow"><div class="mh"><b>' + esc(m.name) + '</b><span>' +
+        esc(C.FLOOR_LABEL[m.floor] || '') + ' · ' + esc(room ? room.name : '?') +
+        ' · 速度 ' + (m.speed || '?') + ' · ' + esc(traitLabel(m.attack || 'might')) + ' ' + (m[m.attack || 'might'] || '?') +
+        (m.stunned ? ' · 僵直' : '') + '</span></div><div class="targets">';
+      if (!heroes.length) html += '<span class="sub">没有存活英雄。</span>';
+      heroes.forEach((p) => {
+        const sameFloor = p.floor === m.floor;
+        html += '<button class="btn ghost" type="button" data-monster="' + esc(m.id) + '" data-target="' + esc(p.id) + '"' +
+          (sameFloor ? '' : ' disabled') + '>追向 ' + esc(p.name) + (sameFloor ? '' : '（不同楼层）') + '</button>';
+      });
+      html += '<button class="btn ghost" type="button" data-monster-skip="' + esc(m.id) + '">跳过这只</button></div></div>';
+    });
+    html += '<div class="actions" style="margin-top:14px"><button class="btn primary" type="button" id="monsterDone">结束怪物阶段</button></div>';
+    openModal(html, 'monster');
+    $('cModalCard').querySelectorAll('[data-target]').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        window.GameShell.send({ type: 'monsterMove', monsterId: b.dataset.monster, target: b.dataset.target });
+        haptic(10);
+      });
+    });
+    $('cModalCard').querySelectorAll('[data-monster-skip]').forEach((b) => {
+      b.addEventListener('click', () => {
+        window.GameShell.send({ type: 'monsterSkip', monsterId: b.dataset.monsterSkip });
+        haptic(5);
+      });
+    });
+    const done = $('monsterDone');
+    if (done) done.addEventListener('click', () => {
+      window.GameShell.send({ type: 'monsterEnd' });
+      haptic(8);
+    });
   }
 
   /* ---------------- 底栏 ---------------- */
@@ -1222,6 +1499,33 @@
       return b;
     };
 
+    if (st.tradeOffer) {
+      renderTradePrompt(st, me, actions);
+      return;
+    }
+    if (st.monsterTurn) {
+      actions.innerHTML = '';
+      const mt = st.monsterTurn;
+      const actor = st.players.find((p) => p.id === mt.actor);
+      if (!isMine) {
+        const span = document.createElement('span');
+        span.className = 'btn ghost';
+        span.style.cssText = 'display:grid;place-items:center';
+        span.textContent = '怪物阶段 · ' + (actor ? actor.name : '叛徒') + ' 指挥中';
+        actions.appendChild(span);
+        return;
+      }
+      if (st.pendingDamage) return;
+      const lead = document.createElement('span');
+      lead.className = 'sub';
+      lead.style.cssText = 'font-size:11px;color:#c9b797;align-self:center';
+      lead.textContent = '怪物阶段 · ' + mt.queue.length + ' 只待行动';
+      actions.appendChild(lead);
+      addBtn('指挥怪物', 'primary', () => renderMonsterTurn(st));
+      addBtn('跳过全部', 'ghost', () => window.GameShell.send({ type: 'monsterEnd' }));
+      return;
+    }
+
     if (st.phase === 'ended') return;
 
     if (!isMine) {
@@ -1238,6 +1542,9 @@
 
     // 当前房间动作
     addBtn('物品 ' + ((me.items || []).length), 'ghost', () => renderInventory(st, mi));
+    if (st.haunt && st.haunt.active) {
+      addBtn('剧本目标', 'ghost', () => openScenarioCard(st));
+    }
     if (here && (here.kind === 'stairs' || here.kind === 'grandStair' || here.kind === 'landing' || here.special === 'basementStairs' || here.name === '门厅')) {
       addBtn('走楼梯', 'ghost', () => window.GameShell.send({ type: 'stair' }), st.moves <= 0 || st.moveLocked || !!st.pendingTile);
     }
@@ -1317,6 +1624,7 @@
   function onTap(ev) {
     const st = cur;
     if (!st || st.phase !== 'playing') return;
+    if (ev.target && ev.target.closest && ev.target.closest('[data-room]')) return;
     if (!myTurn(st)) { window.GameShell.toast('还没轮到你', true); return; }
     if (st.pendingTile || st.pendingDamage || st.pendingRoll) return;
     if (st.moveLocked) { window.GameShell.toast('本回合已经翻过房间', true); return; }
@@ -1363,11 +1671,14 @@
     else if (st.pendingDamage) renderDamageModal(st);
     else if (st.pendingRoll && modalMode) closeModal();
     else if (modalMode === 'tile' || modalMode === 'damage') closeModal();
+    else if (st.monsterTurn && st.phase === 'playing' && myTurn(st) && (modalMode === '' || modalMode === 'monster')) renderMonsterTurn(st);
+    else if (modalMode === 'monster') closeModal();
     else if (modalMode === 'player' && playerModalIndex >= 0) renderPlayerInfo(st, playerModalIndex);
   }
 
   /* ---------------- 启动 ---------------- */
   buildBoard();
+  $('btnInfo').addEventListener('click', () => { if (cur) openInfo(cur); });
   $('cModal').addEventListener('click', (e) => {
     if (e.target === $('cModal')) closeModal();
   });
@@ -1395,9 +1706,15 @@
         '用<b>触发房间 + 预兆</b>查 ' + C.SCENARIOS.length + ' 个剧本之一，剧本决定叛徒，叛徒不一定是抽预兆的人。',
         '闹鬼后同一房间的敌对角色移动额外消耗 1 点；每回合可攻击一次，双方掷同一属性，差值造成伤害。'
       ] },
+      { h: '物品与交易', items: [
+        '物品卡在桌上公开；每件物品每回合只能执行<b>使用 / 交易 / 丢弃 / 偷窃 / 拾取</b>其中一项。',
+        '交易必须先向同房间玩家发起请求，<b>由接收方确认</b>后才转移；对方拒绝或发起方撤回则物品留在原主。',
+        '丢在地上的物品形成公开物品堆，同房间玩家可拾取；地上物品不会消失。'
+      ] },
       { h: '怪物与剧本', items: [
         '怪物默认不能被杀死；英雄击中怪物使其僵直并跳过下一个怪物阶段。',
-        '叛徒回合结束后统一控制怪物移动与攻击；怪物按速度寻路。',
+        '叛徒结束回合后进入<b>怪物阶段</b>：叛徒逐只指定怪物追向哪位英雄（最多移动速度格，抵达后攻击）、跳过这只或直接结束阶段。',
+        '怪物攻击由叛徒决定目标，受害者按物理/精神伤害规则分配；叛徒不能替英雄分配伤害。',
         '英雄按剧本执行仪式、逃跑、击退狼群或撑过轮数；叛徒完成反制目标。'
       ] }
     ],

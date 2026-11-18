@@ -514,6 +514,8 @@ window.CabinEngine = (function () {
     st.lastRoll = null;
     st.lastDamageRoll = null;
     st.lastCard = null;
+    st.tradeOffer = null;
+    st.monsterTurn = null;
     st.omenThisTurn = false;
     st.omenCard = null;
     st.omenRoom = null;
@@ -546,6 +548,7 @@ window.CabinEngine = (function () {
       eventDiscard: [],
       omens: 0, haunt: null,
       monsters: [], pendingTile: null, pendingDamage: null, pendingRoll: null, pendingEnd: false,
+      monsterTurn: null, tradeOffer: null,
       lastCard: null, lastRoll: null, winner: null,
       logs: [opts.skipSelect ? '开局：所有人站在入口大厅' : '开局：先各自挑一个角色']
     };
@@ -1090,38 +1093,126 @@ window.CabinEngine = (function () {
     return null;
   }
 
-  function monsterPhase(st, rand) {
-    if (!st.haunt || !st.haunt.active || !st.monsters.length) return;
-    const heroes = st.players.filter((p) => p.side === 'hero' && !p.dead);
-    if (!heroes.length) return;
-    let attacks = [];
-    st.monsters.forEach((m) => {
-      if (m.stunned > 0) { m.stunned -= 1; return; }
-      const nearest = heroes.slice().sort((a, b) => {
-        const ra = roomAt(st, m.floor, m.x, m.y); const rb = roomAt(st, a.floor, a.x, a.y);
-        return (ra && rb ? Math.abs(ra.x - a.x) + Math.abs(ra.y - a.y) : 99) - (ra && rb ? Math.abs(ra.x - b.x) + Math.abs(ra.y - b.y) : 99);
-      })[0];
-      if (!nearest) return;
-      const same = nearest.floor === m.floor && nearest.x === m.x && nearest.y === m.y;
-      if (!same) {
-        const step = pathStep(st, m, nearest);
-        if (step) { m.x = step.x; m.y = step.y; }
+  function findMonsterPath(st, m, target) {
+    if (m.floor !== target.floor) return null;
+    const start = roomAt(st, m.floor, m.x, m.y);
+    const goal = roomAt(st, target.floor, target.x, target.y);
+    if (!start || !goal) return null;
+    if (start.x === goal.x && start.y === goal.y) return [];
+    const q = [{ r: start, path: [] }];
+    const seen = { [start.x + ',' + start.y]: true };
+    while (q.length) {
+      const cur = q.shift();
+      for (const dir of ['N', 'S', 'E', 'W']) {
+        if (!doorsHas(cur.r.doors, dir)) continue;
+        const d = DIRS[dir];
+        const nx = cur.r.x + d[0], ny = cur.r.y + d[1];
+        if (seen[nx + ',' + ny]) continue;
+        const nr = roomAt(st, m.floor, nx, ny);
+        if (!nr) continue;
+        seen[nx + ',' + ny] = true;
+        const path = cur.path.concat([{ x: nx, y: ny, room: nr }]);
+        if (nx === goal.x && ny === goal.y) return path;
+        q.push({ r: nr, path: path });
       }
-      if (nearest.floor === m.floor && nearest.x === m.x && nearest.y === m.y) {
-        const tr = (m.attack === 'speed' || m.attack === 'sanity' || m.attack === 'known') ? m.attack : 'might';
-        if (m[tr] === undefined) return;
-        const ar = roll(m[tr], rand);
-        const dr = roll(traitVal(st, st.players.indexOf(nearest), tr), rand);
-        const diff = ar.total - dr.total;
-        st.lastRoll = { label: m.name + ' 攻击 ' + nearest.name + '（' + labelOf(tr) + '）', faces: ar.faces, foeFaces: dr.faces, total: ar.total, foe: dr.total };
-        if (diff > 0) attacks.push({ p: nearest, amount: diff, kind: (tr === 'might' || tr === 'speed') ? 'physical' : 'mental' });
-      }
-    });
-    if (attacks.length) {
-      st.pendingEnd = true;
-      attacks.forEach((a) => beginDamage(st, st.players.indexOf(a.p), a.amount, a.kind, '怪物'));
     }
+    return null;
   }
+
+  function monsterAttackHero(st, m, target, rand) {
+    const ti = st.players.findIndex((p) => p.id === target.id);
+    if (ti < 0) return;
+    const tr = (m.attack === 'speed' || m.attack === 'sanity' || m.attack === 'known') ? m.attack : 'might';
+    if (m[tr] === undefined) return;
+    const ar = roll(m[tr], rand);
+    const dr = roll(traitVal(st, ti, tr), rand);
+    const diff = ar.total - dr.total;
+    st.lastRoll = { label: m.name + ' 攻击 ' + target.name + '（' + labelOf(tr) + '）', faces: ar.faces, foeFaces: dr.faces, total: ar.total, foe: dr.total };
+    st.lastCard = { kind: 'monster', title: '怪物攻击 · ' + m.name, text: m.name + ' 扑向 ' + target.name + '。', tone: diff > 0 ? 'bad' : '' };
+    pushLog(st, m.name + ' 攻击 ' + target.name + '：' + ar.total + ' 对 ' + dr.total + ' → ' + (diff > 0 ? '命中' : '被躲开'));
+    if (diff > 0) beginDamage(st, ti, diff, (tr === 'might' || tr === 'speed') ? 'physical' : 'mental', m.name);
+  }
+
+  function finishMonsterTurn(st) {
+    if (!st.monsterTurn) return;
+    if (st.pendingDamage || (st.damageQueue && st.damageQueue.length)) {
+      st.monsterTurn.awaitingDamage = true;
+      return;
+    }
+    st.monsterTurn = null;
+    if (st.phase === 'ended') return;
+    const keepCard = st.lastCard && st.lastCard.kind === 'monster' ? st.lastCard : null;
+    const keepRoll = keepCard ? st.lastRoll : null;
+    nextTurn(st);
+    if (keepCard && st.phase === 'playing') {
+      st.lastCard = keepCard;
+      st.lastRoll = keepRoll;
+    }
+    pushLog(st, '轮到 ' + st.players[st.turn].name);
+  }
+
+  function beginMonsterTurn(st, i) {
+    const alive = st.monsters.filter((m) => !m.dead);
+    if (!alive.length) return false;
+    st.monsterTurn = { actor: st.players[i].id, queue: alive.map((m) => m.id), awaitingDamage: false };
+    pushLog(st, '怪物阶段：' + st.players[i].name + ' 指挥 ' + alive.length + ' 只怪物行动');
+    return true;
+  }
+
+  function monsterAct(st, i, action, rand) {
+    const mt = st.monsterTurn;
+    if (!mt) return { ok: false, msg: '现在不是怪物阶段' };
+    if (st.players[i].id !== mt.actor) return { ok: false, msg: '只有叛徒能指挥怪物' };
+    if (st.pendingDamage) return { ok: false, msg: '先分配伤害' };
+    if (action.type === 'monsterEnd') {
+      if (!mt.queue.length) { finishMonsterTurn(st); return { ok: true, state: st }; }
+      mt.queue.forEach((id) => {
+        const m = st.monsters.find((x) => x.id === id);
+        if (m && m.stunned > 0) m.stunned -= 1;
+      });
+      mt.queue = [];
+      finishMonsterTurn(st);
+      return { ok: true, state: st };
+    }
+    if (action.type === 'monsterSkip') {
+      const m = st.monsters.find((x) => x.id === action.monsterId);
+      if (!m || mt.queue.indexOf(m.id) < 0) return { ok: false, msg: '这只怪物已经行动过了' };
+      if (m.stunned > 0) m.stunned -= 1;
+      mt.queue = mt.queue.filter((id) => id !== m.id);
+      pushLog(st, m.name + ' 跳过行动');
+      if (!mt.queue.length) finishMonsterTurn(st);
+      return { ok: true, state: st };
+    }
+    const m = st.monsters.find((x) => x.id === action.monsterId);
+    if (!m || mt.queue.indexOf(m.id) < 0) return { ok: false, msg: '这只怪物已经行动过了' };
+    if (m.stunned > 0) {
+      m.stunned -= 1;
+      mt.queue = mt.queue.filter((id) => id !== m.id);
+      pushLog(st, m.name + ' 还在僵直，跳过行动');
+      if (!mt.queue.length) finishMonsterTurn(st);
+      return { ok: true, state: st };
+    }
+    const target = st.players.find((p) => p.id === action.target && !p.dead && p.side === 'hero');
+    if (!target) return { ok: false, msg: '没有这个英雄目标' };
+    const path = findMonsterPath(st, m, target);
+    if (path === null) {
+      mt.queue = mt.queue.filter((id) => id !== m.id);
+      pushLog(st, m.name + ' 无法到达 ' + target.name + '，跳过行动');
+      if (!mt.queue.length) finishMonsterTurn(st);
+      return { ok: true, state: st };
+    }
+    const steps = path.slice(0, Math.max(1, m.speed || 1));
+    steps.forEach((p) => { m.x = p.x; m.y = p.y; });
+    if (m.floor === target.floor && m.x === target.x && m.y === target.y) {
+      monsterAttackHero(st, m, target, rand);
+    } else if (steps.length) {
+      pushLog(st, m.name + ' 向 ' + target.name + ' 移动了 ' + steps.length + ' 格');
+    }
+    mt.queue = mt.queue.filter((id) => id !== m.id);
+    if (!mt.queue.length) finishMonsterTurn(st);
+    return { ok: true, state: st };
+  }
+
 
   /* ---------------- 回合 ---------------- */
   function nextTurn(st) {
@@ -1149,15 +1240,15 @@ window.CabinEngine = (function () {
     if (st.pendingDamage) return { ok: false, msg: '先分配伤害' };
     if (st.pendingRoll) return { ok: false, msg: '先掷骰' };
     if (st.pendingTile) return { ok: false, msg: '先放置房间' };
+    if (st.tradeOffer) return { ok: false, msg: '先处理交易请求' };
     if (st.phase === 'ended') return { ok: false, msg: '已经结束' };
     startHauntIfNeeded(st, rand);
     checkWin(st);
     if (st.phase === 'ended') return { ok: true, state: st };
     if (st.haunt && st.haunt.active && st.haunt.justStarted) {
       st.haunt.justStarted = false;
-    } else if (st.haunt && st.haunt.active && st.players[i].side === 'traitor') {
-      monsterPhase(st, rand);
-      if (st.pendingDamage) { st.pendingEnd = true; return { ok: true, state: st }; }
+    } else if (st.haunt && st.haunt.active && st.players[i].side === 'traitor' && !st.monsterTurn) {
+      if (beginMonsterTurn(st, i)) return { ok: true, state: st };
     }
     nextTurn(st);
     pushLog(st, '轮到 ' + st.players[st.turn].name);
@@ -1178,6 +1269,11 @@ window.CabinEngine = (function () {
       st.pendingDamage = st.damageQueue.shift();
       return { ok: true, state: st };
     }
+    if (st.monsterTurn) {
+      if (!st.pendingDamage && !(st.damageQueue && st.damageQueue.length)) finishMonsterTurn(st);
+      checkWin(st);
+      return { ok: true, state: st };
+    }
     const end = st.pendingEnd;
     st.pendingEnd = false;
     if (end) {
@@ -1185,6 +1281,54 @@ window.CabinEngine = (function () {
       pushLog(st, '轮到 ' + st.players[st.turn].name);
     }
     checkWin(st);
+    return { ok: true, state: st };
+  }
+
+  function resolveTrade(st, i, action) {
+    const offer = st.tradeOffer;
+    if (!offer) return { ok: false, msg: '没有待处理的交易' };
+    const me = st.players[i];
+    if (action.type === 'tradeCancel') {
+      if (me.id !== offer.from) return { ok: false, msg: '只有发起者能撤回交易' };
+      st.tradeOffer = null;
+      pushLog(st, me.name + ' 撤回了交易');
+      return { ok: true, state: st };
+    }
+    if (me.id !== offer.to) return { ok: false, msg: '只有接收方可以回应交易' };
+    const from = st.players.find((p) => p.id === offer.from);
+    if (action.type === 'tradeReject') {
+      st.tradeOffer = null;
+      pushLog(st, me.name + ' 拒绝了 ' + (from ? from.name : '对方') + ' 的交易');
+      return { ok: true, state: st };
+    }
+    if (!from) return { ok: false, msg: '交易发起者不在了' };
+    const item = from.items[offer.index];
+    if (!item) { st.tradeOffer = null; return { ok: false, msg: '发起者已经没有这件物品' }; }
+    if (item.noTrade) { st.tradeOffer = null; return { ok: false, msg: '这件物品不能交易' }; }
+    from.items.splice(offer.index, 1);
+    me.items = me.items.concat(item);
+    st.traded = true;
+    markItemAction(st, item, 'trade');
+    st.tradeOffer = null;
+    pushLog(st, from.name + ' 把「' + item.name + '」交给 ' + me.name + '（' + me.name + ' 接受）');
+    return { ok: true, state: st };
+  }
+
+  function makeTradeOffer(st, i, action) {
+    if (st.traded) return { ok: false, msg: '本回合已经交易过' };
+    if (st.tradeOffer) return { ok: false, msg: '已有待处理的交易' };
+    const p = st.players[i];
+    const other = st.players.find((x) => x.id === action.target);
+    if (!other || other.dead || other.floor !== p.floor || other.x !== p.x || other.y !== p.y) return { ok: false, msg: '只能和同房间的人交易' };
+    const item = p.items[action.index];
+    if (!item) return { ok: false, msg: '没有这件物品' };
+    if (item.noTrade) return { ok: false, msg: '这件物品不能交易' };
+    if (itemActionOf(st, item)) return { ok: false, msg: '这件物品本回合已经执行过其他操作' };
+    st.tradeOffer = {
+      from: p.id, to: other.id, index: action.index,
+      itemName: item.name, fromName: p.name, toName: other.name
+    };
+    pushLog(st, p.name + ' 向 ' + other.name + ' 发起交易：' + item.name);
     return { ok: true, state: st };
   }
 
@@ -1224,9 +1368,24 @@ window.CabinEngine = (function () {
     if (st.pendingRoll && action.type === 'rollPending') return resolvePendingRoll(st, i, rand);
     if (st.pendingRoll) return { ok: false, msg: '先掷骰' };
     if (st.pendingTile && action.type !== 'placeTile') return { ok: false, msg: '先旋转并放置房间' };
+    if (st.tradeOffer) {
+      if (action.type === 'tradeAccept' || action.type === 'tradeReject' || action.type === 'tradeCancel') return resolveTrade(st, i, action);
+      return { ok: false, msg: '先处理交易请求' };
+    }
+    if (st.monsterTurn) {
+      if (action.type === 'monsterMove' || action.type === 'monsterEnd' || action.type === 'monsterSkip') return monsterAct(st, i, action, rand);
+      return { ok: false, msg: '先完成怪物阶段' };
+    }
     if (st.turn !== i) return { ok: false, msg: '还没轮到你' };
 
     switch (action.type) {
+      case 'monsterMove': return monsterAct(st, i, action, rand);
+      case 'monsterEnd': return monsterAct(st, i, action, rand);
+      case 'monsterSkip': return monsterAct(st, i, action, rand);
+      case 'tradeOffer': return makeTradeOffer(st, i, action);
+      case 'tradeAccept': return resolveTrade(st, i, action);
+      case 'tradeReject': return resolveTrade(st, i, action);
+      case 'tradeCancel': return resolveTrade(st, i, action);
       case 'placeTile': return placeTile(st, i, action.rot || 0, rand);
       case 'move': {
         const r = moveToRoom(st, i, action.dir, rand);
@@ -1275,22 +1434,7 @@ window.CabinEngine = (function () {
         pushLog(st, p.name + ' 捡起了 ' + available.length + ' 件物品');
         return { ok: true, state: st };
       }
-      case 'trade': {
-        if (st.traded) return { ok: false, msg: '本回合已经交易过' };
-        const p = st.players[i];
-        const other = st.players.find((x) => x.id === action.target);
-        if (!other || other.dead || other.floor !== p.floor || other.x !== p.x || other.y !== p.y) return { ok: false, msg: '只能和同房间的人交易' };
-        const item = p.items[action.index];
-        if (!item) return { ok: false, msg: '没有这件物品' };
-        if (item.noTrade) return { ok: false, msg: '这件物品不能交易' };
-        if (itemActionOf(st, item)) return { ok: false, msg: '这件物品本回合已经执行过其他操作' };
-        p.items.splice(action.index, 1);
-        other.items = other.items.concat(item);
-        st.traded = true;
-        markItemAction(st, item, 'trade');
-        pushLog(st, p.name + ' 把「' + item.name + '」交给 ' + other.name);
-        return { ok: true, state: st };
-      }
+      case 'trade': return makeTradeOffer(st, i, action);
       case 'end': return endTurn(st, i, rand);
       default: return { ok: false, msg: '未知动作' };
     }
