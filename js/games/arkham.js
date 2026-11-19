@@ -19,9 +19,15 @@ window.ArkhamEngine = (function () {
     knife: { type: 'asset', name: '小刀', cost: 1, combat: 1, text: '战力 +1。' },
     charm: { type: 'asset', name: '护身符', cost: 2, will: 1, sanitySoak: 2, text: '意志 +1，可抵消 2 点恐惧。' },
     ally: { type: 'asset', name: '老友', cost: 4, combat: 1, healthSoak: 1, sanitySoak: 1, text: '战力 +1，可各抵消 1 点伤害与恐惧。' },
+    revolver: { type: 'asset', name: '连发左轮', cost: 4, combat: 2, damage: 1, text: '战力 +2，战斗造成 +1 伤害。' },
+    book: { type: 'asset', name: '旧词典', cost: 3, intellect: 2, text: '智力 +2。' },
+    medkit: { type: 'asset', name: '医疗包', cost: 2, healthSoak: 2, text: '可抵消 2 点伤害，耗尽后离场。' },
+    rosary: { type: 'asset', name: '旧念珠', cost: 2, will: 1, sanitySoak: 2, text: '意志 +1，可抵消 2 点恐惧，耗尽后离场。' },
     firstAid: { type: 'event', name: '急救', cost: 2, effect: 'healDamage', text: '回复 2 点伤害。' },
     calm: { type: 'event', name: '镇静剂', cost: 1, effect: 'healHorror', text: '回复 2 点恐惧。' },
     smash: { type: 'event', name: '猛击', cost: 1, effect: 'smash', text: '对当前地点的敌人造成 2 点伤害。' },
+    vicious: { type: 'event', name: '狠击', cost: 2, effect: 'smash3', text: '对当前地点的敌人造成 3 点伤害。' },
+    lucky: { type: 'event', name: '侥幸', cost: 1, effect: 'lucky', text: '下一次检定 +2。' },
     insight: { type: 'event', name: '洞察', cost: 1, effect: 'clue', text: '在当前地点发现 1 个线索。' },
     dash: { type: 'event', name: '疾行', cost: 1, effect: 'evade', text: '自动闪避当前地点的一个敌人。' },
     windfall: { type: 'event', name: '外快', cost: 0, effect: 'money', text: '获得 3 点资源。' },
@@ -33,25 +39,37 @@ window.ArkhamEngine = (function () {
       id: 'detective', name: '罗伊·贝克', role: '私家侦探', color: '#3f7fe0',
       stats: { will: 3, int: 3, combat: 4, agi: 2 }, health: 9, sanity: 5, ability: 'roland',
       abilityText: '击败敌人后，可在所在地点发现 1 个线索。',
-      deck: ['pistol', 'pistol', 'knife', 'knife', 'flashlight', 'charm', 'ally', 'firstAid', 'firstAid', 'calm', 'smash', 'smash', 'insight', 'insight', 'dash', 'windfall', 'notes', 'notes']
+      deck: ['revolver', 'pistol', 'knife', 'knife', 'flashlight', 'charm', 'ally', 'medkit', 'firstAid', 'calm', 'vicious', 'smash', 'insight', 'insight', 'dash', 'lucky', 'windfall', 'notes']
     },
     {
       id: 'scholar', name: '黛西·沃', role: '图书管理员', color: '#8b5cf6',
       stats: { will: 2, int: 5, combat: 2, agi: 3 }, health: 5, sanity: 9, ability: 'scholar',
       abilityText: '每回合第一次调查少花 1 个行动点。',
-      deck: ['flashlight', 'flashlight', 'knife', 'charm', 'charm', 'ally', 'firstAid', 'calm', 'calm', 'insight', 'insight', 'insight', 'dash', 'windfall', 'notes', 'notes', 'smash', 'smash']
+      deck: ['flashlight', 'book', 'knife', 'charm', 'rosary', 'ally', 'medkit', 'calm', 'calm', 'insight', 'insight', 'insight', 'dash', 'lucky', 'notes', 'notes', 'smash', 'vicious']
     },
     {
       id: 'medium', name: '艾格尼丝·贝', role: '灵媒', color: '#e2564a',
       stats: { will: 4, int: 3, combat: 2, agi: 3 }, health: 6, sanity: 8, ability: 'agnes',
       abilityText: '每次受到恐惧后，对当前地点的敌人造成 1 点伤害。',
-      deck: ['charm', 'charm', 'knife', 'flashlight', 'ally', 'firstAid', 'calm', 'calm', 'smash', 'smash', 'insight', 'dash', 'dash', 'windfall', 'windfall', 'notes', 'notes', 'pistol']
+      deck: ['rosary', 'charm', 'knife', 'flashlight', 'ally', 'medkit', 'calm', 'calm', 'vicious', 'smash', 'insight', 'dash', 'dash', 'windfall', 'windfall', 'notes', 'lucky', 'pistol']
     },
     {
       id: 'reporter', name: '温蒂·亚当', role: '记者', color: '#2f9e63',
       stats: { will: 3, int: 3, combat: 2, agi: 4 }, health: 7, sanity: 7, ability: 'wendy',
-      abilityText: '每回合第一次检定失败时，自动重抽一个混沌标记。',
-      deck: ['knife', 'knife', 'flashlight', 'charm', 'ally', 'firstAid', 'calm', 'insight', 'insight', 'dash', 'dash', 'smash', 'windfall', 'windfall', 'notes', 'notes', 'pistol', 'pistol']
+      abilityText: '每回合第一次检定失败时，自动重抽一个混沌标记（自动失败除外）。',
+      deck: ['knife', 'revolver', 'flashlight', 'charm', 'ally', 'medkit', 'calm', 'insight', 'insight', 'dash', 'dash', 'vicious', 'windfall', 'windfall', 'lucky', 'notes', 'pistol', 'book']
+    },
+    {
+      id: 'guardian', name: '马克·哈里根', role: '退伍保安', color: '#c9a45c',
+      stats: { will: 3, int: 2, combat: 4, agi: 2 }, health: 10, sanity: 6, ability: 'guardian',
+      abilityText: '每回合第一次受到伤害时，少受 1 点伤害。',
+      deck: ['revolver', 'revolver', 'knife', 'knife', 'medkit', 'ally', 'firstAid', 'firstAid', 'calm', 'smash', 'vicious', 'insight', 'dash', 'windfall', 'notes', 'notes', 'lucky', 'book']
+    },
+    {
+      id: 'survivor', name: '诺拉·克莱', role: '流浪者', color: '#7a9e5a',
+      stats: { will: 4, int: 2, combat: 3, agi: 4 }, health: 8, sanity: 7, ability: 'survivor',
+      abilityText: '每次实际受到伤害后，获得 1 点资源。',
+      deck: ['flashlight', 'flashlight', 'knife', 'knife', 'rosary', 'ally', 'medkit', 'firstAid', 'calm', 'calm', 'insight', 'insight', 'dash', 'dash', 'windfall', 'notes', 'notes', 'lucky']
     }
   ];
 
@@ -249,16 +267,49 @@ window.ArkhamEngine = (function () {
     return e;
   }
 
+  function removeSoakAsset(state, inv, sa) {
+    const i = inv.soakAssets.indexOf(sa);
+    if (i >= 0) inv.soakAssets.splice(i, 1);
+    const a = inv.assets.indexOf(sa.id);
+    if (a >= 0) inv.assets.splice(a, 1);
+    inv.discard.push(sa.id);
+    log(state, sa.name + ' 已耗尽，离场');
+  }
+
+  function soakWithAssets(state, inv, type, amount) {
+    let left = amount;
+    for (let i = 0; i < inv.soakAssets.length && left > 0;) {
+      const sa = inv.soakAssets[i];
+      const pool = type === 'health' ? sa.health : sa.sanity;
+      if (pool <= 0) { i++; continue; }
+      const use = Math.min(left, pool);
+      if (type === 'health') sa.health -= use;
+      else sa.sanity -= use;
+      left -= use;
+      if (use) log(state, sa.name + ' 替你承受了 ' + use + ' 点' + (type === 'health' ? '伤害' : '恐惧'));
+      const spent = (sa.healthMax > 0 && sa.health <= 0) || (sa.sanityMax > 0 && sa.sanity <= 0);
+      if (spent) removeSoakAsset(state, inv, sa);
+      else i++;
+    }
+    return left;
+  }
+
   function takeDamage(state, inv, n) {
     if (!n) return;
     let left = n;
-    if (inv.soakHealth > 0) {
-      const use = Math.min(left, inv.soakHealth);
-      inv.soakHealth -= use;
-      left -= use;
-      if (use) log(state, '随从替你承受了 ' + use + ' 点伤害');
+    if (inv.ability === 'guardian' && !state.flags.guardianUsed && left > 0) {
+      left -= 1;
+      state.flags.guardianUsed = true;
+      log(state, '退伍保安的本能：本次少受 1 点伤害');
     }
-    if (left > 0) inv.damage += left;
+    left = soakWithAssets(state, inv, 'health', left);
+    if (left > 0) {
+      inv.damage += left;
+      if (inv.ability === 'survivor') {
+        inv.resources += 1;
+        log(state, '流浪者的韧性：受到伤害后获得 1 点资源');
+      }
+    }
     if (inv.damage >= inv.maxHealth) {
       inv.defeated = true;
       endGame(state, 'lose', '你倒下了。' + (state.loseText || ''));
@@ -268,18 +319,13 @@ window.ArkhamEngine = (function () {
   function takeHorror(state, inv, n) {
     if (!n) return;
     let left = n;
-    if (inv.soakSanity > 0) {
-      const use = Math.min(left, inv.soakSanity);
-      inv.soakSanity -= use;
-      left -= use;
-      if (use) log(state, '随从替你承受了 ' + use + ' 点恐惧');
-    }
+    left = soakWithAssets(state, inv, 'sanity', left);
     if (left > 0) inv.horror += left;
     if (inv.horror >= inv.maxSanity) {
       inv.defeated = true;
       endGame(state, 'lose', '你的精神崩溃了。' + (state.loseText || ''));
     }
-    if (left > 0 && inv.ability === 'agnes') {
+    if (left > 0 && inv.ability === 'agnes' && state.phase !== 'ended') {
       const target = enemiesAt(state, inv.location)[0];
       if (target) { target.health -= 1; log(state, '灵媒的感应让 ' + target.name + ' 受到 1 点伤害'); if (target.health <= 0) killEnemy(state, target); }
     }
@@ -287,6 +333,7 @@ window.ArkhamEngine = (function () {
 
   function killEnemy(state, enemy) {
     enemy.health = 0;
+    enemy.engaged = false;
     log(state, enemy.name + ' 被击败');
     const inv = state.inv;
     if (inv.ability === 'roland' && state.locations[inv.location] && state.locations[inv.location].clues > 0) {
@@ -340,22 +387,28 @@ window.ArkhamEngine = (function () {
   function test(state, statKey, difficulty, rng, opts) {
     const inv = state.inv;
     const base = totalStat(state, inv, statKey);
+    let bonus = 0;
+    if (state.flags.lucky) {
+      bonus = 2;
+      state.flags.lucky = false;
+      log(state, '侥幸：本次检定 +2');
+    }
     let token = pickToken(state, rng);
     let mod = tokenMod(token);
     if (token === 'skull') mod = -Math.max(1, (state.enemies || []).filter((e) => e.boss).length + 2);
-    let total = base + mod;
+    let total = base + mod + bonus;
     let success = token !== 'auto' && total >= difficulty;
     if (!success && token !== 'auto' && inv.ability === 'wendy' && !state.flags.wendyLuck) {
       state.flags.wendyLuck = true;
       token = pickToken(state, rng);
       mod = token === 'skull' ? -Math.max(1, (state.enemies || []).filter((e) => e.boss).length + 2) : tokenMod(token);
-      total = base + mod;
+      total = base + mod + bonus;
       success = token !== 'auto' && total >= difficulty;
       log(state, '温蒂的运气：重抽混沌标记');
     }
     state.lastTest = {
       stat: statKey, base: base, token: token, tokenText: tokenText(token),
-      mod: mod, total: total, difficulty: difficulty, success: success
+      mod: mod, bonus: bonus, total: total, difficulty: difficulty, success: success
     };
     return success;
   }
@@ -459,13 +512,31 @@ window.ArkhamEngine = (function () {
     const inv = state.inv;
     (state.enemies || []).forEach((e) => {
       if (e.health <= 0) return;
-      if (e.location !== inv.location) return;
-      if (e.exhausted) { e.exhausted = false; return; }
-      log(state, e.name + ' 发起攻击');
+      if (e.exhausted) {
+        e.exhausted = false;
+        e.engaged = e.location === inv.location;
+        return;
+      }
+      if (e.location !== inv.location) { e.engaged = false; return; }
+      e.engaged = true;
+      log(state, e.name + ' 与你交战');
       takeDamage(state, inv, e.damage);
       if (state.phase === 'ended') return;
       takeHorror(state, inv, e.horror);
     });
+  }
+
+  function attackOfOpportunity(state) {
+    const inv = state.inv;
+    const engaged = enemiesAt(state, inv.location).filter((e) => e.engaged && !e.exhausted);
+    for (const e of engaged) {
+      log(state, e.name + ' 趁机攻击你');
+      takeDamage(state, inv, e.damage);
+      if (state.phase === 'ended') return true;
+      takeHorror(state, inv, e.horror);
+      if (state.phase === 'ended') return true;
+    }
+    return false;
   }
 
   function upkeep(state, rng) {
@@ -477,6 +548,8 @@ window.ArkhamEngine = (function () {
     inv.actions = 3;
     state.flags.wendyLuck = false;
     state.flags.scholarUsed = false;
+    state.flags.guardianUsed = false;
+    state.mulliganAvailable = false;
     tickRitual(state);
     state.round += 1;
     state.phase = 'investigation';
@@ -511,8 +584,13 @@ window.ArkhamEngine = (function () {
     inv.hand.splice(index, 1);
     if (c.type === 'asset') {
       inv.assets.push(id);
-      if (c.healthSoak) inv.soakHealth += c.healthSoak;
-      if (c.sanitySoak) inv.soakSanity += c.sanitySoak;
+      if (c.healthSoak || c.sanitySoak) {
+        inv.soakAssets.push({
+          id: id, name: c.name,
+          health: c.healthSoak || 0, healthMax: c.healthSoak || 0,
+          sanity: c.sanitySoak || 0, sanityMax: c.sanitySoak || 0
+        });
+      }
       log(state, '打出资产：' + c.name);
       return { ok: true };
     }
@@ -524,9 +602,21 @@ window.ArkhamEngine = (function () {
       const loc = locationOf(state, inv);
       if (loc.clues > 0) { loc.clues -= 1; inv.clues += 1; log(state, '洞察：发现 1 个线索'); }
     }
-    if (c.effect === 'smash') {
+    if (c.effect === 'lucky') {
+      state.flags.lucky = true;
+      log(state, '侥幸：下一次检定 +2');
+    }
+    if (c.effect === 'smash' || c.effect === 'smash3') {
       const e = enemiesAt(state, inv.location)[0];
-      if (e) { e.health -= 2; log(state, '猛击：' + e.name + ' 受到 2 点伤害'); if (e.health <= 0) killEnemy(state, e); }
+      const dmg = c.effect === 'smash3' ? 3 : 2;
+      if (e) {
+        e.engaged = true;
+        e.health -= dmg;
+        log(state, (c.effect === 'smash3' ? '狠击' : '猛击') + '：' + e.name + ' 受到 ' + dmg + ' 点伤害');
+        if (e.health <= 0) killEnemy(state, e);
+      } else {
+        log(state, '当前地点没有敌人，攻击落空');
+      }
     }
     if (c.effect === 'evade') {
       const e = enemiesAt(state, inv.location)[0];
@@ -568,15 +658,20 @@ window.ArkhamEngine = (function () {
     const up = (opts && opts.upgrades) || {};
     const stats = clone(invDef.stats);
     ['will', 'int', 'combat', 'agi'].forEach((k) => { stats[k] += Number(up[k]) || 0; });
+    const trauma = Math.max(0, Number(opts && opts.trauma) || 0);
+    const physicalTrauma = Math.ceil(trauma / 2);
+    const mentalTrauma = Math.floor(trauma / 2);
     const inv = {
       id: invDef.id, name: invDef.name, role: invDef.role, color: invDef.color,
-      stats: stats, maxHealth: invDef.health + (Number(up.health) || 0), maxSanity: invDef.sanity + (Number(up.sanity) || 0),
-      damage: 0, horror: 0, resources: 5 + (Number(up.resources) || 0), clues: 0, location: sc.start, soakHealth: 0, soakSanity: 0,
+      stats: stats, maxHealth: Math.max(1, invDef.health + (Number(up.health) || 0) - physicalTrauma),
+      maxSanity: Math.max(1, invDef.sanity + (Number(up.sanity) || 0) - mentalTrauma),
+      damage: 0, horror: 0, resources: 5 + (Number(up.resources) || 0), clues: 0, location: sc.start,
+      soakHealth: 0, soakSanity: 0, soakAssets: [],
       deck: deck, hand: [], discard: [], assets: [], actions: 3, defeated: false,
       ability: invDef.ability, abilityText: invDef.abilityText
     };
     const state = {
-      phase: 'investigation', round: 1, inv: inv,
+      phase: 'investigation', round: 1, inv: inv, trauma: trauma,
       locations: locs, enemies: [], nextEnemyId: 0,
       chaos: CHAOS.slice(), encounter: { deck: shuffle(sc.encounters.slice(), rng), discard: [] },
       scenario: sc.id, scenarioName: sc.name, chapterLabel: sc.chapter, subtitle: sc.subtitle,
@@ -587,7 +682,8 @@ window.ArkhamEngine = (function () {
       agenda: { stage: 1, doom: 0, max: sc.agenda[0].doom, stages: clone(sc.agenda), label: sc.agenda[0].label },
       logs: [sc.intro],
       lastTest: null, encounterCurrent: null,
-      flags: { wendyLuck: false },
+      flags: { wendyLuck: false, scholarUsed: false, guardianUsed: false, lucky: false },
+      mulliganAvailable: true,
       resolution: null, cultistsFound: 0,
       sigilsLeft: sc.act[0].sigils || 0,
       ritual: sc.ritual ? { left: sc.ritual.rounds, max: sc.ritual.rounds, done: false } : null,
@@ -611,6 +707,17 @@ window.ArkhamEngine = (function () {
     }
     if (state.phase === 'ended') return { ok: false, msg: '这一章已经结束了' };
     const inv = state.inv;
+    if (action.type === 'mulligan') {
+      if (!state.mulliganAvailable || state.round !== 1 || state.phase !== 'investigation' || inv.actions !== 3) {
+        return { ok: false, msg: '只能在开局第一次行动前重抽起手' };
+      }
+      inv.deck = shuffle(inv.deck.concat(inv.hand), rng);
+      inv.hand = [];
+      drawCards(state, inv, 5);
+      state.mulliganAvailable = false;
+      log(state, '重抽起手：换了一组开场手牌');
+      return { ok: true, state: state };
+    }
     if (action.type === 'advanceAct') {
       if (state.act.stage !== 1) return { ok: false, msg: '密谋已经推进过了' };
       if (!state.act.clues) return { ok: false, msg: '这一章靠行动推进密谋' };
@@ -683,10 +790,16 @@ window.ArkhamEngine = (function () {
       const cur = locationOf(state, inv);
       if (cur.links.indexOf(action.to) < 0) return { ok: false, msg: '这里走不过去' };
       if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
+      if (attackOfOpportunity(state)) return { ok: true, state: state };
       inv.location = action.to;
       state.locations[action.to].revealed = true;
-      (state.enemies || []).forEach((e) => { if (e.location !== inv.location) e.engaged = false; });
+      (state.enemies || []).forEach((e) => {
+        if (e.location !== inv.location) e.engaged = false;
+        else if (!e.exhausted) e.engaged = true;
+      });
       log(state, '移动到' + state.locations[action.to].name);
+      const engaged = enemiesAt(state, inv.location).filter((e) => e.engaged);
+      if (engaged.length) log(state, '进入' + state.locations[action.to].name + '：' + engaged.map((e) => e.name).join('、') + ' 与你交战');
       return { ok: true, state: state };
     }
 
@@ -710,6 +823,7 @@ window.ArkhamEngine = (function () {
       const e = (state.enemies || []).find((x) => x.id === action.enemy && x.health > 0);
       if (!e || e.location !== inv.location) return { ok: false, msg: '这里没有这个敌人' };
       if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
+      e.engaged = true;
       if (test(state, 'combat', e.fight, rng)) {
         let dmg = 1;
         (inv.assets || []).forEach((a) => { if (CARDS[a].damage) dmg += CARDS[a].damage; });
@@ -731,6 +845,7 @@ window.ArkhamEngine = (function () {
         e.engaged = false;
         log(state, '闪避成功：甩开了 ' + e.name);
       } else {
+        e.engaged = true;
         log(state, '闪避失败：' + e.name + ' 缠住了你');
       }
       return { ok: true, state: state };
@@ -769,6 +884,6 @@ window.ArkhamEngine = (function () {
     INVESTIGATORS: INVESTIGATORS, CARDS: CARDS, LOCATIONS: LOCATIONS,
     ENEMIES: ENEMIES, ENCOUNTERS: ENCOUNTERS, SCENARIOS: SCENARIOS,
     createInitial: createInitial, act: act,
-    helpers: { totalStat: totalStat, tokenText: tokenText, locationOf: locationOf, enemiesAt: enemiesAt }
+    helpers: { totalStat: totalStat, tokenText: tokenText, locationOf: locationOf, enemiesAt: enemiesAt, takeDamage: takeDamage, takeHorror: takeHorror }
   };
 })();

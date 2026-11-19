@@ -234,5 +234,98 @@ for (let t = 0; t < 6; t++) {
   ok('生命值没有被负数污染', s.inv.damage >= 0 && s.inv.horror >= 0, s.inv.damage + '/' + s.inv.horror);
 }
 
+console.log('— 新调查员与新卡');
+eq('调查员共 6 名', E.INVESTIGATORS.length, 6);
+ok('连发左轮已加入卡池', !!E.CARDS.revolver);
+ok('旧词典已加入卡池', !!E.CARDS.book);
+ok('医疗包已加入卡池', !!E.CARDS.medkit);
+ok('旧念珠已加入卡池', !!E.CARDS.rosary);
+ok('狠击已加入卡池', !!E.CARDS.vicious);
+ok('侥幸已加入卡池', !!E.CARDS.lucky);
+
+let gear = E.createInitial([], rngHigh, { investigator: 'guardian' });
+gear.inv.hand = ['revolver'];
+gear.inv.resources = 6;
+gear.inv.actions = 3;
+gear = E.act(gear, { type: 'play', index: 0 }, gear.inv.id, rngHigh).state;
+eq('左轮提供 +2 战力', E.helpers.totalStat(gear, gear.inv, 'combat'), 6);
+ok('左轮提供伤害加值', E.CARDS.revolver.damage === 1);
+
+let smashState = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight' });
+smashState.inv.location = 'university';
+const smashTarget = smashState.enemies.find((e) => e.location === 'university');
+smashTarget.health = 6; smashTarget.maxHealth = 6;
+smashState.inv.actions = 3; smashState.inv.resources = 5; smashState.inv.hand = ['vicious'];
+smashState = E.act(smashState, { type: 'play', index: 0 }, smashState.inv.id, rngHigh).state;
+eq('狠击造成 3 点伤害', smashTarget.health, 3);
+
+let luckyState = E.createInitial([], rngHigh, { investigator: 'scholar' });
+luckyState.locations.study.shroud = 4;
+luckyState.flags.lucky = true;
+luckyState.inv.actions = 3;
+luckyState = E.act(luckyState, { type: 'investigate' }, luckyState.inv.id, rngMid).state;
+ok('侥幸提供 +2 并转为成功', luckyState.lastTest.success && luckyState.lastTest.bonus === 2, JSON.stringify(luckyState.lastTest));
+
+let mull = E.createInitial([], rngHigh, { investigator: 'detective' });
+mull = E.act(mull, { type: 'mulligan' }, mull.inv.id, rngHigh).state;
+eq('重抽后仍是 5 张手牌', mull.inv.hand.length, 5);
+eq('重抽保留 3 行动', mull.inv.actions, 3);
+eq('重抽只能用一次', mull.mulliganAvailable, false);
+const mull2 = E.act(mull, { type: 'mulligan' }, mull.inv.id, rngHigh);
+eq('第二次重抽被拒', mull2.ok, false);
+
+console.log('— 资产承伤与被动');
+let soak = E.createInitial([], rngHigh, { investigator: 'scholar' });
+soak.inv.hand = ['medkit']; soak.inv.resources = 5; soak.inv.actions = 3;
+soak = E.act(soak, { type: 'play', index: 0 }, soak.inv.id, rngHigh).state;
+E.helpers.takeDamage(soak, soak.inv, 2);
+eq('医疗包承受 2 点伤害', soak.inv.damage, 0);
+ok('医疗包耗尽后离场', soak.inv.assets.indexOf('medkit') < 0, soak.inv.assets.join(','));
+
+let allyState = E.createInitial([], rngHigh, { investigator: 'detective' });
+allyState.inv.hand = ['ally']; allyState.inv.resources = 5; allyState.inv.actions = 3;
+allyState = E.act(allyState, { type: 'play', index: 0 }, allyState.inv.id, rngHigh).state;
+E.helpers.takeDamage(allyState, allyState.inv, 1);
+eq('老友替英雄承受 1 点伤害', allyState.inv.damage, 0);
+ok('老友受伤后离场', allyState.inv.assets.indexOf('ally') < 0, allyState.inv.assets.join(','));
+
+let guardState = E.createInitial([], rngHigh, { investigator: 'guardian' });
+E.helpers.takeDamage(guardState, guardState.inv, 2);
+eq('退伍保安每回合首次少受 1 点', guardState.inv.damage, 1);
+E.helpers.takeDamage(guardState, guardState.inv, 2);
+eq('同回合第二次不再减伤', guardState.inv.damage, 3);
+
+let surv = E.createInitial([], rngHigh, { investigator: 'survivor' });
+const resBefore = surv.inv.resources;
+E.helpers.takeDamage(surv, surv.inv, 1);
+eq('流浪者受伤获得 1 资源', surv.inv.resources, resBefore + 1);
+
+let traumaState = E.createInitial([], rngHigh, { investigator: 'detective', trauma: 2 });
+eq('2 点创伤降低生命上限', traumaState.inv.maxHealth, 8);
+eq('2 点创伤降低理智上限', traumaState.inv.maxSanity, 4);
+
+console.log('— 交战与借机攻击');
+let eng = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight' });
+eng.inv.location = 'university';
+const engTarget = eng.enemies.find((e) => e.location === 'university');
+engTarget.engaged = true;
+eng.inv.actions = 3;
+const engDamage = eng.inv.damage;
+eng = E.act(eng, { type: 'move', to: 'downtown' }, eng.inv.id, rngHigh).state;
+eq('离开交战时受到借机攻击', eng.inv.damage, engDamage + engTarget.damage);
+eq('借机攻击后仍可移动', eng.inv.location, 'downtown');
+
+let tired = E.createInitial([], rngHigh, { investigator: 'detective', scenario: 'midnight' });
+tired.inv.location = 'university';
+const tiredTarget = tired.enemies.find((e) => e.location === 'university');
+tiredTarget.exhausted = true; tiredTarget.engaged = false;
+tired.inv.actions = 0;
+tired.encounter.deck = [{ key: 'ritual', name: '黑暗仪式', text: '议程 +1 doom。' }];
+const tiredDamage = tired.inv.damage;
+tired = E.act(tired, { type: 'endTurn' }, tired.inv.id, rngHigh).state;
+eq('疲惫敌人本回合不攻击', tired.inv.damage, tiredDamage);
+eq('敌影阶段结束后恢复', tiredTarget.exhausted, false);
+eq('恢复后重新交战', tiredTarget.engaged, true);
+
 console.log('\n通过 ' + pass + '，失败 ' + fail);
 if (fail) process.exit(1);
