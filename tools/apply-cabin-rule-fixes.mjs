@@ -67,7 +67,7 @@ s37.actions = (s37.actions || []).filter((a) => a.key !== 'disable_robot' && a.k
 const s13 = byNo(13);
 s13.actions = (s13.actions || []).filter((a) => a.key !== 'advance_ritual').concat([{
   key: 'advance_ritual', name: '推进仪式', trait: 'sanity', where: 'room', room: '仪式房', once: 'turn', side: 'traitor',
-  tiers: [{ at: 4, do: { numberTrack: -1 } }, { at: 0, do: { damage: { type: 'sanity', amount: 1 } } }]
+  tiers: [{ at: 4, do: { numberTrack: -1 } }, { at: 0, do: { damage: { type: 'mental', amount: 1 } } }]
 }]);
 
 // #50：叛徒逐层吞噬房间，三层都吞噬后达成“吞噬整栋房子”

@@ -14,6 +14,7 @@ global.window = global;
 eval(packsSrc);
 eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
 const E = window.CabinEngine;
+const TRAITS = ['might', 'speed', 'known', 'sanity'];
 function scenario(no) { return E.SCENARIOS.find((x) => x.no === no); }
 function start(no, n) {
   const ids = Array.from({ length: n }, (_, i) => ({ id: 'a' + i, name: 'A' + i }));
@@ -85,6 +86,42 @@ console.log('=== #6/#7/#17/#18 Setup 状态 ===');
   const st18 = start(18, 3);
   ok('#18 叛徒离场且真身记录', st18.players[st18.haunt.traitor].outside === true && st18.haunt.trueBody === st18.haunt.traitor, st18.haunt.trueBody);
 }
+
+console.log('=== 伤害系统：类型与通用溢出 ===');
+{
+  const stG = start(2, 3);
+  const p = stG.players[0];
+  TRAITS.forEach((t) => { p.track[t].pos = 2; });
+  const before = {};
+  TRAITS.forEach((t) => { before[t] = p.track[t].pos; });
+  const result = E.helpers.applyDamageSplit(stG, 0, 6, 'general', null, 0, { might: 6 });
+  const lost = TRAITS.reduce((n, t) => n + (before[t] - p.track[t].pos), 0);
+  ok('通用伤害溢出后总扣除严格等于 6', lost === 6, lost);
+  ok('通用伤害不会重复计算到其他属性', result.total === 6, JSON.stringify(result));
+
+  const st13 = start(13, 3);
+  const tr = st13.players[st13.haunt.traitor];
+  const ritual = E.helpers.roomByName(st13, '仪式房');
+  tr.floor = ritual.floor; tr.x = ritual.x; tr.y = ritual.y;
+  st13.turn = st13.players.indexOf(tr);
+  E.act(st13, { type: 'hauntAction', key: 'advance_ritual' }, tr.id, () => 0);
+  ok('#13 低档伤害类型为精神伤害', st13.pendingDamage && st13.pendingDamage.kind === 'mental', JSON.stringify(st13.pendingDamage));
+  const sanityBefore = tr.track.sanity.pos;
+  E.act(st13, { type: 'allocateDamage', first: 'sanity', second: 0 }, tr.id, () => 0.99);
+  ok('#13 1 点精神伤害落在神智轨道', tr.track.sanity.pos === sanityBefore - 1, tr.track.sanity.pos);
+}
+
+const DAMAGE_TYPES = ['physical', 'mental', 'general'];
+const badDamage = [];
+for (const sc of E.SCENARIOS) {
+  for (const a of sc.actions || []) {
+    for (const tier of a.tiers || []) {
+      const t = tier.do && tier.do.damage && tier.do.damage.type;
+      if (t && DAMAGE_TYPES.indexOf(t) < 0) badDamage.push(sc.no + ':' + a.key + ':' + t);
+    }
+  }
+}
+ok('剧本行动伤害类型只用 physical/mental/general', badDamage.length === 0, badDamage.join(','));
 
 console.log('---');
 console.log((failed ? 'FAILED ' : 'PASS ') + passed + (failed ? ', FAILED ' + failed : ''));

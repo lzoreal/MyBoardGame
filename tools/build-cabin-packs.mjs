@@ -16,6 +16,7 @@ const TRAITOR_RULES = ['revealer', 'lowestSanity', 'highestMight', 'highestSpeed
   'hiddenTraitor', 'noTraitor', 'freeForAll', 'leftOfRevealer', 'oldest', 'mostOmens', 'seeEvent', 'magicCamera'];
 const GOAL_TYPES = ['killTraitor', 'killAll', 'survive', 'ritual', 'escape', 'hunt', 'tokens', 'rig', 'evidence', 'treasure', 'placeTokens', 'allOf', 'anyOf', 'possessItem', 'destroyItem', 'trackZero', 'convertAll', 'custom'];
 const FACTION_TYPES = ['traitor_vs_heroes', 'hidden_traitor', 'cooperative', 'free_for_all'];
+const DAMAGE_TYPES = ['physical', 'mental', 'general'];
 
 function fail(file, message) {
   throw new Error((file ? file + ': ' : '') + message);
@@ -141,6 +142,18 @@ function validateGoal(goal, label, file) {
   return goal;
 }
 
+function validateDamage(damage, label, file) {
+  if (!damage || typeof damage !== 'object') fail(file, label + ' 必须是对象');
+  if (DAMAGE_TYPES.indexOf(damage.type) < 0) fail(file, label + '.type 不支持：' + damage.type + '（只允许 ' + DAMAGE_TYPES.join('/') + '）');
+  if (damage.amount !== undefined) integer(damage.amount, label + '.amount', file, 0, 99);
+  if (damage.dice !== undefined) integer(damage.dice, label + '.dice', file, 1, 12);
+}
+
+function validateActionEffect(effect, label, file) {
+  if (!effect || typeof effect !== 'object') return;
+  if (effect.damage) validateDamage(effect.damage, label + '.damage', file);
+}
+
 function validateActions(list, label, file) {
   if (!Array.isArray(list)) fail(file, label + ' 必须是数组');
   return list.map((a, i) => {
@@ -156,8 +169,10 @@ function validateActions(list, label, file) {
     if (Array.isArray(a.tiers)) {
       a.tiers.forEach((t, k) => {
         if (t.at === undefined) fail(file, label + '[' + i + '].tiers[' + k + '].at 必填');
+        validateActionEffect(t.do, label + '[' + i + '].tiers[' + k + '].do', file);
       });
     }
+    validateActionEffect(a.miss, label + '[' + i + '].miss', file);
     return {
       key, name, trait, where, room: a.room, symbol: a.symbol,
       floors: Array.isArray(a.floors) ? a.floors : undefined,

@@ -368,7 +368,7 @@ window.CabinEngine = (function () {
     if (!amount) return false;
     const p = st.players[i];
     if (!p || p.dead) return false;
-    kind = kind || 'physical';
+    kind = normalizeDamageType(kind);
     if (kind !== 'general' && itemSum(st, i, 'damageConvert')) {
       pushLog(st, p.name + ' 的胸针把' + (kind === 'mental' ? '精神' : '物理') + '伤害转成通用伤害');
       kind = 'general';
@@ -412,6 +412,12 @@ window.CabinEngine = (function () {
     mental: ['known', 'sanity'],
     general: ['might', 'speed', 'known', 'sanity']
   };
+  const DAMAGE_ALIASES = { sanity: 'mental', knowledge: 'mental', known: 'mental', might: 'physical', speed: 'physical' };
+  function normalizeDamageType(type) {
+    const raw = String(type || 'physical').toLowerCase();
+    const kind = DAMAGE_ALIASES[raw] || raw;
+    return DAMAGE_GROUPS[kind] ? kind : 'physical';
+  }
 
   function dropCapacity(p, trait, hauntOn) {
     const tr = p.track && p.track[trait];
@@ -422,52 +428,63 @@ window.CabinEngine = (function () {
   function applyDamageSplit(st, i, amount, kind, first, second, parts) {
     const p = st.players[i];
     const hauntOn = !!(st.haunt && st.haunt.active);
-    const allowed = DAMAGE_GROUPS[kind] || DAMAGE_GROUPS.physical;
-    const alloc = {};
+    const kindName = normalizeDamageType(kind);
+    const allowed = DAMAGE_GROUPS[kindName];
+    const caps = {};
+    allowed.forEach((t) => { caps[t] = dropCapacity(p, t, hauntOn); });
+
+    const want = {};
     if (parts && typeof parts === 'object') {
-      allowed.forEach((t) => { if (Number(parts[t]) > 0) alloc[t] = Math.floor(Number(parts[t])); });
+      allowed.forEach((t) => { if (Number(parts[t]) > 0) want[t] = Math.floor(Number(parts[t])); });
     } else {
       const a = allowed.indexOf(first) >= 0 ? first : allowed[0];
       const rest = Math.max(0, Math.min(amount, Number(second) || 0));
-      alloc[a] = Math.max(0, amount - rest);
+      want[a] = Math.max(0, amount - rest);
       if (rest) {
         const b = allowed.find((t) => t !== a) || a;
-        alloc[b] = (alloc[b] || 0) + rest;
+        want[b] = (want[b] || 0) + rest;
       }
     }
-    let sum = TRAITS.reduce((n, t) => n + (alloc[t.key] || 0), 0);
-    if (sum !== amount) {
-      let gap = amount - sum;
-      for (const t of allowed) {
-        if (gap <= 0) break;
-        const cap = dropCapacity(p, t, hauntOn);
-        const cur = alloc[t] || 0;
-        const take = Math.min(gap, Math.max(0, cap - cur));
-        if (take > 0) { alloc[t] = cur + take; gap -= take; }
-      }
-    }
+
+    // 先按玩家选择分配，单项不能超过该属性剩余容量。
+    const alloc = {};
+    let remaining = Math.max(0, Number(amount) || 0);
     for (const t of allowed) {
-      let amt = alloc[t] || 0;
-      if (!amt) continue;
-      const cap = dropCapacity(p, t, hauntOn);
-      if (amt > cap) {
-        const overflow = amt - cap;
-        amt = cap;
-        for (const other of allowed) {
-          if (overflow <= 0) break;
-          if (other === t) continue;
-          const ocap = dropCapacity(p, other, hauntOn) - (alloc[other] || 0);
-          if (ocap <= 0) continue;
-          const move = Math.min(overflow, ocap);
-          alloc[other] = (alloc[other] || 0) + move;
-          amt += 0;
-        }
+      const take = Math.min(want[t] || 0, caps[t] || 0, remaining);
+      alloc[t] = take;
+      remaining -= take;
+    }
+    // 通用伤害允许被选择的属性容量不足时，剩余伤害分摊到其他属性。
+    // 身体/精神伤害按官方规则只落在各自两项属性上，不跨组转移。
+    if (remaining > 0 && kindName === 'general') {
+      for (const t of allowed) {
+        const take = Math.min(remaining, Math.max(0, (caps[t] || 0) - (alloc[t] || 0)));
+        if (take > 0) { alloc[t] = (alloc[t] || 0) + take; remaining -= take; }
       }
+    }
+    // 任何情况下总扣除都不能超过原始伤害。
+    let total = allowed.reduce((n, t) => n + (alloc[t] || 0), 0);
+    if (total > amount) {
+      let excess = total - amount;
+      for (const t of allowed.slice().reverse()) {
+        const cut = Math.min(excess, alloc[t] || 0);
+        alloc[t] = (alloc[t] || 0) - cut;
+        excess -= cut;
+        if (!excess) break;
+      }
+      total = amount;
+    }
+
+    for (const t of allowed) {
+      const amt = alloc[t] || 0;
       if (amt) loseTraitDirect(st, i, t, amt, '伤害分配');
     }
-    if (kind === 'physical' && amount > 0 && itemSum(st, i, 'physicalToSanity')) {
-      gainTrait(st, i, 'sanity', 1, '古怪护符');
+    if (remaining > 0 && kindName === 'general' && hauntOn) {
+      p.dead = true;
+      p.corpse = true;
+      pushLog(st, p.name + ' 的四项属性都已到骷髅，剩余 ' + remaining + ' 点伤害无法分配，角色死亡');
     }
+    return { kind: kindName, total: total, remaining: remaining };
   }
 
   /* ---------------- 开局 ---------------- */
@@ -698,12 +715,13 @@ window.CabinEngine = (function () {
   }
 
   function rollDamage(st, i, type, dice, source, rand) {
+    const kind = normalizeDamageType(type);
     const r = roll(Math.max(1, dice), rand);
     const dr = { label: '伤害骰 · ' + (source || '卡牌'), faces: r.faces, total: r.total };
     st.lastDamageRoll = dr;
     if (!st.lastRoll) st.lastRoll = dr;
-    beginDamage(st, i, r.total, type || 'physical', source || '卡牌');
-    pushLog(st, st.players[i].name + ' 承受 ' + r.total + ' 点' + (type === 'mental' ? '精神' : '物理') + '伤害');
+    beginDamage(st, i, r.total, kind, source || '卡牌');
+    pushLog(st, st.players[i].name + ' 承受 ' + r.total + ' 点' + (kind === 'mental' ? '精神' : '物理') + '伤害');
     return r;
   }
 
@@ -1653,7 +1671,7 @@ window.CabinEngine = (function () {
       pushLog(st, p.name + ' 恢复了 ' + ops.heal + ' 点属性');
     }
     if (ops.damage) {
-      const kind = ops.damage.type === 'mental' ? 'mental' : 'physical';
+      const kind = normalizeDamageType(ops.damage.type);
       if (ops.damage.dice) rollDamage(st, i, kind, ops.damage.dice, '剧本', rand);
       else beginDamage(st, i, ops.damage.amount || 1, kind, '剧本');
     }
@@ -2501,7 +2519,7 @@ window.CabinEngine = (function () {
       const dmg = h.monster.endTurn.damage;
       pushLog(st, '（' + (h.monster.name || '怪物') + '）回合结束：英雄各受 ' + (dmg.amount || 1) + ' 点伤害');
       st.players.forEach((p, k) => {
-        if (p.side === 'hero' && !p.dead) beginDamage(st, k, dmg.amount || 1, dmg.type === 'mental' ? 'mental' : 'physical', h.monster.name || '怪物');
+        if (p.side === 'hero' && !p.dead) beginDamage(st, k, dmg.amount || 1, normalizeDamageType(dmg.type), h.monster.name || '怪物');
       });
       checkWin(st);
       if (st.pendingDamage || (st.damageQueue && st.damageQueue.length)) {

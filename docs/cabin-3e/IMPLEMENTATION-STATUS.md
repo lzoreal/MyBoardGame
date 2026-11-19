@@ -7,7 +7,7 @@
 
 第三版迁移已经从“只把规则写进 JSON”推进到“规则有运行入口、内容有硬合同、关键路径有自动化测试”。
 
-- 10 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，924 条断言）+ `cabin-rule-fixes.test.js`（49 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，373 条断言）+ `cabin-scenario-acceptance.test.js`（独立官方规则验收，33 条断言）
+- 10 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，924 条断言）+ `cabin-rule-fixes.test.js`（49 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，373 条断言）+ `cabin-scenario-acceptance.test.js`（独立官方规则验收，38 条断言）
 - 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号，room `X2Z2F`）
 - 线上权限复测：身份接管被拒、错误令牌读 secret 被拒、大厅成员不能直写 playing、playing 中非当前行动者被拒
 - 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**，Setup 仍为 manual **0**，剧本缺怪物定义 **0**
@@ -56,6 +56,9 @@
 - 伤害、治疗、属性转移、身体交换、死亡、复活全部走轨道
 - 闹鬼后轨道到骷髅触发死亡、掉落物品
 - 身体交换同时交换人物板、角色名、年龄、生日和 `charTaken`
+- 通用伤害溢出现在按剩余伤害分摊，总扣除严格等于原始伤害，不再把同一份溢出重复加到多项属性
+- 伤害类型统一为 `physical / mental / general`；`sanity` 作为精神伤害别名在引擎内归一到 `mental`，构建器只接受三种规范类型
+- #13 `advance_ritual` 的 0 档伤害已改为 `mental`，并有独立伤害结算验收
 
 ### 3. 剧本与事件
 

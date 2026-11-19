@@ -1898,7 +1898,7 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {
                 "damage": {
-                  "type": "sanity",
+                  "type": "mental",
                   "amount": 1
                 }
               }
