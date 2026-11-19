@@ -107,6 +107,11 @@ function validateGoal(goal, label, file) {
     if (TRAITS.indexOf(goal.trait) < 0) fail(file, label + '.trait 不支持：' + goal.trait);
     integer(goal.diff, label + '.diff', file, 1, 10);
     integer(goal.need, label + '.need', file, 1, 20);
+    if (goal.requireToken) requireString(goal.requireToken, label + '.requireToken', file, 40);
+    if (goal.requireCount !== undefined) integer(goal.requireCount, label + '.requireCount', file, 1, 30);
+    if (goal.requireCountByPlayers && typeof goal.requireCountByPlayers === 'object') {
+      [3, 4, 5, 6].forEach((n) => integer(goal.requireCountByPlayers[n], label + '.requireCountByPlayers.' + n, file, 1, 30));
+    }
   }
   if (goal.type === 'escape') {
     requireString(goal.room, label + '.room', file);
@@ -114,7 +119,13 @@ function validateGoal(goal, label, file) {
   }
   if (goal.type === 'tokens') {
     requireString(goal.token, label + '.token', file, 20);
-    if (!goal.perHero) integer(goal.need, label + '.need', file, 1, 30);
+    if (!goal.perHero) {
+      if (goal.needByPlayers && typeof goal.needByPlayers === 'object') {
+        [3, 4, 5, 6].forEach((n) => integer(goal.needByPlayers[n], label + '.needByPlayers.' + n, file, 1, 30));
+      } else {
+        integer(goal.need, label + '.need', file, 1, 30);
+      }
+    }
   }
   if (goal.type === 'rig') {
     requireString(goal.token, label + '.token', file, 20);
@@ -162,10 +173,12 @@ function validateActions(list, label, file) {
     if (!/^[A-Za-z0-9_-]+$/.test(key)) fail(file, label + '[' + i + '].key 只能包含字母、数字、下划线、连字符');
     const name = requireString(a.name, label + '[' + i + '].name', file, 40);
     const trait = a.trait === undefined ? 'known' : a.trait;
-    if (TRAITS.indexOf(trait) < 0) fail(file, label + '[' + i + '].trait 必须是属性 key');
+    if (a.rollByNumberTrack !== true && TRAITS.indexOf(trait) < 0) fail(file, label + '[' + i + '].trait 必须是属性 key');
+    if (a.rollByNumberTrack === true && trait !== 'none') fail(file, label + '[' + i + '].rollByNumberTrack 行动的 trait 必须为 none');
     const where = a.where === undefined ? 'any' : a.where;
-    if (['any', 'room', 'symbol', 'floors'].indexOf(where) < 0) fail(file, label + '[' + i + '].where 不支持：' + where);
+    if (['any', 'room', 'rooms', 'symbol', 'floors'].indexOf(where) < 0) fail(file, label + '[' + i + '].where 不支持：' + where);
     if (where === 'room') requireString(a.room, label + '[' + i + '].room', file);
+    if (where === 'rooms' && (!Array.isArray(a.rooms) || !a.rooms.length)) fail(file, label + '[' + i + '].rooms 必须是非空数组');
     if (Array.isArray(a.tiers)) {
       a.tiers.forEach((t, k) => {
         if (t.at === undefined) fail(file, label + '[' + i + '].tiers[' + k + '].at 必填');
@@ -175,11 +188,37 @@ function validateActions(list, label, file) {
     validateActionEffect(a.miss, label + '[' + i + '].miss', file);
     return {
       key, name, trait, where, room: a.room, symbol: a.symbol,
+      rooms: Array.isArray(a.rooms) ? a.rooms : undefined,
       floors: Array.isArray(a.floors) ? a.floors : undefined,
       once: a.once === 'game' ? 'game' : 'turn',
       dead: !!a.dead,
       side: a.side === 'traitor' || a.side === 'hero' ? a.side : undefined,
-      tiers: a.tiers, miss: a.miss
+      tiers: a.tiers, miss: a.miss,
+      requireToken: typeof a.requireToken === 'string' ? a.requireToken : undefined,
+      requireTokenPrefix: typeof a.requireTokenPrefix === 'string' ? a.requireTokenPrefix : undefined,
+      requireSupplyToken: typeof a.requireSupplyToken === 'string' ? a.requireSupplyToken : undefined,
+      consumeToken: typeof a.consumeToken === 'string' ? a.consumeToken : undefined,
+      consumeTokenPrefix: typeof a.consumeTokenPrefix === 'string' ? a.consumeTokenPrefix : undefined,
+      consumeSupplyToken: typeof a.consumeSupplyToken === 'string' ? a.consumeSupplyToken : undefined,
+      consumeCount: a.consumeCount === undefined ? undefined : Number(a.consumeCount),
+      requireItem: typeof a.requireItem === 'string' ? a.requireItem : undefined,
+      requireAnyItem: typeof a.requireAnyItem === 'string' ? a.requireAnyItem : undefined,
+      requireMonsterType: typeof a.requireMonsterType === 'string' ? a.requireMonsterType : undefined,
+      requireMonsterHere: a.requireMonsterHere === true,
+      requireFlag: typeof a.requireFlag === 'string' ? a.requireFlag : undefined,
+      requireTrapped: a.requireTrapped === true,
+      requireNotCarrying: a.requireNotCarrying === true,
+      requireBurnable: a.requireBurnable === true,
+      consumeItemBeforeRoll: a.consumeItemBeforeRoll === true,
+      requireExplosive: a.requireExplosive === true,
+      forbidToken: typeof a.forbidToken === 'string' ? a.forbidToken : undefined,
+      traits: Array.isArray(a.traits) ? a.traits.filter((t) => TRAITS.indexOf(t) >= 0) : undefined,
+      bonusSameRoomHero: a.bonusSameRoomHero === undefined ? undefined : integer(a.bonusSameRoomHero, 'actions[' + i + '].bonusSameRoomHero', file, 1, 6),
+      bonusPerRoomToken: typeof a.bonusPerRoomToken === 'string' ? a.bonusPerRoomToken : undefined,
+      bonusRoom: typeof a.bonusRoom === 'string' ? a.bonusRoom : undefined,
+      bonusKnowledgeToken: a.bonusKnowledgeToken === undefined ? undefined : Number(a.bonusKnowledgeToken),
+      rollByNumberTrack: a.rollByNumberTrack === true,
+      extraDice: a.extraDice === undefined ? undefined : Number(a.extraDice)
     };
   });
 }
@@ -212,7 +251,7 @@ function validateMonster(m, label, file) {
   })();
   return {
     key, name, count, speed, might, sanity, known, attack, noAttack, counts, boundRoom, rule,
-    noStun: /不可击晕|不被击晕|不会击晕|不僵直|不可僵直/.test(rule),
+    noStun: m.noStun === true || /不可击晕|不被击晕|不会击晕|不僵直|不可僵直/.test(rule),
     oneHit: /受到任何伤害.*消灭|受到.*伤害.*消灭|被消灭而不是击晕|受伤.*即.*消灭/.test(rule),
     ignoreDoors: /无视门|穿门|不受门/.test(rule),
     damageReduce: /伤害减免|减伤|所有伤害 -1|减少.*伤害/.test(rule),
@@ -265,7 +304,7 @@ function validateScenario(s, file, seen) {
   if (s.setup.mode === 'scripted') {
     if (!Array.isArray(s.setup.ops)) fail(file, 'scripted setup 缺少 setup.ops');
     const OPS = ['numberTrack', 'assignNumbers', 'assignDisease', 'placeMonster', 'placeMonsterPerHero',
-      'placeToken', 'placeTokenPerHero', 'placeEvidence', 'placeSpecialRoom',
+      'placeToken', 'placeTokenRooms', 'placeTokenPerHero', 'setAsideToken', 'placeEvidence', 'placeSpecialRoom',
       'mirrorRealm', 'assignDieNote', 'ringIllusion', 'ensureSymbolTiles', 'ensureTiles',
       'movePlayers', 'flipRoom', 'grantItem', 'grantTrait', 'healTraitor', 'transferOmens',
       'clearItems', 'leaveItems', 'drawWeapon', 'removeTiles', 'removeBasement', 'removeEvents',
@@ -275,6 +314,8 @@ function validateScenario(s, file, seen) {
       if (OPS.indexOf(op.type) < 0) fail(file, 'setup.ops[' + i + '] 类型不支持：' + op.type);
       if (op.type === 'placeMonster' && !op.monster) fail(file, 'setup.ops[' + i + '] 缺少 monster');
       if (op.type === 'placeToken' && !op.token) fail(file, 'setup.ops[' + i + '] 缺少 token');
+      if (op.type === 'setAsideToken' && !op.token) fail(file, 'setup.ops[' + i + '] 缺少 token');
+      if (op.type === 'placeTokenRooms' && (!op.token || !Array.isArray(op.rooms))) fail(file, 'setup.ops[' + i + '] 缺少 token/rooms');
       if (op.type === 'placeSpecialRoom' && !op.room) fail(file, 'setup.ops[' + i + '] 缺少 room');
     });
   }

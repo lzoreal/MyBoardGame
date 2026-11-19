@@ -1,6 +1,7 @@
 // 已确认剧本目标、行动与事件标记修正的回归
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 let passed = 0, failed = 0;
 const fails = [];
 function ok(name, cond, extra) {
@@ -11,8 +12,8 @@ function seeded(n) { let s = n || 1; return function () { s = (s * 1103515245 + 
 function high() { return 0.99; }
 const packsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 
 function scenario(no) { return E.SCENARIOS.find((x) => x.no === no); }
@@ -53,7 +54,7 @@ console.log('=== #19 / #37 行动标记 ===');
   const st = start(19);
   const p = st.players[st.haunt.revealer];
   const room = E.helpers.roomAt(st, p.floor, p.x, p.y);
-  E.helpers.addToken(st, '录像带', room, 1);
+  E.helpers.addToken(st, '录像带', room, 1, 'setup');
   const r = E.act(st, { type: 'hauntAction', key: 'destroy_tape' }, p.id, high);
   ok('#19 摧毁录像带生成已毁标记', r.ok === true && E.helpers.countTokens(st, '已毁录像带') === 1, r.msg);
   const st37 = start(37, 3);
@@ -114,9 +115,9 @@ console.log('=== custom 目标不再被 Setup 标志直接满足 ===');
   const st50 = start(50);
   E.helpers.checkWin(st50);
   ok('#50 吞噬房子不会因 Setup 标志直接获胜', st50.phase !== 'ended', st50.winner && st50.winner.text);
-  st50.haunt.devouredFloors = { upper: true, ground: true, basement: true };
+  st50.rooms.forEach((r) => { if (r.kind !== 'landing') r.consumed = true; });
   E.helpers.checkWin(st50);
-  ok('#50 三层都被吞噬后才判叛徒胜', st50.phase === 'ended' && st50.winner && st50.winner.side === 'traitor', st50.winner && st50.winner.text);
+  ok('#50 所有非平台房间都被吞噬后才判叛徒胜', st50.phase === 'ended' && st50.winner && st50.winner.side === 'traitor', st50.winner && st50.winner.text);
 
   const st13 = start(13);
   const tr13 = st13.players[st13.haunt.traitor];

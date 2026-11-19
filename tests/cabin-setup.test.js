@@ -1,6 +1,7 @@
 // 50 个官方剧本的 Setup 执行器回归：3/4/5/6 人局都要实际跑一遍
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 let passed = 0, failed = 0;
 const fails = [];
@@ -14,8 +15,8 @@ function seeded(n) {
 }
 const packsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 
 function players(n) {

@@ -7,7 +7,9 @@
 
 第三版迁移已经从“只把规则写进 JSON”推进到“规则有运行入口、内容有硬合同、关键路径有自动化测试”。
 
-- 10 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，924 条断言）+ `cabin-rule-fixes.test.js`（49 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，373 条断言）+ `cabin-scenario-acceptance.test.js`（独立官方规则验收，38 条断言）
+- 13 组 Cabin 测试全部通过：原 5 组 + `cabin-security.test.js`（20 项）+ `cabin-setup.test.js`（50 剧本 × 3/4/5/6 人，956 条断言）+ `cabin-rule-fixes.test.js`（49 项）+ `cabin-all-scenarios.test.js`（50 剧本真实运行，391 条断言）+ `cabin-scenario-acceptance.test.js`（独立官方规则验收，57 条断言）+ `cabin-scenario-playthrough.test.js`（50 个剧本逐一用合法行动走到胜负，50 条断言）+ `cabin-mechanic-3e.test.js`（剩余机制回归，68 条断言）+ `cabin-full-coverage.test.js`（handler 与分支补洞，174 条断言），合计 1918 条断言
+- 覆盖率：`cabin.js` 函数覆盖 100%（227/227），语句 97.15%（3887/4001），分支 75.19%（2164/2878）；全项目语句 99.23%、分支 75.19%。
+
 - 三用户真实联机回归：**12 / 12 passed**（房主 + DD + 手机三号，room `X2Z2F`）
 - 线上权限复测：身份接管被拒、错误令牌读 secret 被拒、大厅成员不能直写 playing、playing 中非当前行动者被拒
 - 内容审计：事件空分支 **0**，纯文本物品 **0**，剧本缺 factions **0**，缺 traitorGoal **0**，缺 setup 合同 **0**，Setup 仍为 manual **0**，剧本缺怪物定义 **0**
@@ -30,6 +32,8 @@
 - `#13` 新增推进仪式行动，数字轨道归零才唤醒沉睡之她；`#50` 新增逐层吞噬行动，三层都被吞噬后才判叛徒胜；`#36` 觉悟改为检查叛徒神智是否达到最大值，不再因 Setup 标志直接获胜
 - `#27` 外星文字改为“叛徒持有供应、逐个铺进房间”，全部铺完才获胜；`#32` 逐层点火，三层烧起来才判“烧毁房子”；`#32` 死亡叛徒可在怪物阶段点火；`#39` 时间流逝行动把数字轨道降到 0 才判“时间耗尽”；`#49` 先夺血、再把血献给同房间恶魔，献齐所有英雄之血才获胜
 - 洗衣滑道只在结束回合时滑落；坍塌房间只在结束回合做一次速度判定；神秘电梯进入时掷两骰并按结果换层；怪物寻路只沿真实楼梯连接，不再把三个平台视为完全互通
+- 按官方 PDF 卡面校正 `#4/#25/#41/#43`：`#4` 新增 13+/9+/0+ 三档神智仪式与恶魔中介前置；`#25` 改为四种属性材料收集后在军械库/仪式房做 5+ 仪式；`#41` 过载后发电机 ON→OFF，房子不可攻击/击晕；`#43` 新增躲藏与隐藏英雄不可被攻击；四项均有独立测试
+- 结构性重构：`applyOps()` 已拆为 `EFFECT_HANDLERS` 效果注册表 + `OP_ORDER` 显式顺序；`custom` 目标集中到 `CUSTOM_GOALS` 注册表；`#7/#17` 专用行动迁入 `ACTION_SPECIALS`；回合结束与怪物结束的 `#32/#43` 条件迁入 `TURN_HOOKS` / `MONSTER_END_HOOKS`。新增效果、目标或时机不再需要在巨型 if 链中间插分支，回归基线更新为 1918 条断言；`cabin.js` 函数覆盖 100%，分支为 75.19%
 
 ### 仍然存在的联机安全边界
 
@@ -114,22 +118,23 @@
 以下缺口没有在本轮关闭，不能把当前状态称为“第三版完整迁移”：
 
 1. **Setup 已自动执行，语义仍需真人逐剧本确认**
-   50 个剧本现在都是 `scripted`，`runScenarioSetup` 会在闹鬼开始时执行 `setup.ops`，Setup 回归覆盖 3/4/5/6 人局共 924 条断言。
+   50 个剧本现在都是 `scripted`，`runScenarioSetup` 会在闹鬼开始时执行 `setup.ops`，Setup 回归覆盖 3/4/5/6 人局共 956 条断言。
    如果 Setup 指定的板块尚未翻出，标记会进入 `pendingTokens`，并在该板块接入地图时自动补放；仍需真人按官方剧本卡确认“标记放在哪个板块/哪一层”的语义细节。
+   `cabin-scenario-playthrough.test.js` 已把 50 个剧本逐一从开局通过 `E.act` 的合法行动推进到胜负；测试会把房间、道具、玩家和怪物摆到可执行前置，但不直接写目标计数、目标完成标志或胜利条件。独立验收同时覆盖 50 剧本 × 3–6 人 Setup 后不得自动判胜、#24 精灵之火必须拾起后带到礼拜堂放下、#50 炸药必须每层实际安放、#40 双胞胎数量与逐人数目标一致。`#15` 幽灵和 `#28` 幽灵鲨属于“不可击晕”怪物，当前额外补了剧本行动入口，仍需对照官方卡面确认其逐字文本与难度。
 
-2. **部分剧本目标仍是声明式**  
-   `goalDone` 已支持 `killAll / anyOf / allOf / possessItem / convertAll / destroyItem / trackZero / numberTrack / tokens perHero`；`custom` 仍只有 `haunt.custom[key]` 状态入口，没有完整剧本语义。
+2. **部分剧本目标仍是声明式**
+   `goalDone` 已支持 `killAll / anyOf / allOf / possessItem / convertAll / destroyItem / trackZero / numberTrack / tokens perHero / hunt / ritual / treasure / evidence / rig`；`custom` 仍只有 `haunt.custom[key]` 状态入口，没有完整剧本语义。
 
-3. **隐藏叛徒的服务端私有状态已启用**  
-   `sql/rooms-private.sql` 已在 Supabase 执行：`room_members` 成员令牌、`room_secrets` 私有表、`rooms` 成员制 RLS、隐藏叛徒拆分触发器、建房/加入/读写 secret 的 RPC。  
-   `js/net.js` 已切换 `privateMode`：带 `x-player-token` 建房/加入/读写，隐藏剧本只合并自己的 secret；Realtime 不认自定义头，另加 2.5 秒令牌轮询兜底。  
+3. **隐藏叛徒的服务端私有状态已启用**
+   `sql/rooms-private.sql` 已在 Supabase 执行：`room_members` 成员令牌、`room_secrets` 私有表、`rooms` 成员制 RLS、隐藏叛徒拆分触发器、建房/加入/读写 secret 的 RPC。
+   `js/net.js` 已切换 `privateMode`：带 `x-player-token` 建房/加入/读写，隐藏剧本只合并自己的 secret；Realtime 不认自定义头，另加 2.5 秒令牌轮询兜底。
    已验证：公开 `rooms.state` 不含 `side / traitor / traitorGoal`；英雄 secret 只有自己的 `side`；叛徒 secret 有 `traitor + traitorGoal`；非成员读 secret 被拒。
 
-4. **重掷类物品已接入，但仍只覆盖判定**  
-   幸运币、兔脚、诡异玩偶已能在“掷出后、确认前”重掷；攻击骰还没有同样的重掷窗口。
+4. **重掷类物品已覆盖判定与攻击**
+   幸运币、兔脚、诡异玩偶已能在“掷出后、确认前”重掷判定；攻击骰现在也复用同一个 `pendingRoll` 窗口，有重掷牌时攻击先停在待确认状态，可重掷后再确认结算。
 
-5. **房间效果已补四个关键房间**  
-   军械库、锅炉房、恐慌室、根窖已执行；其余房间的 `effect` 仍以属性 +1 为主，特殊动作没有逐张补齐。
+5. **房间与剧本特殊机制已补关键缺口**
+   军械库、锅炉房、恐慌室、根窖已执行；#4/#32 火焰板块进入和结束回合伤害、#7 镜界猜线索、#17 DIE 纸条传递、#18 真身回屋、#24 暗女王与精灵之火携带到礼拜堂、#26 长老女王、#47 关闭传送门 Knowledge/Sanity 二选一与同房间英雄 +2、#48 房主头骨、#33 幽灵摄影师力量击倒、猫又/恶魔犬/构造体动态数值、#2 隐藏叛徒暴露回血、#22 空手逃出、#31 四件物品逃出、#35 盐烧虫巢、#41 发电机逐一过载、#43 撑过 6 轮均已接入并有独立测试。其余房间的普通 `effect` 仍以属性 +1 为主，特殊动作继续按官方卡面逐张核对。
 
 ## 验证命令
 
@@ -149,6 +154,8 @@ node tests\cabin-setup.test.js
 node tests\cabin-rule-fixes.test.js
 node tests\cabin-all-scenarios.test.js
 node tests\cabin-scenario-acceptance.test.js
+node tests\cabin-scenario-playthrough.test.js
+node tests\cabin-mechanic-3e.test.js
 node --check js\games\cabin.js
 ```
 

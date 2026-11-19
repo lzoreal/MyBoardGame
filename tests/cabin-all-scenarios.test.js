@@ -2,6 +2,7 @@
 // 目标是否达成不在这里直接构造；独立验收见 cabin-scenario-acceptance.test.js
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 let passed = 0, failed = 0;
 const fails = [];
 function ok(name, cond, extra) {
@@ -12,8 +13,8 @@ function seeded(n) { let s = n || 1; return function () { s = (s * 1103515245 + 
 function high() { return 0.99; }
 const packsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 
 function scenario(no) { return E.SCENARIOS.find((x) => x.no === no); }
@@ -55,6 +56,10 @@ for (const sc of E.SCENARIOS) {
       E.act(st, { type: 'monsterEnd' }, actor, high);
       ok(tag + ' 怪物阶段可结束', !st.monsterTurn, '怪物阶段仍在进行');
     }
+    if (st.pendingDamage) {
+      const pd = st.pendingDamage;
+      E.act(st, { type: 'allocateDamage', amount: pd.amount, first: 'might', second: 'speed' }, pd.player, high);
+    }
   } catch (e) {
     ok(tag + ' 真实结束回合不抛异常', false, e.message);
   }
@@ -69,34 +74,104 @@ for (const sc of E.SCENARIOS) {
       if (!actor && side === 'traitor' && st.players[st.haunt.traitor]) actor = st.players[st.haunt.traitor];
       if (!actor && side === 'hero') actor = st.players.find((p) => !p.dead && p.side === 'hero');
       if (actor) {
+        let room = null;
         if (action.where === 'room') {
-          let room = E.helpers.roomByName(st, action.room);
+          room = E.helpers.roomByName(st, action.room);
           if (!room) {
             room = { floor: 'ground', x: 2, y: 1, name: action.room, doors: 'NEW', symbol: null, kind: 'normal' };
             st.rooms.push(room);
           }
           actor.floor = room.floor; actor.x = room.x; actor.y = room.y;
+        } else if (action.where === 'rooms') {
+          const name = (action.rooms || [])[0];
+          room = E.helpers.roomByName(st, name);
+          if (!room) {
+            room = { floor: 'ground', x: 2, y: 1, name, doors: 'NEW', symbol: null, kind: 'normal' };
+            st.rooms.push(room);
+          }
+          actor.floor = room.floor; actor.x = room.x; actor.y = room.y;
         } else if (action.where === 'symbol') {
           const symbol = action.symbol || 'event';
-          let room = st.rooms.find((r) => r.symbol === symbol);
+          room = st.rooms.find((r) => r.symbol === symbol);
           if (!room) {
             room = { floor: 'ground', x: 1, y: 1, name: '测试' + symbol + '房', doors: 'NEW', symbol, kind: 'normal' };
             st.rooms.push(room);
           }
           actor.floor = room.floor; actor.x = room.x; actor.y = room.y;
         } else if (action.where === 'floors' && action.floors && action.floors.length) {
-          const room = firstRoom(st, action.floors[0]);
+          room = firstRoom(st, action.floors[0]);
           if (room) { actor.floor = room.floor; actor.x = room.x; actor.y = room.y; }
         }
-        if (action.requireToken) {
-          const room = E.helpers.roomByName(st, action.room) || firstRoom(st, actor.floor);
-          E.helpers.addToken(st, action.requireToken, room, 1);
+        if (!room) room = E.helpers.roomAt(st, actor.floor, actor.x, actor.y) || firstRoom(st, actor.floor);
+        if (action.requireMonsterType) {
+          const m = st.monsters.find((x) => !x.dead && x.type === action.requireMonsterType);
+          if (m) {
+            if (action.where === 'symbol' && room) {
+              m.floor = room.floor; m.x = room.x; m.y = room.y;
+            } else {
+              room = E.helpers.roomAt(st, m.floor, m.x, m.y);
+              actor.floor = m.floor; actor.x = m.x; actor.y = m.y;
+            }
+          }
         }
-        if (action.requireItem) actor.items = (actor.items || []).concat([{ name: action.requireItem, key: action.requireItem }]);
+        if (action.requireTokenPrefix) E.helpers.addToken(st, action.requireTokenPrefix + '力量', room, 1, 'setup');
+        if (action.requireToken) E.helpers.addToken(st, action.requireToken, room, 1, 'setup');
+        if (action.requireItem || action.requireAnyItem) {
+          const need = action.requireItem || action.requireAnyItem;
+          if (!st.players.some((q) => (q.items || []).some((it) => it.name === need || it.key === need))) {
+            actor.items = (actor.items || []).concat([{ name: need, key: need }]);
+          }
+        }
+        if (action.requireFlag) {
+          st.haunt.setup.flags = st.haunt.setup.flags || {};
+          st.haunt.setup.flags[action.requireFlag] = true;
+          if (action.requireFlag === 'mirrorRealm') {
+            st.haunt.mirrorRealm = st.haunt.mirrorRealm || {
+              active: true, trait: 'might', omen: '骷髅', room: room ? room.name : '门厅'
+            };
+            if (!st.haunt.mirrorRealm.trait) st.haunt.mirrorRealm.trait = 'might';
+            if (!st.haunt.mirrorRealm.omen) st.haunt.mirrorRealm.omen = '骷髅';
+            if (!st.haunt.mirrorRealm.room) st.haunt.mirrorRealm.room = room ? room.name : '门厅';
+          }
+          if (action.requireFlag === 'ringIllusion') st.haunt.ringIllusion = true;
+        }
         if (action.dead) actor.dead = true;
+        if (action.key === 'perform_ritual') {
+          const idx = st.players.indexOf(actor);
+          const tr = actor.track && actor.track[action.trait || 'sanity'];
+          if (tr) E.helpers.setTrack(st, idx, action.trait || 'sanity', tr.list.length);
+          if (room) E.helpers.addToken(st, '火焰', room, 1, 'setup');
+        }
+        if (action.key === 'overload') st.haunt.numberTrack = 5;
         st.haunt.turnUsed = {};
         st.turn = st.players.indexOf(actor);
-        const r = E.act(st, { type: 'hauntAction', key: action.key }, actor.id, high);
+        const payload = { type: 'hauntAction', key: action.key };
+        if (action.key === 'break_spell' && st.haunt.mirrorRealm) {
+          payload.guess = {
+            trait: st.haunt.mirrorRealm.trait,
+            omen: st.haunt.mirrorRealm.omen,
+            room: st.haunt.mirrorRealm.room
+          };
+        }
+        if (action.key === 'pass_note') {
+          const holder = st.players.find((q) => q.id === (st.haunt.dieNote && st.haunt.dieNote.holder));
+          let target = null;
+          if (holder) {
+            actor = holder;
+            target = st.players.find((q) => q !== holder && !q.dead && q.side === 'hero');
+            if (target) { target.floor = holder.floor; target.x = holder.x; target.y = holder.y; }
+          } else {
+            const first = st.players.find((q) => !q.dead && q.side === 'hero');
+            target = st.players.find((q) => q !== first && !q.dead && q.side === 'hero');
+            if (first && target) {
+              first.note = 'DIE'; st.haunt.dieNote = { holder: first.id }; actor = first;
+              target.floor = first.floor; target.x = first.x; target.y = first.y;
+            }
+          }
+          if (target) payload.target = target.id;
+        }
+        st.turn = st.players.indexOf(actor);
+        const r = E.act(st, payload, actor.id, high);
         ok(tag + ' 真实剧本行动可执行', !!r && r.ok === true, r && r.msg);
       }
     } catch (e) {

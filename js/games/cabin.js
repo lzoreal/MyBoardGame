@@ -27,8 +27,14 @@ window.CabinEngine = (function () {
     { key: 'sanity', label: '神智', kind: 'mental' }
   ];
   const MAX_TRAIT = 8;
-
-  function track(start, min, max) { return { start: start, min: min, max: max }; }
+  const TRAIT_ALIASES = {
+    knowledge: 'known', know: 'known', intellect: 'known',
+    strength: 'might', agility: 'speed', sanity: 'sanity'
+  };
+  function traitKey(trait) {
+    const raw = String(trait || '').toLowerCase();
+    return TRAIT_ALIASES[raw] || raw;
+  }
 
   let CHARS = [];
 
@@ -47,11 +53,9 @@ window.CabinEngine = (function () {
   let EVENTS = [];
 
   /* ---------------- 22 张物品牌 ---------------- */
-  function I(name, text, opt) { return Object.assign({ name: name, text: text }, opt || {}); }
   let ITEMS = [];
 
   /* ---------------- 9 张预兆牌（内容包提供） ---------------- */
-  function O(name, text, opt) { return Object.assign({ name: name, text: text, omen: true }, opt || {}); }
   let OMENS = [];
 
   /* ---------------- 剧本卡（官方 3E 共 5 张；「无」只用于事件直接触发，不参与随机） ---------------- */
@@ -171,10 +175,6 @@ window.CabinEngine = (function () {
   function roomByName(st, name) {
     return st.rooms.find((r) => r.name === name) || null;
   }
-  function alive(st, i) {
-    const p = st.players[i];
-    return !!p && !p.dead;
-  }
   function traitVal(st, i, key) {
     const p = st.players[i];
     if (!p) return 0;
@@ -215,9 +215,6 @@ window.CabinEngine = (function () {
   function itemSum(st, i, field) {
     return (st.players[i].items || []).reduce((n, it) => n + (Number(it[field]) || 0), 0);
   }
-  function hasItem(st, i, key) {
-    return (st.players[i].items || []).some((it) => it.key === key);
-  }
   function itemTestBonus(st, i, trait) {
     const p = st.players[i] || {};
     return (p.items || []).reduce((sum, it) => sum + (it.testTrait === trait && !itemActionOf(st, it) ? (it.testBonus || 0) : 0), 0);
@@ -231,11 +228,6 @@ window.CabinEngine = (function () {
   }
   function weaponScore(it) {
     return weaponDice(it) * 4 + weaponResult(it);
-  }
-  function bestWeapon(st, i, trait) {
-    const p = st.players[i] || {};
-    const list = (p.items || []).filter((it) => it.weapon === trait && !it.noNormalAttack && !itemActionOf(st, it)).sort((a, b) => weaponScore(b) - weaponScore(a));
-    return list[0] || null;
   }
   function markTraitItems(st, i, trait) {
     const p = st.players[i] || {};
@@ -262,15 +254,8 @@ window.CabinEngine = (function () {
     return { trait: trait, diff: diff, total: r.total, faces: r.faces, ok: r.total >= diff, dice: dice };
   }
 
-  function traitValueOf(p, trait) {
-    const tr = p.track && p.track[trait];
-    if (tr && Array.isArray(tr.list) && tr.list.length) {
-      return tr.list[Math.max(0, Math.min(tr.list.length - 1, (tr.pos || 1) - 1))];
-    }
-    return p.traits[trait] || 0;
-  }
-
   function gainTrait(st, i, trait, amount, reason) {
+    trait = traitKey(trait);
     const p = st.players[i];
     if (!p) return;
     const tr = p.track && p.track[trait];
@@ -283,6 +268,7 @@ window.CabinEngine = (function () {
     }
   }
   function healTrait(st, i, trait, amount) {
+    trait = traitKey(trait);
     const p = st.players[i];
     const tr = p && p.track && p.track[trait];
     if (tr) {
@@ -323,7 +309,15 @@ window.CabinEngine = (function () {
     return { ok: true, state: st };
   }
 
+  function noteScenarioDeath(st, i) {
+    const h = st.haunt;
+    if (!h || !h.active || h.no !== 25 || i !== h.traitor) return;
+    const p = st.players[i];
+    if (h.armorHolder === p.id) h.armorRoom = { floor: p.floor, x: p.x, y: p.y };
+  }
+
   function loseTraitDirect(st, i, trait, amount, reason) {
+    trait = traitKey(trait);
     const p = st.players[i];
     if (!p) return;
     const tr = p.track && p.track[trait];
@@ -333,6 +327,7 @@ window.CabinEngine = (function () {
         setTrack(st, i, trait, tr.pos - amount);
         if (tr.pos <= 0 && !p.dead) {
           p.dead = true;
+          noteScenarioDeath(st, i);
           dropItemsOnDeath(st, i);
           pushLog(st, '☠ ' + p.name + ' 的' + labelOf(trait) + '走到骷髅，倒下了');
         }
@@ -345,7 +340,7 @@ window.CabinEngine = (function () {
       if (st.haunt && st.haunt.active) {
         if (next < min) {
           p.traits[trait] = min;
-          if (!p.dead) { p.dead = true; dropItemsOnDeath(st, i); }
+          if (!p.dead) { p.dead = true; noteScenarioDeath(st, i); dropItemsOnDeath(st, i); }
           pushLog(st, '☠ ' + p.name + ' 的' + labelOf(trait) + '跌破下限，倒下了');
         } else p.traits[trait] = next;
       } else p.traits[trait] = Math.max(min, next);
@@ -368,6 +363,7 @@ window.CabinEngine = (function () {
     if (!amount) return false;
     const p = st.players[i];
     if (!p || p.dead) return false;
+    if (p.side === 'hero' && st.haunt && st.haunt.active) st.haunt.damageSinceMonsterTurn = true;
     kind = normalizeDamageType(kind);
     if (kind !== 'general' && itemSum(st, i, 'damageConvert')) {
       pushLog(st, p.name + ' 的胸针把' + (kind === 'mental' ? '精神' : '物理') + '伤害转成通用伤害');
@@ -482,6 +478,7 @@ window.CabinEngine = (function () {
     if (remaining > 0 && kindName === 'general' && hauntOn) {
       p.dead = true;
       p.corpse = true;
+      noteScenarioDeath(st, st.players.indexOf(p));
       pushLog(st, p.name + ' 的四项属性都已到骷髅，剩余 ' + remaining + ' 点伤害无法分配，角色死亡');
     }
     return { kind: kindName, total: total, remaining: remaining };
@@ -619,7 +616,14 @@ window.CabinEngine = (function () {
     };
 
     if (opts.skipSelect) {
-      list.forEach((p, i) => assignCharacter(st, i, CHARS[i % CHARS.length].key));
+      // 自动选角必须按人物板去重：6 人局要拿到 6 块不同人物板，
+      // 不能因为前 6 个角色里有 3 组双面板而让后 3 人没有属性轨道。
+      const usedBoards = {};
+      list.forEach((p, i) => {
+        const pick = CHARS.find((c) => !usedBoards[c.boardId] && !st.charTaken[c.key]) ||
+          CHARS.find((c) => !st.charTaken[c.key]) || CHARS[i % CHARS.length];
+        if (assignCharacter(st, i, pick.key)) usedBoards[pick.boardId] = true;
+      });
       startPlaying(st, 0);
     }
     return st;
@@ -836,7 +840,10 @@ window.CabinEngine = (function () {
       if (!tile && t.name === roomName) { tile = t; return false; }
       return true;
     });
-    if (!tile) return false;
+    if (!tile) {
+      setupPlaceNamedRoom(st, roomName, floor, rand);
+      return true;
+    }
     const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : (floor === 'basement' ? 6 : 5));
     const spot = anchor ? findFreeCell(st, floor, anchor.x, anchor.y) : null;
     if (!spot) { st.roomDeck.push(tile); return false; }
@@ -939,7 +946,7 @@ window.CabinEngine = (function () {
         for (let k = 0; k < rerolled; k++) beginDamage(st, i, 1, 'mental', item.name);
       }
     }
-    pr.result.total = pr.result.faces.reduce((a, b) => a + b, 0);
+    pr.result.total = pr.result.faces.reduce((a, b) => a + b, 0) + (pr.bonus || 0);
     pr.result.ok = pr.result.total >= pr.diff;
     st.lastRoll = {
       label: (pr.card || pr.room) + ' · ' + labelOf(pr.trait) + '判定（重掷）',
@@ -959,6 +966,10 @@ window.CabinEngine = (function () {
     const kind = pr.kind;
     const roomName = pr.room;
     st.pendingRoll = null;
+    if (kind === 'attack') {
+      applyQueuedAttack(st, pr.attack, r, rand);
+      return { ok: true, state: st };
+    }
     pushLog(st, (pr.card || pr.room) + '：' + labelOf(pr.trait) + ' ' + r.total + ' 对 ' + pr.diff + ' → ' + (r.ok ? '成功' : '失败'));
     if (kind === 'event') {
       if (Array.isArray(pr.tiers) && pr.tiers.length) {
@@ -1087,7 +1098,7 @@ window.CabinEngine = (function () {
       traitors: traitors, traitorCount: traitors.length, monsterController: null,
       heroGoal: clone(sc.heroGoal), traitorGoal: clone(sc.traitorGoal),
       heroGoalText: sc.heroGoalText, traitorGoalText: sc.traitorGoalText,
-      progress: 0, round: 0, startRound: st.round, monsterBanish: 0,
+      progress: 0, round: 0, startRound: st.round, monsterBanish: 0, monsterHunted: {},
       revealer: revealer, omen: omenName, room: roomName, justStarted: true,
       actions: clone(sc.actions || []), monster: clone(sc.monster || null), used: {},
       flipRooms: !!sc.flipRooms, card: st.scenarioCard,
@@ -1144,17 +1155,19 @@ window.CabinEngine = (function () {
   }
 
   /* ---------------- 通用标记 / 板块翻覆 ---------------- */
-  function addToken(st, type, room, count) {
+  function addToken(st, type, room, count, source) {
     st.tokens = st.tokens || [];
     st.tokens.push({
       type: String(type), floor: room.floor, x: room.x, y: room.y,
-      count: Math.max(1, count || 1)
+      count: Math.max(1, count || 1), source: source || 'goal'
     });
     pushLog(st, '放置标记「' + type + '」于「' + room.name + '」' + ((count || 1) > 1 ? ' ×' + count : ''));
   }
 
   function countTokens(st, type, filter) {
     let list = (st.tokens || []).filter((t) => t.type === type);
+    // 剧本目标只统计玩家真正获得/放置的标记；Setup 供应标记不能直接算完成。
+    if (filter && filter.goalOnly) list = list.filter((t) => t.source !== 'setup');
     if (filter && filter.floor) list = list.filter((t) => t.floor === filter.floor);
     if (filter && filter.room) list = list.filter((t) => {
       const r = roomAt(st, t.floor, t.x, t.y);
@@ -1164,15 +1177,108 @@ window.CabinEngine = (function () {
     return list.reduce((s, t) => s + (t.count || 1), 0);
   }
 
-  function tokensByFloor(st, type) {
+  function tokensByFloor(st, type, filter) {
     const out = {};
-    FLOORS.forEach((f) => { out[f] = countTokens(st, type, { floor: f }); });
+    FLOORS.forEach((f) => { out[f] = countTokens(st, type, Object.assign({}, filter, { floor: f })); });
     return out;
+  }
+
+  function consumeTokens(st, type, room, count) {
+    const need = Math.max(1, Number(count || 1));
+    let left = need;
+    while (left > 0) {
+      const matches = [];
+      (st.tokens || []).forEach((t, k) => {
+        if (t.type === type && t.floor === room.floor && t.x === room.x && t.y === room.y) matches.push({ t, k });
+      });
+      if (!matches.length) break;
+      // 优先消耗 Setup/行动留下的供应标记，绝不先吃掉已经计入目标的标记；
+      // 否则 #11/#24/#50 这类「同名供应→目标」行动会在第二次执行时把进度清掉。
+      matches.sort((a, b) => (a.t.source === 'goal' ? 1 : 0) - (b.t.source === 'goal' ? 1 : 0) || b.k - a.k);
+      const { t, k } = matches[0];
+      const take = Math.min(left, t.count || 1);
+      if ((t.count || 1) > take) {
+        t.count -= take;
+      } else {
+        st.tokens.splice(k, 1);
+      }
+      left -= take;
+    }
+    return left === 0;
+  }
+
+  function countSupplyTokens(st, type) {
+    const setup = st.haunt && st.haunt.active && st.haunt.setup;
+    const pending = setup && setup.pendingTokens ? Number(setup.pendingTokens[type] || 0) : 0;
+    const aside = setup && setup.setAsideTokens ? Number(setup.setAsideTokens[type] || 0) : 0;
+    return pending + aside + (st.tokens || []).filter((t) => t.type === type && t.source !== 'goal')
+      .reduce((n, t) => n + (t.count || 1), 0);
+  }
+
+  function consumeSupplyTokens(st, type, count) {
+    const need = Math.max(1, Number(count || 1));
+    let left = need;
+    while (left > 0) {
+      const matches = [];
+      (st.tokens || []).forEach((t, k) => {
+        if (t.type === type && t.source !== 'goal') matches.push({ t, k });
+      });
+      if (!matches.length) break;
+      matches.sort((a, b) => b.k - a.k);
+      const { t, k } = matches[0];
+      const take = Math.min(left, t.count || 1);
+      if ((t.count || 1) > take) t.count -= take;
+      else st.tokens.splice(k, 1);
+      left -= take;
+    }
+    const setup = st.haunt && st.haunt.active && st.haunt.setup;
+    if (left > 0 && setup && setup.pendingTokens && setup.pendingTokens[type]) {
+      const take = Math.min(left, setup.pendingTokens[type]);
+      setup.pendingTokens[type] -= take;
+      if (setup.pendingTokens[type] <= 0) delete setup.pendingTokens[type];
+      left -= take;
+    }
+    if (left > 0 && setup && setup.setAsideTokens && setup.setAsideTokens[type]) {
+      const take = Math.min(left, setup.setAsideTokens[type]);
+      setup.setAsideTokens[type] -= take;
+      if (setup.setAsideTokens[type] <= 0) delete setup.setAsideTokens[type];
+      left -= take;
+    }
+    return left === 0;
+  }
+
+  function consumeTokenPrefix(st, prefix, room, count) {
+    const need = Math.max(1, Number(count || 1));
+    let left = need;
+    for (let k = (st.tokens || []).length - 1; k >= 0 && left > 0; k--) {
+      const t = st.tokens[k];
+      if (!String(t.type).startsWith(prefix) || t.floor !== room.floor || t.x !== room.x || t.y !== room.y) continue;
+      const take = Math.min(left, t.count || 1);
+      if ((t.count || 1) > take) t.count -= take;
+      else st.tokens.splice(k, 1);
+      left -= take;
+    }
+    return left === 0;
+  }
+
+  function markHunted(st, monster) {
+    const h = st.haunt;
+    if (!h || !monster) return;
+    h.monsterHunted = h.monsterHunted || {};
+    const id = monster.id || (String(monster.type || monster.key || monster.name) + '|' + String(monster.name || ''));
+    if (h.monsterHunted[id]) return;
+    h.monsterHunted[id] = monster.type || monster.key || monster.name || id;
+    h.monsterBanish = (h.monsterBanish || 0) + 1;
+    h.custom = h.custom || {};
+    if (h.monsterHunted[id] === 'hair' || h.monsterHunted[id] === '巨型毛发怪') h.custom.hairDefeated = true;
   }
 
   function setupPendingMatches(room, target) {
     if (!target || target === 'random' || target === 'nonLanding') {
       return room.kind !== 'start' && room.kind !== 'landing' && room.kind !== 'grandStair';
+    }
+    if (String(target).startsWith('rooms:')) {
+      return String(target).slice(6).split('|').indexOf(room.name) >= 0;
     }
     if (target === 'ground' || target === 'upper' || target === 'basement') return room.floor === target;
     if (target === 'farBasement') return room.floor === 'basement';
@@ -1189,7 +1295,7 @@ window.CabinEngine = (function () {
     Object.keys(setup.pendingTokens).forEach((token) => {
       const target = (setup.pendingTokenTargets && setup.pendingTokenTargets[token]) || 'nonLanding';
       if (!setupPendingMatches(room, target)) return;
-      addToken(st, token, room, 1);
+      addToken(st, token, room, 1, 'setup');
       setup.pendingTokens[token] -= 1;
       if (setup.pendingTokens[token] <= 0) delete setup.pendingTokens[token];
     });
@@ -1202,6 +1308,49 @@ window.CabinEngine = (function () {
     room.symbol = null;
     room.symbolHidden = true;
     return true;
+  }
+
+  function isBurningRoom(st, room) {
+    if (!room) return false;
+    if (room.burning) return true;
+    return countTokens(st, '火焰', { room }) > 0 || countTokens(st, '着火', { room }) > 0;
+  }
+
+  function burnRoom(st, room) {
+    if (!room) return false;
+    room.burning = true;
+    room.flipped = true;
+    room.doors = 'NSEW';
+    room.symbol = null;
+    room.symbolHidden = true;
+    if (room.kind === 'landing') addToken(st, '火焰', room, 1, 'goal');
+    pushLog(st, '「' + room.name + '」烧了起来');
+    return true;
+  }
+
+  function burningRooms(st) {
+    return st.rooms.filter((r) => isBurningRoom(st, r));
+  }
+
+  function spreadBurning(st) {
+    const h = st.haunt;
+    if (!h || !h.active || h.no !== 44) return;
+    const burning = burningRooms(st);
+    if (!burning.length) return;
+    const spread = [];
+    burning.forEach((room) => {
+      DIRS && Object.keys(DIRS).forEach((dir) => {
+        const d = DIRS[dir];
+        const next = roomAt(st, room.floor, room.x + d[0], room.y + d[1]);
+        if (next && !isBurningRoom(st, next) && spread.indexOf(next) < 0) spread.push(next);
+      });
+    });
+    spread.slice(0).forEach((room) => burnRoom(st, room));
+    if (!spread.length) {
+      const landing = st.rooms.find((r) => r.kind === 'landing' && !isBurningRoom(st, r));
+      if (landing) burnRoom(st, landing);
+    }
+    checkWin(st);
   }
 
   /* ---------------- 剧本特殊机制 ---------------- */
@@ -1228,7 +1377,38 @@ window.CabinEngine = (function () {
     return roomAt(st, p.floor, p.x, p.y);
   }
 
-  function setupRoomPool(st, h, target) {
+  function setupPlaceNamedRoom(st, roomName, floor, rand) {
+    if (roomByName(st, roomName)) return roomByName(st, roomName);
+    const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : (floor === 'basement' ? 6 : 5));
+    const spot = anchor ? findFreeCell(st, floor, anchor.x, anchor.y) : null;
+    if (!spot) return null;
+    const room = {
+      floor: floor, x: spot.x, y: spot.y, name: roomName,
+      doors: 'NSEW', symbol: null, effect: null, special: null,
+      link: null, kind: 'normal', rot: 0, revealed: true, resolved: false
+    };
+    st.rooms.push(room);
+    return room;
+  }
+
+  function setupPlaceGenericRoom(st, floor, rand) {
+    const tile = drawRoomTile(st, floor, rand || Math.random);
+    if (!tile) return null;
+    const anchor = roomAt(st, floor, 4, floor === 'upper' ? 1 : (floor === 'basement' ? 6 : 5));
+    const spot = anchor ? findFreeCell(st, floor, anchor.x, anchor.y) : null;
+    if (!spot) { st.roomDeck.unshift(tile); return null; }
+    const room = {
+      floor: floor, x: spot.x, y: spot.y, name: tile.name,
+      doors: tile.doors || 'NSEW', symbol: tile.symbol || null,
+      effect: tile.effect || null, special: tile.special || null,
+      link: tile.link || null, kind: 'normal', rot: 0, revealed: true, resolved: false
+    };
+    st.rooms.push(room);
+    pushLog(st, '剧本 Setup 找出「' + room.name + '」放在' + (FLOOR_LABEL[floor] || floor));
+    return room;
+  }
+
+  function setupRoomPool(st, h, target, rand) {
     const actual = roomByName(st, target);
     if (actual) return [actual];
     if (target === 'traitor') {
@@ -1265,6 +1445,10 @@ window.CabinEngine = (function () {
     if (target === 'ground') return st.rooms.filter((r) => r.floor === 'ground' && r.kind !== 'start' && r.kind !== 'grandStair').slice();
     if (target === 'farBasement') {
       const list = st.rooms.filter((r) => r.floor === 'basement' && r.kind !== 'landing').slice();
+      if (!list.length) {
+        const made = setupPlaceGenericRoom(st, 'basement', rand);
+        if (made) list.push(made);
+      }
       if (!list.length) return [];
       const start = roomByName(st, '底层平台');
       const ox = start ? start.x : 4, oy = start ? start.y : 6;
@@ -1333,7 +1517,8 @@ window.CabinEngine = (function () {
     }
     h.setup = {
       mode: 'scripted', summary: setup.summary || '', numberTokens: {},
-      diseaseTokens: {}, dna: {}, flags: {}, pendingTokens: {}, pendingTokenTargets: {}
+      diseaseTokens: {}, dna: {}, flags: {}, pendingTokens: {}, pendingTokenTargets: {},
+      setAsideTokens: {}
     };
     if (setup.numberTrackByPlayers) {
       h.numberTrack = Number(setup.numberTrackByPlayers[String(st.players.length)]);
@@ -1363,7 +1548,7 @@ window.CabinEngine = (function () {
         pushLog(st, '标记「' + token + '」等待放到之后发现的板块 ×' + count);
         return;
       }
-      for (let k = 0; k < count; k++) addToken(st, token, rooms[k % rooms.length], 1);
+      for (let k = 0; k < count; k++) addToken(st, token, rooms[k % rooms.length], 1, 'setup');
     };
 
     (setup.ops || []).forEach((op) => {
@@ -1404,7 +1589,7 @@ window.CabinEngine = (function () {
       } else if (op.type === 'placeMonster') {
         const def = monsterDef(op.monster);
         if (!def) return;
-        const rooms = setupRoomPool(st, h, op.room || 'random');
+        const rooms = setupRoomPool(st, h, op.room || 'random', rand);
         let count = valueByPlayers(op.countByPlayers, op.count === undefined ? (def.counts ? def.counts[String(st.players.length)] : def.count || 1) : op.count);
         if (op.perHero) count = st.players.length * (op.perHeroCount || 1);
         const pool = rooms.length ? rooms : st.rooms.filter((r) => r.kind !== 'start');
@@ -1415,24 +1600,44 @@ window.CabinEngine = (function () {
       } else if (op.type === 'placeMonsterPerHero') {
         const def = monsterDef(op.monster);
         if (!def) return;
-        setupRoomPool(st, h, 'heroTiles').forEach((room) => spawnOneMonster(st, def, rand, room.name));
+        setupRoomPool(st, h, 'heroTiles', rand).forEach((room) => spawnOneMonster(st, def, rand, room.name));
       } else if (op.type === 'placeToken') {
-        const rooms = setupRoomPool(st, h, op.room || 'random');
+        const rooms = setupRoomPool(st, h, op.room || 'random', rand);
         const count = valueByPlayers(op.countByPlayers, op.count || 1);
         addTokenTo(op.token, rooms, count, op.room || 'random');
+      } else if (op.type === 'placeTokenRooms') {
+        const count = valueByPlayers(op.countByPlayers, op.count || 1);
+        const names = op.rooms || [];
+        const rooms = names.map((name) => roomByName(st, name)).filter(Boolean);
+        let placed = 0;
+        for (const room of rooms) {
+          if (placed >= count) break;
+          addToken(st, op.token, room, 1, 'setup');
+          placed += 1;
+        }
+        const left = count - placed;
+        if (left > 0) {
+          h.setup.pendingTokens[op.token] = (h.setup.pendingTokens[op.token] || 0) + left;
+          h.setup.pendingTokenTargets[op.token] = 'rooms:' + names.join('|');
+          pushLog(st, '标记「' + op.token + '」等待放到之后发现的指定房间 ×' + left);
+        }
+      } else if (op.type === 'setAsideToken') {
+        const count = valueByPlayers(op.countByPlayers, op.count || 0);
+        h.setup.setAsideTokens[op.token] = (h.setup.setAsideTokens[op.token] || 0) + count;
+        pushLog(st, '标记「' + op.token + '」置于一旁 ×' + count);
       } else if (op.type === 'placeTokenPerHero') {
-        const rooms = setupRoomPool(st, h, 'heroTiles');
+        const rooms = setupRoomPool(st, h, 'heroTiles', rand);
         addTokenTo(op.token, rooms, op.perHeroCount || 1, 'heroTiles');
       } else if (op.type === 'placeEvidence') {
         const count = Number(op.count || 8);
-        const rooms = setupRoomPool(st, h, 'nonHeroTiles');
+        const rooms = setupRoomPool(st, h, 'nonHeroTiles', rand);
         const pool = rooms.length ? rooms : st.rooms.filter((r) => r.kind !== 'start');
         h.setup.evidenceTokens = [];
         for (let k = 0; k < count; k++) {
           const t = TRAITS[k % TRAITS.length];
           const room = pool[k % pool.length];
           if (room) {
-            addToken(st, '证据:' + t.label, room, 1);
+            addToken(st, '证据:' + t.label, room, 1, 'setup');
             h.setup.evidenceTokens.push({ trait: t.key, room: room.name, floor: room.floor });
           }
         }
@@ -1489,25 +1694,36 @@ window.CabinEngine = (function () {
         const idx = who === 'traitor' ? h.traitor : h.revealer;
         const room = setupPlayerRoom(st, idx);
         if (room) {
-          room.flipped = true;
-          room.doors = 'NSEW';
-          room.symbol = null;
-          room.symbolHidden = true;
+          if (h.no === 44) burnRoom(st, room);
+          else {
+            room.flipped = true;
+            room.doors = 'NSEW';
+            room.symbol = null;
+            room.symbolHidden = true;
+          }
         }
         if (op.extraHeroIfThree && st.players.length === 3) {
           const other = st.players.findIndex((p, i) => i !== idx && p.side === 'hero' && !p.dead);
           const r2 = other >= 0 ? setupPlayerRoom(st, other) : null;
           if (r2) {
-            r2.flipped = true;
-            r2.doors = 'NSEW';
-            r2.symbol = null;
-            r2.symbolHidden = true;
+            if (h.no === 44) burnRoom(st, r2);
+            else {
+              r2.flipped = true;
+              r2.doors = 'NSEW';
+              r2.symbol = null;
+              r2.symbolHidden = true;
+            }
           }
         }
       } else if (op.type === 'grantItem') {
-        const item = setupFindItem(st, op.item);
-        const idx = op.to === 'traitor' ? h.traitor : (op.to === 'revealer' ? h.revealer : 0);
-        if (item && idx >= 0) grantItem(st, idx, item);
+        const item = setupFindItem(st, op.item) || { key: op.item, name: op.item };
+        const targets = op.to === 'traitor' ? [h.traitor]
+          : op.to === 'heroes' ? st.players.map((p, i) => i).filter((i) => st.players[i].side === 'hero')
+          : [op.to === 'revealer' ? h.revealer : 0];
+        targets.filter((idx) => idx >= 0).forEach((idx) => {
+          const copy = targets.length > 1 ? clone(item) : item;
+          if (copy) grantItem(st, idx, copy);
+        });
       } else if (op.type === 'grantTrait') {
         const idx = op.to === 'traitor' ? h.traitor : h.revealer;
         if (idx >= 0) gainTrait(st, idx, op.trait, valueByPlayers(op.amountByPlayers, op.amount || 1), '剧本 Setup');
@@ -1557,7 +1773,10 @@ window.CabinEngine = (function () {
         heroes.forEach((p) => { p.blood = 1; });
         h.bloodHeroes = heroes.length;
       } else if (op.type === 'trapHeroes') {
-        st.players.filter((p) => p.side === 'hero' && !p.dead).forEach((p) => { p.trapped = true; });
+        st.players.filter((p) => p.side === 'hero' && !p.dead).forEach((p) => {
+          p.trapped = true;
+          p.heroToken = true;
+        });
       } else if (op.type === 'custom') {
         if (op.key === 'alienWordSupply') {
           h.wordSupply = Number(op.valueByPlayers ? op.valueByPlayers[String(st.players.length)] : op.value) || 1;
@@ -1567,6 +1786,15 @@ window.CabinEngine = (function () {
             st.players[h.traitor].dead = true;
             h.monsterController = h.traitor;
             h.traitorBodyDead = true;
+          }
+        } else if (op.key === 'dimensionFriend') {
+          h.custom.dimensionReady = true;
+        } else if (op.key === 'armorStart') {
+          if (h.traitor >= 0) {
+            const tp = st.players[h.traitor];
+            h.armorHolder = tp.id;
+            h.armorRoom = { floor: tp.floor, x: tp.x, y: tp.y };
+            h.custom.spellMaterials = Number(op.value) || 4;
           }
         }
         h.setup.flags[op.key] = op.value === undefined ? true : op.value;
@@ -1607,22 +1835,87 @@ window.CabinEngine = (function () {
   }
 
   /* 剧本行动的结果结算：按 tiers 从高到低取第一个满足的档位 */
-  function applyOps(st, i, ops, room, rand) {
-    if (!ops) return;
-    const h = st.haunt || {};
-    const p = st.players[i];
-    if (ops.progress && st.haunt) st.haunt.progress += ops.progress;
-    if (ops.numberTrack) {
-      const cur = Number(st.haunt.numberTrack || 0);
-      st.haunt.numberTrack = Math.max(0, cur + Number(ops.numberTrack));
-      pushLog(st, '数字轨道变为 ' + st.haunt.numberTrack);
-    }
-    if (ops.devourRoom) {
-      st.haunt.devouredFloors = st.haunt.devouredFloors || {};
-      st.haunt.devouredFloors[p.floor] = true;
-      pushLog(st, p.name + ' 吞噬了「' + (FLOOR_LABEL[p.floor] || p.floor) + '」');
-    }
-    if (ops.spreadWord) {
+  /* ------------------------------------------------------------------
+   * 规则效果层：每个键对应一个原子效果处理器。
+   * 顺序由 OP_ORDER 显式规定，避免依赖对象属性顺序。
+   * ------------------------------------------------------------------ */
+  const EFFECT_HANDLERS = {
+    progress(ctx, value) {
+      if (ctx.st.haunt) ctx.st.haunt.progress += value;
+    },
+    numberTrack(ctx, value) {
+      const cur = Number(ctx.st.haunt.numberTrack || 0);
+      ctx.st.haunt.numberTrack = Math.max(0, cur + Number(value));
+      pushLog(ctx.st, '数字轨道变为 ' + ctx.st.haunt.numberTrack);
+    },
+    devourRoom(ctx) {
+      const { st, p, room } = ctx;
+      if (!room || room.kind === 'landing') return false;
+      st.haunt.devouredRooms = st.haunt.devouredRooms || {};
+      room.consumed = true;
+      room.flipped = true;
+      room.doors = 'NSEW';
+      room.symbol = null;
+      room.symbolHidden = true;
+      st.haunt.devouredRooms[room.floor + ':' + room.x + ':' + room.y] = true;
+      pushLog(st, p.name + ' 吞噬了「' + room.name + '」');
+      return true;
+    },
+    burnRoom(ctx) {
+      const { st, p, room } = ctx;
+      burnRoom(st, room || roomAt(st, p.floor, p.x, p.y));
+    },
+    grantKnowledgeToken(ctx) {
+      const { st, p, room } = ctx;
+      if (!p.knowledgeToken) {
+        p.knowledgeToken = true;
+        pushLog(st, p.name + ' 取得一枚「诅咒知识」标记');
+        return;
+      }
+      const other = st.players.find((q) => q !== p && q.side === 'hero' && !q.dead && !q.knowledgeToken &&
+        q.floor === p.floor && q.x === p.x && q.y === p.y);
+      if (other) {
+        other.knowledgeToken = true;
+        pushLog(st, p.name + ' 把「诅咒知识」标记交给同房间的 ' + other.name);
+      } else {
+        pushLog(st, '同房间没有缺少「诅咒知识」标记的英雄');
+      }
+    },
+    wardToken(ctx) {
+      const { st, p } = ctx;
+      p.wardToken = true;
+      pushLog(st, p.name + ' 取得一枚「守护结界」标记');
+    },
+    consumeItemOrOmen(ctx, value) {
+      const { st, p } = ctx;
+      const pool = (p.items || []).filter((it) => it && !itemActionOf(st, it));
+      if (!pool.length) return false;
+      const want = typeof value === 'string' ? value : null;
+      const pick = want ? pool.find((it) => it.name === want || it.key === want) : pool[0];
+      if (!pick) return false;
+      p.items.splice(p.items.indexOf(pick), 1);
+      st.items = st.items || [];
+      st.items.push(pick);
+      pushLog(st, p.name + ' 烧掉了「' + pick.name + '」');
+      return true;
+    },
+    placeExplosive(ctx) {
+      const { st, room } = ctx;
+      if (!room) return false;
+      if (countSupplyTokens(st, '炸药') > 0) {
+        consumeSupplyTokens(st, '炸药', 1);
+        addToken(st, '炸药', room, 1, 'goal');
+        pushLog(st, '炸药被安放在「' + room.name + '」');
+        return true;
+      }
+      const existing = (st.tokens || []).find((t) => t.type === '炸药' && t.source !== 'setup');
+      if (!existing) return false;
+      existing.floor = room.floor; existing.x = room.x; existing.y = room.y;
+      pushLog(st, '没有备用炸药，把已安放的炸药移到「' + room.name + '」');
+      return true;
+    },
+    spreadWord(ctx) {
+      const { st, p, room } = ctx;
       if ((st.haunt.wordsPlaced || 0) >= (st.haunt.wordSupply || 0)) {
         pushLog(st, '外星文字已经全部铺进屋里');
       } else {
@@ -1630,19 +1923,22 @@ window.CabinEngine = (function () {
         st.haunt.wordsPlaced = (st.haunt.wordsPlaced || 0) + 1;
         pushLog(st, p.name + ' 在「' + (room ? room.name : '这里') + '」放下一个外星文字（' + st.haunt.wordsPlaced + '/' + st.haunt.wordSupply + '）');
       }
-    }
-    if (ops.igniteFloor) {
+    },
+    igniteFloor(ctx) {
+      const { st, p, room } = ctx;
       st.haunt.burnedFloors = st.haunt.burnedFloors || {};
       st.haunt.burnedFloors[p.floor] = true;
       addToken(st, '火焰', room, 1);
       pushLog(st, p.name + ' 点燃了「' + (FLOOR_LABEL[p.floor] || p.floor) + '」');
-    }
-    if (ops.drainTime) {
+    },
+    drainTime(ctx) {
+      const { st } = ctx;
       const cur = Number(st.haunt.numberTrack || 0);
       st.haunt.numberTrack = Math.max(0, cur - 1);
       pushLog(st, '时间流逝，数字轨道变为 ' + st.haunt.numberTrack);
-    }
-    if (ops.collectBlood) {
+    },
+    collectBlood(ctx) {
+      const { st, p } = ctx;
       const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.blood > 0 && q.floor === p.floor && q.x === p.x && q.y === p.y);
       if (hero) {
         hero.blood = 0;
@@ -1652,8 +1948,9 @@ window.CabinEngine = (function () {
       } else {
         pushLog(st, '同房间没有带血标记的英雄');
       }
-    }
-    if (ops.offerBlood) {
+    },
+    offerBlood(ctx) {
+      const { st, p } = ctx;
       const demon = st.monsters.find((m) => (m.key === 'demon' || m.name === '恶魔') && !m.dead && m.floor === p.floor && m.x === p.x && m.y === p.y);
       if (demon && st.haunt.bloodTokens > 0) {
         st.haunt.bloodOffered = (st.haunt.bloodOffered || 0) + st.haunt.bloodTokens;
@@ -1662,128 +1959,250 @@ window.CabinEngine = (function () {
       } else {
         pushLog(st, '要和恶魔同房间并且带着血液，才能献祭');
       }
-    }
-    if (ops.token) addToken(st, ops.token, room, ops.count || 1);
-    if (ops.gain) gainTrait(st, i, ops.gain.trait, ops.gain.amount, '剧本');
-    if (ops.lose) loseTraitDirect(st, i, ops.lose.trait, ops.lose.amount, '剧本');
-    if (ops.heal) {
-      TRAITS.forEach((t) => healTrait(st, i, t.key, ops.heal));
-      pushLog(st, p.name + ' 恢复了 ' + ops.heal + ' 点属性');
-    }
-    if (ops.damage) {
-      const kind = normalizeDamageType(ops.damage.type);
-      if (ops.damage.dice) rollDamage(st, i, kind, ops.damage.dice, '剧本', rand);
-      else beginDamage(st, i, ops.damage.amount || 1, kind, '剧本');
-    }
-    if (ops.flip && room) flipRoom(st, room);
-    if (ops.trap) {
-      const who = ops.trap === true ? p
-        : (ops.trap === 'weakest'
+    },
+    token(ctx, value) {
+      const { st, room, rand, h } = ctx;
+      addToken(st, value, room, ctx.ops.count || 1);
+      if (value === '过载发电机' && room) {
+        const gen = st.monsters.find((m) => !m.dead && m.type === 'generator' && !m.overloaded &&
+          m.floor === room.floor && m.x === room.x && m.y === room.y);
+        if (gen) {
+          gen.overloaded = true;
+          gen.on = false;
+          pushLog(st, '「' + gen.name + '」已经过载，不能再被选为目标');
+        }
+      }
+      if (((h.custom && h.custom.darkQueen) || (h.setup && h.setup.flags && h.setup.flags.darkQueen)) && !h.darkQueenSpawned) {
+        const flames = countTokenEverywhere(st, '精灵之火');
+        if (flames >= 4) {
+          h.darkQueenSpawned = true;
+          const queen = spawnOneMonster(st, {
+            key: 'darkqueen', name: '暗女王', might: 8, speed: 6, sanity: 7, known: 6,
+            attack: 'might', noStun: true, rule: '第五片精灵之火点燃时降临'
+          }, rand || Math.random);
+          const queenRoom = monsterRoom(st, queen);
+          pushLog(st, '★ 第五片精灵之火被点亮，暗女王在「' + (queenRoom ? queenRoom.name : '未知房间') + '」降临');
+        }
+      }
+    },
+    revealTrueBody(ctx) {
+      const st = ctx.st;
+      if (!st.haunt || !st.haunt.ringIllusion) return;
+      const tr = st.players[st.haunt.traitor];
+      if (tr) {
+        tr.outside = false;
+        if (tr.floor === undefined) {
+          const room = roomByName(st, '门厅') || st.rooms[0];
+          tr.floor = room.floor; tr.x = room.x; tr.y = room.y;
+        }
+      }
+      st.players.forEach((q) => { q.illusion = false; });
+      st.haunt.trueBodyRevealed = true;
+      st.haunt.custom = st.haunt.custom || {};
+      st.haunt.custom.trueBodyRevealed = true;
+      pushLog(st, '幻象被揭穿，叛徒的真身回到屋内');
+    },
+    gain(ctx, value) {
+      gainTrait(ctx.st, ctx.i, value.trait, value.amount, '剧本');
+    },
+    lose(ctx, value) {
+      loseTraitDirect(ctx.st, ctx.i, value.trait, value.amount, '剧本');
+    },
+    heal(ctx, value) {
+      TRAITS.forEach((t) => healTrait(ctx.st, ctx.i, t.key, value));
+      pushLog(ctx.st, ctx.p.name + ' 恢复了 ' + value + ' 点属性');
+    },
+    damage(ctx, value) {
+      const kind = normalizeDamageType(value.type);
+      if (value.dice) rollDamage(ctx.st, ctx.i, kind, value.dice, '剧本', ctx.rand);
+      else beginDamage(ctx.st, ctx.i, value.amount || 1, kind, '剧本');
+    },
+    damageAll(ctx, value) {
+      const kind = normalizeDamageType(value.type);
+      ctx.st.players.forEach((q, k) => {
+        if (q.side === 'hero' && !q.dead) beginDamage(ctx.st, k, value.amount || 1, kind, '剧本');
+      });
+    },
+    hideSelf(ctx) {
+      ctx.p.hidden = true;
+      pushLog(ctx.st, ctx.p.name + ' 躲藏起来，怪物不能攻击他');
+    },
+    stunMonster(ctx, value) {
+      const target = ctx.st.monsters.find((m) => !m.dead && (m.type === value || m.key === value));
+      if (target && !target.noStun) {
+        target.stunned = 1;
+        pushLog(ctx.st, ctx.p.name + ' 魅惑了「' + target.name + '」，它僵直了');
+      }
+    },
+    flip(ctx) {
+      if (ctx.room) flipRoom(ctx.st, ctx.room);
+    },
+    trap(ctx, value) {
+      const { st, p } = ctx;
+      const who = value === true ? p
+        : (value === 'weakest'
           ? st.players.filter((q) => !q.dead && q !== p).sort((a, b) => traitVal(st, st.players.indexOf(a), 'might') - traitVal(st, st.players.indexOf(b), 'might'))[0]
-          : (st.players.find((q) => q.id === ops.trap) || p));
+          : (st.players.find((q) => q.id === value) || p));
       if (who) {
         who.trapped = true;
-        pushLog(st, who.name + ' 被「' + (ops.trapName || '困住') + '」标记，不能再移动或交易');
+        pushLog(st, who.name + ' 被「' + (ctx.ops.trapName || '困住') + '」标记，不能再移动或交易');
       }
-    }
-    if (ops.untrap) {
-      const who = ops.untrap === true ? p : (st.players.find((q) => q.id === ops.untrap) || p);
+    },
+    untrap(ctx, value) {
+      const { st, p } = ctx;
+      const who = value === true ? p : (st.players.find((q) => q.id === value) || p);
       who.trapped = false;
       pushLog(st, who.name + ' 摆脱了被困');
-    }
-    if (ops.evidence && st.haunt) {
-      st.haunt.evidence = (st.haunt.evidence || 0) + (typeof ops.evidence === 'number' ? ops.evidence : 1);
-      pushLog(st, '证据配对 +' + (ops.evidence || 1) + '（当前 ' + st.haunt.evidence + '）');
-    }
-    if (ops.bid && room) bidTreasure(st, room, rand);
-    if (ops.treasure) {
-      p.treasure = (p.treasure || 0) + ops.treasure;
-      if (room) addToken(st, '宝藏', room, ops.treasure);
-    }
-    if (ops.dimension && st.haunt) {
-      st.haunt.dimension = true;
-      pushLog(st, '维度改写：这一层从现在起按同一层处理');
-    }
-    if (ops.disguise) {
+    },
+    giveHeroToken(ctx, value) {
+      const { st, p } = ctx;
+      if (value === false) return;
+      p.heroToken = false;
+      st.haunt.traitorHeroTokens = (st.haunt.traitorHeroTokens || 0) + 1;
+      pushLog(st, p.name + ' 把自己的英雄标记交给叛徒，彻底摆脱传送门');
+    },
+    carryToken(ctx, value) {
+      const { st, p } = ctx;
+      if (!value) return;
+      p.carryingFlame = true;
+      p.carryingToken = value;
+      pushLog(st, p.name + ' 拿起了「' + value + '」');
+      const h = st.haunt;
+      if (h && value === '精灵之火' && ((h.custom && h.custom.darkQueen) || (h.setup && h.setup.flags && h.setup.flags.darkQueen)) && !h.darkQueenSpawned) {
+        if (countTokenEverywhere(st, '精灵之火') >= 4) {
+          h.darkQueenSpawned = true;
+          spawnOneMonster(st, {
+            key: 'darkqueen', name: '暗女王', might: 8, speed: 6, sanity: 7, known: 6,
+            attack: 'might', noStun: true, rule: '第五片精灵之火点燃时降临'
+          }, ctx.rand || Math.random);
+          pushLog(st, '★ 暗女王被精灵之火唤醒，降临屋内');
+        }
+      }
+    },
+    evidence(ctx, value) {
+      const st = ctx.st;
+      if (!st.haunt) return;
+      st.haunt.evidence = (st.haunt.evidence || 0) + (typeof value === 'number' ? value : 1);
+      pushLog(st, '证据配对 +' + (value || 1) + '（当前 ' + st.haunt.evidence + '）');
+    },
+    actionFlag(ctx, value) {
+      const h = ctx.h;
+      h.custom = h.custom || {};
+      h.custom[value] = true;
+      pushLog(ctx.st, '剧本状态更新：' + value);
+    },
+    clearActionFlag(ctx, value) {
+      const h = ctx.h;
+      h.custom = h.custom || {};
+      delete h.custom[value];
+    },
+    grantItemSelf(ctx, value) {
+      if (!ctx.room) return;
+      const item = setupFindItem(ctx.st, value) || { key: value, name: value };
+      if (item) grantItem(ctx.st, ctx.i, item);
+    },
+    bid(ctx) {
+      if (ctx.room) bidTreasure(ctx.st, ctx.room, ctx.rand);
+    },
+    treasure(ctx, value) {
+      const { st, p, room } = ctx;
+      p.treasure = (p.treasure || 0) + value;
+      if (room) addToken(st, '宝藏', room, value);
+    },
+    dimension(ctx) {
+      ctx.st.haunt.dimension = true;
+      pushLog(ctx.st, '维度改写：这一层从现在起按同一层处理');
+    },
+    disguise(ctx) {
+      const { st, p, rand } = ctx;
       const targets = st.players.filter((q) => !q.dead && q !== p);
       if (targets.length) {
         const t = targets[Math.floor((rand || Math.random)() * targets.length)];
         t.illusion = true;
         pushLog(st, '「' + t.name + '」看上去不太对——有一个幻象混了进来');
       }
-    }
-    if (ops.reveal && st.haunt) {
+    },
+    reveal(ctx) {
+      const st = ctx.st;
       st.haunt.hidden = false;
       const tr = st.players[st.haunt.traitor];
       pushLog(st, '真相揭露：叛徒是 ' + (tr ? tr.name : '？'));
-    }
-    if (ops.swapBody) {
+    },
+    swapBody(ctx, value) {
+      const { st, p } = ctx;
       const targets = st.players.filter((q) => !q.dead && q !== p);
       if (targets.length) {
-        const t = ops.swapBody === true ? targets[Math.floor((rand || Math.random)() * targets.length)]
-          : (st.players.find((q) => q.id === ops.swapBody) || targets[0]);
-        swapBodies(st, i, st.players.indexOf(t));
+        const t = value === true ? targets[Math.floor((ctx.rand || Math.random)() * targets.length)]
+          : (st.players.find((q) => q.id === value) || targets[0]);
+        swapBodies(st, ctx.i, st.players.indexOf(t));
       }
-    }
-    if (ops.transfer) {
-      const t = ops.transfer.from === 'weakest'
-        ? st.players.filter((q) => !q.dead && q !== p).sort((a, b) => traitVal(st, st.players.indexOf(a), ops.transfer.trait || 'might') - traitVal(st, st.players.indexOf(b), ops.transfer.trait || 'might'))[0]
-        : st.players.find((q) => q.id === ops.transfer.from);
+    },
+    transfer(ctx, value) {
+      const { st, p } = ctx;
+      const t = value.from === 'weakest'
+        ? st.players.filter((q) => !q.dead && q !== p).sort((a, b) => traitVal(st, st.players.indexOf(a), traitKey(value.trait) || 'might') - traitVal(st, st.players.indexOf(b), traitKey(value.trait) || 'might'))[0]
+        : st.players.find((q) => q.id === value.from);
       if (t) {
         const ti = st.players.indexOf(t);
-        const keys = ops.transfer.trait ? [ops.transfer.trait] : TRAITS.map((tr) => tr.key);
+        const keys = value.trait ? [traitKey(value.trait)] : TRAITS.map((tr) => tr.key);
         keys.forEach((key) => {
           const trt = t.track && t.track[key];
           const trp = p.track && p.track[key];
           if (!trt || !trp) return;
-          const amt = Math.max(0, Math.min(ops.transfer.amount || 1, trt.pos - 1));
+          const amt = Math.max(0, Math.min(value.amount || 1, trt.pos - 1));
           if (!amt) return;
           setTrack(st, ti, key, trt.pos - amt);
-          setTrack(st, i, key, trp.pos + amt);
+          setTrack(st, ctx.i, key, trp.pos + amt);
         });
-        pushLog(st, p.name + ' 借走了 ' + t.name + ' 的' + (ops.transfer.trait ? labelOf(ops.transfer.trait) : '多项属性'));
+        pushLog(st, p.name + ' 借走了 ' + t.name + ' 的' + (value.trait ? labelOf(traitKey(value.trait)) : '多项属性'));
       }
-    }
-    if (ops.revive) {
+    },
+    revive(ctx) {
+      const { st, p } = ctx;
       p.dead = false;
       p.corpse = false;
       TRAITS.forEach((t) => {
         const tr = p.track && p.track[t.key];
-        if (tr) setTrack(st, i, t.key, tr.startPos);
+        if (tr) setTrack(st, ctx.i, t.key, tr.startPos);
         else p.traits[t.key] = Math.max(1, p.start[t.key]);
       });
       pushLog(st, '「Cut!」—— ' + p.name + ' 重新站了起来');
-    }
-    if (ops.rewrite && st.haunt) {
-      if (ops.rewrite.heroGoalText) st.haunt.heroGoalText = ops.rewrite.heroGoalText;
-      if (ops.rewrite.heroGoal) st.haunt.heroGoal = clone(ops.rewrite.heroGoal);
-      pushLog(st, '剧本被改写：' + (ops.rewrite.heroGoalText || '新的目标'));
-    }
-    if (ops.addMonster) spawnOneMonster(st, ops.addMonster, rand || Math.random);
-    if (ops.removeMonster) {
-      let need = ops.removeMonsterCount || 1;
+    },
+    rewrite(ctx, value) {
+      const st = ctx.st;
+      if (value.heroGoalText) st.haunt.heroGoalText = value.heroGoalText;
+      if (value.heroGoal) st.haunt.heroGoal = clone(value.heroGoal);
+      pushLog(st, '剧本被改写：' + (value.heroGoalText || '新的目标'));
+    },
+    addMonster(ctx, value) {
+      spawnOneMonster(ctx.st, value, ctx.rand || Math.random);
+    },
+    removeMonster(ctx, value) {
+      let need = ctx.ops.removeMonsterCount || 1;
       while (need-- > 0) {
-        const idx = st.monsters.findIndex((m) => m.type === ops.removeMonster);
+        const idx = ctx.st.monsters.findIndex((m) => m.type === value);
         if (idx < 0) break;
-        pushLog(st, '「' + st.monsters[idx].name + '」被移除了');
-        st.monsters.splice(idx, 1);
+        pushLog(ctx.st, '「' + ctx.st.monsters[idx].name + '」被移除了');
+        ctx.st.monsters.splice(idx, 1);
       }
-    }
-    if (ops.banish) {
-      const type = ops.banish.type || ops.banish;
-      const count = ops.banish.count || 1;
+    },
+    banish(ctx, value) {
+      const st = ctx.st;
+      const type = value.type || value;
+      const count = value.count || 1;
       let need = count;
       while (need-- > 0) {
         const idx = st.monsters.findIndex((m) => m.type === type);
         if (idx < 0) break;
+        markHunted(st, st.monsters[idx]);
         st.monsters.splice(idx, 1);
-        st.haunt.monsterBanish = (st.haunt.monsterBanish || 0) + 1;
       }
       pushLog(st, '驱散了 ' + count + ' 个威胁（累计 ' + (st.haunt.monsterBanish || 0) + '）');
-    }
-    if (ops.destroyItem) {
+    },
+    destroyItem(ctx, value) {
+      const { st, p } = ctx;
       const all = (p.items || []).slice();
-      const at = all.findIndex((it) => it.name === ops.destroyItem || it.key === ops.destroyItem);
+      const at = all.findIndex((it) => it.name === value || it.key === value);
       if (at >= 0) {
         const item = all[at];
         p.items.splice(at, 1);
@@ -1791,17 +2210,49 @@ window.CabinEngine = (function () {
         st.haunt.destroyedItems.push(item.name || item.key);
         pushLog(st, p.name + ' 摧毁了「' + (item.name || item.key) + '」');
       } else {
-        pushLog(st, p.name + ' 没有可摧毁的「' + ops.destroyItem + '」');
+        pushLog(st, p.name + ' 没有可摧毁的「' + value + '」');
       }
-    }
-    if (ops.teleportLanding) {
+    },
+    destroyAnyItem(ctx, value) {
+      const st = ctx.st;
+      let found = null;
+      for (const q of st.players) {
+        const at = (q.items || []).findIndex((it) => it.name === value || it.key === value);
+        if (at >= 0) { found = q.items.splice(at, 1)[0]; break; }
+      }
+      if (found) {
+        st.haunt.destroyedItems = st.haunt.destroyedItems || [];
+        st.haunt.destroyedItems.push(found.name || found.key);
+        pushLog(st, ctx.p.name + ' 摧毁了「' + (found.name || found.key) + '」');
+      } else {
+        pushLog(st, '场上没有可摧毁的「' + value + '」');
+      }
+    },
+    takeAnyItem(ctx, value) {
+      const { st, p } = ctx;
+      let found = null;
+      for (const q of st.players) {
+        if (q === p) continue;
+        const at = (q.items || []).findIndex((it) => it.name === value || it.key === value);
+        if (at >= 0) { found = q.items.splice(at, 1)[0]; break; }
+      }
+      if (found) {
+        grantItem(st, ctx.i, found);
+        pushLog(st, p.name + ' 取得了「' + (found.name || found.key) + '」');
+      } else {
+        pushLog(st, '场上没有「' + value + '」可取得');
+      }
+    },
+    teleportLanding(ctx) {
+      const { st, p } = ctx;
       const landing = st.rooms.find((r) => r.kind === 'landing');
       if (landing) {
         p.floor = landing.floor; p.x = landing.x; p.y = landing.y;
         pushLog(st, p.name + ' 被送回「' + landing.name + '」');
       }
-    }
-    if (ops.collectDNA) {
+    },
+    collectDNA(ctx) {
+      const { st, p, room } = ctx;
       const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.floor === p.floor && q.x === p.x && q.y === p.y);
       if (hero) {
         st.haunt.dnaCollected = st.haunt.dnaCollected || {};
@@ -1812,8 +2263,9 @@ window.CabinEngine = (function () {
       } else {
         pushLog(st, '同房间没有可采集 DNA 的英雄');
       }
-    }
-    if (ops.convertHero) {
+    },
+    convertHero(ctx) {
+      const { st, p } = ctx;
       const hero = st.players.find((q) => !q.dead && q.side === 'hero' && q.floor === p.floor && q.x === p.x && q.y === p.y);
       if (hero) {
         hero.side = 'traitor';
@@ -1822,9 +2274,100 @@ window.CabinEngine = (function () {
       } else {
         pushLog(st, '同房间没有可转化的英雄');
       }
+    },
+    win(ctx, value) {
+      win(ctx.st, value, ctx.ops.winText || (value === 'heroes' ? '剧本目标达成，英雄获胜' : '叛徒达成目标'));
     }
-    if (ops.win) win(st, ops.win, ops.winText || (ops.win === 'heroes' ? '剧本目标达成，英雄获胜' : '叛徒达成目标'));
+  };
+
+  const OP_ORDER = [
+    'progress', 'numberTrack', 'devourRoom', 'burnRoom', 'spreadWord', 'igniteFloor', 'drainTime',
+    'collectBlood', 'offerBlood', 'token', 'revealTrueBody', 'gain', 'lose', 'heal',
+    'damage', 'damageAll', 'hideSelf', 'stunMonster', 'flip', 'trap', 'untrap',
+    'giveHeroToken', 'carryToken', 'evidence', 'actionFlag', 'clearActionFlag', 'grantItemSelf', 'bid', 'treasure',
+    'grantKnowledgeToken', 'wardToken', 'consumeItemOrOmen', 'placeExplosive',
+    'dimension', 'disguise', 'reveal', 'swapBody', 'transfer', 'revive', 'rewrite',
+    'addMonster', 'removeMonster', 'banish', 'destroyItem', 'destroyAnyItem',
+    'takeAnyItem', 'teleportLanding', 'collectDNA', 'convertHero', 'win'
+  ];
+
+  function applyOps(st, i, ops, room, rand) {
+    if (!ops) return;
+    const ctx = { st, i, p: st.players[i], room, rand, h: st.haunt || {}, ops };
+    for (const key of OP_ORDER) {
+      const value = ops[key];
+      if (value === undefined || value === null) continue;
+      const handler = EFFECT_HANDLERS[key];
+      if (handler) handler(ctx, value);
+    }
   }
+
+
+  /* 剧本专用行动：只处理通用校验无法表达的分支。 */
+  const ACTION_SPECIALS = {
+    break_spell({ st, i, action, h, p, room, turnKey, gameKey }) {
+      if (!h.mirrorRealm) return null;
+      const mr = h.mirrorRealm;
+      const guess = action.guess || {};
+      const fields = ['trait', 'omen', 'room'];
+      if (!fields.some((k) => guess[k])) return { ok: false, msg: '需要猜属性、预兆或房间' };
+      if (gameKey) h.gameUsed[gameKey] = true; else h.turnUsed[turnKey] = true;
+      let right = 0;
+      fields.forEach((k) => {
+        if (!guess[k]) return;
+        if (String(guess[k]) === String(mr[k])) {
+          mr.found = mr.found || {};
+          mr.found[k] = true;
+          right += 1;
+        }
+      });
+      if (right > 0) {
+        addToken(st, '破咒', room, right);
+        pushLog(st, p.name + ' 猜中镜界线索：' + right + ' 项');
+      } else {
+        pushLog(st, p.name + ' 猜错了镜界线索，被镜面反噬');
+        beginDamage(st, i, 1, 'mental', '镜界反噬');
+      }
+      const solved = fields.filter((k) => mr.found && mr.found[k]).length;
+      if (solved >= 3) {
+        const revealer = typeof mr.revealer === 'number' ? st.players[mr.revealer] : null;
+        if (revealer) {
+          revealer.trapped = false;
+          revealer.mirror = false;
+        }
+        h.mirrorRealm = null;
+        pushLog(st, '★ 镜界破碎' + (revealer ? '，' + revealer.name + ' 从镜中脱困' : ''));
+      }
+      checkWin(st);
+      return { ok: true, state: st };
+    },
+    pass_note({ st, action, h, p, turnKey, gameKey }) {
+      const note = h.dieNote;
+      if (!note || note.holder !== p.id) return { ok: false, msg: '你手里没有 DIE 纸条' };
+      const target = st.players.find((q) => q.id === action.target && !q.dead && q.side === 'hero');
+      if (!target) return { ok: false, msg: '要指定一位英雄' };
+      if (target.floor !== p.floor || target.x !== p.x || target.y !== p.y) return { ok: false, msg: '只能交给同房间的英雄' };
+      if (gameKey) h.gameUsed[gameKey] = true; else h.turnUsed[turnKey] = true;
+      p.note = null;
+      target.note = 'DIE';
+      note.holder = target.id;
+      note.passes = (note.passes || 0) + 1;
+      h.setup.flags.notePassed = true;
+      pushLog(st, p.name + ' 把 DIE 纸条交给了 ' + target.name);
+      checkWin(st);
+      return { ok: true, state: st };
+    },
+    drop_flame({ st, h, p, room, turnKey, gameKey }) {
+      if (!p.carryingFlame) return { ok: false, msg: '你没有拿着精灵之火' };
+      if (gameKey) h.gameUsed[gameKey] = true; else h.turnUsed[turnKey] = true;
+      p.carryingFlame = false;
+      p.carryingToken = null;
+      addToken(st, '精灵之火', room, 1, 'goal');
+      pushLog(st, p.name + ' 把精灵之火放在「' + room.name + '」');
+      checkWin(st);
+      return { ok: true, state: st };
+    }
+  };
 
   function scenarioAction(st, i, action, rand) {
     const h = st.haunt;
@@ -1851,16 +2394,107 @@ window.CabinEngine = (function () {
       const want = def.symbol || 'event';
       if (!room || room.symbol !== want) return { ok: false, msg: '必须在带「' + want + '」符号的房间做' };
     }
+    if (def.where === 'rooms' && (!room || (def.rooms || []).indexOf(room.name) < 0)) {
+      return { ok: false, msg: '必须在「' + (def.rooms || []).join(' / ') + '」里做' };
+    }
     if (def.where === 'floors' && def.floors && def.floors.indexOf(p.floor) < 0) {
       return { ok: false, msg: '这个楼层不能做' };
     }
     if (def.requireToken && (!room || countTokens(st, def.requireToken, { room }) < 1)) {
       return { ok: false, msg: '这个房间没有「' + def.requireToken + '」' };
     }
+    if (def.consumeToken && room) {
+      const supply = (st.tokens || []).filter((t) => t.type === def.consumeToken &&
+        t.floor === room.floor && t.x === room.x && t.y === room.y && t.source !== 'goal')
+        .reduce((n, t) => n + (t.count || 1), 0);
+      if (supply < (def.consumeCount || 1)) {
+        return { ok: false, msg: '这个房间没有可消耗的「' + def.consumeToken + '」供应标记' };
+      }
+    }
+    if (def.requireSupplyToken && countSupplyTokens(st, def.requireSupplyToken) < (def.consumeCount || 1)) {
+      return { ok: false, msg: '场上没有可用的「' + def.requireSupplyToken + '」供应标记' };
+    }
+    if (def.requireTokenPrefix && (!room || (st.tokens || []).filter((t) => String(t.type).startsWith(def.requireTokenPrefix) && t.floor === room.floor && t.x === room.x && t.y === room.y).length < 1)) {
+      return { ok: false, msg: '这个房间没有「' + def.requireTokenPrefix + '」标记' };
+    }
     if (def.requireItem && !(p.items || []).some((it) => it.name === def.requireItem || it.key === def.requireItem)) {
       return { ok: false, msg: '你必须持有「' + def.requireItem + '」' };
     }
-    const r = testRoll(st, i, def.trait || 'known', 0, rand);
+    if (def.requireAnyItem && !st.players.some((q) => (q.items || []).some((it) => it.name === def.requireAnyItem || it.key === def.requireAnyItem))) {
+      return { ok: false, msg: '场上还没有「' + def.requireAnyItem + '」' };
+    }
+    if (def.requireMonsterType && (!room || !st.monsters.some((m) => !m.dead && m.type === def.requireMonsterType && m.floor === room.floor && m.x === room.x && m.y === room.y))) {
+      return { ok: false, msg: '这个房间没有「' + def.requireMonsterType + '」' };
+    }
+    if (def.key === 'overload' && (!room || !st.monsters.some((m) => !m.dead && m.type === 'generator' && !m.overloaded && m.floor === room.floor && m.x === room.x && m.y === room.y))) {
+      return { ok: false, msg: '这个房间已经没有可过载的发电机' };
+    }
+    if (def.requireFlag && !(
+      (h.setup && h.setup.flags && h.setup.flags[def.requireFlag])
+      || h[def.requireFlag]
+      || (h.custom && h.custom[def.requireFlag])
+    )) {
+      return { ok: false, msg: '当前剧本状态还不允许这个行动' };
+    }
+    if (def.requireTrapped && !p.trapped) {
+      return { ok: false, msg: '只有被困的英雄才能使用这个行动' };
+    }
+    if (def.requireNotCarrying && p.carryingFlame) {
+      return { ok: false, msg: '你已经拿着一盏精灵之火，先放下它' };
+    }
+    if (def.forbidToken && room && countTokens(st, def.forbidToken, { room }) > 0) {
+      return { ok: false, msg: '「' + room.name + '」已经有「' + def.forbidToken + '」标记' };
+    }
+    if (def.requireBurnable && !(p.items || []).some((it) => it && !itemActionOf(st, it))) {
+      return { ok: false, msg: '需要先烧掉一件物品或预兆' };
+    }
+    if (def.requireExplosive && countSupplyTokens(st, '炸药') <= 0 &&
+      !(st.tokens || []).some((t) => t.type === '炸药' && t.source !== 'setup')) {
+      return { ok: false, msg: '没有可用的炸药' };
+    }
+    if (def.requireMonsterHere && room) {
+      const mon = (st.monsters || []).find((m) => !m.dead && (m.type === def.requireMonsterType || m.key === def.requireMonsterType));
+      if (!mon || mon.floor !== room.floor || mon.x !== room.x || mon.y !== room.y) {
+        return { ok: false, msg: '必须和目标怪物在同一板块' };
+      }
+    }
+    if (def.consumeItemBeforeRoll) {
+      const pool = (p.items || []).filter((it) => it && !itemActionOf(st, it));
+      if (!pool.length) return { ok: false, msg: '需要先埋掉一件物品或预兆' };
+      const buried = pool[0];
+      p.items.splice(p.items.indexOf(buried), 1);
+      st.items = st.items || [];
+      st.items.push(buried);
+      pushLog(st, p.name + ' 埋掉了「' + buried.name + '」');
+    }
+    const special = ACTION_SPECIALS[def.key];
+    if (special) {
+      const result = special({ st, i, action, h, p, room, def, turnKey, gameKey });
+      if (result) return result;
+    }
+    let extra = Number(def.extraDice) || 0;
+    let flatBonus = 0;
+    if (def.bonusSameRoomHero && room) {
+      const helper = st.players.some((q) => q !== p && !q.dead && q.side === 'hero' &&
+        q.floor === room.floor && q.x === room.x && q.y === room.y);
+      if (helper) flatBonus += Number(def.bonusSameRoomHero);
+    }
+    if (def.bonusPerRoomToken && room) flatBonus += countTokens(st, def.bonusPerRoomToken, { room });
+    if (def.bonusRoom && room && room.name === def.bonusRoom) flatBonus += 1;
+    if (def.bonusKnowledgeToken) {
+      if (p.knowledgeToken) flatBonus += Number(def.bonusKnowledgeToken);
+    }
+    if (def.key === 'perform_ritual' && room) {
+      extra += countTokens(st, '火焰', { room });
+      if (room.name === '仪式房') extra += 1;
+      extra += countTokens(st, '诅咒知识', { room }) * 2;
+    }
+    const advertised = Array.isArray(def.traits) && def.traits.length ? def.traits : null;
+    const pickedTrait = advertised && action.trait && advertised.indexOf(action.trait) >= 0 ? action.trait : null;
+    const rollTrait = def.rollByNumberTrack ? 'none' : (pickedTrait || def.trait || (advertised ? advertised[0] : 'known'));
+    const diceCount = def.rollByNumberTrack ? Math.max(1, Number(h.numberTrack || 0) + extra) : undefined;
+    const r = testRoll(st, i, rollTrait, 0, rand, diceCount ? 0 : extra, diceCount);
+    if (flatBonus) r.total += flatBonus;
     st.lastRoll = { label: '剧本行动 · ' + def.name, faces: r.faces, total: r.total };
     if (def.once === 'game') {
       h.gameUsed[gameKey] = true;
@@ -1872,6 +2506,11 @@ window.CabinEngine = (function () {
     const tiers = (def.tiers || []).slice().sort((a, b) => (b.at || 0) - (a.at || 0));
     const hit = tiers.find((t) => r.total >= (t.at || 0));
     pushLog(st, p.name + ' 执行「' + def.name + '」：' + r.total);
+    if (hit && room) {
+      if (def.consumeToken) consumeTokens(st, def.consumeToken, room, def.consumeCount || 1);
+      if (def.consumeSupplyToken) consumeSupplyTokens(st, def.consumeSupplyToken, def.consumeCount || 1);
+      if (def.consumeTokenPrefix) consumeTokenPrefix(st, def.consumeTokenPrefix, room, def.consumeCount || 1);
+    }
     applyOps(st, i, hit ? hit.do : def.miss, room, rand);
     checkWin(st);
     return { ok: true, state: st };
@@ -1913,6 +2552,39 @@ window.CabinEngine = (function () {
     return p && !p.dead ? sideOf(st, p) : '';
   }
 
+  /* 自定义目标注册表：剧本只需要声明 key，语义集中在这里。 */
+  const CUSTOM_GOALS = {
+    wake_sleeping_one: ({ h }) => h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0,
+    enlightenment: ({ st, h }) => {
+      const tr = st.players[h.traitor];
+      const sanity = tr && tr.track && tr.track.sanity;
+      return !!(sanity && sanity.pos >= sanity.list.length - 1);
+    },
+    devour_the_house: ({ st, h }) => st.rooms.filter((r) => r.kind !== 'landing').every((r) =>
+      !!(r.consumed || (h.devouredRooms && h.devouredRooms[r.floor + ':' + r.x + ':' + r.y]))),
+    spread_alien_words: ({ h }) => !!h.wordSupply && (h.wordsPlaced || 0) >= h.wordSupply,
+    burn_the_house: ({ h }) => FLOORS.every((f) => !!(h.burnedFloors && h.burnedFloors[f])),
+    time_runs_out: ({ h }) => h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0,
+    bring_blood_person_blood: ({ h }) => (h.bloodOffered || 0) >= (h.bloodHeroes || 0) && (h.bloodHeroes || 0) > 0,
+    book_burned: ({ h }) => !!(h.custom && h.custom.bookBurned),
+    dimension_escape: ({ st, h, heroes, g }) => !!(h.custom && h.custom.dimensionActive) && heroes.some((p) => {
+      const r = roomAt(st, p.floor, p.x, p.y);
+      return r && r.name === (g.room || '入口大厅');
+    }),
+    hair_with_antidote: ({ h, heroes }) => !!(h.custom && h.custom.hairDefeated) && heroes.some((p) =>
+      (p.items || []).some((it) => it.name === '解药' || it.key === '解药')),
+    skull_to_panic: ({ st, heroes, g }) => heroes.some((p) => {
+      const r = roomAt(st, p.floor, p.x, p.y);
+      const carries = (p.items || []).some((it) => it.name === '头骨' || it.key === '头骨');
+      return carries && r && r.name === (g.room || '恐慌室');
+    }),
+    contract_burned: ({ h }) => !!(h.custom && h.custom.contractBurned),
+    burn_every_room: ({ st }) => st.rooms.length > 0 && st.rooms.every((r) => isBurningRoom(st, r)),
+    realtor_freed: ({ h }) => !!(h.custom && h.custom.realtorFreed),
+    armor_spell_broken: ({ h }) => !!(h.custom && h.custom.armorSpellBroken),
+    dawn: ({ h }) => h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0
+  };
+
   function goalDone(st, g, hg, h, heroes) {
     if (!g) return false;
     if (g.type === 'killAll') {
@@ -1934,13 +2606,40 @@ window.CabinEngine = (function () {
       if (g.perHero && g.token === 'DNA') {
         return heroes.every((p) => !!(h.dnaCollected && h.dnaCollected[p.id]));
       }
-      const need = g.perHero ? sideAlive(st, 'hero') : (g.need || 1);
-      return countTokens(st, g.token, g) >= need;
+      const need = g.needByPlayers ? Number(g.needByPlayers[st.players.length] || g.need || 1) : (g.perHero ? sideAlive(st, 'hero') : (g.need || 1));
+      return countTokens(st, g.token, {
+        goalOnly: g.requireGoalOnly !== false,
+        room: g.room || undefined
+      }) >= need;
     }
     if (g.type === 'evidence') return (h.evidence || 0) >= (g.need || 1);
     if (g.type === 'treasure') return (h.treasure || 0) >= (g.need || 1);
-    if (g.type === 'hunt') return h.monsterBanish >= (g.need || 1);
-    if (g.type === 'ritual') return h.progress >= (g.need || 1);
+    if (g.type === 'hunt') {
+      const need = g.needByPlayers ? Number(g.needByPlayers[st.players.length]) : (g.need || 1);
+      const wanted = g.monster || g.monsters || null;
+      const hunted = Object.keys(h.monsterHunted || {}).filter((id) => {
+        const type = h.monsterHunted[id];
+        if (!wanted) return true;
+        if (Array.isArray(wanted)) return wanted.indexOf(type) >= 0;
+        return type === wanted;
+      });
+      if (hunted.length) return hunted.length >= need;
+      // 兼容旧测试/旧存档：没有唯一击杀表时退回总数。
+      return (h.monsterBanish || 0) >= need;
+    }
+    if (g.type === 'ritual') {
+      if (h.progress < (g.need || 1)) return false;
+      if (g.requireToken) {
+        const need = g.requireCountByPlayers
+          ? Number(g.requireCountByPlayers[st.players.length] || 0)
+          : (g.requireCount || 1);
+        const have = countTokens(st, g.requireToken, { goalOnly: !!g.requireGoalOnly });
+        if (have < need) return false;
+      }
+      if (g.requireMonsterType && !st.monsters.some((m) => !m.dead && m.type === g.requireMonsterType)) return false;
+      if (g.requireFlag && !((h.setup && h.setup.flags && h.setup.flags[g.requireFlag]) || h[g.requireFlag])) return false;
+      return true;
+    }
     if (g.type === 'escape') {
       const roomName = g.room || '入口大厅';
       return st.players.some((p) => !p.dead && sideOf(st, p) === 'hero' && (() => {
@@ -1954,13 +2653,14 @@ window.CabinEngine = (function () {
       return !!(h.sideCounts && Number(h.sideCounts.traitor) === 0);
     }
     if (g.type === 'placeTokens' && g.pairs) {
-      const want = g.pairs.map((it) => countTokens(st, it.token, { room: it.room }));
+      const want = g.pairs.map((it) => countTokens(st, it.token, { room: it.room, goalOnly: true }));
       return want.every((n) => n >= (g.need || 1));
     }
     if (g.type === 'rig') {
-      const byFloor = tokensByFloor(st, g.token);
+      const byFloor = tokensByFloor(st, g.token, { goalOnly: true });
       const filled = FLOORS.filter((f) => byFloor[f] > 0).length;
-      return (g.perFloor ? filled >= FLOORS.length : true) && countTokens(st, g.token, null) >= (g.need || 1);
+      const need = g.needByPlayers ? Number(g.needByPlayers[String(st.players.length)] || g.need || 1) : (g.need || 1);
+      return (g.perFloor ? filled >= FLOORS.length : true) && countTokens(st, g.token, { goalOnly: true }) >= need;
     }
     if (g.type === 'trackZero') {
       if (g.track === 'number') {
@@ -1976,29 +2676,8 @@ window.CabinEngine = (function () {
       return (h.destroyedItems || []).some((x) => x === g.item || (x && x.name === g.item));
     }
     if (g.type === 'custom') {
-      if (g.key === 'wake_sleeping_one') {
-        return h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0;
-      }
-      if (g.key === 'enlightenment') {
-        const tr = st.players[h.traitor];
-        const sanity = tr && tr.track && tr.track.sanity;
-        return !!(sanity && sanity.pos >= sanity.list.length - 1);
-      }
-      if (g.key === 'devour_the_house') {
-        return FLOORS.every((f) => !!(h.devouredFloors && h.devouredFloors[f]));
-      }
-      if (g.key === 'spread_alien_words') {
-        return !!h.wordSupply && (h.wordsPlaced || 0) >= h.wordSupply;
-      }
-      if (g.key === 'burn_the_house') {
-        return FLOORS.every((f) => !!(h.burnedFloors && h.burnedFloors[f]));
-      }
-      if (g.key === 'time_runs_out') {
-        return h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0;
-      }
-      if (g.key === 'bring_blood_person_blood') {
-        return (h.bloodOffered || 0) >= (h.bloodHeroes || 0) && (h.bloodHeroes || 0) > 0;
-      }
+      const fn = CUSTOM_GOALS[g.key];
+      if (fn) return !!fn({ st, h, heroes, g });
       return !!(h.custom && h.custom[g.key]);
     }
     return false;
@@ -2020,9 +2699,10 @@ window.CabinEngine = (function () {
       if (!alive.length) { win(st, 'none', '全员倒下，没有幸存者'); return; }
       if (alive.length === 1) {
         const last = alive[0];
-        if (!h.ffaGoal || goalDone(st, h.ffaGoal, hg, h, [last])) {
-          win(st, 'heroes', last.name + ' 是最后活着的人，混战获胜');
-        }
+        const ffa = h.ffaGoal || hg;
+        // 混战目标：killAll 在混战里就是“最后存活”；其它目标（如先凑齐食物）仍需达成。
+        const done = !ffa || ffa.type === 'killAll' || goalDone(st, ffa, hg, h, [last]);
+        if (done) win(st, 'heroes', last.name + ' 是最后活着的人，混战获胜');
       }
       return;
     }
@@ -2035,6 +2715,9 @@ window.CabinEngine = (function () {
       return;
     }
 
+    if (h.no === 43 && h.numberTrack !== null && h.numberTrack !== undefined && Number(h.numberTrack) <= 0) {
+      win(st, 'heroes', '数字轨道归零，天亮了，英雄撑到黎明'); return;
+    }
     if (hg && goalDone(st, hg, hg, h, heroes)) {
       win(st, 'heroes', hg.text || '英雄达成剧本目标'); return;
     }
@@ -2050,13 +2733,6 @@ window.CabinEngine = (function () {
   }
 
   /* ---------------- 移动 / 翻房间 ---------------- */
-  function pendingGuard(st) {
-    if (st.pendingDamage) return '先分配伤害';
-    if (st.pendingTile) return '先旋转并放置房间';
-    if (st.phase === 'ended') return '本章已结束';
-    return '';
-  }
-
   function drawRoomTile(st, floor, rand) {
     let guard = 0;
     while (st.roomDeck.length && guard++ < 60) {
@@ -2158,6 +2834,11 @@ window.CabinEngine = (function () {
     st.moves = Math.max(0, st.moves - (pt.cost || 1));
     st.pendingTile = null;
     pushLog(st, '「' + room.name + '」接入地图（旋转 ' + rot + '）');
+    const fire = countTokens(st, '火焰', { room });
+    if (fire > 0 && st.haunt && st.haunt.active && !me.fireImmune) {
+      pushLog(st, '「' + room.name + '」正在燃烧，' + me.name + ' 被火焰灼伤');
+      beginDamage(st, i, 1, 'physical', '火焰');
+    }
     roomEffect(st, i, room, rand);
     resolveRoomSymbol(st, i, room, rand);
     if (room.special === 'elevator') rideElevator(st, i, rand);
@@ -2211,6 +2892,12 @@ window.CabinEngine = (function () {
     pushLog(st, me.name + ' 乘神秘电梯到「' + dest.name + '」（两骰 ' + r.total + '）');
   }
 
+  function discardHidden(st, me) {
+    if (!me || !me.hidden) return;
+    me.hidden = false;
+    pushLog(st, me.name + ' 移动后失去躲藏状态');
+  }
+
   function moveToRoom(st, i, dir, rand) {
     const me = st.players[i];
     const from = roomAt(st, me.floor, me.x, me.y);
@@ -2232,8 +2919,14 @@ window.CabinEngine = (function () {
     if (st.moves < cost) return { ok: false, msg: '移动点不够，这次需要 ' + cost + ' 点' };
     st.moves -= cost;
     me.x = nx; me.y = ny;
+    discardHidden(st, me);
     const rName = target.name;
     pushLog(st, me.name + ' 进入「' + rName + '」');
+    const fire = isBurningRoom(st, target);
+    if (fire && st.haunt && st.haunt.active && !me.fireImmune) {
+      pushLog(st, '「' + rName + '」正在燃烧，' + me.name + ' 被火焰灼伤');
+      beginDamage(st, i, 1, st.haunt.no === 44 ? 'general' : 'physical', '火焰');
+    }
     roomEffect(st, i, target, rand);
     if (target.special === 'elevator') rideElevator(st, i, rand);
     resolveRoomSymbol(st, i, target, rand);
@@ -2318,6 +3011,82 @@ window.CabinEngine = (function () {
     return (p.items || []).some((it) => it.distance && !it.noNormalAttack && (!it.weapon || it.weapon === trait) && !itemActionOf(st, it));
   }
 
+  function attackRerollAvailable(st, i) {
+    return (st.players[i].items || []).some((it) => it.reroll && !itemActionOf(st, it));
+  }
+
+  /* 攻击骰与判定骰共用同一次“掷骰→可重掷→确认”窗口；没有重掷牌时仍即时结算，保持旧流程。 */
+  function queueAttackRoll(st, i, meta, faces, total, bonus) {
+    st.pendingRoll = {
+      kind: 'attack', index: i, trait: meta.trait, diff: meta.foe,
+      card: '攻击 · ' + meta.targetName,
+      result: { faces: faces.slice(), total: total, ok: total >= meta.foe },
+      attack: meta, bonus: bonus || 0, await: true
+    };
+    st.lastRoll = {
+      label: st.players[i].name + (meta.ranged ? ' 远程攻击 ' : ' 攻击 ') + meta.targetName,
+      faces: faces.slice(), foeFaces: meta.foeFaces || [], total: total,
+      foe: meta.foe, bonus: bonus || 0
+    };
+    st.attacked = true;
+    return { ok: true, pending: true, state: st };
+  }
+
+  function applyQueuedAttack(st, meta, result, rand) {
+    const i = meta.meIndex;
+    const me = st.players[i];
+    const diff = result.total - meta.foe;
+    if (meta.type === 'player') {
+      const targetP = st.players.find((p) => p.id === meta.targetId);
+      if (targetP && !targetP.dead) {
+        const h25 = st.haunt && st.haunt.active && st.haunt.no === 25 ? st.haunt : null;
+        const armorTransfer = h25 && diff > 0 && meta.trait === 'might' && me.side === 'traitor' &&
+          targetP.side === 'hero' && h25.armorHolder === me.id;
+        if (armorTransfer) {
+          h25.armorHolder = targetP.id;
+          h25.armorRoom = { floor: targetP.floor, x: targetP.x, y: targetP.y };
+          pushLog(st, me.name + ' 穿着铠甲击中 ' + targetP.name + '，没有造成伤害，把铠甲交给了他');
+        } else if (diff > 0) beginDamage(st, st.players.indexOf(targetP), diff, meta.physical ? 'physical' : 'mental', me.name + (meta.ranged ? ' 的远程攻击' : ' 的攻击'));
+        else if (diff < 0 && !meta.ranged) beginDamage(st, i, Math.abs(diff), meta.physical ? 'physical' : 'mental', targetP.name + ' 的反击');
+        pushLog(st, me.name + (meta.ranged ? ' 远程攻击 ' : ' 攻击 ') + targetP.name + '：' + result.total + ' 对 ' + meta.foe + ' → ' +
+          (diff > 0 ? (armorTransfer ? '铠甲转移' : '得手 ' + diff) : diff < 0 && !meta.ranged ? '被反击 ' + Math.abs(diff) : '被挡'));
+      }
+      return;
+    }
+    const monster = st.monsters.find((m) => m.id === meta.targetId);
+    if (!monster || monster.dead) return;
+    const monsterDiff = diff - (monster.damageReduce ? 1 : 0);
+    if (monsterDiff > 0) {
+      if ((monster.key === 'photographer' || monster.type === 'photographer') && meta.trait === 'might') {
+        monster.dead = true;
+        markHunted(st, monster);
+        if (st.haunt) st.haunt.monsterBanish = (st.haunt.monsterBanish || 0) + 1;
+        pushLog(st, me.name + ' 用力量击伤幽灵摄影师，它当场被消灭');
+      } else if (monster.oneHit) {
+        monster.dead = true;
+        markHunted(st, monster);
+        pushLog(st, me.name + ' 击中 ' + monster.name + '，它当场被消灭（已驱散 ' + st.haunt.monsterBanish + '）');
+      } else if (monster.noStun) {
+        pushLog(st, me.name + ' 击中 ' + monster.name + '，但它不会僵直，攻击没有效果');
+      } else {
+        monster.stunned = 1;
+        markHunted(st, monster);
+        pushLog(st, me.name + (meta.ranged ? ' 远程击中 ' : ' 击中 ') + monster.name + '，它僵直了（已驱散 ' + st.haunt.monsterBanish + '）');
+      }
+      if (monster.key === 'host' || monster.type === 'host') {
+        const skull = st.items && st.items.find ? st.items.find((it) => it.name === '头骨') : null;
+        grantItem(st, i, skull || { key: 'skull', name: '头骨' });
+        pushLog(st, '房主被击退，头骨交给 ' + me.name);
+      }
+    } else if (diff < 0 && !monster.stunned && !meta.ranged) {
+      beginDamage(st, i, Math.abs(diff), 'physical', monster.name + ' 的反击');
+      pushLog(st, monster.name + ' 反击 ' + me.name + '，造成 ' + Math.abs(diff) + ' 点物理伤害');
+    } else {
+      pushLog(st, me.name + (meta.ranged ? ' 的远程攻击被挡下' : ' 没能击中 ') + monster.name);
+    }
+    checkWin(st);
+  }
+
   function attack(st, i, targetId, trait, rand, opts) {
     opts = opts || {};
     if (!st.haunt || !st.haunt.active) return { ok: false, msg: '闹鬼后才能攻击' };
@@ -2339,23 +3108,44 @@ window.CabinEngine = (function () {
       }
       if (st.haunt && st.haunt.hidden && me.side === 'traitor' && targetP.side !== 'traitor') {
         st.haunt.hidden = false;
-        pushLog(st, '★ 隐藏叛徒暴露了：' + me.name);
+        if (st.haunt.setup && st.haunt.setup.flags && st.haunt.setup.flags.healOnReveal) {
+          TRAITS.forEach((t) => healTrait(st, i, t.key, 99));
+          gainTrait(st, i, 'might', 1, '隐藏叛徒暴露');
+          pushLog(st, '★ 隐藏叛徒暴露：' + me.name + ' 恢复全部属性并 +1 力量');
+        } else {
+          pushLog(st, '★ 隐藏叛徒暴露了：' + me.name);
+        }
       }
+      /* 暴露后即使没有 healOnReveal，也不再隐藏。 */
       const wpn = pickWeapon(st, i, tr, opts.weaponIndex);
       const wpnBonus = weaponResult(wpn);
-      const ar = roll(traitVal(st, i, tr) + itemTestBonus(st, i, tr) + weaponDice(wpn), rand);
+      const wardDice = st.haunt && st.haunt.active && st.haunt.no === 4 && targetP.wardToken ? 2 : 0;
+      const ar = roll(traitVal(st, i, tr) + itemTestBonus(st, i, tr) + weaponDice(wpn) + wardDice, rand);
       const attackTotal = ar.total + wpnBonus;
-      const dr = roll(traitVal(st, st.players.indexOf(targetP), tr) + itemSum(st, st.players.indexOf(targetP), 'defenseDice'), rand);
+      const dr = roll(traitVal(st, st.players.indexOf(targetP), tr) + itemSum(st, st.players.indexOf(targetP), 'defenseDice') + wardDice, rand);
       if (wpn) markItemAction(st, wpn, 'use');
       markTraitItems(st, i, tr);
       st.lastRoll = { label: me.name + (ranged ? ' 远程攻击 ' : ' 攻击 ') + targetP.name, faces: ar.faces, foeFaces: dr.faces, total: attackTotal, foe: dr.total, bonus: wpnBonus };
       const diff = attackTotal - dr.total;
       const physical = (tr === 'might' || tr === 'speed');
+      if (attackRerollAvailable(st, i)) {
+        return queueAttackRoll(st, i, {
+          type: 'player', meIndex: i, targetId: targetP.id, targetName: targetP.name,
+          trait: tr, foe: dr.total, foeFaces: dr.faces, physical: physical, ranged: ranged
+        }, ar.faces, attackTotal, wpnBonus);
+      }
       const stolen = null;
       pushLog(st, me.name + (ranged ? ' 远程攻击 ' : ' 攻击 ') + targetP.name + '：' + attackTotal + ' 对 ' + dr.total + ' → ' +
         (stolen ? '抢走「' + stolen.name + '」' : (diff > 0 ? '得手 ' + diff : diff < 0 && !ranged ? '被反击 ' + Math.abs(diff) : '被挡')));
       st.attacked = true;
-      if (diff > 0 && !stolen) {
+      const h25 = st.haunt && st.haunt.active && st.haunt.no === 25 ? st.haunt : null;
+      const armorTransfer = h25 && diff > 0 && tr === 'might' && me.side === 'traitor' &&
+        targetP.side === 'hero' && h25.armorHolder === me.id;
+      if (diff > 0 && armorTransfer) {
+        h25.armorHolder = targetP.id;
+        h25.armorRoom = { floor: targetP.floor, x: targetP.x, y: targetP.y };
+        pushLog(st, me.name + ' 穿着铠甲击中 ' + targetP.name + '，没有造成伤害，把铠甲交给了他');
+      } else if (diff > 0 && !stolen) {
         beginDamage(st, st.players.indexOf(targetP), diff, physical ? 'physical' : 'mental', me.name + ' 的攻击');
       } else if (diff < 0 && !ranged) {
         beginDamage(st, i, Math.abs(diff), physical ? 'physical' : 'mental', targetP.name + ' 的反击');
@@ -2375,24 +3165,40 @@ window.CabinEngine = (function () {
     const wpnMBonus = weaponResult(wpnM);
     const ar = roll(traitVal(st, i, tr) + itemTestBonus(st, i, tr) + weaponDice(wpnM), rand);
     const attackTotal = ar.total + wpnMBonus;
-    const dr = roll(monster[tr], rand);
+    const dr = roll(monsterStat(st, monster, tr), rand);
     if (wpnM) markItemAction(st, wpnM, 'use');
     markTraitItems(st, i, tr);
     const diff = attackTotal - dr.total;
     const monsterDiff = diff - (monster.damageReduce ? 1 : 0);
     st.lastRoll = { label: me.name + (ranged ? ' 远程攻击 ' : ' 攻击 ') + monster.name, faces: ar.faces, foeFaces: dr.faces, total: attackTotal, foe: dr.total, bonus: wpnMBonus };
     st.attacked = true;
+    if (attackRerollAvailable(st, i)) {
+      return queueAttackRoll(st, i, {
+        type: 'monster', meIndex: i, targetId: monster.id, targetName: monster.name,
+        trait: tr, foe: dr.total, foeFaces: dr.faces, physical: true, ranged: ranged
+      }, ar.faces, attackTotal, wpnMBonus);
+    }
     if (monsterDiff > 0) {
-      if (monster.oneHit) {
+      if ((monster.key === 'photographer' || monster.type === 'photographer') && tr === 'might') {
         monster.dead = true;
-        st.haunt.monsterBanish = (st.haunt.monsterBanish || 0) + 1;
+        markHunted(st, monster);
+        if (st.haunt) st.haunt.monsterBanish = (st.haunt.monsterBanish || 0) + 1;
+        pushLog(st, me.name + ' 用力量击伤幽灵摄影师，它当场被消灭');
+      } else if (monster.oneHit) {
+        monster.dead = true;
+        markHunted(st, monster);
         pushLog(st, me.name + ' 击中 ' + monster.name + '，它当场被消灭（已驱散 ' + st.haunt.monsterBanish + '）');
       } else if (monster.noStun) {
         pushLog(st, me.name + ' 击中 ' + monster.name + '，但它不会僵直，攻击没有效果');
       } else {
         monster.stunned = 1;
-        st.haunt.monsterBanish = (st.haunt.monsterBanish || 0) + 1;
+        markHunted(st, monster);
         pushLog(st, me.name + (ranged ? ' 远程击中 ' : ' 击中 ') + monster.name + '，它僵直了（已驱散 ' + st.haunt.monsterBanish + '）');
+      }
+      if (monster.key === 'host' || monster.type === 'host') {
+        const skull = st.items && st.items.find ? st.items.find((it) => it.name === '头骨') : null;
+        grantItem(st, i, skull || { key: 'skull', name: '头骨' });
+        pushLog(st, '房主被击退，头骨交给 ' + me.name);
       }
     } else if (diff < 0 && !monster.stunned && !ranged) {
       beginDamage(st, i, Math.abs(diff), 'physical', monster.name + ' 的反击');
@@ -2409,18 +3215,35 @@ window.CabinEngine = (function () {
     const h = st.haunt;
     if (!h || !h.active) return { ok: false, msg: '闹鬼后才能进行剧本判定' };
     if (st.players[i] && st.players[i].side === 'traitor') return { ok: false, msg: '叛徒不能帮英雄完成仪式' };
-    if (st.pendingDamage || st.pendingTile) return { ok: false, msg: pendingGuard(st) };
+    if (st.pendingDamage || st.pendingTile) return { ok: false, msg: st.pendingDamage ? '先分配伤害' : '先旋转并放置房间' };
     const goal = h.heroGoal;
     if (goal.type !== 'ritual') return { ok: false, msg: '这个剧本不需要仪式判定' };
     if (st.taskRolled) return { ok: false, msg: '本回合已经做过一次剧本判定' };
     const me = st.players[i];
     const here = roomAt(st, me.floor, me.x, me.y);
-    if (goal.room && (!here || here.name !== goal.room)) return { ok: false, msg: '要在「' + goal.room + '」里做' };
+    if (goal.rooms && goal.rooms.length) {
+      if (!here || goal.rooms.indexOf(here.name) < 0) return { ok: false, msg: '要在「' + goal.rooms.join('」或「') + '」里做' };
+    } else if (goal.room && (!here || here.name !== goal.room)) return { ok: false, msg: '要在「' + goal.room + '」里做' };
+    if (goal.requireToken) {
+      const need = Number(goal.requireCountByPlayers ? goal.requireCountByPlayers[String(st.players.length)] : (goal.requireCount || 1)) || 1;
+      if (countTokenEverywhere(st, goal.requireToken) < need) {
+        return { ok: false, msg: '还缺少仪式需要的「' + goal.requireToken + '」' };
+      }
+    }
     const r = testRoll(st, i, goal.trait, goal.diff, rand);
     st.lastRoll = { label: '仪式 · ' + labelOf(goal.trait) + '判定', faces: r.faces, total: r.total, diff: goal.diff, ok: r.ok };
     st.taskRolled = true;
     if (r.ok) {
       h.progress += 1;
+      if (((h.custom && h.custom.elderQueen) || (h.setup && h.setup.flags && h.setup.flags.elderQueen)) && !h.elderQueenSpawned && h.progress >= 1) {
+        h.elderQueenSpawned = true;
+        const queenRoom = roomByName(st, goal.room) || st.rooms[0];
+        spawnOneMonster(st, {
+          key: 'elderqueen', name: '长老女王', might: 7, speed: 5, sanity: 8, known: 7,
+          attack: 'sanity', noStun: true, rule: '仪式进行时苏醒'
+        }, rand, queenRoom ? queenRoom.name : null);
+        pushLog(st, '★ 第一次仪式推进唤醒了长老女王');
+      }
       pushLog(st, me.name + ' 在「' + (goal.room || '此处') + '完成仪式（' + h.progress + '/' + goal.need + '）');
     } else {
       pushLog(st, me.name + ' 的仪式失败，遭到反噬');
@@ -2432,27 +3255,32 @@ window.CabinEngine = (function () {
 
   /* ---------------- 怪物 ---------------- */
   function monsterRoom(st, m) { return roomAt(st, m.floor, m.x, m.y); }
-  function pathStep(st, m, target) {
-    const start = roomAt(st, m.floor, m.x, m.y);
-    if (!start) return null;
-    const q = [{ r: start, d: 0 }];
-    const seen = { [start.x + ',' + start.y]: true };
-    while (q.length) {
-      const cur = q.shift();
-      if (cur.d >= m.speed) continue;
-      for (const dir of ['N', 'S', 'E', 'W']) {
-        if (!doorsHas(cur.r.doors, dir)) continue;
-        const d = DIRS[dir]; const nx = cur.r.x + d[0], ny = cur.r.y + d[1];
-        const nr = roomAt(st, m.floor, nx, ny);
-        if (!nr || seen[nx + ',' + ny]) continue;
-        seen[nx + ',' + ny] = true;
-        if (nx === target.x && ny === target.y) return { x: nx, y: ny };
-        q.push({ r: nr, d: cur.d + 1 });
-      }
-    }
-    return null;
+  function countMonsterType(st, key) {
+    return st.monsters.filter((m) => !m.dead && (m.key === key || m.type === key)).length;
   }
-
+  function countTokenEverywhere(st, token) {
+    let n = 0;
+    st.rooms.forEach((r) => { n += countTokens(st, token, { room: r }); });
+    return n;
+  }
+  /* 怪物卡上的动态数值：猫又按亡灵猫、恶魔犬按食物、构造体按数字轨道 */
+  function monsterStat(st, m, key) {
+    let v = Number(m[key]) || 0;
+    if (key === 'might' && (m.key === 'bakeneko' || m.type === 'bakeneko')) {
+      v += Math.min(5, countMonsterType(st, 'undeadcat'));
+      v = Math.min(8, v);
+    }
+    if (key === 'might' && (m.key === 'dog' || m.type === 'dog')) {
+      const food = countTokenEverywhere(st, '食物');
+      v += food;
+    }
+    if (key === 'speed' && (m.key === 'construct' || m.type === 'construct')) {
+      const track = st.haunt && st.haunt.numberTrack;
+      if (track) v = Math.max(1, Number(track) || v);
+    }
+    if (m.merged && key === 'might') v = Math.max(v, 8);
+    return v;
+  }
   function findMonsterPath(st, m, target) {
     const start = roomAt(st, m.floor, m.x, m.y);
     const goal = roomAt(st, target.floor, target.x, target.y);
@@ -2495,13 +3323,93 @@ window.CabinEngine = (function () {
     if (ti < 0) return;
     const tr = (m.attack === 'speed' || m.attack === 'sanity' || m.attack === 'known') ? m.attack : 'might';
     if (m[tr] === undefined) return;
-    const ar = roll(m[tr], rand);
+    const ar = roll(monsterStat(st, m, tr), rand);
     const dr = roll(traitVal(st, ti, tr), rand);
     const diff = ar.total - dr.total;
     st.lastRoll = { label: m.name + ' 攻击 ' + target.name + '（' + labelOf(tr) + '）', faces: ar.faces, foeFaces: dr.faces, total: ar.total, foe: dr.total };
     st.lastCard = { kind: 'monster', title: '怪物攻击 · ' + m.name, text: m.name + ' 扑向 ' + target.name + '。', tone: diff > 0 ? 'bad' : '' };
     pushLog(st, m.name + ' 攻击 ' + target.name + '：' + ar.total + ' 对 ' + dr.total + ' → ' + (diff > 0 ? '命中' : '被躲开'));
-    if (diff > 0) beginDamage(st, ti, diff, (tr === 'might' || tr === 'speed') ? 'physical' : 'mental', m.name);
+    if (diff > 0) {
+      beginDamage(st, ti, diff, (tr === 'might' || tr === 'speed') ? 'physical' : 'mental', m.name);
+      if (m.key === 'slug' || m.type === 'slug') {
+        target.side = 'traitor';
+        target.controlled = true;
+        pushLog(st, '★ ' + target.name + ' 被鼻涕虫精神控制，转为叛徒阵营');
+      }
+      if (m.key === 'slug' || m.type === 'slug') {
+        st.monsters.forEach((x) => {
+          if ((x.key === 'slug' || x.type === 'slug') && x.floor === m.floor && x.x === m.x && x.y === m.y) x.dead = true;
+        });
+        if (st.monsterTurn) st.monsterTurn.queue = st.monsterTurn.queue.filter((id) => {
+          const x = st.monsters.find((q) => q.id === id);
+          return x && !x.dead;
+        });
+      }
+    }
+  }
+
+  /* 怪物阶段结束时机钩子：'pending' 等待伤害，'ended' 表示胜负已分。 */
+  const MONSTER_END_HOOKS = {
+    spreadFire({ st, h }) {
+      if (!h || !h.active || h.no !== 44) return '';
+      spreadBurning(st);
+      if (st.phase === 'ended') return 'ended';
+      return '';
+    },
+    demonAura({ st, h }) {
+      if (!h || !h.active || h.no !== 4) return '';
+      const demon = (st.monsters || []).find((m) => !m.dead &&
+        (m.type === 'demon_realtor' || m.key === 'demon_realtor'));
+      if (!demon) return '';
+      st.players.forEach((p, k) => {
+        if (p.side === 'hero' && !p.dead && p.floor === demon.floor && p.x === demon.x && p.y === demon.y) {
+          pushLog(st, '恶魔中介在「' + (roomAt(st, p.floor, p.x, p.y) || {}).name + '」尖啸，' + p.name + ' 失去 1 神智');
+          beginDamage(st, k, 1, 'mental', '恶魔中介');
+        }
+      });
+      checkWin(st);
+      if (st.pendingDamage || (st.damageQueue && st.damageQueue.length)) {
+        st.pendingEnd = true;
+        return 'pending';
+      }
+      return '';
+    },
+    monsterDamage({ st, h }) {
+      if (!h || !h.active || !h.monster || !h.monster.endTurn || !h.monster.endTurn.damage) return '';
+      const dmg = h.monster.endTurn.damage;
+      pushLog(st, '（' + (h.monster.name || '怪物') + '）回合结束：英雄各受 ' + (dmg.amount || 1) + ' 点伤害');
+      st.players.forEach((p, k) => {
+        if (p.side === 'hero' && !p.dead) beginDamage(st, k, dmg.amount || 1, normalizeDamageType(dmg.type), h.monster.name || '怪物');
+      });
+      checkWin(st);
+      if (st.pendingDamage || (st.damageQueue && st.damageQueue.length)) {
+        st.pendingEnd = true;
+        return 'pending';
+      }
+      return '';
+    },
+    werewolfDawn({ st, h }) {
+      if (!h || !h.active || h.no !== 43 || h.numberTrack === null || h.numberTrack === undefined) return '';
+      const drop = h.damageSinceMonsterTurn ? 1 : 2;
+      h.numberTrack = Math.max(0, Number(h.numberTrack) - drop);
+      h.damageSinceMonsterTurn = false;
+      pushLog(st, '狼人嚎叫，数字轨道降到 ' + h.numberTrack + '（本回合' +
+        (drop === 2 ? '没有英雄受伤，额外下降' : '有英雄受伤') + '）');
+      st.players.forEach((q) => { q.hidden = false; });
+      checkWin(st);
+      if (st.phase === 'ended') return 'ended';
+      return '';
+    }
+  };
+
+  const MONSTER_END_HOOK_ORDER = ['spreadFire', 'demonAura', 'monsterDamage', 'werewolfDawn'];
+
+  function runMonsterEndHooks(st) {
+    for (const key of MONSTER_END_HOOK_ORDER) {
+      const result = MONSTER_END_HOOKS[key]({ st, h: st.haunt });
+      if (result) return result;
+    }
+    return '';
   }
 
   function finishMonsterTurn(st) {
@@ -2512,21 +3420,11 @@ window.CabinEngine = (function () {
     }
     st.monsterTurn = null;
     if (st.phase === 'ended') return;
-    const h = st.haunt;
     const keepCard = st.lastCard && st.lastCard.kind === 'monster' ? st.lastCard : null;
     const keepRoll = keepCard ? st.lastRoll : null;
-    if (h && h.active && h.monster && h.monster.endTurn && h.monster.endTurn.damage) {
-      const dmg = h.monster.endTurn.damage;
-      pushLog(st, '（' + (h.monster.name || '怪物') + '）回合结束：英雄各受 ' + (dmg.amount || 1) + ' 点伤害');
-      st.players.forEach((p, k) => {
-        if (p.side === 'hero' && !p.dead) beginDamage(st, k, dmg.amount || 1, normalizeDamageType(dmg.type), h.monster.name || '怪物');
-      });
-      checkWin(st);
-      if (st.pendingDamage || (st.damageQueue && st.damageQueue.length)) {
-        st.pendingEnd = true;
-        return;
-      }
-    }
+    const hook = runMonsterEndHooks(st);
+    if (hook === 'pending') return;
+    if (hook === 'ended' || st.phase === 'ended') return;
     nextTurn(st);
     if (keepCard && st.phase === 'playing') {
       st.lastCard = keepCard;
@@ -2542,6 +3440,18 @@ window.CabinEngine = (function () {
     st.monsterMoveRolls = {};
     pushLog(st, '怪物阶段：' + st.players[i].name + ' 指挥 ' + alive.length + ' 只怪物行动');
     return true;
+  }
+
+  function nearOnGenerator(st, target) {
+    const tr = roomAt(st, target.floor, target.x, target.y);
+    if (!tr) return false;
+    return st.monsters.some((g) => {
+      if (g.dead || g.type !== 'generator' || !g.on) return false;
+      const gr = roomAt(st, g.floor, g.x, g.y);
+      if (!gr || gr.floor !== tr.floor) return false;
+      return (gr.x === tr.x && gr.y === tr.y) ||
+        (Math.abs(gr.x - tr.x) + Math.abs(gr.y - tr.y) === 1);
+    });
   }
 
   function monsterAct(st, i, action, rand) {
@@ -2579,6 +3489,10 @@ window.CabinEngine = (function () {
     }
     const target = st.players.find((p) => p.id === action.target && !p.dead && sideOf(st, p) === 'hero');
     if (!target) return { ok: false, msg: '没有这个英雄目标' };
+    if (target.hidden) return { ok: false, msg: target.name + ' 已躲藏，怪物不能攻击他' };
+    if ((m.type === 'house' || m.key === 'house') && !nearOnGenerator(st, target)) {
+      return { ok: false, msg: '「房子」只能攻击 ON 发电机所在或相邻板块上的英雄' };
+    }
     const path = findMonsterPath(st, m, target);
     if (path === null) {
       mt.queue = mt.queue.filter((id) => id !== m.id);
@@ -2589,7 +3503,7 @@ window.CabinEngine = (function () {
     st.monsterMoveRolls = st.monsterMoveRolls || {};
     const typeKey = m.key || m.name;
     if (!Object.prototype.hasOwnProperty.call(st.monsterMoveRolls, typeKey)) {
-      st.monsterMoveRolls[typeKey] = roll(Math.max(1, m.speed || 1), rand).total;
+      st.monsterMoveRolls[typeKey] = roll(Math.max(1, monsterStat(st, m, 'speed') || 1), rand).total;
       pushLog(st, m.name + ' 的移动骰：' + st.monsterMoveRolls[typeKey] + ' 格');
     }
     const maxSteps = Math.max(0, st.monsterMoveRolls[typeKey]);
@@ -2607,11 +3521,28 @@ window.CabinEngine = (function () {
 
 
   /* ---------------- 回合 ---------------- */
+  function maybeReviveArmorTraitor(st, i) {
+    const h = st.haunt;
+    if (!h || !h.active || h.no !== 25 || i !== h.traitor || !st.players[i].dead) return false;
+    const holder = st.players.find((q) => q.side === 'hero' && !q.dead &&
+      (q.id === h.armorHolder || q.name === h.armorHolder));
+    const spot = holder ? { floor: holder.floor, x: holder.x, y: holder.y } : h.armorRoom;
+    if (!spot) return false;
+    const p = st.players[i];
+    p.dead = false;
+    p.corpse = false;
+    p.floor = spot.floor; p.x = spot.x; p.y = spot.y;
+    TRAITS.forEach((t) => { p.traits[t.key] = p.start[t.key]; if (p.track && p.track[t.key]) p.track[t.key].pos = p.track[t.key].startPos; });
+    pushLog(st, '铠甲的力量让 ' + p.name + ' 重新站起，并恢复到全部属性');
+    return true;
+  }
+
   function nextTurn(st) {
     const from = st.turn;
     let i = st.turn;
     for (let k = 0; k < st.players.length; k++) {
       i = (i + 1) % st.players.length;
+      maybeReviveArmorTraitor(st, i);
       if (!st.players[i].dead) {
         st.turn = i;
         if (i <= from) {
@@ -2628,6 +3559,85 @@ window.CabinEngine = (function () {
     }
     st.turn = 0;
     beginTurn(st, 0);
+  }
+
+  /* 回合结束时机钩子：返回 'pending' 表示等待伤害分配，其它返回值忽略。 */
+  const TURN_HOOKS = {
+    fire({ st, i, p, here }) {
+      if (here && st.haunt && st.haunt.active && st.haunt.no !== 44 &&
+        isBurningRoom(st, here) && !p.fireImmune) {
+        pushLog(st, p.name + ' 在着火的「' + here.name + '」结束回合');
+        if (beginDamage(st, i, 1, 'physical', '火焰')) return 'pending';
+      }
+      return '';
+    },
+    armorCurse({ st, i, p }) {
+      const h = st.haunt;
+      if (!h || !h.active || h.no !== 25 || p.side !== 'traitor') return '';
+      const holder = st.players.find((q) => q.side === 'hero' && !q.dead &&
+        (q.id === h.armorHolder || q.name === h.armorHolder));
+      if (!holder) return '';
+      TRAITS.forEach((t) => loseTraitDirect(st, st.players.indexOf(holder), t.key, 1, '铠甲诅咒'));
+      TRAITS.forEach((t) => gainTrait(st, i, t.key, 1, '铠甲诅咒'));
+      pushLog(st, '铠甲在 ' + holder.name + ' 身上：他四项属性 -1，' + p.name + ' 四项属性 +1');
+      checkWin(st);
+      return '';
+    },
+    roomDamage({ st, i, p, here }) {
+      if (here && here.effect && here.effect.type === 'endTurnDamage') {
+        pushLog(st, p.name + ' 结束回合时仍在「' + here.name + '」');
+        if (beginDamage(st, i, here.effect.amount || 1, here.effect.damage || 'physical', here.name)) return 'pending';
+      }
+      return '';
+    },
+    coal({ st, i, p, here }) {
+      if (here && here.special === 'coal') {
+        const landing = roomByName(st, '底层平台');
+        if (landing) {
+          p.floor = landing.floor; p.x = landing.x; p.y = landing.y;
+          pushLog(st, p.name + ' 在「洗衣滑道」结束回合，滑到底层平台');
+        }
+      }
+      return '';
+    },
+    collapsed({ st, i, p, here, rand }) {
+      if (here && here.special === 'collapsed') {
+        const cr = testRoll(st, i, 'speed', 5, rand);
+        st.lastRoll = { label: '坍塌房间 · 速度判定', faces: cr.faces, total: cr.total, diff: 5, ok: cr.ok };
+        if (!cr.ok) {
+          const landing = roomByName(st, '底层平台');
+          if (landing) { p.floor = landing.floor; p.x = landing.x; p.y = landing.y; }
+          pushLog(st, p.name + ' 脚下的房间塌了，掉到底层平台');
+          if (beginDamage(st, i, 1, 'physical', '坍塌房间')) return 'pending';
+        }
+      }
+      return '';
+    },
+    dieNote({ st, i, p }) {
+      if (st.haunt && st.haunt.dieNote && st.haunt.dieNote.holder === p.id && !p.dead) {
+        const nextHolder = st.players.find((q, k) => k !== i && !q.dead && q.side === 'hero' && q.floor === p.floor && q.x === p.x && q.y === p.y);
+        if (nextHolder) {
+          p.note = null;
+          nextHolder.note = 'DIE';
+          st.haunt.dieNote.holder = nextHolder.id;
+          st.haunt.dieNote.passes = (st.haunt.dieNote.passes || 0) + 1;
+          st.haunt.setup.flags.notePassed = true;
+          pushLog(st, 'DIE 纸条在回合结束时传给了 ' + nextHolder.name);
+        }
+      }
+      return '';
+    }
+  };
+
+  const TURN_HOOK_ORDER = ['fire', 'roomDamage', 'coal', 'collapsed', 'dieNote', 'armorCurse'];
+
+  function runTurnHooks(st, i, here, rand) {
+    const ctx = { st, i, p: st.players[i], here, rand };
+    for (const key of TURN_HOOK_ORDER) {
+      const result = TURN_HOOKS[key](ctx);
+      if (result === 'pending') return 'pending';
+    }
+    return '';
   }
 
   function endTurn(st, i, rand) {
@@ -2655,32 +3665,9 @@ window.CabinEngine = (function () {
       }
     }
     const here = roomAt(st, st.players[i].floor, st.players[i].x, st.players[i].y);
-    if (here && here.effect && here.effect.type === 'endTurnDamage') {
-      pushLog(st, st.players[i].name + ' 结束回合时仍在「' + here.name + '」');
-      if (beginDamage(st, i, here.effect.amount || 1, here.effect.damage || 'physical', here.name)) {
-        st.pendingEnd = true;
-        return { ok: true, state: st };
-      }
-    }
-    if (here && here.special === 'coal') {
-      const landing = roomByName(st, '底层平台');
-      if (landing) {
-        st.players[i].floor = landing.floor; st.players[i].x = landing.x; st.players[i].y = landing.y;
-        pushLog(st, st.players[i].name + ' 在「洗衣滑道」结束回合，滑到底层平台');
-      }
-    }
-    if (here && here.special === 'collapsed') {
-      const cr = testRoll(st, i, 'speed', 5, rand);
-      st.lastRoll = { label: '坍塌房间 · 速度判定', faces: cr.faces, total: cr.total, diff: 5, ok: cr.ok };
-      if (!cr.ok) {
-        const landing = roomByName(st, '底层平台');
-        if (landing) { st.players[i].floor = landing.floor; st.players[i].x = landing.x; st.players[i].y = landing.y; }
-        pushLog(st, st.players[i].name + ' 脚下的房间塌了，掉到底层平台');
-        if (beginDamage(st, i, 1, 'physical', '坍塌房间')) {
-          st.pendingEnd = true;
-          return { ok: true, state: st };
-        }
-      }
+    if (runTurnHooks(st, i, here, rand) === 'pending') {
+      st.pendingEnd = true;
+      return { ok: true, state: st };
     }
     startHauntIfNeeded(st, rand);
     checkWin(st);
@@ -2996,6 +3983,11 @@ window.CabinEngine = (function () {
       rotateDoors: rotateDoors, rollDamage: rollDamage, inLineOfSight: inLineOfSight,
       hasDistanceWeapon: hasDistanceWeapon,
       countTokens: countTokens, tokensByFloor: tokensByFloor, addToken: addToken,
+      isBurningRoom: isBurningRoom, burnRoom: burnRoom, spreadBurning: spreadBurning,
+      isGoalDone: function (st, g) {
+        const heroes = st.players.filter((p) => !p.dead && p.side === 'hero');
+        return goalDone(st, g, st.haunt && st.haunt.heroGoal, st.haunt, heroes);
+      },
       applyDamageSplit: applyDamageSplit, loseTraitDirect: loseTraitDirect, gainTrait: gainTrait,
       beginDamage: beginDamage, grantItem: grantItem, itemSum: itemSum, testRoll: testRoll,
       healTrait: healTrait, firstByBirthday: firstByBirthday, chooseTraitor: chooseTraitor,
@@ -3003,7 +3995,7 @@ window.CabinEngine = (function () {
       linkedTargets: linkedTargets, moveToLinkedRoom: moveToLinkedRoom,
       roomEffect: roomEffect, resolveRoomSymbol: resolveRoomSymbol,
       applyEffect: applyEffect, attachSetupPendingTokens: attachSetupPendingTokens,
-      checkWin: checkWin, rideElevator: rideElevator
+      checkWin: checkWin, rideElevator: rideElevator, monsterStat: monsterStat
     }
   };
 })();

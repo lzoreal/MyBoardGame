@@ -1,6 +1,7 @@
 // 官方 3E 特殊机制回归：石中血、遗产、交易、群魔、幻象、借时、维度、换身、Cut!、被困、隐藏叛徒
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 let passed = 0, failed = 0;
 const fails = [];
@@ -18,8 +19,8 @@ const low = queue([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
 const packsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 
 const players = [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }, { id: 'c', name: 'C' }];
@@ -54,6 +55,8 @@ ok('驱散计入 hunt 进度', st5.haunt.monsterBanish === 2, st5.haunt.monsterB
 console.log('=== 遗产 #6：证据配对 ===');
 const st6 = fresh(61);
 start(st6, 6);
+const evRoom = E.helpers.roomAt(st6, st6.players[0].floor, st6.players[0].x, st6.players[0].y);
+E.helpers.addToken(st6, '证据:力量', evRoom, 1, 'setup');
 const ev = E.act(st6, { type: 'hauntAction', key: 'uncover' }, 'a', high);
 ok('揭开真相累积 1 组证据', ev.ok && st6.haunt.evidence === 1, st6.haunt.evidence);
 st6.haunt.evidence = 3;
@@ -63,7 +66,13 @@ ok('证据配齐 3 组即胜', st6.phase === 'ended' && st6.winner.side === 'her
 console.log('=== 交易 #10：出价抢宝藏 ===');
 const st10 = fresh(101);
 start(st10, 10);
-st10.players.forEach((p) => teleport(p, E.helpers.roomAt(st10, st10.players[0].floor, st10.players[0].x, st10.players[0].y) || st10.rooms[0]));
+let vault = E.helpers.roomByName(st10, '金库');
+if (!vault) {
+  vault = { floor: 'basement', x: 3, y: 1, name: '金库', doors: 'NSEW', symbol: null, kind: 'normal' };
+  st10.rooms.push(vault);
+}
+E.helpers.addToken(st10, '宝藏', vault, 3, 'setup');
+teleport(st10.players[0], vault);
 const bid = E.act(st10, { type: 'hauntAction', key: 'bid' }, 'a', seeded(102));
 ok('出价产生宝藏与标记', bid.ok && st10.haunt.treasure === 1 && E.helpers.roomAt, st10.haunt.treasure);
 
@@ -76,31 +85,57 @@ console.log('=== 戒指 #18：幻象与真身 ===');
 const st18 = fresh(181);
 start(st18, 18);
 E.act(st18, { type: 'hauntAction', key: 'unmask' }, 'a', high);
-const illusioned = st18.players.find((p) => p.illusion);
-ok('揭穿幻象给人打上幻象标记', !!illusioned);
+const body = st18.players[st18.haunt.traitor];
+ok('成功揭穿幻象后真身回到屋内', st18.haunt.trueBodyRevealed === true && !!body && !body.outside);
+const illusioned = st18.players.find((p) => p !== body && !p.dead);
+if (illusioned) illusioned.illusion = true;
 if (illusioned) {
   st18.players[0].x = illusioned.x; st18.players[0].y = illusioned.y; st18.players[0].floor = illusioned.floor;
   const hit = E.act(st18, { type: 'attack', target: illusioned.id, trait: 'might' }, 'a', high);
   ok('攻击幻象只消散不受伤', hit.ok && illusioned.illusion === false && !illusioned.dead, hit.msg);
 }
 
-console.log('=== 借来的时间 #25：属性转移 ===');
+console.log('=== 借来的时间 #25：铠甲转移与诅咒 ===');
 const st25 = fresh(251);
 start(st25, 25);
-const armory = E.helpers.roomByName(st25, '军械库') || { floor: 'ground', x: 6, y: 6, name: '军械库', doors: 'NSEW', kind: 'normal' };
-if (!E.helpers.roomByName(st25, '军械库')) st25.rooms.push(armory);
-st25.players[0].traits.might = 4;
-E.helpers.setTrack(st25, 0, 'might', 4, '测试：固定到 4');
-if (armory) {
-  teleport(st25.players[0], armory);
-  const before = st25.players.map((p) => p.traits.might);
-  E.act(st25, { type: 'hauntAction', key: 'borrow' }, 'a', high);
-  const after = st25.players.map((p) => p.traits.might);
-  const shifted = after[0] === before[0] + 1 && after.some((v, k) => k > 0 && v === before[k] - 1);
-  ok('借走时间：自己 +1、最弱者 -1', shifted, before.join('/') + ' → ' + after.join('/'));
-} else {
-  ok('军械库房间存在', false, 'missing room');
-}
+const armorTraitor = st25.players[st25.haunt.traitor];
+const armorHero = st25.players.find((p) => p.side === 'hero' && !p.dead);
+ok('#25 叛徒开局持有铠甲', !!armorTraitor && st25.haunt.armorHolder === armorTraitor.id);
+if (armorTraitor && armorHero) {
+  const armorRoom = E.helpers.roomByName(st25, '军械库') || st25.rooms[0];
+  teleport(armorTraitor, armorRoom);
+  teleport(armorHero, armorRoom);
+  E.helpers.setTrack(st25, st25.players.indexOf(armorTraitor), 'might', 8);
+  st25.turn = st25.players.indexOf(armorTraitor);
+  const beforeMight = armorHero.traits.might;
+  E.act(st25, { type: 'attack', target: armorHero.id, trait: 'might' }, armorTraitor.id, high);
+  ok('#25 叛徒用力量击中英雄时转移铠甲，而不是造成伤害',
+    st25.haunt.armorHolder === armorHero.id && armorHero.traits.might === beforeMight,
+    st25.haunt.armorHolder + '/' + armorHero.traits.might);
+  const beforeHero = Object.assign({}, armorHero.traits);
+  const beforeTraitor = Object.assign({}, armorTraitor.traits);
+  E.act(st25, { type: 'end' }, armorTraitor.id, high);
+  const cursed = ['might', 'speed', 'known', 'sanity'].every((t) =>
+    armorHero.traits[t] === beforeHero[t] - 1 || (armorHero.track && armorHero.track[t].pos === Math.max(0, armorHero.track[t].pos)));
+  const buffed = ['might', 'speed', 'known', 'sanity'].some((t) => armorTraitor.traits[t] === beforeTraitor[t] + 1);
+  ok('#25 叛徒回合结束时英雄受诅咒、叛徒获增益', cursed && buffed,
+    Object.keys(beforeHero).map((t) => beforeHero[t] + '→' + armorHero.traits[t]).join('/') + ' | ' +
+    Object.keys(beforeTraitor).map((t) => beforeTraitor[t] + '→' + armorTraitor.traits[t]).join('/'));
+} else ok('#25 叛徒与英雄存在', false);
+
+console.log('=== 借来的时间 #25：仪式房也能破解铠甲法术 ===');
+const st25r = fresh(252);
+start(st25r, 25);
+const ritualist25 = st25r.players.find((p) => p.side === 'hero' && !p.dead);
+const ritualRoom25 = E.helpers.roomByName(st25r, '仪式房');
+if (ritualist25 && ritualRoom25) {
+  teleport(ritualist25, ritualRoom25);
+  for (let k = 0; k < 4; k++) E.helpers.addToken(st25r, '法术材料', ritualRoom25, 1, 'setup');
+  E.helpers.setTrack(st25r, st25r.players.indexOf(ritualist25), 'sanity', 7);
+  st25r.turn = st25r.players.indexOf(ritualist25);
+  const ritual25 = E.act(st25r, { type: 'check' }, ritualist25.id, high);
+  ok('#25 在仪式房也可以用 4 份材料做 5+ 神智仪式', ritual25.ok && st25r.haunt.progress >= 1, ritual25.msg);
+} else ok('#25 仪式房与英雄存在', false);
 
 console.log('=== 右侧的维度 #34：跨层同格 ===');
 const st34 = fresh(341);

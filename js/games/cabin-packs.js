@@ -986,7 +986,23 @@ window.CABIN_PACKS = {
                 "teleportLanding": true
               }
             }
-          ]
+          ],
+          "miss": {
+            "damage": {
+              "type": "physical",
+              "amount": 6
+            },
+            "teleportLanding": true,
+            "numberTrack": -1
+          },
+          "requireItem": "骨戒",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -1034,11 +1050,9 @@ window.CABIN_PACKS = {
         "traitorCount": 0
       },
       "heroGoal": {
-        "type": "ritual",
-        "room": "仪式房",
-        "trait": "sanity",
-        "diff": 5,
-        "need": 3
+        "type": "custom",
+        "key": "realtor_freed",
+        "text": "在恶魔中介所在板块完成 13+ 神智仪式"
       },
       "traitorGoal": null,
       "heroGoalText": "在仪式房完成 3 次神智判定（难度 5），解救中介",
@@ -1080,6 +1094,21 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "rescueRealtor",
             "value": true
+          },
+          {
+            "type": "placeSpecialRoom",
+            "room": "仪式房",
+            "floor": "ground"
+          },
+          {
+            "type": "setAsideToken",
+            "token": "火焰",
+            "countByPlayers": {
+              "3": 3,
+              "4": 4,
+              "5": 5,
+              "6": 6
+            }
           }
         ]
       },
@@ -1103,6 +1132,146 @@ window.CABIN_PACKS = {
           "ignoreDoors": false,
           "damageReduce": false,
           "attackOnly": ""
+        }
+      ],
+      "actions": [
+        {
+          "key": "perform_ritual",
+          "name": "perform_ritual",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 13,
+              "do": {
+                "actionFlag": "realtorFreed"
+              }
+            },
+            {
+              "at": 9,
+              "do": {
+                "note": "仪式还差一点，结束回合"
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damageAll": {
+                  "type": "mental",
+                  "amount": 1
+                },
+                "note": "恶魔中介尖叫，每名英雄失去 1 神智"
+              }
+            }
+          ],
+          "requireMonsterType": "demon_realtor",
+          "requireMonsterHere": true,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "bonusPerRoomToken": "火焰",
+          "bonusRoom": "仪式房",
+          "bonusKnowledgeToken": 2,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "gain_curse",
+          "name": "获得诅咒知识",
+          "trait": "known",
+          "where": "rooms",
+          "rooms": [
+            "图书室",
+            "礼拜堂",
+            "实验室"
+          ],
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "grantKnowledgeToken": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "cleanse_room",
+          "name": "净化房间",
+          "trait": "speed",
+          "where": "symbol",
+          "symbol": "event",
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 6,
+              "do": {
+                "token": "火焰"
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "forbidToken": "火焰",
+          "bonusKnowledgeToken": 2,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "prepare_ward",
+          "name": "准备守护结界",
+          "trait": "might",
+          "where": "rooms",
+          "rooms": [
+            "育婴室",
+            "军械库",
+            "墓园"
+          ],
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 6,
+              "do": {
+                "wardToken": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "bonusKnowledgeToken": 2,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -1214,7 +1383,14 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -1334,7 +1510,16 @@ window.CABIN_PACKS = {
                 "note": "什么也没找到"
               }
             }
-          ]
+          ],
+          "requireTokenPrefix": "证据:",
+          "consumeTokenPrefix": "证据:",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -1415,7 +1600,7 @@ window.CABIN_PACKS = {
           },
           {
             "type": "placeToken",
-            "token": "符文",
+            "token": "污垢",
             "room": "nonLanding",
             "count": 5
           },
@@ -1433,6 +1618,41 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "clean_room",
+          "name": "清洁房间",
+          "trait": "known",
+          "where": "rooms",
+          "rooms": [
+            "血房",
+            "焦屋",
+            "坍塌房间",
+            "杂物房",
+            "地下墓穴"
+          ],
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "符文"
+              }
+            }
+          ],
+          "requireToken": "污垢",
+          "consumeToken": "污垢",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "housekeeper",
         "name": "家政工",
@@ -1597,6 +1817,11 @@ window.CABIN_PACKS = {
         "numberTrack": 4,
         "ops": [
           {
+            "type": "placeSpecialRoom",
+            "room": "金库",
+            "floor": "basement"
+          },
+          {
             "type": "placeToken",
             "token": "宝藏",
             "room": "farBasement",
@@ -1626,7 +1851,8 @@ window.CABIN_PACKS = {
           "key": "bid",
           "name": "出价",
           "trait": "might",
-          "where": "any",
+          "where": "room",
+          "room": "金库",
           "once": "turn",
           "dead": false,
           "tiers": [
@@ -1636,7 +1862,14 @@ window.CABIN_PACKS = {
                 "bid": true
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -1686,7 +1919,13 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "tokens",
         "token": "食物",
-        "need": 3
+        "need": 3,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        }
       },
       "traitorGoal": null,
       "heroGoalText": "找到 3 份食物献祭，活到最后",
@@ -1694,7 +1933,13 @@ window.CABIN_PACKS = {
       "ffaGoal": {
         "type": "tokens",
         "token": "食物",
-        "need": 3
+        "need": 3,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        }
       },
       "setup": {
         "mode": "scripted",
@@ -1761,6 +2006,34 @@ window.CABIN_PACKS = {
           "ignoreDoors": false,
           "damageReduce": false,
           "attackOnly": ""
+        }
+      ],
+      "actions": [
+        {
+          "key": "cook",
+          "name": "烹饪",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "食物"
+              }
+            }
+          ],
+          "requireToken": "食物",
+          "consumeToken": "食物",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -1903,7 +2176,14 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -2044,7 +2324,14 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -2214,6 +2501,86 @@ window.CABIN_PACKS = {
           "attackOnly": ""
         }
       ],
+      "actions": [
+        {
+          "key": "banish_ghost",
+          "name": "驱散幽灵",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 7,
+              "do": {
+                "banish": {
+                  "type": "ghost"
+                }
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "banish_vampire",
+          "name": "驱散吸血鬼",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 7,
+              "do": {
+                "banish": {
+                  "type": "vampire"
+                }
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "banish_werewolf",
+          "name": "驱散狼人",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 7,
+              "do": {
+                "banish": {
+                  "type": "werewolf"
+                }
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "flipRooms": false,
       "dimension": false,
       "custom": true,
@@ -2263,7 +2630,15 @@ window.CABIN_PACKS = {
         "room": "墓园",
         "trait": "sanity",
         "diff": 5,
-        "need": 1
+        "need": 1,
+        "requireToken": "已收集遗骸",
+        "requireGoalOnly": true,
+        "requireCountByPlayers": {
+          "3": 4,
+          "4": 5,
+          "5": 6,
+          "6": 7
+        }
       },
       "traitorGoal": {
         "type": "killAll"
@@ -2308,6 +2683,34 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "collect_relic",
+          "name": "收集遗骸",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "已收集遗骸"
+              }
+            }
+          ],
+          "requireToken": "遗骸",
+          "consumeToken": "遗骸",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "ghost",
         "name": "鬼魂",
@@ -2372,13 +2775,22 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "hunt",
-        "need": 3
+        "type": "allOf",
+        "goals": [
+          {
+            "type": "hunt",
+            "need": 3,
+            "monster": "gremlin"
+          },
+          {
+            "type": "killTraitor"
+          }
+        ]
       },
       "traitorGoal": {
         "type": "killAll"
       },
-      "heroGoalText": "消灭带有符文的 3 只小妖精，并杀死叛徒",
+      "heroGoalText": "消灭带符文的 3 只小妖精，并杀死叛徒",
       "traitorGoalText": "所有英雄死亡",
       "ffaGoal": null,
       "setup": {
@@ -2411,6 +2823,30 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "pass_note",
+          "name": "把 DIE 纸条传下去",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "gremlin",
         "name": "小妖精",
@@ -2550,16 +2986,28 @@ window.CABIN_PACKS = {
             {
               "at": 5,
               "do": {
-                "disguise": true
+                "revealTrueBody": true
               }
             },
             {
               "at": 0,
               "do": {
+                "damage": {
+                  "type": "mental",
+                  "amount": 1
+                },
                 "note": "幻象换了一张脸，你又一次认错人"
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireFlag": "ringIllusion",
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -2687,7 +3135,16 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireToken": "录像带",
+          "consumeToken": "录像带",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -2754,7 +3211,23 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "killTraitor"
+        "type": "allOf",
+        "goals": [
+          {
+            "type": "tokens",
+            "token": "音节",
+            "need": 3,
+            "needByPlayers": {
+              "3": 2,
+              "4": 3,
+              "5": 5,
+              "6": 5
+            }
+          },
+          {
+            "type": "killTraitor"
+          }
+        ]
       },
       "traitorGoal": {
         "type": "killAll"
@@ -2797,6 +3270,34 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "gather_syllable",
+          "name": "收集音节",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "音节"
+              }
+            }
+          ],
+          "requireToken": "音节",
+          "consumeToken": "音节",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "faceless",
         "name": "无名者",
@@ -2861,7 +3362,17 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "killTraitor"
+        "type": "allOf",
+        "goals": [
+          {
+            "type": "killTraitor"
+          },
+          {
+            "type": "custom",
+            "key": "book_burned",
+            "text": "烧掉旧书"
+          }
+        ]
       },
       "traitorGoal": {
         "type": "killAll"
@@ -2905,6 +3416,34 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "burn_book",
+          "name": "burn_book",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "destroyAnyItem": "旧书",
+                "actionFlag": "bookBurned"
+              }
+            }
+          ],
+          "requireAnyItem": "旧书",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "spooky",
         "name": "Spooky McMasters",
@@ -2971,7 +3510,7 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "escape",
         "room": "入口大厅",
-        "need": 1
+        "need": 0
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3078,7 +3617,13 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "tokens",
         "token": "已关闭机器",
-        "need": 3
+        "need": 3,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        }
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3134,6 +3679,34 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "shutdown",
+          "name": "关闭机器",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "已关闭机器"
+              }
+            }
+          ],
+          "requireToken": "ON",
+          "consumeToken": "ON",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "robot",
         "name": "机器人助手",
@@ -3200,7 +3773,15 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "tokens",
         "token": "精灵之火",
-        "need": 4
+        "need": 4,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        },
+        "room": "礼拜堂",
+        "requireGoalOnly": false
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3232,6 +3813,11 @@ window.CABIN_PACKS = {
           },
           {
             "type": "placeSpecialRoom",
+            "room": "墓园",
+            "floor": "ground"
+          },
+          {
+            "type": "placeSpecialRoom",
             "room": "塔楼",
             "floor": "upper"
           },
@@ -3256,9 +3842,16 @@ window.CABIN_PACKS = {
             "floor": "basement"
           },
           {
-            "type": "placeToken",
+            "type": "placeTokenRooms",
             "token": "精灵之火",
-            "room": "nonLanding",
+            "rooms": [
+              "塔楼",
+              "雕像回廊",
+              "温室",
+              "墓园",
+              "地下洞穴",
+              "地下湖"
+            ],
             "countByPlayers": {
               "3": 2,
               "4": 3,
@@ -3279,27 +3872,52 @@ window.CABIN_PACKS = {
           "key": "pickflame",
           "name": "拾起火焰",
           "trait": "speed",
-          "where": "symbol",
-          "symbol": "omen",
+          "where": "any",
           "once": "turn",
           "dead": false,
           "tiers": [
             {
               "at": 5,
               "do": {
-                "token": "精灵之火"
+                "carryToken": "精灵之火"
               }
             },
             {
               "at": 0,
               "do": {
                 "damage": {
-                  "type": "physical",
+                  "type": "general",
                   "amount": 2
-                }
+                },
+                "carryToken": "精灵之火"
               }
             }
-          ]
+          ],
+          "requireToken": "精灵之火",
+          "consumeToken": "精灵之火",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": true,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "drop_flame",
+          "name": "放下火焰",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -3373,9 +3991,15 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "ritual",
         "room": "军械库",
+        "rooms": [
+          "军械库",
+          "仪式房"
+        ],
         "trait": "sanity",
         "diff": 5,
-        "need": 2
+        "need": 1,
+        "requireToken": "法术材料",
+        "requireCount": 4
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3394,6 +4018,21 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "spellMaterials",
             "value": 4
+          },
+          {
+            "type": "placeSpecialRoom",
+            "room": "军械库",
+            "floor": "ground"
+          },
+          {
+            "type": "custom",
+            "key": "armorStart",
+            "value": 4
+          },
+          {
+            "type": "placeSpecialRoom",
+            "room": "仪式房",
+            "floor": "ground"
           }
         ]
       },
@@ -3401,34 +4040,132 @@ window.CABIN_PACKS = {
       "monsters": [],
       "actions": [
         {
-          "key": "borrow",
-          "name": "借走时间",
+          "key": "find_sanity",
+          "name": "寻找神智材料",
           "trait": "sanity",
-          "where": "room",
-          "room": "军械库",
+          "where": "rooms",
+          "rooms": [
+            "手术室",
+            "墓园",
+            "血房"
+          ],
           "once": "turn",
           "dead": false,
           "tiers": [
             {
-              "at": 5,
+              "at": 4,
               "do": {
-                "transfer": {
-                  "from": "weakest",
-                  "trait": "might",
-                  "amount": 1
-                }
+                "token": "法术材料"
               }
             },
             {
               "at": 0,
-              "do": {
-                "damage": {
-                  "type": "mental",
-                  "amount": 1
-                }
-              }
+              "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "find_might",
+          "name": "寻找力量材料",
+          "trait": "might",
+          "where": "rooms",
+          "rooms": [
+            "食品储藏室",
+            "标本室",
+            "餐厅"
+          ],
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "法术材料"
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "find_known",
+          "name": "寻找知识材料",
+          "trait": "known",
+          "where": "rooms",
+          "rooms": [
+            "熔炉房",
+            "天文台",
+            "图书室"
+          ],
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "法术材料"
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "find_speed",
+          "name": "寻找速度材料",
+          "trait": "speed",
+          "where": "rooms",
+          "rooms": [
+            "地下湖",
+            "温室",
+            "厨房"
+          ],
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 4,
+              "do": {
+                "token": "法术材料"
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -3480,7 +4217,9 @@ window.CABIN_PACKS = {
         "room": "仪式房",
         "trait": "sanity",
         "diff": 4,
-        "need": 3
+        "need": 3,
+        "requireToken": "祭坛",
+        "requireCount": 1
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3660,7 +4399,14 @@ window.CABIN_PACKS = {
                 "spreadWord": true
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -3737,6 +4483,35 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "detonate",
+          "name": "引爆炸药",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 7,
+              "do": {
+                "banish": {
+                  "type": "shark"
+                }
+              }
+            }
+          ],
+          "requireMonsterType": "shark",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "shark",
         "name": "大白幽灵鲨",
@@ -3805,7 +4580,8 @@ window.CABIN_PACKS = {
         "room": "仪式房",
         "trait": "known",
         "diff": 5,
-        "need": 3
+        "need": 3,
+        "requireMonsterType": "fae"
       },
       "traitorGoal": {
         "type": "killAll"
@@ -3829,6 +4605,11 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "bindFae",
             "value": 3
+          },
+          {
+            "type": "placeSpecialRoom",
+            "room": "仪式房",
+            "floor": "ground"
           }
         ]
       },
@@ -3921,6 +4702,11 @@ window.CABIN_PACKS = {
         "summary": "秘密楼梯找出来放好；从牌堆顶拿走 4/6/9/12 块板块，其余放回盒子；叛徒身上的预兆交给揭示者。",
         "ops": [
           {
+            "type": "placeSpecialRoom",
+            "room": "秘密楼梯",
+            "floor": "ground"
+          },
+          {
             "type": "removeTiles",
             "countByPlayers": {
               "3": 4,
@@ -3955,6 +4741,33 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "claim_ring",
+          "name": "找到戒指",
+          "trait": "known",
+          "where": "room",
+          "room": "秘密楼梯",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "戒指"
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "wedding",
         "name": "婚礼小怪物",
@@ -4226,7 +5039,14 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -4298,15 +5118,10 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "allOf",
-        "text": "在维度改写下把同伴带出房子",
-        "goals": [
-          {
-            "type": "escape",
-            "room": "入口大厅",
-            "need": 1
-          }
-        ]
+        "type": "custom",
+        "key": "dimension_escape",
+        "text": "在维度改写生效时抵达入口大厅",
+        "room": "入口大厅"
       },
       "traitorGoal": {
         "type": "killAll"
@@ -4339,6 +5154,32 @@ window.CABIN_PACKS = {
       },
       "priority": 100,
       "monsters": [],
+      "actions": [
+        {
+          "key": "shift_dimension",
+          "name": "触发维度改写",
+          "trait": "known",
+          "where": "any",
+          "once": "game",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "actionFlag": "dimensionActive"
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "flipRooms": false,
       "dimension": true,
       "custom": true,
@@ -4431,10 +5272,44 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "saltWeakness",
             "value": true
+          },
+          {
+            "type": "grantItem",
+            "item": "盐",
+            "to": "heroes"
           }
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "burn_nest",
+          "name": "焚烧虫巢",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "已毁虫巢"
+              }
+            }
+          ],
+          "requireToken": "虫巢",
+          "consumeToken": "虫巢",
+          "requireAnyItem": "盐",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "slug",
         "name": "鼻涕虫",
@@ -4532,10 +5407,21 @@ window.CABIN_PACKS = {
         "summary": "英雄没有额外布置，叛徒左手先行动。",
         "ops": [
           {
+            "type": "ensureSymbolTiles",
+            "symbol": "event",
+            "count": 4
+          },
+          {
             "type": "placeMonster",
             "monster": "ghost",
             "room": "eventTiles",
-            "count": 3
+            "count": 3,
+            "countByPlayers": {
+              "3": 4,
+              "4": 4,
+              "5": 4,
+              "6": 4
+            }
           },
           {
             "type": "custom",
@@ -4561,7 +5447,14 @@ window.CABIN_PACKS = {
                 "token": "安息的幽灵"
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -4711,7 +5604,14 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         },
         {
           "key": "disable_robot",
@@ -4724,7 +5624,8 @@ window.CABIN_PACKS = {
             {
               "at": 4,
               "do": {
-                "token": "已关闭机器人"
+                "token": "已关闭机器人",
+                "removeMonster": "security"
               }
             },
             {
@@ -4736,7 +5637,15 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterType": "security",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         },
         {
           "key": "collect_dna",
@@ -4757,7 +5666,14 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -4825,7 +5741,13 @@ window.CABIN_PACKS = {
       },
       "heroGoal": {
         "type": "hunt",
-        "need": 5
+        "need": 5,
+        "needByPlayers": {
+          "3": 3,
+          "4": 4,
+          "5": 5,
+          "6": 6
+        }
       },
       "traitorGoal": {
         "type": "killAll"
@@ -5020,7 +5942,14 @@ window.CABIN_PACKS = {
                 "drainTime": true
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -5088,7 +6017,14 @@ window.CABIN_PACKS = {
       },
       "heroGoal": {
         "type": "hunt",
-        "need": 5
+        "need": 5,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        },
+        "monster": "twins"
       },
       "traitorGoal": {
         "type": "killAll"
@@ -5199,7 +6135,13 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "tokens",
         "token": "过载发电机",
-        "need": 3
+        "need": 3,
+        "needByPlayers": {
+          "3": 3,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        }
       },
       "traitorGoal": {
         "type": "killAll"
@@ -5243,7 +6185,8 @@ window.CABIN_PACKS = {
               "sanity": 5,
               "known": 5,
               "attack": "might",
-              "noAttack": true
+              "noAttack": true,
+              "on": true
             },
             "room": "symbolTiles",
             "countByPlayers": {
@@ -5265,7 +6208,7 @@ window.CABIN_PACKS = {
         {
           "key": "overload",
           "name": "让发电机过载",
-          "trait": "might",
+          "trait": "none",
           "where": "any",
           "once": "turn",
           "dead": false,
@@ -5282,7 +6225,73 @@ window.CABIN_PACKS = {
                 "note": "结束回合"
               }
             }
-          ]
+          ],
+          "requireMonsterType": "generator",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": true
+        },
+        {
+          "key": "disable_trap",
+          "name": "解除陷阱",
+          "trait": "speed",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 6,
+              "do": {
+                "numberTrack": 1,
+                "note": "解除陷阱并把数字轨道 +1"
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireToken": "陷阱",
+          "consumeToken": "陷阱",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "sabotage",
+          "name": "破坏电子设备",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "token": "搜查",
+                "numberTrack": 1
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -5297,8 +6306,8 @@ window.CABIN_PACKS = {
         "noAttack": true,
         "counts": null,
         "boundRoom": "",
-        "rule": "不可攻击或击晕；只攻击发电机板块附近的英雄",
-        "noStun": false,
+        "rule": "不可攻击或击晕；只攻击 ON 发电机所在或相邻板块上的英雄",
+        "noStun": true,
         "oneHit": false,
         "ignoreDoors": false,
         "damageReduce": false,
@@ -5392,6 +6401,28 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "pantry",
             "value": true
+          },
+          {
+            "type": "placeMonster",
+            "room": "eventTiles",
+            "count": 3,
+            "monster": {
+              "key": "ghost",
+              "name": "幽灵",
+              "count": 3,
+              "speed": 3,
+              "might": 3,
+              "sanity": 3,
+              "known": 4,
+              "attack": "sanity",
+              "noStun": true,
+              "noAttack": false,
+              "oneHit": false,
+              "damageReduce": false,
+              "ignoreDoors": false,
+              "attackOnly": "",
+              "rule": "不可被攻击"
+            }
           }
         ]
       },
@@ -5409,10 +6440,23 @@ window.CABIN_PACKS = {
             {
               "at": 4,
               "do": {
-                "token": "被驱魔的幽灵"
+                "token": "被驱魔的幽灵",
+                "removeMonster": "ghost"
               }
+            },
+            {
+              "at": 0,
+              "do": {}
             }
-          ]
+          ],
+          "requireMonsterType": "ghost",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -5479,13 +6523,14 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "survive",
-        "need": 6
+        "type": "custom",
+        "key": "dawn",
+        "text": "数字轨道归零，撑到黎明"
       },
       "traitorGoal": {
         "type": "killAll"
       },
-      "heroGoalText": "撑过 6 轮，等到天亮",
+      "heroGoalText": "把数字轨道拖到 0，撑到黎明",
       "traitorGoalText": "所有英雄死亡",
       "ffaGoal": null,
       "setup": {
@@ -5508,12 +6553,80 @@ window.CABIN_PACKS = {
           },
           {
             "type": "custom",
-            "key": "surviveUntilDawn",
+            "key": "dawn",
             "value": 6
           }
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "hide",
+          "name": "躲藏",
+          "trait": "speed",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 5,
+              "do": {
+                "hideSelf": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "charm",
+          "name": "魅惑野兽",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 8,
+              "do": {
+                "stunMonster": "werewolf"
+              }
+            },
+            {
+              "at": 5,
+              "do": {}
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "physical",
+                  "amount": 1
+                }
+              }
+            }
+          ],
+          "requireMonsterType": "werewolf",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "werewolf",
         "name": "狼人",
@@ -5578,14 +6691,14 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "tokens",
-        "token": "着火",
-        "need": 5
+        "type": "custom",
+        "key": "burn_every_room",
+        "text": "把整栋房子烧起来"
       },
       "traitorGoal": {
         "type": "killAll"
       },
-      "heroGoalText": "让 5 间房烧起来",
+      "heroGoalText": "把整栋房子烧起来",
       "traitorGoalText": "所有英雄死亡",
       "ffaGoal": null,
       "setup": {
@@ -5601,12 +6714,6 @@ window.CABIN_PACKS = {
             "extraHeroIfThree": true
           },
           {
-            "type": "placeToken",
-            "token": "火焰",
-            "room": "nonLanding",
-            "count": 5
-          },
-          {
             "type": "placeMonster",
             "monster": "mannequin",
             "room": "landingTiles"
@@ -5615,6 +6722,11 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "burnFiveRooms",
             "value": 5
+          },
+          {
+            "type": "setAsideToken",
+            "token": "火焰",
+            "count": 5
           }
         ]
       },
@@ -5631,17 +6743,21 @@ window.CABIN_PACKS = {
             {
               "at": 4,
               "do": {
-                "token": "着火",
-                "flip": true
+                "burnRoom": true
               }
             },
             {
               "at": 0,
-              "do": {
-                "note": "你下不了手"
-              }
+              "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -5783,7 +6899,14 @@ window.CABIN_PACKS = {
                 }
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -5831,8 +6954,10 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "hunt",
-        "need": 1
+        "type": "custom",
+        "key": "hair_with_antidote",
+        "text": "持真解药击败巨型毛发怪",
+        "room": "入口大厅"
       },
       "traitorGoal": {
         "type": "convertAll",
@@ -5873,6 +6998,11 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "convertAllHeroes",
             "value": true
+          },
+          {
+            "type": "grantItem",
+            "item": "解药",
+            "to": "heroes"
           }
         ]
       },
@@ -5897,7 +7027,14 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -5966,7 +7103,13 @@ window.CABIN_PACKS = {
       "heroGoal": {
         "type": "tokens",
         "token": "已关闭传送门",
-        "need": 3
+        "need": 3,
+        "needByPlayers": {
+          "3": 2,
+          "4": 3,
+          "5": 4,
+          "6": 5
+        }
       },
       "traitorGoal": {
         "type": "killAll"
@@ -6009,19 +7152,40 @@ window.CABIN_PACKS = {
           "key": "seal",
           "name": "关闭传送门",
           "trait": "known",
-          "where": "symbol",
-          "symbol": "omen",
+          "where": "any",
           "once": "turn",
           "dead": false,
           "tiers": [
             {
               "at": 4,
               "do": {
-                "token": "已关闭传送门",
-                "untrap": true
+                "token": "已关闭传送门"
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "damage": {
+                  "type": "mental",
+                  "amount": 1
+                }
               }
             }
-          ]
+          ],
+          "requireToken": "传送门",
+          "consumeToken": "传送门",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "traits": [
+            "known",
+            "sanity"
+          ],
+          "bonusSameRoomHero": 2,
+          "rollByNumberTrack": false
         },
         {
           "key": "snare",
@@ -6039,7 +7203,49 @@ window.CABIN_PACKS = {
                 "trapName": "被困"
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "escape_portal",
+          "name": "摆脱传送门",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 6,
+              "do": {
+                "untrap": true,
+                "giveHeroToken": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {
+                "gain": {
+                  "trait": "knowledge",
+                  "amount": 1
+                }
+              }
+            }
+          ],
+          "requireToken": "传送门",
+          "requireMonsterHere": false,
+          "requireTrapped": true,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "flipRooms": false,
@@ -6087,9 +7293,10 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "escape",
-        "room": "恐慌室",
-        "need": 1
+        "type": "custom",
+        "key": "skull_to_panic",
+        "text": "把头骨带到恐慌室",
+        "room": "恐慌室"
       },
       "traitorGoal": {
         "type": "killAll"
@@ -6131,10 +7338,42 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "skullToPanicRoom",
             "value": true
+          },
+          {
+            "type": "grantItem",
+            "item": "头骨",
+            "to": "traitor"
           }
         ]
       },
       "priority": 100,
+      "actions": [
+        {
+          "key": "take_skull",
+          "name": "take_skull",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "takeAnyItem": "头骨"
+              }
+            }
+          ],
+          "requireAnyItem": "头骨",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "host",
         "name": "房主",
@@ -6199,7 +7438,17 @@ window.CABIN_PACKS = {
         "traitorCount": 1
       },
       "heroGoal": {
-        "type": "killTraitor"
+        "type": "allOf",
+        "goals": [
+          {
+            "type": "killTraitor"
+          },
+          {
+            "type": "custom",
+            "key": "contract_burned",
+            "text": "烧掉契约"
+          }
+        ]
       },
       "traitorGoal": {
         "type": "anyOf",
@@ -6264,6 +7513,11 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "bloodOfBlooded",
             "value": true
+          },
+          {
+            "type": "grantItem",
+            "item": "契约",
+            "to": "traitor"
           }
         ]
       },
@@ -6288,7 +7542,14 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         },
         {
           "key": "offer_blood",
@@ -6305,7 +7566,40 @@ window.CABIN_PACKS = {
                 "offerBlood": true
               }
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "burn_contract",
+          "name": "burn_contract",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "destroyAnyItem": "契约",
+                "actionFlag": "contractBurned"
+              }
+            }
+          ],
+          "requireAnyItem": "契约",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -6375,7 +7669,13 @@ window.CABIN_PACKS = {
         "type": "rig",
         "token": "炸药",
         "need": 3,
-        "perFloor": true
+        "perFloor": true,
+        "needByPlayers": {
+          "3": 3,
+          "4": 4,
+          "5": 4,
+          "6": 5
+        }
       },
       "traitorGoal": {
         "type": "anyOf",
@@ -6390,7 +7690,7 @@ window.CABIN_PACKS = {
           }
         ]
       },
-      "heroGoalText": "每层至少放 1 个炸药，共 3 个",
+      "heroGoalText": "把所有炸药安放好，且每层至少一枚",
       "traitorGoalText": "吞噬整栋房子，或所有英雄死亡",
       "ffaGoal": null,
       "setup": {
@@ -6407,17 +7707,6 @@ window.CABIN_PACKS = {
         },
         "ops": [
           {
-            "type": "placeToken",
-            "token": "炸药",
-            "room": "nonLanding",
-            "countByPlayers": {
-              "3": 3,
-              "4": 4,
-              "5": 4,
-              "6": 5
-            }
-          },
-          {
             "type": "placeMonster",
             "monster": "construct",
             "room": "traitor"
@@ -6430,6 +7719,16 @@ window.CABIN_PACKS = {
             "type": "custom",
             "key": "devour_the_house",
             "value": true
+          },
+          {
+            "type": "setAsideToken",
+            "token": "炸药",
+            "countByPlayers": {
+              "3": 3,
+              "4": 4,
+              "5": 4,
+              "6": 5
+            }
           }
         ]
       },
@@ -6454,7 +7753,46 @@ window.CABIN_PACKS = {
               "at": 0,
               "do": {}
             }
-          ]
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        },
+        {
+          "key": "plant_charge",
+          "name": "安放炸药",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 6,
+              "do": {
+                "placeExplosive": true
+              }
+            },
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": true,
+          "consumeItemBeforeRoll": true,
+          "requireExplosive": true,
+          "traits": [
+            "speed",
+            "known"
+          ],
+          "rollByNumberTrack": false
         }
       ],
       "monster": {
@@ -6656,6 +7994,32 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 120,
+      "actions": [
+        {
+          "key": "study",
+          "name": "研究",
+          "trait": "known",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "研究"
+              }
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "feverish",
         "name": "热病者",
@@ -6752,10 +8116,40 @@ window.CABIN_PACKS = {
           },
           {
             "type": "mirrorRealm"
+          },
+          {
+            "type": "custom",
+            "key": "mirrorRealm",
+            "value": true
           }
         ]
       },
       "priority": 120,
+      "actions": [
+        {
+          "key": "break_spell",
+          "name": "破咒",
+          "trait": "sanity",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {}
+            }
+          ],
+          "requireMonsterHere": false,
+          "requireFlag": "mirrorRealm",
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "mirrorbeing",
         "name": "镜中人",
@@ -6974,6 +8368,33 @@ window.CABIN_PACKS = {
         ]
       },
       "priority": 120,
+      "actions": [
+        {
+          "key": "smash_camera",
+          "name": "砸毁相机",
+          "trait": "might",
+          "where": "any",
+          "once": "turn",
+          "dead": false,
+          "side": "hero",
+          "tiers": [
+            {
+              "at": 0,
+              "do": {
+                "token": "已毁相机"
+              }
+            }
+          ],
+          "requireAnyItem": "魔法相机",
+          "requireMonsterHere": false,
+          "requireTrapped": false,
+          "requireNotCarrying": false,
+          "requireBurnable": false,
+          "consumeItemBeforeRoll": false,
+          "requireExplosive": false,
+          "rollByNumberTrack": false
+        }
+      ],
       "monster": {
         "key": "photographer",
         "name": "幽灵摄影师",

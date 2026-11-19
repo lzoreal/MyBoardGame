@@ -1,6 +1,7 @@
 // 私有联机安全与 P0 规则回归
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 let passed = 0, failed = 0;
 const fails = [];
@@ -16,8 +17,8 @@ function seeded(n) {
 const root = path.join(__dirname, '..');
 const packsSrc = fs.readFileSync(path.join(root, 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(root, 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(root, 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 
 const sql = fs.readFileSync(path.join(root, 'sql', 'rooms-private.sql'), 'utf8');

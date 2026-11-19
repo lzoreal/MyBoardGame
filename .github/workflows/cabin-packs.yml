@@ -65,8 +65,17 @@ jobs:
       - name: Run independent scenario acceptance
         run: node tests/cabin-scenario-acceptance.test.js
 
+      - name: Run 50 scenario legal-action playthroughs
+        run: node tests/cabin-scenario-playthrough.test.js
+
       - name: Run cabin private-state security tests
         run: node tests/cabin-security.test.js
+
+      - name: Run remaining 3E monster and scenario mechanics
+        run: node tests/cabin-mechanic-3e.test.js
+
+      - name: Run coverage handler matrix
+        run: node tests/cabin-full-coverage.test.js
 
       - name: Commit generated manifest
         run: |

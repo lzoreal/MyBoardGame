@@ -54,6 +54,18 @@
   .playerTrait .ptBar span { display: block; height: 100%; border-radius: inherit; background: #c68b2c; }
   .playerTrait.low .ptRow b { color: #a33a2c; }
   .playerTrait.low .ptBar span { background: #b65545; }
+  .playerCardWrap { display: flex; flex-direction: column; align-items: center; margin: 8px 0 12px; }
+  .playerCard { position: relative; width: min(100%, 420px); aspect-ratio: 1 / 1; filter: drop-shadow(0 10px 22px rgba(52, 35, 18, .22)); }
+  .playerCardBg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .playerCardFace { position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%); width: 27%; aspect-ratio: 1 / 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #e8c87a; color: #fffaf0; font-size: 48px; font-weight: 900; box-shadow: 0 0 0 5px rgba(214, 166, 82, .12), 0 8px 18px rgba(0, 0, 0, .45); z-index: 2; }
+  .playerCardPlate { position: relative; z-index: 3; width: 68%; margin-top: -7.5%; padding: 7px 10px 8px; border: 1px solid rgba(214, 166, 82, .45); border-radius: 10px; background: linear-gradient(180deg, #211a13, #120f0c); text-align: center; box-shadow: 0 5px 12px rgba(0, 0, 0, .25); }
+  .playerCardPlate b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: #f3dfb5; letter-spacing: .3px; }
+  .playerCardPlate span { display: block; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; color: #b7a07d; }
+  .cardStat { position: absolute; z-index: 2; width: 74px; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+  .cardStat span { display: block; font-size: 10px; font-weight: 700; color: #cbb58f; letter-spacing: .5px; }
+  .cardStat b { display: block; margin-top: 1px; font-size: 20px; line-height: 1; color: #f0c76b; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+  .cardStat i { display: block; width: 42px; height: 3px; margin: 4px auto 0; border-radius: 999px; background: rgba(214, 178, 106, .20); overflow: hidden; }
+  .cardStat i u { display: block; height: 100%; border-radius: inherit; background: #d4a64f; }
   .itemRule { margin-top: 3px; font-size: 11px; color: #2f6fa3; font-weight: 700; }
   .deckGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin: 8px 0 12px; }
   .deckCard { padding: 9px 11px; border-radius: 12px; background: #fffaf0; border: 1px solid #dfcbaa; }
@@ -357,8 +369,8 @@
 <script src="../js/config.js?v=12"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/net.js?v=19"></script>
-<script src="../js/games/cabin-packs.js?v=20261119i"></script>
-<script src="../js/games/cabin.js?v=20261119i"></script>
+<script src="../js/games/cabin-packs.js?v=20261119t"></script>
+<script src="../js/games/cabin.js?v=20261119t"></script>
 <script src="games/shell.js?v=19"></script>
 <script>
 (function () {
@@ -524,6 +536,51 @@
     $('cModalCard').querySelectorAll('[data-pick]').forEach((b) => {
       b.addEventListener('click', () => onPick(options[Number(b.dataset.pick)]));
     });
+  }
+
+  function chooseMirrorGuess(st) {
+    const mr = st.haunt && st.haunt.mirrorRealm;
+    if (!mr) return;
+    const traitOpts = C.TRAITS.map((t) => '<option value="' + esc(t.key) + '">' + esc(t.label) + '</option>').join('');
+    const omenOpts = (C.OMENS || []).map((o) => {
+      const name = typeof o === 'string' ? o : o.name;
+      return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
+    }).join('');
+    const roomOpts = Array.from(new Set(st.rooms.map((r) => r.name))).map((name) =>
+      '<option value="' + esc(name) + '">' + esc(name) + '</option>').join('');
+    openModal('<h2>猜镜界线索</h2><p>每猜中一项就得到一枚「破咒」；猜错会被镜面反噬。三项都猜中后镜界破碎。</p>' +
+      '<label class="dmgBox" style="display:block"><small>属性</small><select id="mirrorTrait" style="width:100%;min-height:42px">' + traitOpts + '</select></label>' +
+      '<label class="dmgBox" style="display:block"><small>预兆</small><select id="mirrorOmen" style="width:100%;min-height:42px">' + omenOpts + '</select></label>' +
+      '<label class="dmgBox" style="display:block"><small>房间</small><select id="mirrorRoom" style="width:100%;min-height:42px">' + roomOpts + '</select></label>' +
+      '<div class="actions" style="margin-top:14px"><button class="btn ghost" id="mirrorCancel" type="button">取消</button>' +
+      '<button class="btn primary" id="mirrorConfirm" type="button">提交猜测</button></div>', 'choose');
+    const cancel = $('mirrorCancel');
+    if (cancel) cancel.addEventListener('click', () => closeModal());
+    const confirm = $('mirrorConfirm');
+    if (confirm) confirm.addEventListener('click', () => {
+      const guess = {
+        trait: ($('mirrorTrait') || {}).value,
+        omen: ($('mirrorOmen') || {}).value,
+        room: ($('mirrorRoom') || {}).value
+      };
+      window.GameShell.send({ type: 'hauntAction', key: 'break_spell', guess: guess });
+      closeModal();
+      haptic(8);
+    });
+  }
+
+  function passDieNote(st, me) {
+    const heroes = playersOf(st).filter((p) => p.id !== me.id && !p.dead && p.side === 'hero' &&
+      p.floor === me.floor && p.x === me.x && p.y === me.y);
+    if (!heroes.length) {
+      window.GameShell.toast('同房间没有其他英雄可以接纸条', true);
+      return;
+    }
+    chooseTarget('把 DIE 纸条交给谁？', heroes.map((p) => ({ name: p.name, id: p.id })), (o) => {
+      window.GameShell.send({ type: 'hauntAction', key: 'pass_note', target: o.id });
+      closeModal();
+      haptic(8);
+    }, '只能交给同房间的另一位英雄。');
   }
 
   /* ---------------- 棋盘 ---------------- */
@@ -1473,6 +1530,65 @@
     return parts.join(' · ');
   }
 
+  function playerCard(p, color) {
+    const cx = 160, cy = 154, R = 82;
+    const axes = [
+      { key: 'might', label: '力量', angle: -126, x: 29, y: 30 },
+      { key: 'known', label: '知识', angle: -54, x: 71, y: 30 },
+      { key: 'sanity', label: '神智', angle: 18, x: 81, y: 51 },
+      { key: 'avg', label: '综合', angle: 90, x: 50, y: 79 },
+      { key: 'speed', label: '速度', angle: 162, x: 19, y: 51 }
+    ];
+    const base = axes.filter((x) => x.key !== 'avg');
+    const avg = (field, fallback) => base.reduce((n, x) => n + (Number(p[field] && p[field][x.key]) || fallback), 0) / base.length;
+    const ratio = (a) => {
+      if (a.key === 'avg') {
+        const cap = avg('max', 8);
+        return cap > 0 ? Math.max(0, Math.min(1, avg('traits', 0) / cap)) : 0;
+      }
+      const cap = Number(p.max && p.max[a.key]) || 8;
+      return cap > 0 ? Math.max(0, Math.min(1, (Number(p.traits && p.traits[a.key]) || 0) / cap)) : 0;
+    };
+    const val = (a) => {
+      if (a.key === 'avg') return Math.round(avg('traits', 0) * 10) / 10;
+      return Number(p.traits && p.traits[a.key]) || 0;
+    };
+    const point = (angle, rr) => {
+      const rad = angle * Math.PI / 180;
+      return [cx + Math.cos(rad) * rr, cy + Math.sin(rad) * rr];
+    };
+    const poly = (scale) => axes.map((a) => point(a.angle, R * scale).map((n) => n.toFixed(1)).join(',')).join(' ');
+    const shape = axes.map((a) => point(a.angle, Math.max(5, R * ratio(a))).map((n) => n.toFixed(1)).join(',')).join(' ');
+    let svg = '<svg class="playerCardBg" viewBox="0 0 320 320" role="img" aria-label="角色卡五维图">' +
+      '<defs><radialGradient id="cardGlow" cx="50%" cy="44%" r="62%">' +
+      '<stop offset="0%" stop-color="#493b27"/><stop offset="56%" stop-color="#231c14"/><stop offset="100%" stop-color="#0f0c09"/>' +
+      '</radialGradient></defs>' +
+      '<polygon points="160,10 306,116 260,300 60,300 14,116" fill="url(#cardGlow)" stroke="#c79a4b" stroke-width="3"/>' +
+      '<polygon points="160,27 291,122 247,285 73,285 29,122" fill="none" stroke="rgba(215,176,102,.24)" stroke-width="1"/>';
+    for (const s of [0.25, 0.5, 0.75, 1]) {
+      svg += '<polygon points="' + poly(s) + '" fill="none" stroke="rgba(214,178,106,' + (s === 1 ? '.30' : '.16') + ')" stroke-width="1"/>';
+    }
+    axes.forEach((a) => {
+      const q = point(a.angle, R);
+      svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '" stroke="rgba(214,178,106,.22)" stroke-width="1"/>';
+    });
+    svg += '<polygon points="' + shape + '" fill="rgba(214,166,82,.20)" stroke="#e3b85f" stroke-width="2"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="#e3b85f"/></svg>';
+
+    let stats = '';
+    axes.forEach((a) => {
+      stats += '<div class="cardStat" style="left:' + a.x + '%;top:' + a.y + '%">' +
+        '<span>' + esc(a.label) + '</span><b>' + val(a) + '</b>' +
+        '<i><u style="width:' + Math.round(ratio(a) * 100) + '%"></u></i></div>';
+    });
+    const ch = p.charName || '未选角色';
+    const sub = [p.role, p.age ? p.age + ' 岁' : ''].filter(Boolean).join(' · ');
+    return '<div class="playerCardWrap"><div class="playerCard">' + svg +
+      '<div class="playerCardFace" style="background:' + color + '">' + esc(p.art || '?') + '</div>' +
+      stats + '</div>' +
+      '<div class="playerCardPlate"><b>' + esc(ch) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div></div>';
+  }
+
   function renderPlayerInfo(st, idx) {
     const p = playersOf(st)[idx];
     if (!p) { closeModal(); return; }
@@ -1500,7 +1616,8 @@
       (active ? ' · 本回合移动 ' + st.moves : '') +
       (h ? ' · 剧本：' + esc(h.name) : '') + '</div>';
 
-    html += '<div class="playerSectionTitle">角色卡 · 四项属性</div><div class="playerStats">';
+    html += '<div class="playerSectionTitle">角色卡 · 五维图</div>' + playerCard(p, seatColor(idx)) +
+      '<div class="playerStats">';
     C.TRAITS.forEach((t) => {
       const v = Number(p.traits && p.traits[t.key]) || 0;
       const min = Number(p.min && p.min[t.key]);
@@ -2001,7 +2118,11 @@
           (a.where === 'symbol' && here && here.symbol === (a.symbol || 'event')) ||
           (a.where === 'floors' && (!a.floors || a.floors.indexOf(me.floor) >= 0));
         addBtn('⚄ ' + esc(a.name), 'primary',
-          () => window.GameShell.send({ type: 'hauntAction', key: a.key }),
+          () => {
+            if (a.key === 'break_spell' && h.mirrorRealm) { chooseMirrorGuess(st); return; }
+            if (a.key === 'pass_note') { passDieNote(st, me); return; }
+            window.GameShell.send({ type: 'hauntAction', key: a.key });
+          },
           used || !okWhere,
           used ? '本回合已经做过' : (!okWhere ? (a.where === 'room' ? '必须在「' + a.room + '」里做' : '房间条件不满足') : '按属性掷骰后结算'));
       });

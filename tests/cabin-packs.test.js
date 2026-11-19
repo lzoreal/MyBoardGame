@@ -2,6 +2,7 @@
 global.window = global;
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const root = path.join(__dirname, '..');
 
 window.CABIN_PACKS = {
@@ -37,7 +38,7 @@ window.CABIN_PACKS = {
   omens: [{ key: 'o1', name: '婴啼', text: '测试预兆', delta: { trait: 'sanity', amount: -1 } }]
 };
 
-eval(fs.readFileSync(path.join(root, 'js/games/cabin.js'), 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root, 'js/games/cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 let pass = 0, fail = 0;
 function ok(name, cond) {

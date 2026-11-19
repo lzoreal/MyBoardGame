@@ -1,9 +1,10 @@
 global.window = global;
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const root = path.join(__dirname, '..');
-eval(fs.readFileSync(path.join(root, 'js/games/cabin-packs.js'), 'utf8'));
-eval(fs.readFileSync(path.join(root, 'js/games/cabin.js'), 'utf8'));
+vm.runInThisContext(fs.readFileSync(path.join(root, 'js/games/cabin-packs.js'), 'utf8'), { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(root, 'js/games/cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 let pass = 0, fail = 0;
 function ok(name, cond, extra) { if (cond) { pass++; console.log('  ok   ' + name); } else { fail++; console.log('  FAIL ' + name + (extra === undefined ? '' : ' -> ' + extra)); } }

@@ -2,6 +2,7 @@
 // 覆盖本轮修复的 P0，以及 #6/#7/#17/#18 的状态落地
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 let passed = 0, failed = 0;
 const fails = [];
 function ok(name, cond, extra) {
@@ -11,8 +12,8 @@ function ok(name, cond, extra) {
 function seeded(n) { let s = n || 1; return function () { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; }
 const packsSrc = fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin-packs.js'), 'utf8');
 global.window = global;
-eval(packsSrc);
-eval(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'));
+vm.runInThisContext(packsSrc, { filename: 'cabin-packs.js' });
+vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'games', 'cabin.js'), 'utf8'), { filename: 'cabin.js' });
 const E = window.CabinEngine;
 const TRAITS = ['might', 'speed', 'known', 'sanity'];
 function scenario(no) { return E.SCENARIOS.find((x) => x.no === no); }
@@ -87,6 +88,58 @@ console.log('=== #6/#7/#17/#18 Setup 状态 ===');
   ok('#18 叛徒离场且真身记录', st18.players[st18.haunt.traitor].outside === true && st18.haunt.trueBody === st18.haunt.traitor, st18.haunt.trueBody);
 }
 
+console.log('=== 50 剧本 3–6 人开局不得自动判胜 ===');
+{
+  let ended = [];
+  for (const sc of E.SCENARIOS) {
+    for (const n of [3, 4, 5, 6]) {
+      const st = start(sc.no, n);
+      E.helpers.checkWin(st);
+      if (st.phase === 'ended') ended.push('#' + sc.no + '/' + n + 'p:' + (st.winner && st.winner.side));
+    }
+  }
+  ok('50 剧本 × 3–6 人 Setup 后均未自动结束', ended.length === 0, ended.join(','));
+  const st24 = start(24, 5);
+  ok('#24 5 人精灵之火仍只算实际拾取，不因 Setup 直接胜利', st24.phase === 'playing', st24.phase);
+  const st50 = start(50, 3);
+  ok('#50 3 人炸药 Setup 不满足每层爆破目标', st50.phase === 'playing', st50.phase);
+}
+
+console.log('=== #40 血肉行者归来：3–6 人双胞胎数量与猎杀目标一致 ===');
+for (const n of [3, 4, 5, 6]) {
+  const st = start(40, n);
+  const need = st.haunt.heroGoal.needByPlayers[n];
+  ok('#40 ' + n + ' 人双胞胎 ' + need + ' 只', st.monsters.filter((m) => m.type === 'twins').length === need,
+    st.monsters.filter((m) => m.type === 'twins').length + '/' + need);
+}
+
+console.log('=== #34 维度改写必须由行动触发 ===');
+{
+  const st = start(34, 3);
+  ok('#34 Setup 后不因维度标记直接胜利', st.phase === 'playing', st.phase);
+  ok('#34 维度行动存在', !!(st.haunt.actions || []).find((a) => a.key === 'shift_dimension'));
+}
+
+console.log('=== 仪式型剧本的道具/地点前置 ===');
+{
+  const st4 = start(4, 3);
+  ok('#4 仪式房真实在场', !!E.helpers.roomByName(st4, '仪式房'));
+  const st16 = start(16, 3);
+  ok('#16 遗骸 4 个', E.helpers.countTokens(st16, '遗骸', {}) === 4, E.helpers.countTokens(st16, '遗骸', {}));
+  ok('#16 收集遗骸行动存在', (st16.haunt.actions || []).some((a) => a.key === 'collect_relic'));
+  const st25 = start(25, 3);
+  ok('#25 军械库真实在场', !!E.helpers.roomByName(st25, '军械库'));
+  ok('#25 法术材料必须通过四次寻找行动获得，Setup 不直接放置',
+    E.helpers.countTokens(st25, '法术材料', {}) === 0 &&
+    ['find_sanity', 'find_might', 'find_known', 'find_speed'].every((k) => (st25.haunt.actions || []).some((a) => a.key === k)),
+    E.helpers.countTokens(st25, '法术材料', {}));
+  const st26 = start(26, 3);
+  ok('#26 祭坛真实在场', E.helpers.countTokens(st26, '祭坛', {}) === 1, E.helpers.countTokens(st26, '祭坛', {}));
+  const st29 = start(29, 3);
+  ok('#29 仪式房真实在场', !!E.helpers.roomByName(st29, '仪式房'));
+  ok('#29 妖精仍在场', st29.monsters.some((m) => !m.dead && m.type === 'fae'));
+}
+
 console.log('=== 伤害系统：类型与通用溢出 ===');
 {
   const stG = start(2, 3);
@@ -122,6 +175,10 @@ for (const sc of E.SCENARIOS) {
   }
 }
 ok('剧本行动伤害类型只用 physical/mental/general', badDamage.length === 0, badDamage.join(','));
+
+const six = E.createInitial(Array.from({ length: 6 }, (_, i) => ({ id: 'p' + i, name: 'P' + i })), () => 0.5, { skipSelect: true });
+ok('6 人局每名玩家都有四项属性轨道', six.players.every((p) => p.track && ['speed', 'might', 'sanity', 'known'].every((k) => p.track[k])), six.players.map((p) => !!p.track).join(','));
+ok('6 人局使用 6 块不同人物板', new Set(six.players.map((p) => p.boardId)).size === 6, six.players.map((p) => p.boardId).join(','));
 
 console.log('---');
 console.log((failed ? 'FAILED ' : 'PASS ') + passed + (failed ? ', FAILED ' + failed : ''));

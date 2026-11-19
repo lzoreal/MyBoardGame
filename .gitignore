@@ -8,3 +8,17 @@ node_modules/
 
 # 本地参考素材（官方英文扫描件，不入库、不参与构建）
 山中小屋英文版资源/
+# 覆盖率临时产物
+.covall/
+.covraw/
+coverage/
+coverage-report.txt
+.coverage-report.txt
+.coverage-try.cjs
+
+# 本地审查临时产物
+.review-pages/
+.review-actions.cjs
+.debug*.cjs
+.uncovered-ranges.txt
+.playthrough-last.txt
