@@ -150,7 +150,7 @@ window.ArkhamEngine = (function () {
   const SCENARIOS = {
     gathering: {
       id: 'gathering', chapter: '第一章', name: '集结号', start: 'study',
-      subtitle: '第一章 · 集结号',
+      subtitle: '第一章 · 集结号', order: 1, next: 'midnight', xp: 2, startLabel: '进入屋子',
       intro: '雨夜，你站在失踪屋主的房门前。书房里的笔记只写了半句话：“他们在地下室喂养它。”',
       locations: LOCATIONS, encounters: ENCOUNTERS,
       act: [
@@ -167,7 +167,7 @@ window.ArkhamEngine = (function () {
     },
     midnight: {
       id: 'midnight', chapter: '第二章', name: '午夜狂欢', start: 'northside',
-      subtitle: '第二章 · 午夜狂欢',
+      subtitle: '第二章 · 午夜狂欢', order: 2, next: 'abyss', xp: 3, startLabel: '走上午夜街头',
       intro: '午夜前，五名戴兜帽的邪教徒散进了阿卡姆的街区。你知道其中三人聚在一起，正在准备一场仪式。找到他们，别让钟声敲完。',
       locations: CITY_LOCATIONS, encounters: ENCOUNTERS,
       act: [
@@ -185,7 +185,7 @@ window.ArkhamEngine = (function () {
     },
     abyss: {
       id: 'abyss', chapter: '第三章', name: '深渊之下', start: 'mouth',
-      subtitle: '第三章 · 深渊之下',
+      subtitle: '第三章 · 深渊之下', order: 3, next: null, xp: 4, startLabel: '潜下裂缝',
       intro: '仪式的源头在海崖下面。你沿着裂缝潜进去，三座刻着螺旋的仪式节点正在把潮水往上推；再晚一点，深渊里的东西就会爬出来。',
       locations: ABYSS_LOCATIONS, encounters: ABYSS_ENCOUNTERS,
       act: [

@@ -181,7 +181,23 @@ ArkhamEngine.registerEncounterEffect('probeEncounter', (state, card, rng) => {
 | `setAgenda` | `value` | 合并到 `state.agenda` |
 | `log` | `text` | 开局日志 |
 
-### 钩子
+### 剧本 UI 元数据
+
+现有界面不再写死三章，以下字段会直接驱动开局页和结算页：
+
+| 字段 | 用途 |
+| --- | --- |
+| `order` | 章节排序，数字越小越靠前 |
+| `next` | 胜利后进入的下一章 id；`null` 表示没有下一章 |
+| `xp` | 胜利获得的经验值 |
+| `standalone` | 独立支线，不强制要求前序章节 |
+| `how` | 开局页“这一章怎么玩”的说明 |
+| `startLabel` | 开始按钮文案 |
+| `winBig` | 结算页的大标题 |
+
+`js/games/arkham-pilot-pack.js` 是一个独立原创试点包，示例了调查员、卡牌、敌人、遭遇、剧本 setup、剧本 UI 元数据的完整注册流程。
+
+### 剧本钩子
 
 - 剧本级：`sc.hooks.setup`、`sc.hooks.enemyDefeated`、`sc.hooks.actAdvanced`、`sc.hooks.enterLocation`、`sc.hooks.investigate`、`sc.hooks.end`。
 - 全局级：`ArkhamEngine.registerHook('gameStart'|'enemyDefeated'|'actAdvanced'|'enterLocation'|'investigate'|'gameEnded', fn)`。

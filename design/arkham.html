@@ -353,13 +353,14 @@ button:disabled{cursor:not-allowed;opacity:.42}
 <div class="toast" id="toast"></div>
 
 <script src="../js/games/arkham.js"></script>
+<script src="../js/games/arkham-pilot-pack.js"></script>
 <script>
 (function(){
   const E = window.ArkhamEngine;
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot'}[c]));
   const STORE = 'arkham:campaign';
-  const ORDER = ['gathering', 'midnight', 'abyss'];
+  const ORDER = Object.keys(E.SCENARIOS).sort((a, b) => ((E.SCENARIOS[a].order || 100) - (E.SCENARIOS[b].order || 100)));
   const UPGRADES = [
     { key: 'health', name: '强健体魄', cost: 2, text: '生命上限 +1' },
     { key: 'sanity', name: '精神锚点', cost: 2, text: '理智上限 +1' },
@@ -370,7 +371,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
   ];
   let state = null;
   let picked = 'detective';
-  let pickedChapter = 'gathering';
+  let pickedChapter = ORDER[0] || 'gathering';
   let sug = null;
   let seenTest = '';
   let seenEnc = '';
@@ -429,14 +430,14 @@ button:disabled{cursor:not-allowed;opacity:.42}
   /* ---------------- 开局 ---------------- */
   function showStart(){
     const invs = E.INVESTIGATORS;
-    const sc = E.SCENARIOS[pickedChapter] || E.SCENARIOS.gathering;
+    const sc = E.SCENARIOS[pickedChapter] || E.SCENARIOS[ORDER[0]] || E.SCENARIOS.gathering;
     const camp = readCampaign();
     const done = (camp.chapters || []).indexOf(sc.id) >= 0;
-    const how = sc.id === 'midnight'
+    const how = sc.how || (sc.id === 'midnight'
       ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。五名邪教徒分散在城区，解决其中 3 名就会逼出仪式主持者；击败邪教徒后可以审问他，换取线索或拖慢仪式。仪式倒计时每回合减少，归零后主持者会变强。撑不住时可以撤退，但仪式会继续。'
       : (sc.id === 'abyss'
         ? '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。三座仪式节点分布在潮湿通道、地下湖和裂缝，靠近后做意志检定（4）将其熄灭；三座全灭才会逼出深渊吞噬者，在深渊边缘击败他。潮水倒计时每回合减少，归零后他会更强。'
-        : '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。');
+        : '每回合 3 个行动：移动、调查、战斗、闪避、打牌、抽牌、拿资源。检定抽混沌袋，成功才拿到线索。集齐 3 个线索推进密谋，地下室的门会打开——那里有这一章的东西在等你。'));
     const idx = ORDER.indexOf(sc.id);
     const prev = idx > 0 ? E.SCENARIOS[ORDER[idx - 1]] : null;
     const prevDone = prev ? camp.chapters.indexOf(prev.id) >= 0 : true;
@@ -448,13 +449,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
       </div>
       <div class="sheetBody">
         <div class="chapterPick">
-          ${Object.keys(E.SCENARIOS).map((id) => {
+          ${ORDER.map((id) => {
             const s = E.SCENARIOS[id];
             const ok = (camp.chapters || []).indexOf(id) >= 0;
             const i = ORDER.indexOf(id);
             const p = i > 0 ? E.SCENARIOS[ORDER[i - 1]] : null;
             const pDone = p ? camp.chapters.indexOf(p.id) >= 0 : true;
-            const cs = ok ? '已完成' : (i === 0 ? '从这里开始' : (pDone ? '可继续' : '推荐先玩' + p.chapter));
+            const cs = ok ? '已完成' : (s.standalone ? '独立支线' : (i === 0 ? '从这里开始' : (pDone ? '可继续' : '推荐先玩' + p.chapter)));
             return `<button class="chap ${id === pickedChapter ? 'sel' : ''}" data-ch="${id}">
               <span class="cn">${esc(s.chapter)} · ${esc(s.name)}</span>
               <span class="cs">${cs}</span>
@@ -493,7 +494,7 @@ button:disabled{cursor:not-allowed;opacity:.42}
         </details>
         <h3>这一章怎么玩</h3>
         <p style="font-size:12.5px;color:#5b4a34">${esc(how)}</p>
-        <button class="sheetBtn" id="btnStart">${sc.id === 'midnight' ? '走上午夜街头' : (sc.id === 'abyss' ? '潜下裂缝' : '进入屋子')}</button>
+        <button class="sheetBtn" id="btnStart">${esc(sc.startLabel || '开始调查')}</button>
       </div>`);
     $('#sheet').querySelectorAll('[data-ch]').forEach((b) => {
       b.onclick = () => { pickedChapter = b.dataset.ch; showStart(); };
@@ -776,11 +777,11 @@ button:disabled{cursor:not-allowed;opacity:.42}
     if (endShown) return;
     endShown = true;
     const r = state.resolution;
-    const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS.gathering;
+    const sc = E.SCENARIOS[state.scenario] || E.SCENARIOS[ORDER[0]] || E.SCENARIOS.gathering;
     const camp = readCampaign();
     let gain = 0;
     if (r.result === 'win') {
-      gain = sc.id === 'abyss' ? 4 : (sc.id === 'midnight' ? 3 : 2);
+      gain = sc.xp != null ? sc.xp : (sc.id === 'abyss' ? 4 : (sc.id === 'midnight' ? 3 : 2));
       camp.xp += gain;
       if (camp.chapters.indexOf(sc.id) < 0) camp.chapters.push(sc.id);
     } else if (r.result === 'resign') {
@@ -790,12 +791,13 @@ button:disabled{cursor:not-allowed;opacity:.42}
       camp.trauma += 1;
     }
     localStorage.setItem(STORE, JSON.stringify(camp));
-    const nextId = ORDER[ORDER.indexOf(sc.id) + 1];
+    const orderIndex = ORDER.indexOf(sc.id);
+    const nextId = sc.next !== undefined ? sc.next : (orderIndex >= 0 ? ORDER[orderIndex + 1] : null);
     const nextSc = nextId ? E.SCENARIOS[nextId] : null;
     const canNext = !!nextSc && r.result === 'win';
     const title = r.result === 'win' ? sc.chapter + '完成' : (r.result === 'resign' ? '撤出阿卡姆' : '调查终止');
     const big = r.result === 'win'
-      ? (sc.id === 'abyss' ? '潮水退去' : (sc.id === 'midnight' ? '钟声停下' : '天亮之前'))
+      ? (sc.winBig || (sc.id === 'abyss' ? '潮水退去' : (sc.id === 'midnight' ? '钟声停下' : '天亮之前')))
       : (r.result === 'resign' ? '午夜撤退' : '黑暗吞没');
     openSheet(`
       <div class="sheetHead"><div><h2>${esc(title)}</h2><p>${esc(sc.name)} · 结局</p></div></div>
