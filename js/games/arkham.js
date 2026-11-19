@@ -15,13 +15,13 @@ window.ArkhamEngine = (function () {
 
   const CARDS = {
     pistol: { type: 'asset', name: '旧式手枪', cost: 3, combat: 1, damage: 1, text: '战力 +1，战斗造成 +1 伤害。' },
-    flashlight: { type: 'asset', name: '手电筒', cost: 2, intellect: 2, text: '智力 +2（调查时）。' },
+    flashlight: { type: 'asset', name: '手电筒', cost: 2, intellect: 2, actionEffect: 'flashlight', actionCost: 1, exhaust: true, text: '智力 +2。行动：照亮当前地点，本次调查检定 +1。' },
     knife: { type: 'asset', name: '小刀', cost: 1, combat: 1, text: '战力 +1。' },
     charm: { type: 'asset', name: '护身符', cost: 2, will: 1, sanitySoak: 2, text: '意志 +1，可抵消 2 点恐惧。' },
     ally: { type: 'asset', name: '老友', cost: 4, combat: 1, healthSoak: 1, sanitySoak: 1, text: '战力 +1，可各抵消 1 点伤害与恐惧。' },
     revolver: { type: 'asset', name: '连发左轮', cost: 4, combat: 2, damage: 1, text: '战力 +2，战斗造成 +1 伤害。' },
     book: { type: 'asset', name: '旧词典', cost: 3, intellect: 2, text: '智力 +2。' },
-    medkit: { type: 'asset', name: '医疗包', cost: 2, healthSoak: 2, text: '可抵消 2 点伤害，耗尽后离场。' },
+    medkit: { type: 'asset', name: '医疗包', cost: 2, healthSoak: 2, actionEffect: 'medkit', actionCost: 1, uses: 2, text: '可抵消 2 点伤害。行动：回复 1 点伤害，可用 2 次。' },
     rosary: { type: 'asset', name: '旧念珠', cost: 2, will: 1, sanitySoak: 2, text: '意志 +1，可抵消 2 点恐惧，耗尽后离场。' },
     firstAid: { type: 'event', name: '急救', cost: 2, effect: 'healDamage', text: '回复 2 点伤害。' },
     calm: { type: 'event', name: '镇静剂', cost: 1, effect: 'healHorror', text: '回复 2 点恐惧。' },
@@ -221,6 +221,7 @@ window.ArkhamEngine = (function () {
   const CARD_EFFECTS = {};
   const ACTION_HANDLERS = {};
   const ENCOUNTER_EFFECTS = {};
+  const ASSET_EFFECTS = {};
   const HOOKS = {};
 
   function registerCardEffect(name, fn) {
@@ -233,6 +234,10 @@ window.ArkhamEngine = (function () {
 
   function registerEncounterEffect(name, fn) {
     if (typeof name === 'string' && typeof fn === 'function') ENCOUNTER_EFFECTS[name] = fn;
+  }
+
+  function registerAssetEffect(name, fn) {
+    if (typeof name === 'string' && typeof fn === 'function') ASSET_EFFECTS[name] = fn;
   }
 
   function registerHook(name, fn) {
@@ -354,10 +359,12 @@ window.ArkhamEngine = (function () {
 
   function spawnEnemyDef(state, base, locId, extra) {
     const id = 'e' + (state.nextEnemyId = (state.nextEnemyId || 0) + 1);
+    const engagedWith = playerList(state).filter((p) => !p.defeated && p.location === locId).map((p) => p.id);
     const e = Object.assign({
       id: id, key: base.name, name: base.name, fight: base.fight, evade: base.evade,
       health: base.health, maxHealth: base.health, damage: base.damage, horror: base.horror,
-      location: locId, engaged: locId === state.inv.location, exhausted: false, boss: !!base.boss
+      location: locId, engaged: engagedWith.length > 0, engagedWith: engagedWith,
+      exhausted: false, boss: !!base.boss, hunter: !!base.hunter
     }, extra || {});
     state.enemies.push(e);
     return e;
@@ -390,12 +397,29 @@ window.ArkhamEngine = (function () {
     return left;
   }
 
+  function autoAdvanceIfDown(state, inv, rng) {
+    if (state.phase !== 'investigation' || state.inv !== inv || !inv.defeated) return;
+    if (!livingPlayers(state).length) return;
+    inv.turnDone = true;
+    inv.actions = 0;
+    const next = livingPlayers(state).find((p) => !p.turnDone);
+    if (next) {
+      setActive(state, state.players.indexOf(next));
+      next.actions = 3;
+      log(state, '轮到 ' + next.name + ' 行动');
+      return;
+    }
+    enemyPhase(state);
+    if (state.phase === 'ended') return;
+    upkeep(state, rng || Math.random);
+  }
+
   function takeDamage(state, inv, n) {
     if (!n) return;
     let left = n;
-    if (inv.ability === 'guardian' && !state.flags.guardianUsed && left > 0) {
+    if (inv.ability === 'guardian' && !(inv.flags && inv.flags.guardianUsed) && left > 0) {
       left -= 1;
-      state.flags.guardianUsed = true;
+      inv.flags.guardianUsed = true;
       log(state, '退伍保安的本能：本次少受 1 点伤害');
     }
     left = soakWithAssets(state, inv, 'health', left);
@@ -408,7 +432,9 @@ window.ArkhamEngine = (function () {
     }
     if (inv.damage >= inv.maxHealth) {
       inv.defeated = true;
-      endGame(state, 'lose', '你倒下了。' + (state.loseText || ''));
+      log(state, inv.name + ' 倒下了');
+      if (!livingPlayers(state).length) endGame(state, 'lose', '你倒下了。' + (state.loseText || ''));
+      else autoAdvanceIfDown(state, inv, null);
     }
   }
 
@@ -419,7 +445,9 @@ window.ArkhamEngine = (function () {
     if (left > 0) inv.horror += left;
     if (inv.horror >= inv.maxSanity) {
       inv.defeated = true;
-      endGame(state, 'lose', '你的精神崩溃了。' + (state.loseText || ''));
+      log(state, inv.name + ' 的精神崩溃了');
+      if (!livingPlayers(state).length) endGame(state, 'lose', '你的精神崩溃了。' + (state.loseText || ''));
+      else autoAdvanceIfDown(state, inv, null);
     }
     if (left > 0 && inv.ability === 'agnes' && state.phase !== 'ended') {
       const target = enemiesAt(state, inv.location)[0];
@@ -491,30 +519,54 @@ window.ArkhamEngine = (function () {
     runHooks('actAdvanced', state, { stage: 2 });
   }
 
+  function commitValue(card, statKey) {
+    if (!card) return 0;
+    if (card.icons && typeof card.icons[statKey] === 'number') return card.icons[statKey];
+    if (card.commit && typeof card.commit[statKey] === 'number') return card.commit[statKey];
+    return card.type === 'event' ? 1 : 0;
+  }
+
   function test(state, statKey, difficulty, rng, opts) {
-    const inv = state.inv;
-    const base = totalStat(state, inv, statKey);
-    let bonus = 0;
-    if (state.flags.lucky) {
-      bonus = 2;
+    const inv = (opts && opts.inv) || state.inv;
+    let bonus = (opts && Number(opts.bonus)) || 0;
+    if ((inv.flags && inv.flags.lucky) || state.flags.lucky) {
+      bonus += 2;
+      if (inv.flags) inv.flags.lucky = false;
       state.flags.lucky = false;
       log(state, '侥幸：本次检定 +2');
     }
+    const commit = (opts && opts.commit) || [];
+    const committed = [];
+    let commitBonus = 0;
+    commit.slice().sort((a, b) => b - a).forEach((idx) => {
+      const cardId = inv.hand[idx];
+      if (!cardId) return;
+      const card = CARDS[cardId];
+      if (!card) return;
+      commitBonus += commitValue(card, statKey);
+      committed.push(card.name || cardId);
+      inv.hand.splice(idx, 1);
+      inv.discard.push(cardId);
+    });
+    const base = totalStat(state, inv, statKey);
     let token = pickToken(state, rng);
     let mod = skillTokenMod(state, token);
-    let total = base + mod + bonus;
+    let total = base + mod + bonus + commitBonus;
     let success = token !== 'auto' && total >= difficulty;
-    if (!success && token !== 'auto' && inv.ability === 'wendy' && !state.flags.wendyLuck) {
-      state.flags.wendyLuck = true;
+    if (!success && token !== 'auto' && inv.ability === 'wendy' && !(inv.flags && inv.flags.wendyLuck)) {
+      if (inv.flags) inv.flags.wendyLuck = true;
       token = pickToken(state, rng);
       mod = skillTokenMod(state, token);
-      total = base + mod + bonus;
+      total = base + mod + bonus + commitBonus;
       success = token !== 'auto' && total >= difficulty;
       log(state, '温蒂的运气：重抽混沌标记');
     }
+    state.testSeq = (state.testSeq || 0) + 1;
     state.lastTest = {
+      inv: inv.id, seq: state.testSeq,
       stat: statKey, base: base, token: token, tokenText: tokenText(token),
-      mod: mod, bonus: bonus, total: total, difficulty: difficulty, success: success
+      mod: mod, bonus: bonus, commitBonus: commitBonus, commit: committed,
+      total: total, difficulty: difficulty, success: success
     };
     return success;
   }
@@ -545,68 +597,70 @@ window.ArkhamEngine = (function () {
     if (spec.log) log(state, spec.log);
   }
 
-  function resolveEncounterSpec(state, card, rng) {
+  function resolveEncounterSpec(state, card, rng, onlyInv) {
     const spec = card.test;
+    const inv = onlyInv || state.inv;
     const stat = typeof spec === 'string' ? 'will' : spec.stat || 'will';
     const difficulty = typeof spec === 'string' ? 3 : (spec.difficulty || 3);
-    const success = test(state, stat, difficulty, rng);
-    applyEncounterOutcome(state, state.inv, success ? spec.success : spec.fail);
+    const success = test(state, stat, difficulty, rng, { inv: inv });
+    applyEncounterOutcome(state, inv, success ? spec.success : spec.fail);
     return success;
   }
 
-  function spawnEncounter(state, card, rng) {
-    const inv = state.inv;
+  function spawnEncounter(state, card, rng, onlyInv) {
+    const inv = onlyInv || state.inv;
+    const roll = (stat, diff) => test(state, stat, diff, rng, { inv: inv });
     if (card.effect && ENCOUNTER_EFFECTS[card.effect]) {
-      ENCOUNTER_EFFECTS[card.effect](state, card, rng);
+      ENCOUNTER_EFFECTS[card.effect](state, card, rng, inv);
       return;
     }
     if (card.test) {
-      resolveEncounterSpec(state, card, rng);
+      resolveEncounterSpec(state, card, rng, inv);
       return;
     }
     if (card.key && ENEMIES[card.key] && !ENEMIES[card.key].boss) {
       const e = makeEnemy(state, card.key, inv.location);
-      log(state, card.name + ' 出现在' + state.locations[inv.location].name + '，与你交战');
+      log(state, card.name + ' 出现在' + state.locations[inv.location].name + '，与' + inv.name + '交战');
       return;
     }
     if (card.key === 'hands') {
-      if (!test(state, 'will', 3, rng)) takeDamage(state, inv, 1);
+      if (!roll('will', 3)) takeDamage(state, inv, 1);
       return;
     }
     if (card.key === 'fear') {
-      if (!test(state, 'will', 4, rng)) takeHorror(state, inv, 2);
+      if (!roll('will', 4)) takeHorror(state, inv, 2);
       return;
     }
     if (card.key === 'mist') {
-      if (!test(state, 'int', 3, rng)) inv.actions = Math.max(0, inv.actions - 1);
+      if (!roll('int', 3)) inv.actions = Math.max(0, inv.actions - 1);
       return;
     }
     if (card.key === 'ambush') {
-      if (!test(state, 'agi', 3, rng)) takeDamage(state, inv, 1);
+      if (!roll('agi', 3)) takeDamage(state, inv, 1);
       return;
     }
     if (card.key === 'whisper') {
-      if (!test(state, 'will', 3, rng)) { takeHorror(state, inv, 1); state.agenda.doom += 1; }
+      if (!roll('will', 3)) { takeHorror(state, inv, 1); state.agenda.doom += 1; }
       return;
     }
     if (card.key === 'collapse') {
-      if (!test(state, 'agi', 4, rng)) takeDamage(state, inv, 2);
+      if (!roll('agi', 4)) takeDamage(state, inv, 2);
       return;
     }
     if (card.key === 'tide') {
-      if (!test(state, 'will', 3, rng)) takeHorror(state, inv, 1);
+      if (!roll('will', 3)) takeHorror(state, inv, 1);
       return;
     }
     if (card.key === 'slip') {
-      if (!test(state, 'agi', 3, rng)) takeDamage(state, inv, 1);
+      if (!roll('agi', 3)) takeDamage(state, inv, 1);
       return;
     }
     if (card.key === 'dark') {
-      if (!test(state, 'int', 3, rng)) inv.actions = Math.max(0, inv.actions - 1);
+      if (!roll('int', 3)) inv.actions = Math.max(0, inv.actions - 1);
       return;
     }
     if (card.key === 'chant') {
-      if (!test(state, 'will', 4, rng)) { takeHorror(state, inv, 1); state.agenda.doom += 1; }
+      if (!roll('will', 4)) { takeHorror(state, inv, 1); state.agenda.doom += 1; }
       return;
     }
     if (card.key === 'ritual' || card.key === 'offering') {
@@ -617,15 +671,18 @@ window.ArkhamEngine = (function () {
 
   function mythosPhase(state, rng) {
     state.phase = 'mythos';
-    const inv = state.inv;
-    if (!state.encounter.deck.length) {
-      state.encounter.deck = shuffle(state.encounter.discard.splice(0), rng);
-    }
-    const card = state.encounter.deck.pop();
-    state.encounter.discard.push(card);
-    state.encounterCurrent = card;
-    log(state, '遭遇：' + card.name);
-    spawnEncounter(state, card, rng);
+    const living = livingPlayers(state);
+    living.forEach((inv) => {
+      if (state.phase === 'ended') return;
+      if (!state.encounter.deck.length) {
+        state.encounter.deck = shuffle(state.encounter.discard.splice(0), rng);
+      }
+      const card = state.encounter.deck.pop();
+      state.encounter.discard.push(card);
+      state.encounterCurrent = card;
+      log(state, inv.name + ' 遭遇：' + card.name);
+      spawnEncounter(state, card, rng, inv);
+    });
     if (state.phase === 'ended') return;
     state.agenda.doom += 1;
     if (state.agenda.doom >= state.agenda.max) advanceAgenda(state);
@@ -644,30 +701,70 @@ window.ArkhamEngine = (function () {
     }
   }
 
+  function refreshEngagement(state, enemy) {
+    enemy.engagedWith = livingPlayers(state)
+      .filter((p) => p.location === enemy.location)
+      .map((p) => p.id);
+    enemy.engaged = enemy.engagedWith.length > 0;
+  }
+
+  function nextStepToward(state, from, to) {
+    if (!from || !to || from === to) return null;
+    const queue = [{ path: [from], dist: 0 }];
+    const seen = new Set([from]);
+    while (queue.length) {
+      const cur = queue.shift();
+      const here = cur.path[cur.path.length - 1];
+      const links = (state.locations[here] && state.locations[here].links) || [];
+      for (const nxt of links) {
+        if (seen.has(nxt)) continue;
+        if (nxt === to) return { step: nxt, dist: cur.dist + 1 };
+        seen.add(nxt);
+        queue.push({ path: cur.path.concat(nxt), dist: cur.dist + 1 });
+      }
+    }
+    return null;
+  }
+
   function enemyPhase(state) {
     state.phase = 'enemy';
-    const inv = state.inv;
+    const living = livingPlayers(state);
     (state.enemies || []).forEach((e) => {
       if (e.health <= 0) return;
       if (e.exhausted) {
         e.exhausted = false;
-        e.engaged = e.location === inv.location;
+        refreshEngagement(state, e);
         return;
       }
-      if (e.location !== inv.location) { e.engaged = false; return; }
-      e.engaged = true;
-      log(state, e.name + ' 与你交战');
-      takeDamage(state, inv, e.damage);
+      refreshEngagement(state, e);
+      if (!e.engagedWith.length && e.hunter && living.length) {
+        let best = null;
+        living.forEach((p) => {
+          const route = nextStepToward(state, e.location, p.location);
+          if (route && (!best || route.dist < best.dist)) best = { step: route.step, dist: route.dist, target: p };
+        });
+        if (best) {
+          e.location = best.step;
+          log(state, e.name + ' 追踪着' + best.target.name + '，移动到' + state.locations[best.step].name);
+          refreshEngagement(state, e);
+        }
+      }
+      if (!e.engagedWith.length) return;
+      const target = playerById(state, e.engagedWith[0]);
+      if (!target || target.defeated) return;
+      log(state, e.name + ' 攻击' + target.name);
+      takeDamage(state, target, e.damage);
       if (state.phase === 'ended') return;
-      takeHorror(state, inv, e.horror);
+      takeHorror(state, target, e.horror);
     });
   }
 
   function attackOfOpportunity(state) {
     const inv = state.inv;
-    const engaged = enemiesAt(state, inv.location).filter((e) => e.engaged && !e.exhausted);
+    const engaged = enemiesAt(state, inv.location)
+      .filter((e) => !e.exhausted && ((e.engagedWith && e.engagedWith.length) ? e.engagedWith.indexOf(inv.id) >= 0 : e.engaged));
     for (const e of engaged) {
-      log(state, e.name + ' 趁机攻击你');
+      log(state, e.name + ' 趁机攻击' + inv.name);
       takeDamage(state, inv, e.damage);
       if (state.phase === 'ended') return true;
       takeHorror(state, inv, e.horror);
@@ -678,20 +775,36 @@ window.ArkhamEngine = (function () {
 
   function upkeep(state, rng) {
     state.phase = 'upkeep';
-    const inv = state.inv;
-    (state.enemies || []).forEach((e) => { e.exhausted = false; });
-    drawCards(state, inv, 1);
-    inv.resources += 1;
-    inv.actions = 3;
+    (state.enemies || []).forEach((e) => { e.exhausted = false; refreshEngagement(state, e); });
+    livingPlayers(state).forEach((inv) => {
+      readyAssets(inv);
+      drawCards(state, inv, 1);
+      inv.resources += 1;
+      inv.actions = 3;
+      inv.turnDone = false;
+      if (inv.flags) {
+        inv.flags.wendyLuck = false;
+        inv.flags.scholarUsed = false;
+        inv.flags.guardianUsed = false;
+        inv.flags.lucky = false;
+      }
+      enforceHandLimit(state, inv);
+    });
     state.flags.wendyLuck = false;
     state.flags.scholarUsed = false;
     state.flags.guardianUsed = false;
+    state.flags.lucky = false;
     state.mulliganAvailable = false;
     tickRitual(state);
     state.round += 1;
-    state.phase = 'investigation';
     mythosPhase(state, rng);
-    if (state.phase !== 'ended') startInvestigation(state, inv);
+    if (state.phase === 'ended') return;
+    const living = livingPlayers(state);
+    if (!living.length) { endGame(state, 'lose', '所有调查员都倒下了。'); return; }
+    const first = living[0];
+    setActive(state, state.players.indexOf(first));
+    first.actions = 3;
+    state.phase = 'investigation';
   }
 
   function drawCards(state, inv, n) {
@@ -703,6 +816,19 @@ window.ArkhamEngine = (function () {
       }
       inv.hand.push(inv.deck.pop());
     }
+  }
+
+  function enforceHandLimit(state, inv) {
+    const limit = 8;
+    while (inv.hand.length > limit) {
+      const dropped = inv.hand.shift();
+      inv.discard.push(dropped);
+      log(state, inv.name + ' 手牌超过上限，弃掉 ' + ((CARDS[dropped] && CARDS[dropped].name) || dropped));
+    }
+  }
+
+  function readyAssets(inv) {
+    (inv.assetInstances || []).forEach((a) => { a.exhausted = false; a.uses = a.usesMax != null ? a.usesMax : a.uses; });
   }
 
   function spendAction(inv, n) {
@@ -721,6 +847,8 @@ window.ArkhamEngine = (function () {
     inv.hand.splice(index, 1);
     if (c.type === 'asset') {
       inv.assets.push(id);
+      inv.assetInstances = inv.assetInstances || [];
+      inv.assetInstances.push({ id: id, exhausted: false, uses: c.uses || 0, usesMax: c.uses || 0 });
       if (c.healthSoak || c.sanitySoak) {
         inv.soakAssets.push({
           id: id, name: c.name,
@@ -759,8 +887,8 @@ window.ArkhamEngine = (function () {
       const loc = locationOf(state, inv);
       if (loc.clues > 0) { loc.clues -= 1; inv.clues += 1; log(state, '洞察：发现 1 个线索'); }
     });
-    registerCardEffect('lucky', (state) => {
-      state.flags.lucky = true;
+    registerCardEffect('lucky', (state, inv) => {
+      inv.flags.lucky = true;
       log(state, '侥幸：下一次检定 +2');
     });
     const hit = (state, inv, dmg, label) => {
@@ -777,6 +905,29 @@ window.ArkhamEngine = (function () {
       const e = enemiesAt(state, inv.location)[0];
       if (e) { e.exhausted = true; e.engaged = false; log(state, '疾行：摆脱了 ' + e.name); }
     });
+  }
+
+  function registerDefaultAssetEffects() {
+    ASSET_EFFECTS.flashlight = (state, inv, card, inst, rng) => {
+      const loc = locationOf(state, inv);
+      if (loc.clues <= 0) { log(state, '手电筒：这里已经没有线索'); return; }
+      if (test(state, 'int', loc.shroud, rng, { inv: inv, bonus: 1 })) {
+        loc.clues -= 1;
+        inv.clues += 1;
+        log(state, '手电筒照亮 ' + loc.name + '：发现 1 个线索');
+        runScenarioHook(state, 'investigate', { location: loc, success: true });
+        runHooks('investigate', state, { location: loc, success: true });
+      } else {
+        log(state, '手电筒照亮 ' + loc.name + '：还是没找到线索');
+        runScenarioHook(state, 'investigate', { location: loc, success: false });
+        runHooks('investigate', state, { location: loc, success: false });
+      }
+    };
+    ASSET_EFFECTS.medkit = (state, inv) => {
+      if (inv.damage <= 0) { log(state, '医疗包：没有需要处理的伤害'); return; }
+      inv.damage = Math.max(0, inv.damage - 1);
+      log(state, '医疗包：回复 1 点伤害');
+    };
   }
 
   function buffBoss(state, boss) {
@@ -830,31 +981,92 @@ window.ArkhamEngine = (function () {
     });
   }
 
+  function playerList(state) {
+    return state.players || (state.inv ? [state.inv] : []);
+  }
+
+  function playerById(state, id) {
+    return playerList(state).find((p) => p.id === id) || null;
+  }
+
+  function setActive(state, index) {
+    if (!state.players || !state.players.length) return null;
+    state.active = Math.max(0, Math.min(index, state.players.length - 1));
+    state.inv = state.players[state.active];
+    return state.inv;
+  }
+
+  function livingPlayers(state) {
+    return playerList(state).filter((p) => !p.defeated);
+  }
+
+  function makeInvestigator(def, sc, opts, trauma, rng) {
+    const up = (opts && opts.upgradesById && opts.upgradesById[def.id]) || (opts && opts.upgrades) || {};
+    const stats = clone(def.stats);
+    ['will', 'int', 'combat', 'agi'].forEach((k) => { stats[k] += Number(up[k]) || 0; });
+    const physicalTrauma = (opts && opts.traumas && opts.traumas[def.id] && opts.traumas[def.id].physical != null)
+      ? Math.max(0, Number(opts.traumas[def.id].physical) || 0)
+      : Math.ceil(trauma / 2);
+    const mentalTrauma = (opts && opts.traumas && opts.traumas[def.id] && opts.traumas[def.id].mental != null)
+      ? Math.max(0, Number(opts.traumas[def.id].mental) || 0)
+      : Math.floor(trauma / 2);
+    const deckIds = ((opts && opts.decks && opts.decks[def.id]) || (opts && opts.deck) || def.deck).slice();
+    const unknown = deckIds.filter((id) => !CARDS[id]);
+    const safeDeck = deckIds.filter((id) => CARDS[id]);
+    const finalDeck = safeDeck.length ? safeDeck : def.deck.slice();
+    return {
+      id: def.id, name: def.name, role: def.role, color: def.color,
+      stats: stats, maxHealth: Math.max(1, def.health + (Number(up.health) || 0) - physicalTrauma),
+      maxSanity: Math.max(1, def.sanity + (Number(up.sanity) || 0) - mentalTrauma),
+      damage: 0, horror: 0, resources: 5 + (Number(up.resources) || 0), clues: 0, location: sc.start,
+      soakHealth: 0, soakSanity: 0, soakAssets: [],
+      deck: shuffle(finalDeck, rng), hand: [], discard: [], assets: [], assetInstances: [],
+      deckWarnings: unknown.length ? ['未知卡牌：' + unknown.join('、')] : [],
+      actions: 3, defeated: false, turnDone: false,
+      ability: def.ability, abilityText: def.abilityText,
+      trauma: { physical: physicalTrauma, mental: mentalTrauma },
+      flags: { wendyLuck: false, scholarUsed: false, guardianUsed: false, lucky: false },
+      mulliganAvailable: true
+    };
+  }
+
+  function validateDeck(cardIds, opts) {
+    const ids = Array.isArray(cardIds) ? cardIds.slice() : [];
+    const unknown = ids.filter((id) => !CARDS[id]);
+    const empty = ids.length === 0;
+    const min = opts && opts.minSize ? Number(opts.minSize) : 0;
+    const tooSmall = ids.length < min;
+    const maxCopies = opts && opts.maxCopies ? Number(opts.maxCopies) : 0;
+    const counts = {};
+    ids.forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
+    const overCopies = maxCopies ? Object.keys(counts).filter((id) => counts[id] > maxCopies) : [];
+    return {
+      ok: !empty && !unknown.length && !tooSmall && !overCopies.length,
+      size: ids.length,
+      unknown: unknown,
+      tooSmall: tooSmall,
+      overCopies: overCopies
+    };
+  }
+
   function createInitial(players, rng, opts) {
-    const invDef = INVESTIGATORS.find((x) => x.id === (opts && opts.investigator)) || INVESTIGATORS[0];
     const sc = SCENARIOS[(opts && opts.scenario)] || SCENARIOS.gathering;
     const locs = {};
     Object.keys(sc.locations).forEach((k) => {
       locs[k] = Object.assign({ id: k, clues: sc.locations[k].clues, clues0: sc.locations[k].clues, revealed: k === sc.start }, clone(sc.locations[k]));
     });
-    const deck = shuffle(invDef.deck.slice(), rng);
-    const up = (opts && opts.upgrades) || {};
-    const stats = clone(invDef.stats);
-    ['will', 'int', 'combat', 'agi'].forEach((k) => { stats[k] += Number(up[k]) || 0; });
+    const ids = (opts && opts.investigators && opts.investigators.length)
+      ? opts.investigators.slice()
+      : [(opts && opts.investigator) || INVESTIGATORS[0].id];
     const trauma = Math.max(0, Number(opts && opts.trauma) || 0);
-    const physicalTrauma = Math.ceil(trauma / 2);
-    const mentalTrauma = Math.floor(trauma / 2);
-    const inv = {
-      id: invDef.id, name: invDef.name, role: invDef.role, color: invDef.color,
-      stats: stats, maxHealth: Math.max(1, invDef.health + (Number(up.health) || 0) - physicalTrauma),
-      maxSanity: Math.max(1, invDef.sanity + (Number(up.sanity) || 0) - mentalTrauma),
-      damage: 0, horror: 0, resources: 5 + (Number(up.resources) || 0), clues: 0, location: sc.start,
-      soakHealth: 0, soakSanity: 0, soakAssets: [],
-      deck: deck, hand: [], discard: [], assets: [], actions: 3, defeated: false,
-      ability: invDef.ability, abilityText: invDef.abilityText
-    };
+    const invs = ids.map((id) => {
+      const def = INVESTIGATORS.find((x) => x.id === id) || INVESTIGATORS[0];
+      const per = (opts && opts.traumas && opts.traumas[id]) || {};
+      const t = per.total != null ? Number(per.total) : trauma;
+      return makeInvestigator(def, sc, opts, Math.max(0, t), rng);
+    });
     const state = {
-      phase: 'investigation', round: 1, inv: inv, trauma: trauma,
+      phase: 'investigation', round: 1, active: 0, inv: invs[0], players: invs, trauma: trauma,
       locations: locs, enemies: [], nextEnemyId: 0,
       chaos: (sc.chaosBag || CHAOS).slice(), tokenRules: sc.tokenRules || {},
       encounter: { deck: shuffle(sc.encounters.slice(), rng), discard: [] },
@@ -873,7 +1085,7 @@ window.ArkhamEngine = (function () {
       ritual: sc.ritual ? { left: sc.ritual.rounds, max: sc.ritual.rounds, done: false } : null,
       pendingInterrogation: null,
       winText: sc.winText, loseText: sc.loseText,
-      hostId: inv.id
+      hostId: invs[0].id
     };
     if (Array.isArray(sc.setup)) applySetupOps(state, sc, rng);
     else if (sc.id === 'midnight') {
@@ -881,36 +1093,65 @@ window.ArkhamEngine = (function () {
         spawnEnemyDef(state, CULTISTS[s.cultist], s.loc, { cultist: true, key: 'cultist' });
       });
     }
-    drawCards(state, inv, 5);
+    invs.forEach((inv) => drawCards(state, inv, 5));
     runScenarioHook(state, 'setup', { scenario: sc });
     runHooks('gameStart', state, { scenario: sc });
     return state;
   }
 
+  function endPlayerTurn(state, inv, rng) {
+    if (state.phase !== 'investigation') return { ok: false, msg: '现在不能结束回合' };
+    inv.turnDone = true;
+    inv.actions = 0;
+    const next = livingPlayers(state).find((p) => !p.turnDone);
+    if (next) {
+      setActive(state, state.players.indexOf(next));
+      next.actions = 3;
+      state.phase = 'investigation';
+      log(state, '轮到 ' + next.name + ' 行动');
+      return { ok: true, state: state };
+    }
+    enemyPhase(state);
+    if (state.phase === 'ended') return { ok: true, state: state };
+    upkeep(state, rng);
+    return { ok: true, state: state };
+  }
+
   function act(state, action, pid, rng) {
     if (!state) return { ok: false, msg: '对局数据异常' };
     if (action.type === 'restart') {
+      const roster = (action.investigators && action.investigators.length)
+        ? action.investigators.slice()
+        : [action.investigator || state.inv.id];
       return {
         ok: true,
         state: createInitial([], rng, {
-          investigator: action.investigator || state.inv.id,
+          investigators: roster,
           scenario: action.scenario || state.scenario,
+          upgradesById: action.upgradesById || null,
           upgrades: action.upgrades || {},
+          decks: action.decks || null,
+          traumas: action.traumas || null,
           trauma: action.trauma != null ? action.trauma : state.trauma
         })
       };
     }
     if (state.phase === 'ended') return { ok: false, msg: '这一章已经结束了' };
-    const inv = state.inv;
+    const actor = (pid && playerById(state, pid)) || state.inv;
+    if (state.phase === 'investigation' && actor !== state.inv) {
+      return { ok: false, msg: '现在轮到 ' + state.inv.name + ' 行动' };
+    }
+    const inv = actor;
     if (action.type === 'mulligan') {
-      if (!state.mulliganAvailable || state.round !== 1 || state.phase !== 'investigation' || inv.actions !== 3) {
+      if (!inv.mulliganAvailable || state.round !== 1 || state.phase !== 'investigation' || inv.actions !== 3) {
         return { ok: false, msg: '只能在开局第一次行动前重抽起手' };
       }
       inv.deck = shuffle(inv.deck.concat(inv.hand), rng);
       inv.hand = [];
       drawCards(state, inv, 5);
+      inv.mulliganAvailable = false;
       state.mulliganAvailable = false;
-      log(state, '重抽起手：换了一组开场手牌');
+      log(state, inv.name + ' 重抽起手：换了一组开场手牌');
       return { ok: true, state: state };
     }
     if (ACTION_HANDLERS[action.type]) {
@@ -974,7 +1215,7 @@ window.ArkhamEngine = (function () {
       const loc = state.locations[action.at];
       if (!loc || !loc.sigil || loc.id !== inv.location) return { ok: false, msg: '这里没有能熄灭的节点' };
       if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
-      if (test(state, 'will', 4, rng)) {
+      if (test(state, 'will', 4, rng, { commit: action.commit })) {
         loc.sigil = false;
         state.sigilsLeft = Math.max(0, (state.sigilsLeft || 0) - 1);
         log(state, '熄灭了' + loc.name + '的仪式节点，还剩 ' + state.sigilsLeft + ' 座');
@@ -996,10 +1237,7 @@ window.ArkhamEngine = (function () {
       if (attackOfOpportunity(state)) return { ok: true, state: state };
       inv.location = action.to;
       state.locations[action.to].revealed = true;
-      (state.enemies || []).forEach((e) => {
-        if (e.location !== inv.location) e.engaged = false;
-        else if (!e.exhausted) e.engaged = true;
-      });
+      (state.enemies || []).forEach((e) => refreshEngagement(state, e));
       log(state, '移动到' + state.locations[action.to].name);
       const engaged = enemiesAt(state, inv.location).filter((e) => e.engaged);
       if (engaged.length) log(state, '进入' + state.locations[action.to].name + '：' + engaged.map((e) => e.name).join('、') + ' 与你交战');
@@ -1015,7 +1253,7 @@ window.ArkhamEngine = (function () {
       const cost = inv.ability === 'scholar' && !state.flags.scholarUsed ? 0 : 1;
       if (!spendAction(inv, cost)) return { ok: false, msg: '行动点不够' };
       if (cost === 0) state.flags.scholarUsed = true;
-      if (test(state, 'int', loc.shroud, rng)) {
+      if (test(state, 'int', loc.shroud, rng, { commit: action.commit })) {
         loc.clues -= 1;
         inv.clues += 1;
         log(state, '调查成功：在' + loc.name + '发现 1 个线索');
@@ -1034,7 +1272,7 @@ window.ArkhamEngine = (function () {
       if (!e || e.location !== inv.location) return { ok: false, msg: '这里没有这个敌人' };
       if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
       e.engaged = true;
-      if (test(state, 'combat', e.fight, rng)) {
+      if (test(state, 'combat', e.fight, rng, { commit: action.commit })) {
         let dmg = 1;
         (inv.assets || []).forEach((a) => { if (CARDS[a].damage) dmg += CARDS[a].damage; });
         e.health -= dmg;
@@ -1050,7 +1288,7 @@ window.ArkhamEngine = (function () {
       const e = (state.enemies || []).find((x) => x.id === action.enemy && x.health > 0);
       if (!e || e.location !== inv.location) return { ok: false, msg: '这里没有这个敌人' };
       if (!spendAction(inv, 1)) return { ok: false, msg: '行动点不够' };
-      if (test(state, 'agi', e.evade, rng)) {
+      if (test(state, 'agi', e.evade, rng, { commit: action.commit })) {
         e.exhausted = true;
         e.engaged = false;
         log(state, '闪避成功：甩开了 ' + e.name);
@@ -1075,31 +1313,47 @@ window.ArkhamEngine = (function () {
       return { ok: true, state: state };
     }
 
+    if (action.type === 'useAsset') {
+      const idx = Number(action.index);
+      const inst = (inv.assetInstances || [])[idx];
+      if (!inst) return { ok: false, msg: '这张资产不在场' };
+      const card = CARDS[inst.id];
+      if (!card) return { ok: false, msg: '资产数据异常' };
+      if (inst.exhausted) return { ok: false, msg: '这张资产已经疲惫' };
+      if (inst.usesMax > 0 && inst.uses <= 0) return { ok: false, msg: '这张资产没有使用次数了' };
+      const effect = ASSET_EFFECTS[card.actionEffect];
+      if (!effect) return { ok: false, msg: '这张资产没有可主动使用的效果' };
+      if (!spendAction(inv, Number(card.actionCost) || 0)) return { ok: false, msg: '行动点不够' };
+      if (card.exhaust !== false) inst.exhausted = true;
+      if (inst.usesMax > 0) inst.uses -= 1;
+      effect(state, inv, card, inst, rng);
+      return { ok: true, state: state };
+    }
+
     if (action.type === 'play') {
       const r = playCard(state, inv, Number(action.index));
       return r.ok ? { ok: true, state: state } : r;
     }
 
-    if (action.type === 'endTurn') {
-      enemyPhase(state);
-      if (state.phase === 'ended') return { ok: true, state: state };
-      upkeep(state, rng);
-      return { ok: true, state: state };
+    if (action.type === 'endTurn' || action.type === 'pass') {
+      return endPlayerTurn(state, inv, rng);
     }
 
     return { ok: false, msg: '这个操作不支持' };
   }
 
   registerDefaultCardEffects();
+  registerDefaultAssetEffects();
 
   return {
     INVESTIGATORS: INVESTIGATORS, CARDS: CARDS, LOCATIONS: LOCATIONS,
     ENEMIES: ENEMIES, ENCOUNTERS: ENCOUNTERS, SCENARIOS: SCENARIOS,
     CHAOS: CHAOS, TOKEN_LABEL: TOKEN_LABEL, TOKEN_MOD: TOKEN_MOD,
     createInitial: createInitial, act: act,
+    validateDeck: validateDeck,
     registerContent: registerContent, registerCardEffect: registerCardEffect,
     registerAction: registerAction, registerHook: registerHook,
-    registerEncounterEffect: registerEncounterEffect,
+    registerEncounterEffect: registerEncounterEffect, registerAssetEffect: registerAssetEffect,
     helpers: { totalStat: totalStat, tokenText: tokenText, tokenMod: tokenMod, locationOf: locationOf, enemiesAt: enemiesAt, takeDamage: takeDamage, takeHorror: takeHorror }
   };
 })();

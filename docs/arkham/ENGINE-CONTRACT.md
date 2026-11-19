@@ -17,11 +17,13 @@
 | `ArkhamEngine.registerContent(pack, opts)` | 注册内容包；默认合并，`opts.replace=true` 时替换对应集合 |
 | `ArkhamEngine.registerCardEffect(name, fn)` | 注册卡牌效果，`fn(state, inv, card, id)` |
 | `ArkhamEngine.registerAction(type, fn)` | 注册动作，`fn(state, action, inv, rng)`，必须返回 `{ok, state}` |
-| `ArkhamEngine.registerEncounterEffect(name, fn)` | 注册遭遇效果，`fn(state, card, rng)` |
+| `ArkhamEngine.registerEncounterEffect(name, fn)` | 注册遭遇效果，`fn(state, card, rng, inv)`，`inv` 为当前遭遇的调查员 |
+| `ArkhamEngine.registerAssetEffect(name, fn)` | 注册资产主动效果，`fn(state, inv, card, inst, rng)`；`inst` 为资产实例 |
 | `ArkhamEngine.registerHook(name, fn)` | 注册全局钩子，`fn(state, payload)` |
 | `ArkhamEngine.helpers.tokenMod(state, token)` | 读取当前剧本的混沌标记修正 |
-| `ArkhamEngine.createInitial(players, rng, opts)` | 开局；`opts = {investigator, scenario, upgrades, trauma}` |
-| `ArkhamEngine.act(state, action, pid, rng)` | 执行动作 |
+| `ArkhamEngine.createInitial(players, rng, opts)` | 开局；`opts = {investigator, investigators, scenario, deck, decks, upgrades, upgradesById, trauma, traumas}` |
+| `ArkhamEngine.validateDeck(cardIds, opts)` | 校验牌组；`opts = {minSize, maxCopies}`，返回 `{ok,size,unknown,tooSmall,overCopies}` |
+| `ArkhamEngine.act(state, action, pid, rng)` | 执行动作；`pid` 指定行动调查员，默认当前行动者 |
 
 `registerContent` 支持的键：
 
@@ -55,6 +57,10 @@
   healthSoak: 0,              // 资产可承受的伤害
   sanitySoak: 0,              // 资产可承受的恐惧
   effect: 'healDamage',       // 事件牌效果名
+  actionEffect: 'flashlight', // 资产主动效果名，对应 ASSET_EFFECTS
+  actionCost: 1,              // 主动使用消耗的行动点
+  exhaust: true,              // 使用后是否疲惫，默认 true
+  uses: 2,                    // 可用次数；0/未填表示不限次数
   text: '...'
 }
 ```
@@ -70,6 +76,29 @@ ArkhamEngine.registerCardEffect('probeEffect', (state, inv, card, id) => {
 ```
 
 未注册的 `effect` 不会中断游戏，但会写入日志；正式内容包应保证每个事件牌都有处理器。
+
+### 资产主动使用
+
+资产入场时，引擎会为每张资产创建实例：
+
+```js
+inv.assetInstances = [{ id, exhausted, uses, usesMax }]
+```
+
+`action.type = 'useAsset'` 时，`action.index` 指向 `assetInstances` 的下标。引擎会依次检查资产是否存在、是否疲惫、次数是否耗尽、是否注册了 `actionEffect`、行动点是否足够，然后扣行动、标记疲惫/次数，并调用：
+
+```js
+ArkhamEngine.registerAssetEffect('flashlight', (state, inv, card, inst, rng) => {
+  // 自行完成检定、日志与钩子
+});
+```
+
+内建示例：
+
+- `flashlight`：行动调查当前地点，检定 +1。
+- `medkit`：回复 1 点伤害，2 次。
+
+疲惫与次数在维护阶段由 `readyAssets(inv)` 统一恢复；`inv.assets` 仍保留资产 id 列表，供 UI 与旧逻辑读取。
 
 ## 调查员
 
@@ -89,6 +118,41 @@ ArkhamEngine.registerCardEffect('probeEffect', (state, inv, card, id) => {
 ```
 
 当前引擎内建能力标识只有 `roland`、`wendy`、`scholar`、`guardian`、`survivor`、`medium` 相关的已有逻辑。新调查员若需要特殊能力，优先注册动作或钩子，不要把官方能力硬塞进引擎分支。
+
+### 多调查员与回合
+
+`createInitial` 支持 `opts.investigators = ['detective', 'scholar']`。开局后：
+
+- `state.players`：全部调查员。
+- `state.active`：当前行动者在 `players` 中的下标。
+- `state.inv`：当前行动者别名，旧代码与 UI 可直接使用。
+- 每名调查员拥有独立的 `hand / deck / discard / assets / assetInstances / actions / turnDone / flags / trauma`。
+- `endPlayerTurn` 先把当前调查员标记 `turnDone`，再切换下一位存活且未结束的调查员；全员结束后才进入 `enemyPhase → upkeep → mythosPhase`，然后回合 +1。
+- 当前调查员在自己回合倒下时，`takeDamage / takeHorror` 会自动把回合交给下一位存活调查员；只有全员倒下才 `endGame`。
+- 敌人实例用 `engagedWith: [invId]` 记录交战对象；`hunter` 敌人会按 BFS 向最近调查员移动一格。
+
+按调查员传入成长与牌组：
+
+```js
+createInitial([], rng, {
+  investigators: ['detective', 'scholar'],
+  decks: { detective: [...], scholar: [...] },
+  upgradesById: { detective: { combat: 1 }, scholar: { int: 1 } },
+  traumas: { detective: { physical: 1, mental: 0 }, scholar: { total: 1 } }
+});
+```
+
+`opts.deck` 仍作为单调查员牌组的简写；`opts.decks[id]` 优先。未知卡牌会被过滤并写入 `inv.deckWarnings`，全部非法时回退到调查员基础牌组。
+
+### 检定投入与手牌
+
+`test(state, stat, difficulty, rng, { inv, commit, bonus })`：
+
+- `commit` 是手牌下标数组；投入牌按 `card.icons[stat]` / `card.commit[stat]` 计值，事件牌默认 1 点，结算后进入弃牌堆。
+- `lastTest` 会记录 `inv / seq / commit / commitBonus / bonus / total / success`。
+- 手牌上限 8；维护阶段 `enforceHandLimit(inv)` 自动弃最旧手牌并写日志。
+
+`validateDeck(cardIds, { minSize, maxCopies })` 可在牌组编辑界面直接调用，不会修改游戏状态。
 
 ## 敌人
 
@@ -128,8 +192,8 @@ ArkhamEngine.registerCardEffect('probeEffect', (state, inv, card, id) => {
 注册遭遇效果：
 
 ```js
-ArkhamEngine.registerEncounterEffect('probeEncounter', (state, card, rng) => {
-  state.flags.probeEncounter = true;
+ArkhamEngine.registerEncounterEffect('probeEncounter', (state, card, rng, inv) => {
+  inv.flags.probeEncounter = true;
 });
 ```
 
@@ -232,12 +296,11 @@ ArkhamEngine.registerAction('probeAction', (state, action, inv) => {
 
 ## 当前边界
 
-这不是完整官方规则引擎，仍是单调查员、三章原创内容的状态机。官方内容接入前还需要补：
+这不是完整官方规则引擎。多调查员、卡牌投入、牌组校验、手牌上限、资产主动使用/疲惫、猎人移动与多人遭遇已经接入；官方内容接入前仍需补：
 
-1. 多调查员与多人回合顺序。
-2. 卡牌投入检定、牌库构筑、手牌上限、经验值。
-3. 完整资产使用/疲劳、正式敌人移动与狩猎。
-4. 官方剧本的 `custom` 目标执行器（当前依赖剧本钩子或自定义动作）。
-5. 战役存档、创伤分项、卡牌/剧本解锁。
+1. 官方剧本的 `custom` 目标执行器（当前依赖剧本钩子或自定义动作）。
+2. 完整的牌组构筑界面与卡池筛选（引擎已提供 `validateDeck`，UI 尚未开放编辑器）。
+3. 战役存档的卡牌/剧本解锁、分项创伤的战役档持久化（引擎已接受 `traumas` 分项）。
+4. 更完整的资产与事件时机系统（当前只有主动使用与基础承伤）。
 
-本合同的测试样例见 `tests/arkham-engine-contract.test.js`。
+本合同的测试样例见 `tests/arkham-engine-contract.test.js`、`tests/arkham-multiplayer.test.js` 与 `tests/arkham-pilot-pack.test.js`。
